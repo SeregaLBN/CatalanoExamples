@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 
 // https://github.com/DiegoCatalano/Catalano-Framework/releases
 import Catalano.Imaging.FastBitmap;
+import Catalano.Imaging.Filters.FrequencyFilter;
 
 public class FilterUsageExample {
 
@@ -79,6 +80,60 @@ public class FilterUsageExample {
     private void onClose() {
         frame.dispose();
         logger.warn("Good bay!");
+    }
+
+    private void onAddNewFilter(ActionEvent ev) {
+        logger.trace("onAddNewFilter");
+
+        JDialog dlg = new JDialog(frame, "Select filter...", true);
+
+        Object keyBind = "CloseDialog";
+        dlg.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), keyBind);
+        dlg.getRootPane().getActionMap().put(keyBind, new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public void actionPerformed(ActionEvent e) { dlg.dispose(); }
+        });
+
+        JPanel panel4Radio = new JPanel(new GridLayout(0, 1, 0, 5));
+        panel4Radio.setBorder(BorderFactory.createTitledBorder("Filters"));
+        ButtonGroup radioGroup = new ButtonGroup();
+
+        JRadioButton radioFilter1 = new JRadioButton(FrequencyFilter.class.getSimpleName());
+        radioFilter1.setActionCommand(FrequencyFilter.class.getSimpleName());
+
+        JRadioButton radioFilter2 = new JRadioButton(FrequencyFilter.class.getSimpleName());
+        radioFilter2.setActionCommand(FrequencyFilter.class.getSimpleName());
+
+        panel4Radio.add(radioFilter1);
+        panel4Radio.add(radioFilter2);
+        radioGroup.add(radioFilter1);
+        radioGroup.add(radioFilter2);
+
+        dlg.add(panel4Radio);
+
+        JButton btnOk = new JButton("Ok");
+        btnOk.addActionListener(ev2 -> {
+            dlg.dispose();
+
+            ButtonModel bm = radioGroup.getSelection();
+            if (bm == null)
+                return;
+            String cmd = bm.getActionCommand();
+            if (cmd.equals(FrequencyFilter.class.getSimpleName())) {
+                addFrequencyFilterTab();
+            } else {
+                logger.error("Add filter executer for " + cmd);
+            }
+        });
+
+        dlg.add(panel4Radio, BorderLayout.CENTER);
+        dlg.add(btnOk, BorderLayout.SOUTH);
+
+        dlg.setResizable(false);
+        dlg.pack();
+        dlg.setLocationRelativeTo(frame);
+        dlg.setVisible(true);
     }
 
     private void onOriginalImageAsGray(JPanel imagePanel) {
@@ -223,6 +278,7 @@ public class FilterUsageExample {
             { // fill boxBottomLeft
                 boxBottomLeft.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
                 JButton btnAddFilter = new JButton("Add filter");
+                btnAddFilter.addActionListener(this::onAddNewFilter);
                 boxBottomLeft.add(btnAddFilter);
 
                 boxBottomLeft.add(Box.createVerticalStrut(6));
@@ -240,6 +296,26 @@ public class FilterUsageExample {
             leftPanel.setMinimumSize(new Dimension(WIDTH_LEFT_PANEL, 200));
             leftPanel.setPreferredSize(new Dimension(WIDTH_LEFT_PANEL, -1));
         }
+
+        { // make root tab panel
+            JPanel panel = new JPanel();
+            panel.setLayout(new BorderLayout());
+            panel.add(imagePanel, BorderLayout.CENTER);
+            panel.add(leftPanel, BorderLayout.EAST);
+            tabPanel.addTab("Orignal", panel);
+        }
+    }
+
+    private void addFrequencyFilterTab() {
+        JPanel leftPanel = new JPanel();
+        { // fill leftPanel
+            leftPanel.setLayout(new BorderLayout());
+            leftPanel.setMinimumSize(new Dimension(WIDTH_LEFT_PANEL, 200));
+            leftPanel.setPreferredSize(new Dimension(WIDTH_LEFT_PANEL, -1));
+        }
+
+        // make imagePanel
+        JPanel imagePanel = buildImagePanel();
 
         { // make root tab panel
             JPanel panel = new JPanel();
