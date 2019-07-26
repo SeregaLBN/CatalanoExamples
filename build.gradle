@@ -1,0 +1,52 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+    mavenCentral()
+
+    flatDir {
+        dirs './libs'
+        // https://github.com/DiegoCatalano/Catalano-Framework/releases
+        // Download and unpack from libs.zip:
+        //  ./libs/Catalano.Core.jar
+        //  ./libs/Catalano.Math.jar
+        //  ./libs/Catalano.IO.jar
+        //  ./libs/Catalano.Image.jar
+    }
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+compileJava.options.encoding = 'UTF-8'
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+    }
+}
+
+mainClassName = "ksn.catalano.examples.filter"
+version = '0.0.1'
+
+jar {
+    manifest {
+        attributes 'Main-Class': mainClassName,
+                   'Title'     : 'FastMines game - demo Java FX desktop application',
+                   'Version'   : version,
+                   'Vendor'    : 'SeregaLBN',
+                   'Build-Date': new Date().format("yyyy-MM-dd'T 'HH:mm:ss.SSSZZ")
+    }
+}
+
+dependencies {
+    compile 'log4j:log4j:1.2.17'
+    compile 'commons-io:commons-io:2.6'
+    compile 'org.apache.commons:commons-lang3:3.9'
+    compile name: 'Catalano.Core'
+    compile name: 'Catalano.Math'
+    compile name: 'Catalano.IO'
+    compile name: 'Catalano.Image'
+}
