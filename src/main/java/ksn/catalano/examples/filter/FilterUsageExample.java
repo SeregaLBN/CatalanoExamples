@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -48,7 +49,7 @@ public class FilterUsageExample {
     private BooleanSupplier isGray;
     private BooleanSupplier isScale;
 
-    private File imageFile;
+    private File latestImageDir = Paths.get("./exampleImages").toFile();
     private BufferedImage original;
     private List<FastBitmap> tabImages = new ArrayList<>();
 
@@ -57,6 +58,9 @@ public class FilterUsageExample {
     public FilterUsageExample() {
         frame = new JFrame(DEFAULT_CAPTION);
         initialize();
+
+        if (!latestImageDir.exists())
+            latestImageDir = null;
     }
 
     private void initialize() {
@@ -246,7 +250,7 @@ public class FilterUsageExample {
                 btnLoadImage.addActionListener(ev -> {
                     logger.trace("onSelectImage");
 
-                    File file = selectImageFile(imageFile);
+                    File file = selectImageFile(latestImageDir);
                     if (file == null)
                         return;
 
@@ -257,7 +261,7 @@ public class FilterUsageExample {
                         return;
                     }
 
-                    imageFile = file;
+                    latestImageDir = file.getParentFile();
 
                     // reset all filters
                     for (int i=0; i<tabImages.size(); ++i)
@@ -265,6 +269,7 @@ public class FilterUsageExample {
                     onOriginalImageAsGray(imagePanel); // apply
                 });
                 SwingUtilities.invokeLater(btnLoadImage::requestFocus);
+                SwingUtilities.invokeLater(btnLoadImage::doClick);
                 boxCenterLeft.add(btnLoadImage);
 
                 boxCenterLeft.add(Box.createVerticalStrut(6));

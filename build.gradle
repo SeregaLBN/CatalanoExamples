@@ -28,7 +28,7 @@ sourceSets {
     }
 }
 
-mainClassName = "ksn.catalano.examples.filter.FilterUsageExample"
+mainClassName = 'ksn.catalano.examples.filter.FilterUsageExample'
 version = '0.0.2'
 
 jar {
@@ -72,3 +72,60 @@ task fatJar(type: Jar) {
     with jar
 }
 project.tasks.build.dependsOn project.tasks.fatJar
+
+
+def downloadExampleImage() {
+    // https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0,_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG
+    try {
+        def url = new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG/1024px-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG')
+
+        def file = project.file('./exampleImages/1024px-VolodimirHillAndDnieper.jpg')
+        if (file.exists()) {
+            println 'Example image already downloaded! ' + file.absolutePath
+            return
+
+            // recheck size
+            def conn = null
+            try {
+                conn = url.openConnection()
+                conn.setRequestMethod('HEAD')
+                long size = conn.contentLengthLong
+                if (file.length() == size)
+                    return // all ok
+
+                System.err.println('Illegal file size: delete it')
+                file.delete()
+            } finally {
+                if (conn != null)
+                    conn.disconnect()
+            }
+        }
+
+        file.parentFile.mkdir()
+
+        println 'Try download example image from ' + url
+        new java.io.BufferedInputStream(url.openStream()).withCloseable { bin ->
+        new java.io.FileOutputStream(file).withCloseable { fos ->
+            def buffer = new byte[10240]
+            long total = 0
+            for (int i=0; true; ++i) {
+                int read = bin.read(buffer, 0, buffer.length)
+                if (read < 0)
+                    break
+                if (read == 0)
+                    continue
+                fos.write(buffer, 0, read)
+                total += read
+                println '  ...iteration #' + (1+i) + ': read=' + read + '; total=' + total
+            }
+            println 'Example image downloaded! ' + file.absolutePath
+        }}
+    } catch (Exception ex) {
+        System.err.println('Can`t download example image: ' + ex)
+    }
+}
+
+gradle.taskGraph.beforeTask { Task task ->
+    if ((task.project.name == 'CatalanoExamples') && (task.name == 'processResources'))
+        downloadExampleImage()
+}

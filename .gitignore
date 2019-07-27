@@ -11,3 +11,4 @@ local.properties
 *.iml
 gradlew*
 gradle-wrapper*
+**/exampleImages
