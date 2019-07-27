@@ -28,16 +28,17 @@ sourceSets {
     }
 }
 
-mainClassName = "ksn.catalano.examples.filter"
-version = '0.0.1'
+mainClassName = "ksn.catalano.examples.filter.FilterUsageExample"
+version = '0.0.2'
 
 jar {
     manifest {
-        attributes 'Main-Class': mainClassName,
-                   'Title'     : 'FastMines game - demo Java FX desktop application',
-                   'Version'   : version,
-                   'Vendor'    : 'SeregaLBN',
-                   'Build-Date': new Date().format("yyyy-MM-dd'T 'HH:mm:ss.SSSZZ")
+        attributes 'Main-Class' : mainClassName,
+                   'Title'      : 'CatalanoExamples - demo Java SWING desktop application',
+                   'Description': 'Examples of usage Catalano-Framework: https://github.com/DiegoCatalano/Catalano-Framework',
+                   'Version'    : version,
+                   'Vendor'     : 'SeregaLBN',
+                   'Build-Date' : new Date().format("yyyy-MM-dd'T 'HH:mm:ss.SSSZZ")
     }
 }
 
@@ -49,3 +50,25 @@ dependencies {
     compile name: 'Catalano.IO'
     compile name: 'Catalano.Image'
 }
+
+// can run as single JAR:
+//  java -jar ./CatalanoExamples/build/libs/CatalanoExamples-fat-{version}.jar
+task fatJar(type: Jar) {
+    manifest {
+        attributes jar.manifest.attributes
+    }
+    baseName = project.name + '-fat'
+    from {
+        configurations.compile.collect {
+            it.isDirectory()
+                ? it
+                : zipTree(it).matching{exclude{
+                    //println it
+                    //it.name == 'META-INF'
+                    it.toString().contains('!META-INF')
+                }}
+        }
+    }
+    with jar
+}
+project.tasks.build.dependsOn project.tasks.fatJar
