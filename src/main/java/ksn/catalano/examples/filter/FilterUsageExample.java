@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
@@ -17,20 +16,30 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // https://github.com/DiegoCatalano/Catalano-Framework/releases
+// Download and unpack from libs.zip:
+//  ./libs/Catalano.Core.jar
+//  ./libs/Catalano.Math.jar
+//  ./libs/Catalano.IO.jar
+//  ./libs/Catalano.Image.jar
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.FrequencyFilter;
 
 public class FilterUsageExample {
 
     static {
-        org.apache.log4j.BasicConfigurator.configure();
+        System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY  , "TRACE");
+        System.setProperty(org.slf4j.impl.SimpleLogger.SHOW_DATE_TIME_KEY     , "true");
+        System.setProperty(org.slf4j.impl.SimpleLogger.DATE_TIME_FORMAT_KEY   , "HH:mm:ss:SSS");
+        System.setProperty(org.slf4j.impl.SimpleLogger.SHOW_THREAD_NAME_KEY   , "true");
+        System.setProperty(org.slf4j.impl.SimpleLogger.SHOW_LOG_NAME_KEY      , "true");
+        System.setProperty(org.slf4j.impl.SimpleLogger.SHOW_SHORT_LOG_NAME_KEY, "true");
     }
 
-    private static final Logger logger = Logger.getLogger(FilterUsageExample.class);
+    private static final Logger logger = LoggerFactory.getLogger(FilterUsageExample.class);
     private static final String DEFAULT_CAPTION = "Catalano demo filters";
     private static final int WIDTH_LEFT_PANEL = 150;
 
@@ -364,11 +373,18 @@ public class FilterUsageExample {
     }
 
     private static class ImageFilter extends FileFilter {
-        private static final List<String> ALL = Collections.unmodifiableList(Arrays.asList("jpeg", "jpg", "gif", "tiff", "tif", "png"));
+        private static final List<String> ALL = Arrays.asList("jpeg", "jpg", "gif", "tiff", "tif", "png");
 
         @Override
         public boolean accept(File file) {
-            return file.isDirectory() || ALL.contains(FilenameUtils.getExtension(file.getName()));
+            if (file.isDirectory())
+                return true;
+            String fileName = file.getName();
+            int pos = fileName.lastIndexOf('.');
+            if (pos < 0)
+                return false;
+            String ext = fileName.substring(pos + 1);
+            return ALL.stream().anyMatch(ext::equalsIgnoreCase);
         }
 
         @Override
