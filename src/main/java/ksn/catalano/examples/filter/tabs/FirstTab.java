@@ -50,12 +50,11 @@ public class FirstTab implements ITab {
             latestImageDir = null;
     }
     public FirstTab(
-            ITabHandler tabHandler,
-            File imageFile,
-            boolean isGray,
-            boolean isScale
-        )
-    {
+        ITabHandler tabHandler,
+        File imageFile,
+        boolean isGray,
+        boolean isScale
+    ) {
         this.tabHandler = tabHandler;
         this.isGray  = isGray;
         this.isScale = isScale;
@@ -87,12 +86,14 @@ public class FirstTab implements ITab {
 
     @Override
     public void resetImage() {
-        // none!
+        image = null;
+        if (imagePanelInvalidate != null)
+            imagePanelInvalidate.run();
     }
 
     @Override
     public void updateSource(ITab newSource) {
-        // none!
+        throw new UnsupportedOperationException("Illegal call");
     }
 
     private static JPanel buildImagePanel(ITabHandler tabHandler) {
@@ -114,7 +115,7 @@ public class FirstTab implements ITab {
         return imagePanel;
     }
 
-    public static JPanel makeTab(
+    public static void makeTab(
         ITabHandler tabHandler,
         ITab self,
         String tabTitle,
@@ -175,19 +176,16 @@ public class FirstTab implements ITab {
             tabPane.addTab(tabTitle, panel);
             tabPane.setSelectedIndex(tabPane.getTabCount() - 1);
         }
-
-        return imagePanel;
     }
 
     public void makeTab() {
-        JPanel imagePanel = makeTab(
+        makeTab(
             tabHandler,
             this,
             "Original",
             false,
             this::makeLoadGrayScaleOptions
         );
-        imagePanelInvalidate = imagePanel::repaint;
     }
 
 
@@ -197,8 +195,8 @@ public class FirstTab implements ITab {
 
         try {
             source = ImageIO.read(imageFile);
+            resetImage();
             SwingUtilities.invokeLater(tabHandler::onSourceChanged);
-            image = null;
             return true;
         } catch (IOException ex) {
             logger.error("Can`t read image", ex);
@@ -207,6 +205,8 @@ public class FirstTab implements ITab {
     }
 
     public void makeLoadGrayScaleOptions(JPanel imagePanel, Box boxCenterLeft) {
+        imagePanelInvalidate = imagePanel::repaint;
+
         JButton btnLoadImage = new JButton("Load image...");
         btnLoadImage.addActionListener(ev -> {
             logger.trace("onSelectImage");
@@ -216,7 +216,7 @@ public class FirstTab implements ITab {
                 return;
 
             latestImageDir = file.getParentFile();
-            imagePanelInvalidate.run();
+            imagePanel.repaint();
         });
         SwingUtilities.invokeLater(btnLoadImage::requestFocus);
         if (source == null)
@@ -228,8 +228,7 @@ public class FirstTab implements ITab {
         JCheckBox btnAsGray = new JCheckBox("Gray", isGray);
         btnAsGray.addActionListener(ev -> {
             isGray  = btnAsGray.isSelected();
-            image = null;
-            imagePanelInvalidate.run();
+            resetImage();
         });
         boxCenterLeft.add(btnAsGray);
 

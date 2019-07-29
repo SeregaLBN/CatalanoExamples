@@ -114,7 +114,7 @@ public class MainApp {
     }
 
     private void onSourceChanged() {
-        tabs.forEach(ITab::resetImage);
+        tabs.stream().skip(1).forEach(ITab::resetImage);
     }
 
     private ITabHandler getTabHandler() {

@@ -23,8 +23,10 @@ public class FrequencyFilterTab implements ITab {
     private ITab source;
     private FastBitmap image;
     private boolean boosting = true;
-    DefaultBoundedRangeModel modelMin = new DefaultBoundedRangeModel(  0, 0, MIN, MAX);
-    DefaultBoundedRangeModel modelMax = new DefaultBoundedRangeModel(100, 0, MIN, MAX);
+    private Runnable imagePanelInvalidate;
+    private DefaultBoundedRangeModel modelMin = new DefaultBoundedRangeModel(  0, 0, MIN, MAX);
+    private DefaultBoundedRangeModel modelMax = new DefaultBoundedRangeModel(100, 0, MIN, MAX);
+    private Timer timer;
 
     public FrequencyFilterTab(ITabHandler tabHandler, ITab source) {
         this.tabHandler = tabHandler;
@@ -89,6 +91,7 @@ public class FrequencyFilterTab implements ITab {
     @Override
     public void resetImage() {
         image = null;
+        imagePanelInvalidate.run();
     }
 
     @Override
@@ -108,12 +111,13 @@ public class FrequencyFilterTab implements ITab {
     }
 
     public void makeFrequencyFilterOptions(JPanel imagePanel, Box boxCenterLeft) {
+        imagePanelInvalidate = imagePanel::repaint;
+
         {
             JCheckBox btnAsBoost = new JCheckBox("Boosting", boosting);
             btnAsBoost.addActionListener(ev -> {
                 boosting = btnAsBoost.isSelected();
                 resetImage();
-                imagePanel.repaint();
             });
             boxCenterLeft.add(btnAsBoost);
         }
@@ -148,9 +152,38 @@ public class FrequencyFilterTab implements ITab {
             sliderMin.setLabelTable(positionMin);
             sliderMax.setLabelTable(positionMax);
 
+            modelMin.addChangeListener(ev -> {
+                int valMin = modelMin.getValue();
+                logger.trace("modelMin: value={}", valMin);
+                if (valMin > sliderMax.getValue())
+                    sliderMax.setValue(valMin);
+                debounce(this::resetImage);
+            });
+            modelMax.addChangeListener(ev -> {
+                int valMax = modelMax.getValue();
+                logger.trace("modelMax: value={}", valMax);
+                if (valMax < sliderMin.getValue())
+                    sliderMin.setValue(valMax);
+                debounce(this::resetImage);
+            });
+
             panelGroup.add(boxMinMax);
             boxCenterLeft.add(panelGroup);
         }
+    }
+
+    private void debounce(Runnable runnable) {
+        if (timer == null)
+            timer = new Timer(300, ev -> {
+                timer.stop();
+                logger.info("debounce: call runnable");
+                runnable.run();
+            });
+
+        if (timer.isRunning())
+            timer.restart();
+        else
+            timer.start();
     }
 
 }
