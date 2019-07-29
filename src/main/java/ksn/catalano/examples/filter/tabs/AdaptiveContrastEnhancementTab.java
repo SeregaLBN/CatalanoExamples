@@ -137,48 +137,22 @@ public class AdaptiveContrastEnhancementTab implements ITab {
         }
 
         {
-            JPanel panelGroup = new JPanel();
-            panelGroup.setBorder(BorderFactory.createTitledBorder("Frequency filter"));
+            Box boxOptions = Box.createHorizontalBox();
+            boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
-            Box boxMinMax = Box.createHorizontalBox();
-            JSlider sliderWinSize = new JSlider(JSlider.VERTICAL);
-            JSlider sliderK1      = new JSlider(JSlider.VERTICAL);
-            JSlider sliderK2      = new JSlider(JSlider.VERTICAL);
-            JSlider sliderMinGain = new JSlider(JSlider.VERTICAL);
-            JSlider sliderMaxGain = new JSlider(JSlider.VERTICAL);
+            boxOptions.add(Box.createHorizontalGlue());
+            FrequencyFilterTab.makeSliderVert(boxOptions, "Window size", modelWinSize, null);
+            boxOptions.add(Box.createHorizontalStrut(8));
+            FrequencyFilterTab.makeSliderVert(boxOptions, "K1"         , modelK1     , v -> String.format("%.2f", v * K_COEF));
+            boxOptions.add(Box.createHorizontalStrut(8));
+            FrequencyFilterTab.makeSliderVert(boxOptions, "K2"         , modelK2     , v -> String.format("%.2f", v * K_COEF));
+            boxOptions.add(Box.createHorizontalStrut(8));
+            JSlider sliderMinGain = FrequencyFilterTab.makeSliderVert(boxOptions, "Min gain", modelMinGain, v -> String.format("%.2f", v * GAIN_COEF));
+            boxOptions.add(Box.createHorizontalStrut(8));
+            JSlider sliderMaxGain = FrequencyFilterTab.makeSliderVert(boxOptions, "Max gain", modelMaxGain, v -> String.format("%.2f", v * GAIN_COEF));
+            boxOptions.add(Box.createHorizontalGlue());
 
-            sliderWinSize.setModel(modelWinSize);
-            sliderK1     .setModel(modelK1);
-            sliderK2     .setModel(modelK2);
-            sliderMinGain.setModel(modelMinGain);
-            sliderMaxGain.setModel(modelMaxGain);
-
-            sliderWinSize.setToolTipText("Window size");
-            sliderK1     .setToolTipText("K1");
-            sliderK2     .setToolTipText("K2");
-            sliderMinGain.setToolTipText("Max gain");
-            sliderMaxGain.setToolTipText("Min gain");
-
-            boxMinMax.add(sliderWinSize);
-            boxMinMax.add(Box.createHorizontalStrut(4));
-            boxMinMax.add(sliderK1);
-            boxMinMax.add(Box.createHorizontalStrut(4));
-            boxMinMax.add(sliderK2);
-            boxMinMax.add(Box.createHorizontalStrut(4));
-            boxMinMax.add(sliderMinGain);
-            boxMinMax.add(sliderMaxGain);
-
-//            Hashtable<Integer, JLabel> positionMin = new Hashtable<>();
-//            Hashtable<Integer, JLabel> positionMax = new Hashtable<>();
-//            for (int i = MIN; i <= MAX; i += 5) {
-//                positionMin.put(i, new JLabel(Integer.toString(i)));
-//                positionMax.put(i, new JLabel(Integer.toString(i)));
-//            }
-//            positionMin.put(MIN, new JLabel("Min"));
-//            positionMax.put(MAX, new JLabel("Max"));
-//
-//            sliderMin.setLabelTable(positionMin);
-//            sliderMax.setLabelTable(positionMax);
+            boxCenterLeft.add(boxOptions);
 
             modelWinSize.addChangeListener(ev -> {
                 int valWinSize = modelWinSize.getValue();
@@ -209,9 +183,6 @@ public class AdaptiveContrastEnhancementTab implements ITab {
                     sliderMinGain.setValue(valMaxGain);
                 debounceResetImage();
             });
-
-            panelGroup.add(boxMinMax);
-            boxCenterLeft.add(panelGroup);
         }
     }
 

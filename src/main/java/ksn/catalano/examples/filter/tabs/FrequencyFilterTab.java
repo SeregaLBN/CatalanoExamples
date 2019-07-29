@@ -1,7 +1,8 @@
 package ksn.catalano.examples.filter.tabs;
 
+import java.awt.Component;
 import java.awt.Cursor;
-import java.util.Hashtable;
+import java.util.function.IntFunction;
 
 import javax.swing.*;
 
@@ -127,36 +128,16 @@ public class FrequencyFilterTab implements ITab {
         }
 
         {
-            JPanel panelGroup = new JPanel();
-            panelGroup.setBorder(BorderFactory.createTitledBorder("Frequency filter"));
+            Box boxOptions = Box.createHorizontalBox();
+            boxOptions.setBorder(BorderFactory.createTitledBorder("Frequency filter"));
 
-            Box boxAll = Box.createVerticalBox();
+            boxOptions.add(Box.createHorizontalGlue());
+            JSlider sliderMin = makeSliderVert(boxOptions, "Min", modelMin, null);
+            boxOptions.add(Box.createHorizontalStrut(8));
+            JSlider sliderMax = makeSliderVert(boxOptions, "Max", modelMax, null);
+            boxOptions.add(Box.createHorizontalGlue());
 
-            Box boxMinMax = Box.createHorizontalBox();
-            JSlider sliderMin = new JSlider(JSlider.VERTICAL);
-            JSlider sliderMax = new JSlider(JSlider.VERTICAL);
-
-            sliderMin.setModel(modelMin);
-            sliderMax.setModel(modelMax);
-
-            sliderMin.setToolTipText("Min");
-            sliderMax.setToolTipText("Max");
-
-            boxMinMax.add(sliderMin);
-            boxMinMax.add(Box.createHorizontalStrut(4));
-            boxMinMax.add(sliderMax);
-
-            Hashtable<Integer, JLabel> positionMin = new Hashtable<>();
-            Hashtable<Integer, JLabel> positionMax = new Hashtable<>();
-            for (int i = MIN; i <= MAX; i += 35) {
-                positionMin.put(i, new JLabel(Integer.toString(i)));
-                positionMax.put(i, new JLabel(Integer.toString(i)));
-            }
-            positionMin.put(MIN, new JLabel("Min"));
-            positionMax.put(MAX, new JLabel("Max"));
-
-            sliderMin.setLabelTable(positionMin);
-            sliderMax.setLabelTable(positionMax);
+            boxCenterLeft.add(boxOptions);
 
             modelMin.addChangeListener(ev -> {
                 int valMin = modelMin.getValue();
@@ -172,10 +153,36 @@ public class FrequencyFilterTab implements ITab {
                     sliderMin.setValue(valMax);
                 debounceResetImage();
             });
-
-            boxAll.add(boxMinMax);
-            boxCenterLeft.add(boxAll);
         }
+    }
+
+    public static JSlider makeSliderVert(Box doAdd, String title, DefaultBoundedRangeModel model, IntFunction<String> valueTransformer) {
+        JLabel labTitle = new JLabel(title); labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel labValue = new JLabel();      labValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JSlider slider = new JSlider(JSlider.VERTICAL);
+        slider.setModel(model);
+//        slider.setMajorTickSpacing(20);
+//        slider.setMinorTickSpacing(4);
+//        slider.setPaintTicks(true);
+
+        Box boxColumn = Box.createVerticalBox();
+        boxColumn.setBorder(BorderFactory.createTitledBorder(""));
+        boxColumn.add(labTitle);
+        boxColumn.add(slider);
+        boxColumn.add(labValue);
+
+        doAdd.add(boxColumn);
+
+        Runnable executor = () -> {
+            int val = model.getValue();
+            labValue.setText((valueTransformer == null)
+                             ? Integer.toString(val)
+                             : valueTransformer.apply(val));
+        };
+        executor.run();
+        model.addChangeListener(ev -> executor.run());
+
+        return slider;
     }
 
     private void debounceResetImage() {
