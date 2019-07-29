@@ -10,7 +10,7 @@ public interface ITabHandler {
 
     JTabbedPane getTabPanel();
 
-    void onSourceChanged();
+    void onImageChanged(ITab tab);
     void onCancel();
     void onAddNewFilter();
     void onRemoveFilter(ITab tab);

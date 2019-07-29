@@ -100,8 +100,12 @@ public class AdaptiveContrastEnhancementTab implements ITab {
 
     @Override
     public void resetImage() {
+        if (image == null)
+            return;
+
         image = null;
         imagePanelInvalidate.run();
+        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
     }
 
     @Override

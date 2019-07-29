@@ -90,8 +90,12 @@ public class FrequencyFilterTab implements ITab {
 
     @Override
     public void resetImage() {
+        if (image == null)
+            return;
+
         image = null;
         imagePanelInvalidate.run();
+        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
     }
 
     @Override
@@ -125,6 +129,8 @@ public class FrequencyFilterTab implements ITab {
         {
             JPanel panelGroup = new JPanel();
             panelGroup.setBorder(BorderFactory.createTitledBorder("Frequency filter"));
+
+            Box boxAll = Box.createVerticalBox();
 
             Box boxMinMax = Box.createHorizontalBox();
             JSlider sliderMin = new JSlider(JSlider.VERTICAL);
@@ -167,8 +173,8 @@ public class FrequencyFilterTab implements ITab {
                 debounceResetImage();
             });
 
-            panelGroup.add(boxMinMax);
-            boxCenterLeft.add(panelGroup);
+            boxAll.add(boxMinMax);
+            boxCenterLeft.add(boxAll);
         }
     }
 

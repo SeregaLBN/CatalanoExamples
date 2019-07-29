@@ -86,9 +86,13 @@ public class FirstTab implements ITab {
 
     @Override
     public void resetImage() {
+        if (image == null)
+            return;
+
         image = null;
         if (imagePanelInvalidate != null)
             imagePanelInvalidate.run();
+        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
     }
 
     @Override
@@ -190,7 +194,6 @@ public class FirstTab implements ITab {
         try {
             source = ImageIO.read(imageFile);
             resetImage();
-            SwingUtilities.invokeLater(tabHandler::onSourceChanged);
             return true;
         } catch (IOException ex) {
             logger.error("Can`t read image", ex);

@@ -115,8 +115,11 @@ public class MainApp {
         logger.warn("Good bay!");
     }
 
-    private void onSourceChanged() {
-        tabs.stream().skip(1).forEach(ITab::resetImage);
+    private void onSourceChanged(ITab tab) {
+        int pos = tabs.lastIndexOf(tab);
+        assert pos > 0;
+
+        tabs.stream().skip(pos + 1).forEach(ITab::resetImage);
     }
 
     private ITabHandler getTabHandler() {
@@ -124,7 +127,7 @@ public class MainApp {
             @Override
             public JTabbedPane getTabPanel() { return MainApp.this.getTabPanel(); }
             @Override
-            public void onSourceChanged() {           MainApp.this.onSourceChanged(); }
+            public void onImageChanged(ITab tab) {    MainApp.this.onSourceChanged(tab); }
             @Override
             public void onAddNewFilter() {            MainApp.this.onAddNewFilter(); }
             @Override
