@@ -28,7 +28,7 @@ sourceSets {
     }
 }
 
-mainClassName = 'ksn.catalano.examples.filter.FilterUsageExample'
+mainClassName = 'ksn.catalano.examples.filter.MainApp'
 version = '0.0.2'
 
 jar {

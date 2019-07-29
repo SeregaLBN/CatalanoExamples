@@ -1,6 +1,10 @@
 package ksn.catalano.examples.filter.tabs;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +12,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -26,27 +29,42 @@ public class FirstTab implements ITab {
     private static final int WIDTH_LEFT_PANEL = 150;
 
     public static final String PROPERTY_NAME_SOURCE = "Source";
+    public static final File DEFAULT_IMAGE = Paths.get("./exampleImages", "1024px-VolodimirHillAndDnieper.jpg").toFile();
 
     private final ITabHandler tabHandler;
 
     private BufferedImage source;
     private FastBitmap image;
     private File latestImageDir;
+    private Runnable imagePanelInvalidate;
 
-    private BooleanSupplier isGray;
-    private BooleanSupplier isScale;
+    private boolean isGray = false;
+    private boolean isScale = true;
 
 
     public FirstTab(ITabHandler tabHandler) {
         this.tabHandler = tabHandler;
 
-        latestImageDir = Paths.get("./exampleImages").toFile();
+        latestImageDir = DEFAULT_IMAGE.getParentFile();
         if (!latestImageDir.exists())
             latestImageDir = null;
     }
+    public FirstTab(
+            ITabHandler tabHandler,
+            File imageFile,
+            boolean isGray,
+            boolean isScale
+        )
+    {
+        this.tabHandler = tabHandler;
+        this.isGray  = isGray;
+        this.isScale = isScale;
+        if (readImageFile(imageFile))
+            latestImageDir = imageFile.getParentFile();
+    }
 
     public boolean isScale() {
-        return isScale.getAsBoolean();
+        return isScale;
     }
 
     public BufferedImage getSource() {
@@ -55,12 +73,25 @@ public class FirstTab implements ITab {
 
     @Override
     public FastBitmap getImage() {
+        if (source == null)
+            return null;
+
+        if (image == null) {
+            image = new FastBitmap(source);
+            if (isGray && !image.isGrayscale())
+                image.toGrayscale();
+        }
         return image;
     }
 
 
     @Override
     public void resetImage() {
+        // none!
+    }
+
+    @Override
+    public void updateSource(ITab newSource) {
         // none!
     }
 
@@ -78,12 +109,12 @@ public class FirstTab implements ITab {
         tmp[0] = imagePanel;
 
         imagePanel.setMinimumSize(new Dimension(150, 200));
-        imagePanel.setPreferredSize(new Dimension(150, 200));
+        imagePanel.setPreferredSize(new Dimension(700, 400));
 
         return imagePanel;
     }
 
-    public static void makeTab(
+    public static JPanel makeTab(
         ITabHandler tabHandler,
         ITab self,
         String tabTitle,
@@ -95,7 +126,7 @@ public class FirstTab implements ITab {
         { // fill leftPanel
             Box boxCenterLeft = Box.createVerticalBox();
             { // fill boxCenterLeft
-                boxCenterLeft.setBorder(BorderFactory.createLineBorder(Color.BLUE, 1));
+                boxCenterLeft.setBorder(BorderFactory.createTitledBorder(""));
                 fillCoxCenterLeft.accept(imagePanel, boxCenterLeft);
             }
 
@@ -144,16 +175,35 @@ public class FirstTab implements ITab {
             tabPane.addTab(tabTitle, panel);
             tabPane.setSelectedIndex(tabPane.getTabCount() - 1);
         }
+
+        return imagePanel;
     }
 
     public void makeTab() {
-        makeTab(
+        JPanel imagePanel = makeTab(
             tabHandler,
             this,
             "Original",
             false,
             this::makeLoadGrayScaleOptions
         );
+        imagePanelInvalidate = imagePanel::repaint;
+    }
+
+
+    private boolean readImageFile(File imageFile) {
+        if (imageFile == null)
+            return false;
+
+        try {
+            source = ImageIO.read(imageFile);
+            SwingUtilities.invokeLater(tabHandler::onSourceChanged);
+            image = null;
+            return true;
+        } catch (IOException ex) {
+            logger.error("Can`t read image", ex);
+            return false;
+        }
     }
 
     public void makeLoadGrayScaleOptions(JPanel imagePanel, Box boxCenterLeft) {
@@ -162,53 +212,35 @@ public class FirstTab implements ITab {
             logger.trace("onSelectImage");
 
             File file = selectImageFile(latestImageDir);
-            if (file == null)
+            if (!readImageFile(file))
                 return;
-
-            try {
-                source = ImageIO.read(file);
-                SwingUtilities.invokeLater(tabHandler::onSourceChanged);
-                image = null;
-            } catch (IOException ex) {
-                logger.error("Can`t read image", ex);
-                return;
-            }
 
             latestImageDir = file.getParentFile();
-
-            onOriginalImageAsGray(imagePanel); // apply
+            imagePanelInvalidate.run();
         });
         SwingUtilities.invokeLater(btnLoadImage::requestFocus);
-        SwingUtilities.invokeLater(btnLoadImage::doClick);
+        if (source == null)
+            SwingUtilities.invokeLater(btnLoadImage::doClick);
         boxCenterLeft.add(btnLoadImage);
 
         boxCenterLeft.add(Box.createVerticalStrut(6));
 
-        JCheckBox btnAsGray = new JCheckBox("Gray", false);
-        btnAsGray.addActionListener(ev -> onOriginalImageAsGray(imagePanel));
+        JCheckBox btnAsGray = new JCheckBox("Gray", isGray);
+        btnAsGray.addActionListener(ev -> {
+            isGray  = btnAsGray.isSelected();
+            image = null;
+            imagePanelInvalidate.run();
+        });
         boxCenterLeft.add(btnAsGray);
 
-        JCheckBox btnScale = new JCheckBox("Scale", true);
-        btnScale.addActionListener(ev -> imagePanel.repaint());
+        JCheckBox btnScale = new JCheckBox("Scale", isScale);
+        btnScale.addActionListener(ev -> {
+            isScale = btnScale.isSelected();
+            imagePanel.repaint();
+        });
         boxCenterLeft.add(btnScale);
 
         makeSameWidth(new Component[] { btnLoadImage, btnAsGray, btnScale });
-
-        isGray  = btnAsGray::isSelected;
-        isScale = btnScale ::isSelected;
-    }
-
-    private void onOriginalImageAsGray(JPanel imagePanel) {
-        logger.trace("onOriginalImageAsGray");
-
-        if (source == null)
-            return;
-
-        image = new FastBitmap(source);
-        if (isGray.getAsBoolean() && !image.isGrayscale())
-            image.toGrayscale();
-
-        imagePanel.repaint();
     }
 
 

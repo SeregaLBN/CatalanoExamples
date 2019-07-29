@@ -1,6 +1,10 @@
 package ksn.catalano.examples.filter;
 
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -30,7 +34,7 @@ import ksn.catalano.examples.filter.tabs.FrequencyFilterTab;
 import ksn.catalano.examples.filter.tabs.ITab;
 import ksn.catalano.examples.filter.tabs.ITabHandler;
 
-public class FilterUsageExample {
+public class MainApp {
 
     static {
         System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY  , "TRACE");
@@ -41,18 +45,22 @@ public class FilterUsageExample {
         System.setProperty(org.slf4j.impl.SimpleLogger.SHOW_SHORT_LOG_NAME_KEY, "true");
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(FilterUsageExample.class);
+    private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
     private static final String DEFAULT_CAPTION = "Catalano demo filters";
 
     private final JFrame frame;
-    private JTabbedPane tabPanel;
+    private JTabbedPane tabPane;
     private BooleanSupplier isScale;
-
     private List<ITab> tabs = new ArrayList<>();
+    private boolean useDefaultPipeline = true;
 
-    public FilterUsageExample() {
+    public MainApp() {
         frame = new JFrame(DEFAULT_CAPTION);
         initialize();
+
+        // DEBUG
+        if (useDefaultPipeline)
+            defaultPipeline();
     }
 
     private void initialize() {
@@ -62,13 +70,13 @@ public class FilterUsageExample {
         frame.getRootPane().getActionMap().put(keyBind, new AbstractAction() {
             private static final long serialVersionUID = 1L;
             @Override
-            public void actionPerformed(ActionEvent e) { FilterUsageExample.this.onClose(); }
+            public void actionPerformed(ActionEvent e) { MainApp.this.onClose(); }
         });
         /**/
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent we) { FilterUsageExample.this.onClose(); }
+            public void windowClosing(WindowEvent we) { MainApp.this.onClose(); }
         });
 
         frame.setResizable(true);
@@ -78,20 +86,22 @@ public class FilterUsageExample {
     }
 
     private void createComponents() {
-        tabPanel = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
-        tabPanel.setBorder(BorderFactory.createEmptyBorder(8,8,2,8));
-        tabPanel.addChangeListener(this::onTabChanged);
+        tabPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabPane.setBorder(BorderFactory.createEmptyBorder(8,8,2,8));
+        tabPane.addChangeListener(this::onTabChanged);
 
-        FirstTab tab = new FirstTab(getTabHandler());
-        tab.makeTab();
-        isScale = tab::isScale;
-        tabs.add(tab);
+        if (!useDefaultPipeline) {
+            FirstTab tab = new FirstTab(getTabHandler());
+            tab.makeTab();
+            isScale = tab::isScale;
+            tabs.add(tab);
+        }
 
-        frame.getContentPane().add(tabPanel, BorderLayout.CENTER);
+        frame.getContentPane().add(tabPane, BorderLayout.CENTER);
     }
 
     private JTabbedPane getTabPanel() {
-        return tabPanel;
+        return tabPane;
     }
 
     private void onCancel() {
@@ -110,18 +120,18 @@ public class FilterUsageExample {
     private ITabHandler getTabHandler() {
         return new ITabHandler() {
             @Override
-            public JTabbedPane getTabPanel() { return FilterUsageExample.this.getTabPanel(); }
+            public JTabbedPane getTabPanel() { return MainApp.this.getTabPanel(); }
             @Override
-            public void onSourceChanged() {           FilterUsageExample.this.onSourceChanged(); }
+            public void onSourceChanged() {           MainApp.this.onSourceChanged(); }
             @Override
-            public void onAddNewFilter() {            FilterUsageExample.this.onAddNewFilter(); }
+            public void onAddNewFilter() {            MainApp.this.onAddNewFilter(); }
             @Override
-            public void onRemoveFilter(ITab tab) {    FilterUsageExample.this.onRemoveFilter(tab); }
+            public void onRemoveFilter(ITab tab) {    MainApp.this.onRemoveFilter(tab); }
             @Override
-            public void onCancel() {                  FilterUsageExample.this.onCancel(); }
+            public void onCancel() {                  MainApp.this.onCancel(); }
             @Override
             public void onImagePanelPaint(JPanel imagePanel, Graphics2D g) {
-                                                      FilterUsageExample.this.onImagePanelPaint(imagePanel, g);
+                                                      MainApp.this.onImagePanelPaint(imagePanel, g);
             }
         };
     }
@@ -143,8 +153,15 @@ public class FilterUsageExample {
 
     private void onRemoveFilter(ITab tab) {
         int pos = tabs.lastIndexOf(tab);
+        assert pos > 0;
+
+        tabPane.removeTabAt(pos);
         tabs.remove(tab);
-        tabs.stream().skip(pos).forEach(ITab::resetImage);
+        for (int i = pos; i < tabs.size(); ++i) {
+            ITab prev = tabs.get(i-1);
+            ITab curr = tabs.get(i);
+            curr.updateSource(prev);
+        }
     }
 
     private void onImagePanelPaint(JPanel imagePanel, Graphics2D g) {
@@ -154,7 +171,7 @@ public class FilterUsageExample {
         g.setColor(new Color(0xAE, 0xD6, 0xF1));
         g.fillRect(0, 0, imagePanel.getWidth(), imagePanel.getHeight());
 
-        int i = tabPanel.getSelectedIndex();
+        int i = tabPane.getSelectedIndex();
         if (i < 0)
             return;
         if (i >= tabs.size())
@@ -186,6 +203,19 @@ public class FilterUsageExample {
         logger.info("onTabChanged");
     }
 
+    private void defaultPipeline() {
+        FirstTab tab1 = new FirstTab(getTabHandler(), FirstTab.DEFAULT_IMAGE, false, true);
+        tab1.makeTab();
+        isScale = tab1::isScale;
+        tabs.add(tab1);
+
+        FrequencyFilterTab tab2 = new FrequencyFilterTab(getTabHandler(), tab1, 0, 60, true);
+        tab2.makeTab();
+        tabs.add(tab2);
+
+        frame.pack();
+    }
+
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -195,11 +225,11 @@ public class FilterUsageExample {
 
         try {
             SwingUtilities.invokeAndWait(() -> {
-                FilterUsageExample mainWin = new FilterUsageExample();
+                MainApp mainWin = new MainApp();
                 mainWin.frame.setVisible(true);
             });
         } catch (Exception ex) {
-            logger.error(FilterUsageExample.class.getSimpleName() + "::main", ex);
+            logger.error(MainApp.class.getSimpleName() + "::main", ex);
         }
     }
 
