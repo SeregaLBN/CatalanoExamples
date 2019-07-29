@@ -129,20 +129,20 @@ public class FrequencyFilterTab implements ITab {
             Box boxMinMax = Box.createHorizontalBox();
             JSlider sliderMin = new JSlider(JSlider.VERTICAL);
             JSlider sliderMax = new JSlider(JSlider.VERTICAL);
+
             sliderMin.setModel(modelMin);
             sliderMax.setModel(modelMax);
+
             sliderMin.setToolTipText("Min");
             sliderMax.setToolTipText("Max");
 
-            boxMinMax.add(Box.createHorizontalStrut(4));
             boxMinMax.add(sliderMin);
             boxMinMax.add(Box.createHorizontalStrut(4));
             boxMinMax.add(sliderMax);
-            boxMinMax.add(Box.createHorizontalStrut(4));
 
             Hashtable<Integer, JLabel> positionMin = new Hashtable<>();
             Hashtable<Integer, JLabel> positionMax = new Hashtable<>();
-            for (int i = MIN; i <= MAX; i += 5) {
+            for (int i = MIN; i <= MAX; i += 35) {
                 positionMin.put(i, new JLabel(Integer.toString(i)));
                 positionMax.put(i, new JLabel(Integer.toString(i)));
             }
@@ -157,14 +157,14 @@ public class FrequencyFilterTab implements ITab {
                 logger.trace("modelMin: value={}", valMin);
                 if (valMin > sliderMax.getValue())
                     sliderMax.setValue(valMin);
-                debounce(this::resetImage);
+                debounceResetImage();
             });
             modelMax.addChangeListener(ev -> {
                 int valMax = modelMax.getValue();
                 logger.trace("modelMax: value={}", valMax);
                 if (valMax < sliderMin.getValue())
                     sliderMin.setValue(valMax);
-                debounce(this::resetImage);
+                debounceResetImage();
             });
 
             panelGroup.add(boxMinMax);
@@ -172,12 +172,12 @@ public class FrequencyFilterTab implements ITab {
         }
     }
 
-    private void debounce(Runnable runnable) {
+    private void debounceResetImage() {
         if (timer == null)
             timer = new Timer(300, ev -> {
                 timer.stop();
-                logger.info("debounce: call runnable");
-                runnable.run();
+                logger.info("debounce: call resetImage");
+                resetImage();
             });
 
         if (timer.isRunning())

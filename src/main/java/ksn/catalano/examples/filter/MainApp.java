@@ -28,7 +28,9 @@ import org.slf4j.LoggerFactory;
 //  ./libs/Catalano.IO.jar
 //  ./libs/Catalano.Image.jar
 import Catalano.Imaging.FastBitmap;
+import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
 import Catalano.Imaging.Filters.FrequencyFilter;
+import ksn.catalano.examples.filter.tabs.AdaptiveContrastEnhancementTab;
 import ksn.catalano.examples.filter.tabs.FirstTab;
 import ksn.catalano.examples.filter.tabs.FrequencyFilterTab;
 import ksn.catalano.examples.filter.tabs.ITab;
@@ -141,12 +143,21 @@ public class MainApp {
         String filterClassName = new SelectFilterDialog(frame).getFilterClassName();
         if (filterClassName == null)
             return;
+
         if (filterClassName.equals(FrequencyFilter.class.getSimpleName())) {
             ITab lastTab = tabs.get(tabs.size() - 1);
             FrequencyFilterTab tab = new FrequencyFilterTab(getTabHandler(), lastTab);
             tab.makeTab();
             tabs.add(tab);
+        } else
+
+        if (filterClassName.equals(AdaptiveContrastEnhancement.class.getSimpleName())) {
+            ITab lastTab = tabs.get(tabs.size() - 1);
+            AdaptiveContrastEnhancementTab tab = new AdaptiveContrastEnhancementTab(getTabHandler(), lastTab);
+            tab.makeTab();
+            tabs.add(tab);
         } else {
+
             logger.error("Not supported filter {}", filterClassName);
         }
     }
@@ -212,6 +223,10 @@ public class MainApp {
         FrequencyFilterTab tab2 = new FrequencyFilterTab(getTabHandler(), tab1, 0, 60, true);
         tab2.makeTab();
         tabs.add(tab2);
+
+        AdaptiveContrastEnhancementTab tab3 = new AdaptiveContrastEnhancementTab(getTabHandler(), tab2, 10, 0.3, 0.6, 0.1, 1, true);
+        tab3.makeTab();
+        tabs.add(tab3);
 
         frame.pack();
     }

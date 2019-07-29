@@ -26,7 +26,7 @@ import Catalano.Imaging.FastBitmap;
 public class FirstTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(FirstTab.class);
-    private static final int WIDTH_LEFT_PANEL = 150;
+    private static final int WIDTH_LEFT_PANEL = 250;
 
     public static final String PROPERTY_NAME_SOURCE = "Source";
     public static final File DEFAULT_IMAGE = Paths.get("./exampleImages", "1024px-VolodimirHillAndDnieper.jpg").toFile();
@@ -135,29 +135,23 @@ public class FirstTab implements ITab {
             { // fill boxBottomLeft
                 boxBottomLeft.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
 
-                JButton btnRemoveFilter = null;
-                if (addRemoveFilterButton) {
-                    btnRemoveFilter = new JButton("Remove filter");
-                    btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(self));
-                    boxBottomLeft.add(btnRemoveFilter);
-                }
-
-                boxBottomLeft.add(Box.createVerticalStrut(6));
-
                 JButton btnAddFilter = new JButton("Add filter");
                 btnAddFilter.addActionListener(ev -> tabHandler.onAddNewFilter());
                 boxBottomLeft.add(btnAddFilter);
 
                 boxBottomLeft.add(Box.createVerticalStrut(6));
 
-                JButton btnCancel = new JButton("Cancel");
-                btnCancel.addActionListener(ev -> tabHandler.onCancel());
-                boxBottomLeft.add(btnCancel);
-
-                if (addRemoveFilterButton)
-                    makeSameWidth(new Component[] { btnRemoveFilter, btnAddFilter, btnCancel });
-                else
+                if (addRemoveFilterButton) {
+                    JButton btnRemoveFilter = new JButton("Remove filter");
+                    btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(self));
+                    boxBottomLeft.add(btnRemoveFilter);
+                    makeSameWidth(new Component[] { btnAddFilter, btnRemoveFilter });
+                } else {
+                    JButton btnCancel = new JButton("Cancel");
+                    btnCancel.addActionListener(ev -> tabHandler.onCancel());
+                    boxBottomLeft.add(btnCancel);
                     makeSameWidth(new Component[] { btnAddFilter, btnCancel });
+                }
             }
 
             leftPanel.setLayout(new BorderLayout());

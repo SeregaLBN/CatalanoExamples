@@ -11,7 +11,9 @@ import javax.swing.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
 import Catalano.Imaging.Filters.FrequencyFilter;
+import ksn.catalano.examples.filter.tabs.AdaptiveContrastEnhancementTab;
 
 public class SelectFilterDialog {
 
@@ -43,8 +45,8 @@ public class SelectFilterDialog {
         JRadioButton radioFilter1 = new JRadioButton(FrequencyFilter.class.getSimpleName());
         radioFilter1.setActionCommand(FrequencyFilter.class.getSimpleName());
 
-        JRadioButton radioFilter2 = new JRadioButton(FrequencyFilter.class.getSimpleName());
-        radioFilter2.setActionCommand(FrequencyFilter.class.getSimpleName());
+        JRadioButton radioFilter2 = new JRadioButton(AdaptiveContrastEnhancement.class.getSimpleName());
+        radioFilter2.setActionCommand(AdaptiveContrastEnhancement.class.getSimpleName());
 
         panel4Radio.add(radioFilter1);
         panel4Radio.add(radioFilter2);
