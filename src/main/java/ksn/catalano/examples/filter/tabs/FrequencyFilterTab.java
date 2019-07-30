@@ -33,7 +33,7 @@ public class FrequencyFilterTab implements ITab {
         makeTab();
     }
 
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab source, int min, int max, boolean boosting) {
+    public FrequencyFilterTab(ITabHandler tabHandler, ITab source, boolean boosting, int min, int max) {
         this.tabHandler = tabHandler;
         this.source = source;
         this.modelMin.setValue(min);
@@ -99,7 +99,7 @@ public class FrequencyFilterTab implements ITab {
         UiHelper.makeTab(
              tabHandler,
              this,
-             "Frequency", //FrequencyFilter.class.getSimpleName(),
+             FrequencyFilter.class.getSimpleName(),
              true,
              this::makeFilterOptions
          );

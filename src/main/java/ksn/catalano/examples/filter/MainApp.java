@@ -33,6 +33,7 @@ import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
 import Catalano.Imaging.Filters.BrightnessCorrection;
 import Catalano.Imaging.Filters.FrequencyFilter;
+import Catalano.Imaging.Filters.Rotate;
 import ksn.catalano.examples.filter.tabs.*;
 
 public class MainApp {
@@ -156,6 +157,9 @@ public class MainApp {
         if (filterClassName.equals(BrightnessCorrection.class.getSimpleName()))
             tabs.add(new           BrightnessCorrectionTab(getTabHandler(), lastTab));
         else
+        if (filterClassName.equals(Rotate.class.getSimpleName()))
+            tabs.add(new           RotateTab(getTabHandler(), lastTab));
+        else
             logger.error("Not supported filter {}", filterClassName);
     }
 
@@ -218,9 +222,10 @@ public class MainApp {
 
         if (firstTab.getImage() != null) {
             List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
-                prevTab -> new BrightnessCorrectionTab(getTabHandler(), prevTab, 1                   , true),
-                prevTab -> new FrequencyFilterTab(     getTabHandler(), prevTab, 0, 60               , true),
-                prevTab -> new AdaptiveContrastTab(    getTabHandler(), prevTab, 10, 0.3, 0.6, 0.1, 1, true)
+                prevTab -> new BrightnessCorrectionTab(getTabHandler(), prevTab, true, 1),
+                prevTab -> new FrequencyFilterTab(     getTabHandler(), prevTab, true, 0, 60),
+                prevTab -> new AdaptiveContrastTab(    getTabHandler(), prevTab, true, 10, 0.3, 0.6, 0.1, 1),
+                prevTab -> new RotateTab(              getTabHandler(), prevTab, true, 10.5, true, Rotate.Algorithm.BICUBIC)
             );
             ITab prevTab = firstTab;
             for (UnaryOperator<ITab> fTab : nextTabs) {

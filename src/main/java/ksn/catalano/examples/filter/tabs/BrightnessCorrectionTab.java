@@ -31,7 +31,7 @@ public class BrightnessCorrectionTab implements ITab {
         makeTab();
     }
 
-    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source, int adjustValue, boolean boosting) {
+    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source, boolean boosting, int adjustValue) {
         this.tabHandler = tabHandler;
         this.source = source;
         this.modelAdjust.setValue(adjustValue);
@@ -58,8 +58,6 @@ public class BrightnessCorrectionTab implements ITab {
             image = new FastBitmap(image);
             if (boosting)
                 image = UiHelper.boostImage(image, logger);
-//            if (!image.isGrayscale())
-//                image.toGrayscale();
 
             BrightnessCorrection brightnessCorrection = new BrightnessCorrection(modelAdjust.getValue());
             brightnessCorrection.applyInPlace(image);
@@ -90,7 +88,7 @@ public class BrightnessCorrectionTab implements ITab {
         UiHelper.makeTab(
              tabHandler,
              this,
-             "Brightness", //BrightnessCorrection.class.getSimpleName(),
+             BrightnessCorrection.class.getSimpleName(),
              true,
              this::makeFilterOptions
          );

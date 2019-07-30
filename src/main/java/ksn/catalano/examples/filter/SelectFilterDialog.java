@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
 import Catalano.Imaging.Filters.BrightnessCorrection;
 import Catalano.Imaging.Filters.FrequencyFilter;
+import Catalano.Imaging.Filters.Rotate;
 
 public class SelectFilterDialog {
 
@@ -44,9 +45,10 @@ public class SelectFilterDialog {
         ButtonGroup radioGroup = new ButtonGroup();
 
         Arrays.asList(
-            BrightnessCorrection.class,
+            BrightnessCorrection       .class,
             AdaptiveContrastEnhancement.class,
-            FrequencyFilter.class
+            FrequencyFilter            .class,
+            Rotate                     .class
         ).forEach(filterClass -> {
             String className = filterClass.getSimpleName();
             JRadioButton radioFilter = new JRadioButton(className);

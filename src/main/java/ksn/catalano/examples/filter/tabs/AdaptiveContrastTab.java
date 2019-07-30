@@ -13,14 +13,15 @@ import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
 public class AdaptiveContrastTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(AdaptiveContrastTab.class);
-    private static final int MIN_WINDOW_SIZE = 0;
-    private static final int MAX_WINDOW_SIZE = 200;
-    private static final int MIN_K           = 0;
-    private static final int MAX_K           = 2000;
-    private static final int MIN_GAIN        = 0;
-    private static final int MAX_GAIN        = 2000;
+
     private static final double    K_COEF = 0.01;
     private static final double GAIN_COEF = 0.01;
+    private static final int MIN_WINDOW_SIZE = 0;
+    private static final int MAX_WINDOW_SIZE = 200;
+    private static final int MIN_K           = (int)( 0 /    K_COEF);
+    private static final int MAX_K           = (int)(20 /    K_COEF);
+    private static final int MIN_GAIN        = (int)( 0 / GAIN_COEF);
+    private static final int MAX_GAIN        = (int)(20 / GAIN_COEF);
 
     private final ITabHandler tabHandler;
     private ITab source;
@@ -41,7 +42,7 @@ public class AdaptiveContrastTab implements ITab {
         makeTab();
     }
 
-    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, int windowSize, double k1, double k2, double minGain, double maxGain, boolean boosting) {
+    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, double k1, double k2, double minGain, double maxGain) {
         this.tabHandler = tabHandler;
         this.source = source;
         this.modelWinSize.setValue(windowSize);
@@ -110,7 +111,7 @@ public class AdaptiveContrastTab implements ITab {
         UiHelper.makeTab(
              tabHandler,
              this,
-             "Contrast", //AdaptiveContrastEnhancement.class.getSimpleName(),
+             AdaptiveContrastEnhancement.class.getSimpleName(),
              true,
              this::makeFilterOptions
          );
