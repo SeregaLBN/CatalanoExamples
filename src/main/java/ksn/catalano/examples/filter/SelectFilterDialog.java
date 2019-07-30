@@ -5,6 +5,7 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 
 import javax.swing.*;
 
@@ -12,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
+import Catalano.Imaging.Filters.BrightnessCorrection;
 import Catalano.Imaging.Filters.FrequencyFilter;
-import ksn.catalano.examples.filter.tabs.AdaptiveContrastEnhancementTab;
 
 public class SelectFilterDialog {
 
@@ -42,16 +43,17 @@ public class SelectFilterDialog {
         panel4Radio.setBorder(BorderFactory.createTitledBorder("Filters"));
         ButtonGroup radioGroup = new ButtonGroup();
 
-        JRadioButton radioFilter1 = new JRadioButton(FrequencyFilter.class.getSimpleName());
-        radioFilter1.setActionCommand(FrequencyFilter.class.getSimpleName());
-
-        JRadioButton radioFilter2 = new JRadioButton(AdaptiveContrastEnhancement.class.getSimpleName());
-        radioFilter2.setActionCommand(AdaptiveContrastEnhancement.class.getSimpleName());
-
-        panel4Radio.add(radioFilter1);
-        panel4Radio.add(radioFilter2);
-        radioGroup.add(radioFilter1);
-        radioGroup.add(radioFilter2);
+        Arrays.asList(
+            BrightnessCorrection.class,
+            AdaptiveContrastEnhancement.class,
+            FrequencyFilter.class
+        ).forEach(filterClass -> {
+            String className = filterClass.getSimpleName();
+            JRadioButton radioFilter = new JRadioButton(className);
+            radioFilter.setActionCommand(className);
+            panel4Radio.add(radioFilter);
+            radioGroup.add(radioFilter);
+        });
 
         dlg.add(panel4Radio);
 

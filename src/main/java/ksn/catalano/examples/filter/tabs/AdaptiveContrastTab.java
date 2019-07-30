@@ -9,11 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
-import Catalano.Imaging.Filters.Resize;
 
-public class AdaptiveContrastEnhancementTab implements ITab {
+public class AdaptiveContrastTab implements ITab {
 
-    private static final Logger logger = LoggerFactory.getLogger(AdaptiveContrastEnhancementTab.class);
+    private static final Logger logger = LoggerFactory.getLogger(AdaptiveContrastTab.class);
     private static final int MIN_WINDOW_SIZE = 0;
     private static final int MAX_WINDOW_SIZE = 200;
     private static final int MIN_K           = 0;
@@ -35,12 +34,14 @@ public class AdaptiveContrastEnhancementTab implements ITab {
     private DefaultBoundedRangeModel modelMaxGain = new DefaultBoundedRangeModel(100, 0, MIN_GAIN       , MAX_GAIN);
     private Timer timer;
 
-    public AdaptiveContrastEnhancementTab(ITabHandler tabHandler, ITab source) {
+    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source) {
         this.tabHandler = tabHandler;
         this.source = source;
+
+        makeTab();
     }
 
-    public AdaptiveContrastEnhancementTab(ITabHandler tabHandler, ITab source, int windowSize, double k1, double k2, double minGain, double maxGain, boolean boosting) {
+    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, int windowSize, double k1, double k2, double minGain, double maxGain, boolean boosting) {
         this.tabHandler = tabHandler;
         this.source = source;
         this.modelWinSize.setValue(windowSize);
@@ -49,6 +50,8 @@ public class AdaptiveContrastEnhancementTab implements ITab {
         this.modelMinGain.setValue((int)(minGain / GAIN_COEF));
         this.modelMaxGain.setValue((int)(maxGain / GAIN_COEF));
         this.boosting = boosting;
+
+        makeTab();
     }
 
     @Override
@@ -67,19 +70,8 @@ public class AdaptiveContrastEnhancementTab implements ITab {
             frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
             image = new FastBitmap(image);
-            if (boosting) {
-                double zoomX = 400 / (double)image.getWidth();
-                double zoomY = 250 / (double)image.getHeight();
-                double zoom = Math.min(zoomX, zoomY);
-                logger.trace("zoom={}", zoom);
-                if (zoom < 1) {
-                    int newWidth  = (int)(zoom * image.getWidth());
-                    int newHeight = (int)(zoom * image.getHeight());
-
-                    Resize resize = new Resize(newWidth, newHeight);
-                    image = resize.apply(image);
-                }
-            }
+            if (boosting)
+                image = UiHelper.boostImage(image, logger);
             if (!image.isGrayscale())
                 image.toGrayscale();
 
@@ -114,42 +106,35 @@ public class AdaptiveContrastEnhancementTab implements ITab {
         resetImage();
     }
 
-    public void makeTab() {
-        FirstTab.makeTab(
+    private void makeTab() {
+        UiHelper.makeTab(
              tabHandler,
              this,
-             AdaptiveContrastEnhancement.class.getSimpleName(),
+             "Contrast", //AdaptiveContrastEnhancement.class.getSimpleName(),
              true,
-             this::makeFrequencyFilterOptions
+             this::makeFilterOptions
          );
     }
 
-    public void makeFrequencyFilterOptions(JPanel imagePanel, Box boxCenterLeft) {
+    public void makeFilterOptions(JPanel imagePanel, Box boxCenterLeft) {
         imagePanelInvalidate = imagePanel::repaint;
 
-        {
-            JCheckBox btnAsBoost = new JCheckBox("Boosting", boosting);
-            btnAsBoost.addActionListener(ev -> {
-                boosting = btnAsBoost.isSelected();
-                resetImage();
-            });
-            boxCenterLeft.add(btnAsBoost);
-        }
+        boxCenterLeft.add(UiHelper.makeAsBoostCheckBox(() -> boosting, b -> boosting = b, this::resetImage));
 
         {
             Box boxOptions = Box.createHorizontalBox();
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            FrequencyFilterTab.makeSliderVert(boxOptions, "Window size", modelWinSize, null);
-            boxOptions.add(Box.createHorizontalStrut(8));
-            FrequencyFilterTab.makeSliderVert(boxOptions, "K1"         , modelK1     , v -> String.format("%.2f", v * K_COEF));
-            boxOptions.add(Box.createHorizontalStrut(8));
-            FrequencyFilterTab.makeSliderVert(boxOptions, "K2"         , modelK2     , v -> String.format("%.2f", v * K_COEF));
-            boxOptions.add(Box.createHorizontalStrut(8));
-            JSlider sliderMinGain = FrequencyFilterTab.makeSliderVert(boxOptions, "Min gain", modelMinGain, v -> String.format("%.2f", v * GAIN_COEF));
-            boxOptions.add(Box.createHorizontalStrut(8));
-            JSlider sliderMaxGain = FrequencyFilterTab.makeSliderVert(boxOptions, "Max gain", modelMaxGain, v -> String.format("%.2f", v * GAIN_COEF));
+            UiHelper.makeSliderVert(boxOptions, "WinSize", modelWinSize, null);
+            boxOptions.add(Box.createHorizontalStrut(2));
+            UiHelper.makeSliderVert(boxOptions, "K1"     , modelK1     , v -> String.format("%.2f", v * K_COEF));
+            boxOptions.add(Box.createHorizontalStrut(2));
+            UiHelper.makeSliderVert(boxOptions, "K2"     , modelK2     , v -> String.format("%.2f", v * K_COEF));
+            boxOptions.add(Box.createHorizontalStrut(2));
+            JSlider sliderMinGain = UiHelper.makeSliderVert(boxOptions, "MinGain", modelMinGain, v -> String.format("%.2f", v * GAIN_COEF));
+            boxOptions.add(Box.createHorizontalStrut(2));
+            JSlider sliderMaxGain = UiHelper.makeSliderVert(boxOptions, "MaxGain", modelMaxGain, v -> String.format("%.2f", v * GAIN_COEF));
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);
@@ -187,17 +172,7 @@ public class AdaptiveContrastEnhancementTab implements ITab {
     }
 
     private void debounceResetImage() {
-        if (timer == null)
-            timer = new Timer(300, ev -> {
-                timer.stop();
-                logger.info("debounce: call resetImage");
-                resetImage();
-            });
-
-        if (timer.isRunning())
-            timer.restart();
-        else
-            timer.start();
+        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
     }
 
 }

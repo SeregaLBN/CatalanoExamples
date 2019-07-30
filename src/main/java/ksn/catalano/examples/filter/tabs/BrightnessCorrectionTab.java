@@ -8,36 +8,33 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
-import Catalano.Imaging.Filters.FourierTransform;
-import Catalano.Imaging.Filters.FrequencyFilter;
+import Catalano.Imaging.Filters.BrightnessCorrection;
 
-public class FrequencyFilterTab implements ITab {
+public class BrightnessCorrectionTab implements ITab {
 
-    private static final Logger logger = LoggerFactory.getLogger(FrequencyFilterTab.class);
-    private static final int MIN = 0;
-    private static final int MAX = 200;
+    private static final Logger logger = LoggerFactory.getLogger(BrightnessCorrectionTab.class);
+    private static final int MIN = -255;
+    private static final int MAX = 256;
 
     private final ITabHandler tabHandler;
     private ITab source;
     private FastBitmap image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private DefaultBoundedRangeModel modelMin = new DefaultBoundedRangeModel(  0, 0, MIN, MAX);
-    private DefaultBoundedRangeModel modelMax = new DefaultBoundedRangeModel(100, 0, MIN, MAX);
+    private DefaultBoundedRangeModel modelAdjust = new DefaultBoundedRangeModel(100, 0, MIN, MAX);
     private Timer timer;
 
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab source) {
+    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source) {
         this.tabHandler = tabHandler;
         this.source = source;
 
         makeTab();
     }
 
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab source, int min, int max, boolean boosting) {
+    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source, int adjustValue, boolean boosting) {
         this.tabHandler = tabHandler;
         this.source = source;
-        this.modelMin.setValue(min);
-        this.modelMax.setValue(max);
+        this.modelAdjust.setValue(adjustValue);
         this.boosting = boosting;
 
         makeTab();
@@ -61,17 +58,11 @@ public class FrequencyFilterTab implements ITab {
             image = new FastBitmap(image);
             if (boosting)
                 image = UiHelper.boostImage(image, logger);
-            if (!image.isGrayscale())
-                image.toGrayscale();
+//            if (!image.isGrayscale())
+//                image.toGrayscale();
 
-            FourierTransform fourierTransform = new FourierTransform(image);
-            fourierTransform.Forward();
-
-            FrequencyFilter frequencyFilter = new FrequencyFilter(modelMin.getValue(), modelMax.getValue());
-            frequencyFilter.ApplyInPlace(fourierTransform);
-
-            fourierTransform.Backward();
-            image = fourierTransform.toFastBitmap();
+            BrightnessCorrection brightnessCorrection = new BrightnessCorrection(modelAdjust.getValue());
+            brightnessCorrection.applyInPlace(image);
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
         }
@@ -99,7 +90,7 @@ public class FrequencyFilterTab implements ITab {
         UiHelper.makeTab(
              tabHandler,
              this,
-             "Frequency", //FrequencyFilter.class.getSimpleName(),
+             "Brightness", //BrightnessCorrection.class.getSimpleName(),
              true,
              this::makeFilterOptions
          );
@@ -112,28 +103,17 @@ public class FrequencyFilterTab implements ITab {
 
         {
             Box boxOptions = Box.createHorizontalBox();
-            boxOptions.setBorder(BorderFactory.createTitledBorder("Frequency filter"));
+            boxOptions.setBorder(BorderFactory.createTitledBorder("Brightness correction"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            JSlider sliderMin = UiHelper.makeSliderVert(boxOptions, "Min", modelMin, null);
-            boxOptions.add(Box.createHorizontalStrut(8));
-            JSlider sliderMax = UiHelper.makeSliderVert(boxOptions, "Max", modelMax, null);
+            UiHelper.makeSliderVert(boxOptions, "Adjust", modelAdjust, null);
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);
 
-            modelMin.addChangeListener(ev -> {
-                int valMin = modelMin.getValue();
-                logger.trace("modelMin: value={}", valMin);
-                if (valMin > sliderMax.getValue())
-                    sliderMax.setValue(valMin);
-                debounceResetImage();
-            });
-            modelMax.addChangeListener(ev -> {
-                int valMax = modelMax.getValue();
-                logger.trace("modelMax: value={}", valMax);
-                if (valMax < sliderMin.getValue())
-                    sliderMin.setValue(valMax);
+            modelAdjust.addChangeListener(ev -> {
+                int valAdjust = modelAdjust.getValue();
+                logger.trace("modelAdjust: value={}", valAdjust);
                 debounceResetImage();
             });
         }

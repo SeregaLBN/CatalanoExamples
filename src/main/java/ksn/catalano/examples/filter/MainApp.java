@@ -12,8 +12,10 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.UnaryOperator;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -29,12 +31,9 @@ import org.slf4j.LoggerFactory;
 //  ./libs/Catalano.Image.jar
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
+import Catalano.Imaging.Filters.BrightnessCorrection;
 import Catalano.Imaging.Filters.FrequencyFilter;
-import ksn.catalano.examples.filter.tabs.AdaptiveContrastEnhancementTab;
-import ksn.catalano.examples.filter.tabs.FirstTab;
-import ksn.catalano.examples.filter.tabs.FrequencyFilterTab;
-import ksn.catalano.examples.filter.tabs.ITab;
-import ksn.catalano.examples.filter.tabs.ITabHandler;
+import ksn.catalano.examples.filter.tabs.*;
 
 public class MainApp {
 
@@ -54,15 +53,15 @@ public class MainApp {
     private JTabbedPane tabPane;
     private BooleanSupplier isScale;
     private List<ITab> tabs = new ArrayList<>();
-    private boolean useDefaultPipeline = true;
+    private boolean useExamplePipeline = true;
 
     public MainApp() {
         frame = new JFrame(DEFAULT_CAPTION);
         initialize();
 
         // DEBUG
-        if (useDefaultPipeline)
-            defaultPipeline();
+        if (useExamplePipeline)
+            examplePipeline();
     }
 
     private void initialize() {
@@ -92,9 +91,8 @@ public class MainApp {
         tabPane.setBorder(BorderFactory.createEmptyBorder(8,8,2,8));
         tabPane.addChangeListener(this::onTabChanged);
 
-        if (!useDefaultPipeline) {
+        if (!useExamplePipeline) {
             FirstTab tab = new FirstTab(getTabHandler());
-            tab.makeTab();
             isScale = tab::isScale;
             tabs.add(tab);
         }
@@ -147,22 +145,18 @@ public class MainApp {
         if (filterClassName == null)
             return;
 
-        if (filterClassName.equals(FrequencyFilter.class.getSimpleName())) {
-            ITab lastTab = tabs.get(tabs.size() - 1);
-            FrequencyFilterTab tab = new FrequencyFilterTab(getTabHandler(), lastTab);
-            tab.makeTab();
-            tabs.add(tab);
-        } else
-
-        if (filterClassName.equals(AdaptiveContrastEnhancement.class.getSimpleName())) {
-            ITab lastTab = tabs.get(tabs.size() - 1);
-            AdaptiveContrastEnhancementTab tab = new AdaptiveContrastEnhancementTab(getTabHandler(), lastTab);
-            tab.makeTab();
-            tabs.add(tab);
-        } else {
-
+        ITab lastTab = tabs.get(tabs.size() - 1);
+        // factory
+        if (filterClassName.equals(FrequencyFilter.class.getSimpleName()))
+            tabs.add(new           FrequencyFilterTab(getTabHandler(), lastTab));
+        else
+        if (filterClassName.equals(AdaptiveContrastEnhancement.class.getSimpleName()))
+            tabs.add(new           AdaptiveContrastTab(getTabHandler(), lastTab));
+        else
+        if (filterClassName.equals(BrightnessCorrection.class.getSimpleName()))
+            tabs.add(new           BrightnessCorrectionTab(getTabHandler(), lastTab));
+        else
             logger.error("Not supported filter {}", filterClassName);
-        }
     }
 
     private void onRemoveFilter(ITab tab) {
@@ -217,19 +211,24 @@ public class MainApp {
         logger.info("onTabChanged");
     }
 
-    private void defaultPipeline() {
-        FirstTab tab1 = new FirstTab(getTabHandler(), FirstTab.DEFAULT_IMAGE, false, true);
-        tab1.makeTab();
-        isScale = tab1::isScale;
-        tabs.add(tab1);
+    private void examplePipeline() {
+        FirstTab firstTab = new FirstTab(getTabHandler(), FirstTab.DEFAULT_IMAGE, false, true);
+        isScale = firstTab::isScale;
+        tabs.add(firstTab);
 
-        FrequencyFilterTab tab2 = new FrequencyFilterTab(getTabHandler(), tab1, 0, 60, true);
-        tab2.makeTab();
-        tabs.add(tab2);
-
-        AdaptiveContrastEnhancementTab tab3 = new AdaptiveContrastEnhancementTab(getTabHandler(), tab2, 10, 0.3, 0.6, 0.1, 1, true);
-        tab3.makeTab();
-        tabs.add(tab3);
+        if (firstTab.getImage() != null) {
+            List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
+                prevTab -> new BrightnessCorrectionTab(getTabHandler(), prevTab, 1                   , true),
+                prevTab -> new FrequencyFilterTab(     getTabHandler(), prevTab, 0, 60               , true),
+                prevTab -> new AdaptiveContrastTab(    getTabHandler(), prevTab, 10, 0.3, 0.6, 0.1, 1, true)
+            );
+            ITab prevTab = firstTab;
+            for (UnaryOperator<ITab> fTab : nextTabs) {
+                ITab next = fTab.apply(prevTab);
+                tabs.add(next);
+                prevTab = next;
+            }
+        }
 
         frame.pack();
     }
