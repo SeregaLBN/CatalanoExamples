@@ -1,6 +1,7 @@
 package ksn.catalano.examples.filter.tabs;
 
 import java.awt.Cursor;
+import java.util.Locale;
 
 import javax.swing.*;
 
@@ -16,12 +17,14 @@ public class AdaptiveContrastTab implements ITab {
 
     private static final double    K_COEF = 0.01;
     private static final double GAIN_COEF = 0.01;
-    private static final int MIN_WINDOW_SIZE = 0;
-    private static final int MAX_WINDOW_SIZE = 200;
-    private static final int MIN_K           = (int)( 0 /    K_COEF);
-    private static final int MAX_K           = (int)(20 /    K_COEF);
-    private static final int MIN_GAIN        = (int)( 0 / GAIN_COEF);
-    private static final int MAX_GAIN        = (int)(20 / GAIN_COEF);
+    private static final int MIN_WINDOW_SIZE = 1;                       // Size of window (should be an odd number).
+    private static final int MAX_WINDOW_SIZE = 201;
+    private static final int MIN_K1          = (int)( 0 /    K_COEF);   // Local gain factor, between 0 and 1.
+    private static final int MAX_K1          = (int)( 1 /    K_COEF);
+    private static final int MIN_K2          = (int)( 0 /    K_COEF);   // Local mean constant, between 0 and 1.
+    private static final int MAX_K2          = (int)( 1 /    K_COEF);
+    private static final int MIN_GAIN        = (int)( 0 / GAIN_COEF);   // The minimum gain factor
+    private static final int MAX_GAIN        = (int)(20 / GAIN_COEF);   // The maximum gain factor
 
     private final ITabHandler tabHandler;
     private ITab source;
@@ -29,8 +32,8 @@ public class AdaptiveContrastTab implements ITab {
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
     private DefaultBoundedRangeModel modelWinSize = new DefaultBoundedRangeModel( 20, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
-    private DefaultBoundedRangeModel modelK1      = new DefaultBoundedRangeModel( 30, 0, MIN_K          , MAX_K);
-    private DefaultBoundedRangeModel modelK2      = new DefaultBoundedRangeModel( 60, 0, MIN_K          , MAX_K);
+    private DefaultBoundedRangeModel modelK1      = new DefaultBoundedRangeModel( 30, 0, MIN_K1         , MAX_K1);
+    private DefaultBoundedRangeModel modelK2      = new DefaultBoundedRangeModel( 60, 0, MIN_K2         , MAX_K2);
     private DefaultBoundedRangeModel modelMinGain = new DefaultBoundedRangeModel( 10, 0, MIN_GAIN       , MAX_GAIN);
     private DefaultBoundedRangeModel modelMaxGain = new DefaultBoundedRangeModel(100, 0, MIN_GAIN       , MAX_GAIN);
     private Timer timer;
@@ -127,15 +130,15 @@ public class AdaptiveContrastTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, "WinSize", modelWinSize, null);
+            UiHelper.makeSliderVert(boxOptions, "WinSize", modelWinSize, null                                                                          , "Size of window");
             boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, "K1"     , modelK1     , v -> String.format("%.2f", v * K_COEF));
+            UiHelper.makeSliderVert(boxOptions, "K1"     , modelK1     , v -> String.format(Locale.US, "%.2f", v * K_COEF)                             , "Local gain factor");
             boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, "K2"     , modelK2     , v -> String.format("%.2f", v * K_COEF));
+            UiHelper.makeSliderVert(boxOptions, "K2"     , modelK2     , v -> String.format(Locale.US, "%.2f", v * K_COEF)                             , "Local mean constant");
             boxOptions.add(Box.createHorizontalStrut(2));
-            JSlider sliderMinGain = UiHelper.makeSliderVert(boxOptions, "MinGain", modelMinGain, v -> String.format("%.2f", v * GAIN_COEF));
+            JSlider sliderMinGain = UiHelper.makeSliderVert(boxOptions, "MinGain", modelMinGain, v -> String.format(Locale.US, "%.2f", v * GAIN_COEF)  , "The minimum gain factor");
             boxOptions.add(Box.createHorizontalStrut(2));
-            JSlider sliderMaxGain = UiHelper.makeSliderVert(boxOptions, "MaxGain", modelMaxGain, v -> String.format("%.2f", v * GAIN_COEF));
+            JSlider sliderMaxGain = UiHelper.makeSliderVert(boxOptions, "MaxGain", modelMaxGain, v -> String.format(Locale.US, "%.2f", v * GAIN_COEF)  , "The maximum gain factor");
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

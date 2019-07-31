@@ -15,7 +15,7 @@ public class FrequencyFilterTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(FrequencyFilterTab.class);
     private static final int MIN = 0;
-    private static final int MAX = 200;
+    private static final int MAX = 1024;
 
     private final ITabHandler tabHandler;
     private ITab source;
@@ -115,9 +115,9 @@ public class FrequencyFilterTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Frequency filter"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            JSlider sliderMin = UiHelper.makeSliderVert(boxOptions, "Min", modelMin, null);
+            JSlider sliderMin = UiHelper.makeSliderVert(boxOptions, "Min", modelMin, null, "Minimum value for to keep");
             boxOptions.add(Box.createHorizontalStrut(8));
-            JSlider sliderMax = UiHelper.makeSliderVert(boxOptions, "Max", modelMax, null);
+            JSlider sliderMax = UiHelper.makeSliderVert(boxOptions, "Max", modelMax, null, "Maximum value for to keep");
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

@@ -1,18 +1,10 @@
 package ksn.catalano.examples.filter.tabs;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.IntFunction;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -158,7 +150,7 @@ public final class UiHelper {
         }
     }
 
-    public static JSlider makeSliderVert(Box doAdd, String title, DefaultBoundedRangeModel model, IntFunction<String> valueTransformer) {
+    public static JSlider makeSliderVert(Box doAdd, String title, DefaultBoundedRangeModel model, IntFunction<String> valueTransformer, String tip) {
         JLabel labTitle = new JLabel(title); labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel labValue = new JLabel();      labValue.setAlignmentX(Component.CENTER_ALIGNMENT);
         JSlider slider = new JSlider(JSlider.VERTICAL);
@@ -166,6 +158,9 @@ public final class UiHelper {
 //        slider.setMajorTickSpacing(20);
 //        slider.setMinorTickSpacing(4);
 //        slider.setPaintTicks(true);
+        slider  .setToolTipText(tip);
+        labValue.setToolTipText(tip);
+        labTitle.setToolTipText(tip);
 
         Box boxColumn = Box.createVerticalBox();
         boxColumn.setBorder(BorderFactory.createTitledBorder(""));
@@ -209,6 +204,7 @@ public final class UiHelper {
         Box box = Box.createHorizontalBox();
         JCheckBox btnAsBoost = new JCheckBox("Boosting", getter.getAsBoolean());
         btnAsBoost.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnAsBoost.setToolTipText("Speed up by reducing the image");
         btnAsBoost.addActionListener(ev -> {
             setter.accept(btnAsBoost.isSelected());
             executor.run();;

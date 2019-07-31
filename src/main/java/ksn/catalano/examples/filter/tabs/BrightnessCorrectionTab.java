@@ -14,7 +14,7 @@ public class BrightnessCorrectionTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(BrightnessCorrectionTab.class);
     private static final int MIN = -255;
-    private static final int MAX = 256;
+    private static final int MAX =  255;
 
     private final ITabHandler tabHandler;
     private ITab source;
@@ -104,7 +104,7 @@ public class BrightnessCorrectionTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Brightness correction"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, "Adjust", modelAdjust, null);
+            UiHelper.makeSliderVert(boxOptions, "Adjust", modelAdjust, null, "Brightness adjust value");
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

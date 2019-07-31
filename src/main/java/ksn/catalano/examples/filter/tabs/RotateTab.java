@@ -2,6 +2,7 @@ package ksn.catalano.examples.filter.tabs;
 
 import java.awt.Cursor;
 import java.awt.event.ItemEvent;
+import java.util.Locale;
 
 import javax.swing.*;
 
@@ -16,8 +17,8 @@ public class RotateTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(RotateTab.class);
     private static final double COEF = 0.01;
-    private static final int MIN = (int)(-180/COEF);
-    private static final int MAX = (int)( 180/COEF);
+    private static final int MIN = (int)( 0 /COEF);
+    private static final int MAX = (int)(360/COEF);
 
 
     private final ITabHandler tabHandler;
@@ -115,6 +116,7 @@ public class RotateTab implements ITab {
             box2.setBorder(BorderFactory.createTitledBorder(""));
 
             JCheckBox btnKeepSize = new JCheckBox("Keep size", keepSize);
+            btnKeepSize.setToolTipText("Keep the original size");
             btnKeepSize.addActionListener(ev -> {
                 keepSize  = btnKeepSize.isSelected();
                 resetImage();
@@ -123,10 +125,12 @@ public class RotateTab implements ITab {
 
             Box box4Alg = Box.createVerticalBox();
             box4Alg.setBorder(BorderFactory.createTitledBorder("Algorithm"));
+            box4Alg.setToolTipText("Interpolation algorithm");
             ButtonGroup radioGroup = new ButtonGroup();
             for (Rotate.Algorithm alg : Rotate.Algorithm.values()) {
                 JRadioButton radioBtnAlg = new JRadioButton(alg.name(), alg == this.algorithm);
                 radioBtnAlg.setActionCommand(alg.name());
+                radioBtnAlg.setToolTipText("Interpolation algorithm");
                 radioBtnAlg.addItemListener(ev -> {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
                         this.algorithm = alg;
@@ -140,7 +144,7 @@ public class RotateTab implements ITab {
             box2.add(box4Alg);
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, "Angle", modelAngle, v -> String.format("%.2f", v * COEF));
+            UiHelper.makeSliderVert(boxOptions, "Angle", modelAngle, v -> String.format(Locale.US, "%.2f", v * COEF), "Angle");
             boxOptions.add(Box.createHorizontalStrut(8));
             boxOptions.add(box2);
             boxOptions.add(Box.createHorizontalGlue());
