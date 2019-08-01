@@ -30,11 +30,7 @@ import org.slf4j.LoggerFactory;
 //  ./libs/Catalano.IO.jar
 //  ./libs/Catalano.Image.jar
 import Catalano.Imaging.FastBitmap;
-import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
-import Catalano.Imaging.Filters.ArtifactsRemoval;
-import Catalano.Imaging.Filters.BrightnessCorrection;
-import Catalano.Imaging.Filters.FrequencyFilter;
-import Catalano.Imaging.Filters.Rotate;
+import Catalano.Imaging.Filters.*;
 import ksn.catalano.examples.filter.tabs.*;
 
 public class MainApp {
@@ -164,6 +160,9 @@ public class MainApp {
         if (filterClassName.equals(ArtifactsRemoval.class.getSimpleName()))
             tabs.add(new           ArtifactsRemovalTab(getTabHandler(), lastTab));
         else
+        if (filterClassName.equals(Blur.class.getSimpleName()))
+            tabs.add(new           BlurTab(getTabHandler(), lastTab));
+        else
             logger.error("Not supported filter {}", filterClassName);
     }
 
@@ -227,6 +226,7 @@ public class MainApp {
         if (firstTab.getImage() != null) {
             List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
                 prevTab -> new BrightnessCorrectionTab(getTabHandler(), prevTab, true, 1),
+                prevTab -> new BlurTab(                getTabHandler(), prevTab, true),
                 prevTab -> new FrequencyFilterTab(     getTabHandler(), prevTab, true, 0, 60),
                 prevTab -> new AdaptiveContrastTab(    getTabHandler(), prevTab, true, 10, 0.3, 0.6, 0.1, 1),
                 prevTab -> new RotateTab(              getTabHandler(), prevTab, true, 0.5, true, Rotate.Algorithm.BICUBIC),

@@ -47,7 +47,8 @@ public class SelectFilterDialog {
             FrequencyFilter            .class,
             Rotate                     .class,
             ArtifactsRemoval           .class,
-            BernsenThreshold           .class
+            BernsenThreshold           .class,
+            Blur                       .class
         ).forEach(filterClass -> {
             String className = filterClass.getSimpleName();
             JRadioButton radioFilter = new JRadioButton(className);
