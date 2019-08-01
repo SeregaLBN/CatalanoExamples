@@ -230,7 +230,8 @@ public class MainApp {
                 prevTab -> new FrequencyFilterTab(     getTabHandler(), prevTab, true, 0, 60),
                 prevTab -> new AdaptiveContrastTab(    getTabHandler(), prevTab, true, 10, 0.3, 0.6, 0.1, 1),
                 prevTab -> new RotateTab(              getTabHandler(), prevTab, true, 0.5, true, Rotate.Algorithm.BICUBIC),
-                prevTab -> new ArtifactsRemovalTab(    getTabHandler(), prevTab, true, 15)
+                prevTab -> new ArtifactsRemovalTab(    getTabHandler(), prevTab, true, 15),
+                prevTab -> new BernsenThresholdTab(    getTabHandler(), prevTab, true, 15, 15)
             );
             ITab prevTab = firstTab;
             for (UnaryOperator<ITab> fTab : nextTabs) {
