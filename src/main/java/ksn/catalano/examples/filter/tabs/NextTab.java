@@ -10,15 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.BernsenThreshold;
+import Catalano.Imaging.Filters.BradleyLocalThreshold;
 
-public class BernsenThresholdTab implements ITab {
+public class NextTab implements ITab {
 
-    private static final Logger logger = LoggerFactory.getLogger(BernsenThresholdTab.class);
+    private static final Logger logger = LoggerFactory.getLogger(NextTab.class);
 
-    private static final int MIN_RADIUS = 0;
-    private static final int MAX_RADIUS = 100;
+    private static final int MIN_WINDOW_SIZE = 1;                       // Size of window (should be an odd number).
+    private static final int MAX_WINDOW_SIZE = 201;
 
-    private static final double CONTRAST_THRESHOLD_COEF = 0.01;
+    private static final float CONTRAST_THRESHOLD_COEF = 0.01f;
     private static final int MIN_CONTRAST_THRESHOLD = (int)( 0 /CONTRAST_THRESHOLD_COEF);
     private static final int MAX_CONTRAST_THRESHOLD = (int)(300/CONTRAST_THRESHOLD_COEF);
 
@@ -27,22 +28,22 @@ public class BernsenThresholdTab implements ITab {
     private FastBitmap image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private DefaultBoundedRangeModel modelRadius            = new DefaultBoundedRangeModel(15, 0, MIN_RADIUS            , MAX_RADIUS);
+    private DefaultBoundedRangeModel modelRadius            = new DefaultBoundedRangeModel(41, 0, MIN_WINDOW_SIZE       , MAX_WINDOW_SIZE);
     private DefaultBoundedRangeModel modelСontrastThreshold = new DefaultBoundedRangeModel(15, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
     private Timer timer;
 
-    public BernsenThresholdTab(ITabHandler tabHandler, ITab source) {
+    public NextTab(ITabHandler tabHandler, ITab source) {
         this.tabHandler = tabHandler;
         this.source = source;
 
         makeTab();
     }
 
-    public BernsenThresholdTab(ITabHandler tabHandler, ITab source, boolean boosting, int radius, double contrastThreshold) {
+    public NextTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, float pixelBrightnessDiff) {
         this.tabHandler = tabHandler;
         this.source = source;
-        this.modelRadius.setValue(radius);
-        this.modelСontrastThreshold.setValue((int)(contrastThreshold / CONTRAST_THRESHOLD_COEF));
+        this.modelRadius.setValue(windowSize);
+        this.modelСontrastThreshold.setValue((int)(pixelBrightnessDiff / CONTRAST_THRESHOLD_COEF));
         this.boosting = boosting;
 
         makeTab();
@@ -69,8 +70,8 @@ public class BernsenThresholdTab implements ITab {
             if (!image.isGrayscale())
                 image.toGrayscale();
 
-            BernsenThreshold bernsenThreshold = new BernsenThreshold(modelRadius.getValue(), modelСontrastThreshold.getValue() * CONTRAST_THRESHOLD_COEF);
-            bernsenThreshold.applyInPlace(image);
+            BradleyLocalThreshold bradleyLocalThreshold = new BradleyLocalThreshold(modelRadius.getValue(), modelСontrastThreshold.getValue() * CONTRAST_THRESHOLD_COEF);
+            bradleyLocalThreshold.applyInPlace(image);
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
         }
