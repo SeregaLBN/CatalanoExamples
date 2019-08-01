@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
+import Catalano.Imaging.Filters.ArtifactsRemoval;
 import Catalano.Imaging.Filters.BrightnessCorrection;
 import Catalano.Imaging.Filters.FrequencyFilter;
 import Catalano.Imaging.Filters.Rotate;
@@ -48,7 +49,8 @@ public class SelectFilterDialog {
             BrightnessCorrection       .class,
             AdaptiveContrastEnhancement.class,
             FrequencyFilter            .class,
-            Rotate                     .class
+            Rotate                     .class,
+            ArtifactsRemoval           .class
         ).forEach(filterClass -> {
             String className = filterClass.getSimpleName();
             JRadioButton radioFilter = new JRadioButton(className);

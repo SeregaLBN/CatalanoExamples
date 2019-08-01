@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 //  ./libs/Catalano.Image.jar
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
+import Catalano.Imaging.Filters.ArtifactsRemoval;
 import Catalano.Imaging.Filters.BrightnessCorrection;
 import Catalano.Imaging.Filters.FrequencyFilter;
 import Catalano.Imaging.Filters.Rotate;
@@ -160,6 +161,9 @@ public class MainApp {
         if (filterClassName.equals(Rotate.class.getSimpleName()))
             tabs.add(new           RotateTab(getTabHandler(), lastTab));
         else
+        if (filterClassName.equals(ArtifactsRemoval.class.getSimpleName()))
+            tabs.add(new           ArtifactsRemovalTab(getTabHandler(), lastTab));
+        else
             logger.error("Not supported filter {}", filterClassName);
     }
 
@@ -225,7 +229,8 @@ public class MainApp {
                 prevTab -> new BrightnessCorrectionTab(getTabHandler(), prevTab, true, 1),
                 prevTab -> new FrequencyFilterTab(     getTabHandler(), prevTab, true, 0, 60),
                 prevTab -> new AdaptiveContrastTab(    getTabHandler(), prevTab, true, 10, 0.3, 0.6, 0.1, 1),
-                prevTab -> new RotateTab(              getTabHandler(), prevTab, true, 10.5, true, Rotate.Algorithm.BICUBIC)
+                prevTab -> new RotateTab(              getTabHandler(), prevTab, true, 0.5, true, Rotate.Algorithm.BICUBIC),
+                prevTab -> new ArtifactsRemovalTab(    getTabHandler(), prevTab, true, 15)
             );
             ITab prevTab = firstTab;
             for (UnaryOperator<ITab> fTab : nextTabs) {
