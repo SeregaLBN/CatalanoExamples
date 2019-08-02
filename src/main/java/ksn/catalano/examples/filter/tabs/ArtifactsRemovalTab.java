@@ -9,12 +9,14 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.ArtifactsRemoval;
+import ksn.catalano.examples.filter.model.SliderIntModel;
+import ksn.catalano.examples.filter.util.UiHelper;
 
 public class ArtifactsRemovalTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(ArtifactsRemovalTab.class);
 
-    private static final int MIN_WINDOW_SIZE = 1;                       // Size of window (should be an odd number).
+    private static final int MIN_WINDOW_SIZE = 1;
     private static final int MAX_WINDOW_SIZE = 201;
 
     private final ITabHandler tabHandler;
@@ -22,7 +24,7 @@ public class ArtifactsRemovalTab implements ITab {
     private FastBitmap image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private DefaultBoundedRangeModel modelWinSize = new DefaultBoundedRangeModel(15, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
+    private SliderIntModel modelWinSize = new SliderIntModel(15, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
     private Timer timer;
 
     public ArtifactsRemovalTab(ITabHandler tabHandler, ITab source) {
@@ -107,14 +109,13 @@ public class ArtifactsRemovalTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, "WinSize", modelWinSize, null, "Size of window");
+            UiHelper.makeSliderVert(boxOptions, modelWinSize, "WinSize", "Size of window");
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);
 
-            modelWinSize.addChangeListener(ev -> {
-                int valWinSize = modelWinSize.getValue();
-                logger.trace("modelWinSize: value={}", valWinSize);
+            modelWinSize.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
                 debounceResetImage();
             });
         }

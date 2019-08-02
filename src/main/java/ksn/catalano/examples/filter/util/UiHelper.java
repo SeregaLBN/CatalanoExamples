@@ -1,10 +1,17 @@
-package ksn.catalano.examples.filter.tabs;
+package ksn.catalano.examples.filter.util;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -13,6 +20,9 @@ import org.slf4j.Logger;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Resize;
+import ksn.catalano.examples.filter.model.ISliderModel;
+import ksn.catalano.examples.filter.tabs.ITab;
+import ksn.catalano.examples.filter.tabs.ITabHandler;
 
 public final class UiHelper {
     private UiHelper() {}
@@ -150,11 +160,11 @@ public final class UiHelper {
         }
     }
 
-    public static JSlider makeSliderVert(Box doAdd, String title, DefaultBoundedRangeModel model, IntFunction<String> valueTransformer, String tip) {
+    public static void makeSliderVert(Box doAdd, ISliderModel<?> model, String title, String tip) {
         JLabel labTitle = new JLabel(title); labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         JLabel labValue = new JLabel();      labValue.setAlignmentX(Component.CENTER_ALIGNMENT);
         JSlider slider = new JSlider(JSlider.VERTICAL);
-        slider.setModel(model);
+        slider.setModel(model.getWrapped());
 //        slider.setMajorTickSpacing(20);
 //        slider.setMinorTickSpacing(4);
 //        slider.setPaintTicks(true);
@@ -170,16 +180,9 @@ public final class UiHelper {
 
         doAdd.add(boxColumn);
 
-        Runnable executor = () -> {
-            int val = model.getValue();
-            labValue.setText((valueTransformer == null)
-                             ? Integer.toString(val)
-                             : valueTransformer.apply(val));
-        };
+        Runnable executor = () -> labValue.setText(model.getFormatedText());
         executor.run();
-        model.addChangeListener(ev -> executor.run());
-
-        return slider;
+        model.getWrapped().addChangeListener(ev -> executor.run());
     }
 
     public static void debounceExecutor(Supplier<Timer> getterTimer, Consumer<Timer> setterTimer, int debounceTimer, Runnable executor, Logger logger) {
@@ -207,7 +210,7 @@ public final class UiHelper {
         btnAsBoost.setToolTipText("Speed up by reducing the image");
         btnAsBoost.addActionListener(ev -> {
             setter.accept(btnAsBoost.isSelected());
-            executor.run();;
+            executor.run();
         });
         box.add(btnAsBoost);
         return box;

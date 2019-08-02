@@ -12,11 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Blur;
+import ksn.catalano.examples.filter.util.UiHelper;
 
 public class BlurTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(BlurTab.class);
-
 
     private final ITabHandler tabHandler;
     private ITab source;

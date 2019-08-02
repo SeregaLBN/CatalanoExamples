@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.FourierTransform;
 import Catalano.Imaging.Filters.FrequencyFilter;
+import ksn.catalano.examples.filter.model.SliderIntModel;
+import ksn.catalano.examples.filter.util.UiHelper;
 
 public class FrequencyFilterTab implements ITab {
 
@@ -22,8 +24,8 @@ public class FrequencyFilterTab implements ITab {
     private FastBitmap image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private DefaultBoundedRangeModel modelMin = new DefaultBoundedRangeModel(  0, 0, MIN, MAX);
-    private DefaultBoundedRangeModel modelMax = new DefaultBoundedRangeModel(100, 0, MIN, MAX);
+    private SliderIntModel modelMin = new SliderIntModel(  0, 0, MIN, MAX);
+    private SliderIntModel modelMax = new SliderIntModel(100, 0, MIN, MAX);
     private Timer timer;
 
     public FrequencyFilterTab(ITabHandler tabHandler, ITab source) {
@@ -115,25 +117,25 @@ public class FrequencyFilterTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Frequency filter"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            JSlider sliderMin = UiHelper.makeSliderVert(boxOptions, "Min", modelMin, null, "Minimum value for to keep");
+            UiHelper.makeSliderVert(boxOptions, modelMin, "Min", "Minimum value for to keep");
             boxOptions.add(Box.createHorizontalStrut(8));
-            JSlider sliderMax = UiHelper.makeSliderVert(boxOptions, "Max", modelMax, null, "Maximum value for to keep");
+            UiHelper.makeSliderVert(boxOptions, modelMax, "Max", "Maximum value for to keep");
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);
 
-            modelMin.addChangeListener(ev -> {
+            modelMin.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelMin: value={}", modelMin.getFormatedText());
                 int valMin = modelMin.getValue();
-                logger.trace("modelMin: value={}", valMin);
-                if (valMin > sliderMax.getValue())
-                    sliderMax.setValue(valMin);
+                if (valMin > modelMax.getValue())
+                    modelMax.setValue(valMin);
                 debounceResetImage();
             });
-            modelMax.addChangeListener(ev -> {
+            modelMax.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelMax: value={}", modelMax.getFormatedText());
                 int valMax = modelMax.getValue();
-                logger.trace("modelMax: value={}", valMax);
-                if (valMax < sliderMin.getValue())
-                    sliderMin.setValue(valMax);
+                if (valMax < modelMin.getValue())
+                    modelMin.setValue(valMax);
                 debounceResetImage();
             });
         }

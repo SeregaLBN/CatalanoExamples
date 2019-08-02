@@ -2,7 +2,6 @@ package ksn.catalano.examples.filter.tabs;
 
 import java.awt.Cursor;
 import java.awt.event.ItemEvent;
-import java.util.Locale;
 
 import javax.swing.*;
 
@@ -12,14 +11,14 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Rotate;
 import Catalano.Imaging.Filters.Rotate.Algorithm;
+import ksn.catalano.examples.filter.model.SliderDoubleModel;
+import ksn.catalano.examples.filter.util.UiHelper;
 
 public class RotateTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(RotateTab.class);
-    private static final double COEF = 0.01;
-    private static final int MIN = (int)( 0 /COEF);
-    private static final int MAX = (int)(360/COEF);
-
+    private static final double MIN =   0;
+    private static final double MAX = 360;
 
     private final ITabHandler tabHandler;
     private ITab source;
@@ -28,7 +27,7 @@ public class RotateTab implements ITab {
     private boolean keepSize = true;
     private Rotate.Algorithm algorithm = Algorithm.BICUBIC;
     private Runnable imagePanelInvalidate;
-    private DefaultBoundedRangeModel modelAngle = new DefaultBoundedRangeModel(100, 0, MIN, MAX);
+    private SliderDoubleModel modelAngle = new SliderDoubleModel(100, 0, MIN, MAX);
     private Timer timer;
 
     public RotateTab(ITabHandler tabHandler, ITab source) {
@@ -41,7 +40,7 @@ public class RotateTab implements ITab {
     public RotateTab(ITabHandler tabHandler, ITab source, boolean boosting, double angle, boolean keepSize, Rotate.Algorithm algorithm) {
         this.tabHandler = tabHandler;
         this.source = source;
-        this.modelAngle.setValue((int)(angle / COEF));
+        this.modelAngle.setValue(angle);
         this.keepSize = keepSize;
         this.algorithm = algorithm;
         this.boosting = boosting;
@@ -68,7 +67,7 @@ public class RotateTab implements ITab {
             if (boosting)
                 image = UiHelper.boostImage(image, logger);
 
-            Rotate rotate = new Rotate(modelAngle.getValue() * COEF, keepSize, algorithm);
+            Rotate rotate = new Rotate(modelAngle.getValue(), keepSize, algorithm);
             rotate.applyInPlace(image);
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
@@ -144,16 +143,15 @@ public class RotateTab implements ITab {
             box2.add(box4Alg);
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, "Angle", modelAngle, v -> String.format(Locale.US, "%.2f", v * COEF), "Angle");
+            UiHelper.makeSliderVert(boxOptions, modelAngle, "Angle", "Angle");
             boxOptions.add(Box.createHorizontalStrut(8));
             boxOptions.add(box2);
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);
 
-            modelAngle.addChangeListener(ev -> {
-                int valAdjust = modelAngle.getValue();
-                logger.trace("modelAngle: value={}", valAdjust * COEF);
+            modelAngle.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelAngle: value={}", modelAngle.getFormatedText());
                 debounceResetImage();
             });
         }

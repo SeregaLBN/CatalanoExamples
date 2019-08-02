@@ -42,16 +42,18 @@ public class SelectFilterDialog {
         ButtonGroup radioGroup = new ButtonGroup();
 
         Arrays.asList(
-            BrightnessCorrection       .class,
-            AdaptiveContrastEnhancement.class,
-            FrequencyFilter            .class,
-            Rotate                     .class,
-            ArtifactsRemoval           .class,
-            BernsenThreshold           .class,
-            Blur                       .class
-        ).forEach(filterClass -> {
-            String className = filterClass.getSimpleName();
-            JRadioButton radioFilter = new JRadioButton(className);
+            new Object[] { BrightnessCorrection       .class, "Brightness adjusting in RGB color space" },
+            new Object[] { AdaptiveContrastEnhancement.class, "Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change" },
+            new Object[] { FrequencyFilter            .class, "Filtering of frequencies outside of specified range in complex Fourier transformed image" },
+            new Object[] { Rotate                     .class, "Rotate image" },
+            new Object[] { ArtifactsRemoval           .class, "Remove artifacts caused by uneven lightning" },
+            new Object[] { BernsenThreshold           .class, "The method uses a user-provided contrast threshold" },
+            new Object[] { Blur                       .class, "Blur filter" },
+            new Object[] { BradleyLocalThreshold      .class, "Adaptive thresholding using the integral image"}
+        ).forEach(arr -> {
+            String className = ((Class<?>)arr[0]).getSimpleName();
+            String description = (String)arr[1];
+            JRadioButton radioFilter = new JRadioButton(className + ": " + description);
             radioFilter.setActionCommand(className);
             panel4Radio.add(radioFilter);
             radioGroup.add(radioFilter);

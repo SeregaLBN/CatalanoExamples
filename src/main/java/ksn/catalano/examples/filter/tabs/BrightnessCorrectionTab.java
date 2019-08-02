@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.BrightnessCorrection;
+import ksn.catalano.examples.filter.model.SliderIntModel;
+import ksn.catalano.examples.filter.util.UiHelper;
 
 public class BrightnessCorrectionTab implements ITab {
 
@@ -21,7 +23,7 @@ public class BrightnessCorrectionTab implements ITab {
     private FastBitmap image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private DefaultBoundedRangeModel modelAdjust = new DefaultBoundedRangeModel(100, 0, MIN, MAX);
+    private SliderIntModel modelAdjust = new SliderIntModel(100, 0, MIN, MAX);
     private Timer timer;
 
     public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source) {
@@ -104,14 +106,13 @@ public class BrightnessCorrectionTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Brightness correction"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, "Adjust", modelAdjust, null, "Brightness adjust value");
+            UiHelper.makeSliderVert(boxOptions, modelAdjust, "Adjust", "Brightness adjust value");
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);
 
-            modelAdjust.addChangeListener(ev -> {
-                int valAdjust = modelAdjust.getValue();
-                logger.trace("modelAdjust: value={}", valAdjust);
+            modelAdjust.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelAdjust: value={}", modelAdjust.getFormatedText());
                 debounceResetImage();
             });
         }

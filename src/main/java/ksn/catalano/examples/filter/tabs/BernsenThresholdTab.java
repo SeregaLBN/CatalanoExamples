@@ -1,7 +1,6 @@
 package ksn.catalano.examples.filter.tabs;
 
 import java.awt.Cursor;
-import java.util.Locale;
 
 import javax.swing.*;
 
@@ -10,25 +9,26 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.BernsenThreshold;
+import ksn.catalano.examples.filter.model.SliderDoubleModel;
+import ksn.catalano.examples.filter.model.SliderIntModel;
+import ksn.catalano.examples.filter.util.UiHelper;
 
 public class BernsenThresholdTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(BernsenThresholdTab.class);
 
-    private static final int MIN_RADIUS = 0;
-    private static final int MAX_RADIUS = 100;
-
-    private static final double CONTRAST_THRESHOLD_COEF = 0.01;
-    private static final int MIN_CONTRAST_THRESHOLD = (int)( 0 /CONTRAST_THRESHOLD_COEF);
-    private static final int MAX_CONTRAST_THRESHOLD = (int)(300/CONTRAST_THRESHOLD_COEF);
+    private static final int    MIN_RADIUS = 0;
+    private static final int    MAX_RADIUS = 100;
+    private static final double MIN_CONTRAST_THRESHOLD = 0;
+    private static final double MAX_CONTRAST_THRESHOLD = 30000;
 
     private final ITabHandler tabHandler;
     private ITab source;
     private FastBitmap image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private DefaultBoundedRangeModel modelRadius            = new DefaultBoundedRangeModel(15, 0, MIN_RADIUS            , MAX_RADIUS);
-    private DefaultBoundedRangeModel modelСontrastThreshold = new DefaultBoundedRangeModel(15, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
+    private SliderIntModel    modelRadius            = new SliderIntModel   (15, 0, MIN_RADIUS            , MAX_RADIUS);
+    private SliderDoubleModel modelContrastThreshold = new SliderDoubleModel(15, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
     private Timer timer;
 
     public BernsenThresholdTab(ITabHandler tabHandler, ITab source) {
@@ -42,7 +42,7 @@ public class BernsenThresholdTab implements ITab {
         this.tabHandler = tabHandler;
         this.source = source;
         this.modelRadius.setValue(radius);
-        this.modelСontrastThreshold.setValue((int)(contrastThreshold / CONTRAST_THRESHOLD_COEF));
+        this.modelContrastThreshold.setValue(contrastThreshold);
         this.boosting = boosting;
 
         makeTab();
@@ -69,7 +69,7 @@ public class BernsenThresholdTab implements ITab {
             if (!image.isGrayscale())
                 image.toGrayscale();
 
-            BernsenThreshold bernsenThreshold = new BernsenThreshold(modelRadius.getValue(), modelСontrastThreshold.getValue() * CONTRAST_THRESHOLD_COEF);
+            BernsenThreshold bernsenThreshold = new BernsenThreshold(modelRadius.getValue(), modelContrastThreshold.getValue());
             bernsenThreshold.applyInPlace(image);
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
@@ -114,16 +114,15 @@ public class BernsenThresholdTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, "Radius", modelRadius, null, "Radius");
+            UiHelper.makeSliderVert(boxOptions, modelRadius, "Radius", "Radius");
             boxOptions.add(Box.createHorizontalStrut(8));
-            UiHelper.makeSliderVert(boxOptions, "Contrast Threshold", modelСontrastThreshold, v -> String.format(Locale.US, "%.2f", v * CONTRAST_THRESHOLD_COEF), "Contrast Threshold");
+            UiHelper.makeSliderVert(boxOptions, modelContrastThreshold, "Contrast Threshold", "Contrast Threshold");
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);
 
-            modelRadius.addChangeListener(ev -> {
-                int valRadius = modelRadius.getValue();
-                logger.trace("modelRadius: value={}", valRadius);
+            modelRadius.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelRadius: value={}", modelRadius.getFormatedText());
                 debounceResetImage();
             });
         }

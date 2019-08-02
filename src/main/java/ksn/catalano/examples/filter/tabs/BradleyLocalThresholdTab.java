@@ -1,7 +1,6 @@
 package ksn.catalano.examples.filter.tabs;
 
 import java.awt.Cursor;
-import java.util.Locale;
 
 import javax.swing.*;
 
@@ -11,39 +10,40 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.BernsenThreshold;
 import Catalano.Imaging.Filters.BradleyLocalThreshold;
+import ksn.catalano.examples.filter.model.SliderDoubleModel;
+import ksn.catalano.examples.filter.model.SliderIntModel;
+import ksn.catalano.examples.filter.util.UiHelper;
 
-public class NextTab implements ITab {
+public class BradleyLocalThresholdTab implements ITab {
 
-    private static final Logger logger = LoggerFactory.getLogger(NextTab.class);
+    private static final Logger logger = LoggerFactory.getLogger(BradleyLocalThresholdTab.class);
 
-    private static final int MIN_WINDOW_SIZE = 1;                       // Size of window (should be an odd number).
-    private static final int MAX_WINDOW_SIZE = 201;
-
-    private static final float CONTRAST_THRESHOLD_COEF = 0.01f;
-    private static final int MIN_CONTRAST_THRESHOLD = (int)( 0 /CONTRAST_THRESHOLD_COEF);
-    private static final int MAX_CONTRAST_THRESHOLD = (int)(300/CONTRAST_THRESHOLD_COEF);
+    private static final int    MIN_WINDOW_SIZE           =   1;
+    private static final int    MAX_WINDOW_SIZE           = 201;
+    private static final double MIN_PIXEL_BRIGHTNESS_DIFF =   0;
+    private static final double MAX_PIXEL_BRIGHTNESS_DIFF = 300;
 
     private final ITabHandler tabHandler;
     private ITab source;
     private FastBitmap image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private DefaultBoundedRangeModel modelRadius            = new DefaultBoundedRangeModel(41, 0, MIN_WINDOW_SIZE       , MAX_WINDOW_SIZE);
-    private DefaultBoundedRangeModel modelСontrastThreshold = new DefaultBoundedRangeModel(15, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
+    private SliderIntModel    modelWindowSize          = new SliderIntModel   (  41, 0, MIN_WINDOW_SIZE          , MAX_WINDOW_SIZE);
+    private SliderDoubleModel modelPixelBrightnessDiff = new SliderDoubleModel(0.15, 0, MIN_PIXEL_BRIGHTNESS_DIFF, MAX_PIXEL_BRIGHTNESS_DIFF);
     private Timer timer;
 
-    public NextTab(ITabHandler tabHandler, ITab source) {
+    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab source) {
         this.tabHandler = tabHandler;
         this.source = source;
 
         makeTab();
     }
 
-    public NextTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, float pixelBrightnessDiff) {
+    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, double pixelBrightnessDiff) {
         this.tabHandler = tabHandler;
         this.source = source;
-        this.modelRadius.setValue(windowSize);
-        this.modelСontrastThreshold.setValue((int)(pixelBrightnessDiff / CONTRAST_THRESHOLD_COEF));
+        this.modelWindowSize.setValue(windowSize);
+        this.modelPixelBrightnessDiff.setValue(pixelBrightnessDiff);
         this.boosting = boosting;
 
         makeTab();
@@ -70,7 +70,7 @@ public class NextTab implements ITab {
             if (!image.isGrayscale())
                 image.toGrayscale();
 
-            BradleyLocalThreshold bradleyLocalThreshold = new BradleyLocalThreshold(modelRadius.getValue(), modelСontrastThreshold.getValue() * CONTRAST_THRESHOLD_COEF);
+            BradleyLocalThreshold bradleyLocalThreshold = new BradleyLocalThreshold(modelWindowSize.getValue(), (float)(double)modelPixelBrightnessDiff.getValue());
             bradleyLocalThreshold.applyInPlace(image);
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
@@ -115,16 +115,15 @@ public class NextTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, "Radius", modelRadius, null, "Radius");
+            UiHelper.makeSliderVert(boxOptions, modelWindowSize, "Window size", "Window size to calculate average value of pixels for");
             boxOptions.add(Box.createHorizontalStrut(8));
-            UiHelper.makeSliderVert(boxOptions, "Contrast Threshold", modelСontrastThreshold, v -> String.format(Locale.US, "%.2f", v * CONTRAST_THRESHOLD_COEF), "Contrast Threshold");
+            UiHelper.makeSliderVert(boxOptions, modelPixelBrightnessDiff, "Brightness difference", "Brightness difference limit between processing pixel and average value across neighbors");
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);
 
-            modelRadius.addChangeListener(ev -> {
-                int valRadius = modelRadius.getValue();
-                logger.trace("modelRadius: value={}", valRadius);
+            modelWindowSize.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelRadius: value={}", modelWindowSize.getFormatedText());
                 debounceResetImage();
             });
         }

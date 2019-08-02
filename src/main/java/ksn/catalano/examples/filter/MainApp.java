@@ -163,6 +163,12 @@ public class MainApp {
         if (filterClassName.equals(Blur.class.getSimpleName()))
             tabs.add(new           BlurTab(getTabHandler(), lastTab));
         else
+        if (filterClassName.equals(BernsenThreshold.class.getSimpleName()))
+            tabs.add(new           BernsenThresholdTab(getTabHandler(), lastTab));
+        else
+        if (filterClassName.equals(BradleyLocalThreshold.class.getSimpleName()))
+            tabs.add(new           BradleyLocalThresholdTab(getTabHandler(), lastTab));
+        else
             logger.error("Not supported filter {}", filterClassName);
     }
 
@@ -225,13 +231,17 @@ public class MainApp {
 
         if (firstTab.getImage() != null) {
             List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
-                prevTab -> new BrightnessCorrectionTab(getTabHandler(), prevTab, true, 1),
-                prevTab -> new BlurTab(                getTabHandler(), prevTab, true),
-                prevTab -> new FrequencyFilterTab(     getTabHandler(), prevTab, true, 0, 60),
-                prevTab -> new AdaptiveContrastTab(    getTabHandler(), prevTab, true, 10, 0.3, 0.6, 0.1, 1),
-                prevTab -> new RotateTab(              getTabHandler(), prevTab, true, 0.5, true, Rotate.Algorithm.BICUBIC),
-                prevTab -> new ArtifactsRemovalTab(    getTabHandler(), prevTab, true, 15),
-                prevTab -> new BernsenThresholdTab(    getTabHandler(), prevTab, true, 15, 15)
+                // supported full colors
+                prevTab -> new BrightnessCorrectionTab( getTabHandler(), prevTab, true, 1),
+                prevTab -> new BlurTab(                 getTabHandler(), prevTab, true),
+                prevTab -> new RotateTab(               getTabHandler(), prevTab, true, 0.01, true, Rotate.Algorithm.BICUBIC),
+
+                // only grayscale
+                prevTab -> new FrequencyFilterTab(      getTabHandler(), prevTab, true, 0, 60),
+                prevTab -> new AdaptiveContrastTab(     getTabHandler(), prevTab, true, 10, 0.3, 0.6, 0.1, 1),
+                prevTab -> new ArtifactsRemovalTab(     getTabHandler(), prevTab, true, 15),
+                prevTab -> new BernsenThresholdTab(     getTabHandler(), prevTab, true, 15, 15),
+                prevTab -> new BradleyLocalThresholdTab(getTabHandler(), prevTab, true, 41, 0.15)
             );
             ITab prevTab = firstTab;
             for (UnaryOperator<ITab> fTab : nextTabs) {
