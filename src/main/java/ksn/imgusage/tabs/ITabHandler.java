@@ -1,5 +1,4 @@
-
-package ksn.catalano.examples.filter.tabs;
+package ksn.imgusage.tabs;
 
 import java.awt.Graphics2D;
 

@@ -1,4 +1,4 @@
-package ksn.catalano.examples.filter.tabs;
+package ksn.imgusage.tabs.catalano;
 
 import java.awt.Cursor;
 import java.awt.event.ItemEvent;
@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Rotate;
 import Catalano.Imaging.Filters.Rotate.Algorithm;
-import ksn.catalano.examples.filter.model.SliderDoubleModel;
-import ksn.catalano.examples.filter.util.UiHelper;
+import ksn.imgusage.model.SliderDoubleModel;
+import ksn.imgusage.tabs.ITab;
+import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.utils.UiHelper;
 
 public class RotateTab implements ITab {
 

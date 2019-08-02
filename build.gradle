@@ -28,13 +28,13 @@ sourceSets {
     }
 }
 
-mainClassName = 'ksn.catalano.examples.filter.MainApp'
+mainClassName = 'ksn.imgusage.filtersdemo.MainApp'
 version = '0.0.2'
 
 jar {
     manifest {
         attributes 'Main-Class' : mainClassName,
-                   'Title'      : 'CatalanoExamples - demo Java SWING desktop application',
+                   'Title'      : 'Demonstration of the use of image filters - Java SWING desktop application',
                    'Description': 'Examples of usage Catalano-Framework: https://github.com/DiegoCatalano/Catalano-Framework',
                    'Version'    : version,
                    'Vendor'     : 'SeregaLBN',

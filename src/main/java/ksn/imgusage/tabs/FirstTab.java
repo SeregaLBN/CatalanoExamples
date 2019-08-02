@@ -1,4 +1,4 @@
-package ksn.catalano.examples.filter.tabs;
+package ksn.imgusage.tabs;
 
 import java.awt.Component;
 import java.awt.image.BufferedImage;
@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
-import ksn.catalano.examples.filter.util.UiHelper;
+import ksn.imgusage.utils.UiHelper;
 
 public class FirstTab implements ITab {
 

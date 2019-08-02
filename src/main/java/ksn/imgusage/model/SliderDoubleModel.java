@@ -1,4 +1,4 @@
-package ksn.catalano.examples.filter.model;
+package ksn.imgusage.model;
 
 import java.text.NumberFormat;
 import java.util.Locale;

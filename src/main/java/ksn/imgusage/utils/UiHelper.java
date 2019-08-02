@@ -1,4 +1,4 @@
-package ksn.catalano.examples.filter.util;
+package ksn.imgusage.utils;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -22,9 +22,9 @@ import org.slf4j.Logger;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Resize;
-import ksn.catalano.examples.filter.model.ISliderModel;
-import ksn.catalano.examples.filter.tabs.ITab;
-import ksn.catalano.examples.filter.tabs.ITabHandler;
+import ksn.imgusage.model.ISliderModel;
+import ksn.imgusage.tabs.ITab;
+import ksn.imgusage.tabs.ITabHandler;
 
 public final class UiHelper {
     private UiHelper() {}

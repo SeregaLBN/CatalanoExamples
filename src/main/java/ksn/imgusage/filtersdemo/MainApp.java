@@ -1,4 +1,4 @@
-package ksn.catalano.examples.filter;
+package ksn.imgusage.filtersdemo;
 
 import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
@@ -31,7 +31,11 @@ import org.slf4j.LoggerFactory;
 //  ./libs/Catalano.Image.jar
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.*;
-import ksn.catalano.examples.filter.tabs.*;
+import ksn.imgusage.tabs.FirstTab;
+import ksn.imgusage.tabs.ITab;
+import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.catalano.*;
+import ksn.imgusage.utils.SelectFilterDialog;
 
 public class MainApp {
 
@@ -45,7 +49,7 @@ public class MainApp {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
-    private static final String DEFAULT_CAPTION = "Catalano demo filters";
+    private static final String DEFAULT_CAPTION = "Demonstration of image filters";
 
     private final JFrame frame;
     private JTabbedPane tabPane;

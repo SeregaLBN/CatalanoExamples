@@ -1,4 +1,4 @@
-package ksn.catalano.examples.filter.tabs;
+package ksn.imgusage.tabs.catalano;
 
 import java.awt.Cursor;
 
@@ -10,8 +10,10 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.FourierTransform;
 import Catalano.Imaging.Filters.FrequencyFilter;
-import ksn.catalano.examples.filter.model.SliderIntModel;
-import ksn.catalano.examples.filter.util.UiHelper;
+import ksn.imgusage.model.SliderIntModel;
+import ksn.imgusage.tabs.ITab;
+import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.utils.UiHelper;
 
 public class FrequencyFilterTab implements ITab {
 

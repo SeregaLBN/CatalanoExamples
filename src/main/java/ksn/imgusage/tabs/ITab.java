@@ -1,5 +1,5 @@
 
-package ksn.catalano.examples.filter.tabs;
+package ksn.imgusage.tabs;
 
 import Catalano.Imaging.FastBitmap;
 

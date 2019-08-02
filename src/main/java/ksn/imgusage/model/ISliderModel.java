@@ -1,4 +1,4 @@
-package ksn.catalano.examples.filter.model;
+package ksn.imgusage.model;
 
 import javax.swing.BoundedRangeModel;
 
