@@ -27,7 +27,7 @@ public class RotateTab implements ITab {
     private boolean keepSize = true;
     private Rotate.Algorithm algorithm = Algorithm.BICUBIC;
     private Runnable imagePanelInvalidate;
-    private SliderDoubleModel modelAngle = new SliderDoubleModel(100, 0, MIN, MAX);
+    private SliderDoubleModel modelAngle = new SliderDoubleModel(0, 0, MIN, MAX);
     private Timer timer;
 
     public RotateTab(ITabHandler tabHandler, ITab source) {

@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
-import Catalano.Imaging.Filters.BernsenThreshold;
 import Catalano.Imaging.Filters.BradleyLocalThreshold;
 import ksn.catalano.examples.filter.model.SliderDoubleModel;
 import ksn.catalano.examples.filter.model.SliderIntModel;
@@ -18,10 +17,10 @@ public class BradleyLocalThresholdTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(BradleyLocalThresholdTab.class);
 
-    private static final int    MIN_WINDOW_SIZE           =   1;
-    private static final int    MAX_WINDOW_SIZE           = 201;
-    private static final double MIN_PIXEL_BRIGHTNESS_DIFF =   0;
-    private static final double MAX_PIXEL_BRIGHTNESS_DIFF = 300;
+    private static final int    MIN_WINDOW_SIZE           =    2;
+    private static final int    MAX_WINDOW_SIZE           = 1000;
+    private static final double MIN_PIXEL_BRIGHTNESS_DIFF =    0;
+    private static final double MAX_PIXEL_BRIGHTNESS_DIFF =  300;
 
     private final ITabHandler tabHandler;
     private ITab source;
@@ -99,7 +98,7 @@ public class BradleyLocalThresholdTab implements ITab {
         UiHelper.makeTab(
              tabHandler,
              this,
-             BernsenThreshold.class.getSimpleName(),
+             BradleyLocalThreshold.class.getSimpleName(),
              true,
              this::makeFilterOptions
          );
@@ -124,6 +123,10 @@ public class BradleyLocalThresholdTab implements ITab {
 
             modelWindowSize.getWrapped().addChangeListener(ev -> {
                 logger.trace("modelRadius: value={}", modelWindowSize.getFormatedText());
+                debounceResetImage();
+            });
+            modelPixelBrightnessDiff.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelPixelBrightnessDiff: value={}", modelPixelBrightnessDiff.getFormatedText());
                 debounceResetImage();
             });
         }

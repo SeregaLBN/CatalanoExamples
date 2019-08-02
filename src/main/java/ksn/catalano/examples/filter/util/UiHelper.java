@@ -14,6 +14,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 
 import org.slf4j.Logger;
@@ -161,28 +163,60 @@ public final class UiHelper {
     }
 
     public static void makeSliderVert(Box doAdd, ISliderModel<?> model, String title, String tip) {
-        JLabel labTitle = new JLabel(title); labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JLabel labValue = new JLabel();      labValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel labTitle = new JLabel(title);
+        labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JTextField txtValue = new JTextField();
+        txtValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+        txtValue.setHorizontalAlignment(JTextField.CENTER);
+        txtValue.setMaximumSize(new Dimension(150, 40));
+
         JSlider slider = new JSlider(JSlider.VERTICAL);
         slider.setModel(model.getWrapped());
 //        slider.setMajorTickSpacing(20);
 //        slider.setMinorTickSpacing(4);
 //        slider.setPaintTicks(true);
         slider  .setToolTipText(tip);
-        labValue.setToolTipText(tip);
+        txtValue.setToolTipText(tip);
         labTitle.setToolTipText(tip);
 
         Box boxColumn = Box.createVerticalBox();
         boxColumn.setBorder(BorderFactory.createTitledBorder(""));
         boxColumn.add(labTitle);
         boxColumn.add(slider);
-        boxColumn.add(labValue);
+        boxColumn.add(txtValue);
 
         doAdd.add(boxColumn);
 
-        Runnable executor = () -> labValue.setText(model.getFormatedText());
+        Runnable executor = () -> txtValue.setText(model.getFormatedText());
         executor.run();
         model.getWrapped().addChangeListener(ev -> executor.run());
+        txtValue.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                handle();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                handle();
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                handle();
+            }
+
+            private void handle() {
+                SwingUtilities.invokeLater(() -> {
+                    String newVaue = txtValue.getText();
+                    if (newVaue.equals(model.getFormatedText()))
+                        return;
+
+                    model.setFormatedText(newVaue);
+                });
+            }
+        });
     }
 
     public static void debounceExecutor(Supplier<Timer> getterTimer, Consumer<Timer> setterTimer, int debounceTimer, Runnable executor, Logger logger) {

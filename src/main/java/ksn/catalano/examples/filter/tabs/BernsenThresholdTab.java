@@ -20,7 +20,7 @@ public class BernsenThresholdTab implements ITab {
     private static final int    MIN_RADIUS = 0;
     private static final int    MAX_RADIUS = 100;
     private static final double MIN_CONTRAST_THRESHOLD = 0;
-    private static final double MAX_CONTRAST_THRESHOLD = 30000;
+    private static final double MAX_CONTRAST_THRESHOLD = 300;
 
     private final ITabHandler tabHandler;
     private ITab source;
@@ -123,6 +123,10 @@ public class BernsenThresholdTab implements ITab {
 
             modelRadius.getWrapped().addChangeListener(ev -> {
                 logger.trace("modelRadius: value={}", modelRadius.getFormatedText());
+                debounceResetImage();
+            });
+            modelContrastThreshold.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelContrastThreshold: value={}", modelContrastThreshold.getFormatedText());
                 debounceResetImage();
             });
         }

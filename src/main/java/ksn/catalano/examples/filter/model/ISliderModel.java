@@ -8,6 +8,7 @@ public interface ISliderModel<T extends Number> {
     void setValue(T value);
 
     String getFormatedText();
+    void setFormatedText(String value);
 
     BoundedRangeModel getWrapped();
 

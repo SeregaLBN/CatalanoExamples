@@ -237,11 +237,11 @@ public class MainApp {
                 prevTab -> new RotateTab(               getTabHandler(), prevTab, true, 0.01, true, Rotate.Algorithm.BICUBIC),
 
                 // only grayscale
-                prevTab -> new FrequencyFilterTab(      getTabHandler(), prevTab, true, 0, 60),
-                prevTab -> new AdaptiveContrastTab(     getTabHandler(), prevTab, true, 10, 0.3, 0.6, 0.1, 1),
-                prevTab -> new ArtifactsRemovalTab(     getTabHandler(), prevTab, true, 15),
-                prevTab -> new BernsenThresholdTab(     getTabHandler(), prevTab, true, 15, 15),
-                prevTab -> new BradleyLocalThresholdTab(getTabHandler(), prevTab, true, 41, 0.15)
+                prevTab -> new FrequencyFilterTab(      getTabHandler(), prevTab, true, 0, 200),
+                prevTab -> new AdaptiveContrastTab(     getTabHandler(), prevTab, true, 4, 0.84, 0.02, 2.4, 4.93),
+                prevTab -> new BernsenThresholdTab(     getTabHandler(), prevTab, true, 6, 30),
+                prevTab -> new BradleyLocalThresholdTab(getTabHandler(), prevTab, true, 10, 70),
+                prevTab -> new ArtifactsRemovalTab(     getTabHandler(), prevTab, true, 9)
             );
             ITab prevTab = firstTab;
             for (UnaryOperator<ITab> fTab : nextTabs) {
@@ -257,6 +257,7 @@ public class MainApp {
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            UIManager.put("Slider.paintValue", false);
         } catch (Exception ex) {
             logger.warn("", ex);
         }

@@ -3,8 +3,12 @@ package ksn.catalano.examples.filter.model;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class SliderIntModel implements ISliderModel<Integer> {
 
+    private static final Logger logger = LoggerFactory.getLogger(SliderIntModel.class);
     private final DefaultBoundedRangeModel model;
 
     public SliderIntModel(int value, int extent, int min, int max) {
@@ -23,6 +27,14 @@ public class SliderIntModel implements ISliderModel<Integer> {
     @Override
     public String getFormatedText() {
         return Integer.toString(getValue());
+    }
+    @Override
+    public void setFormatedText(String value) {
+        try {
+            setValue(Integer.parseInt(value));
+        } catch (Exception ex) {
+            logger.error("{}::setFormatedText: {}", getClass().getSimpleName(), ex.getMessage());
+        }
     }
 
     @Override
