@@ -52,7 +52,7 @@ dependencies {
 }
 
 // can run as single JAR:
-//  java -jar ./CatalanoExamples/build/libs/CatalanoExamples-fat-{version}.jar
+//  java -jar ./ImageFilterExamples/build/libs/ImageFilterExamples-fat-{version}.jar
 task fatJar(type: Jar) {
     manifest {
         attributes jar.manifest.attributes
@@ -126,6 +126,6 @@ def downloadExampleImage() {
 }
 
 gradle.taskGraph.beforeTask { Task task ->
-    if ((task.project.name == 'CatalanoExamples') && (task.name == 'processResources'))
+    if ((task.project.name == 'ImageFilterExamples') && (task.name == 'processResources'))
         downloadExampleImage()
 }

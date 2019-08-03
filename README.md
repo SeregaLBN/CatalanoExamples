@@ -1,8 +1,8 @@
-# [Catalano Framework][CatalanoFramework] usage examples
+# Demonstration of the use of image filters
 
 Features:
 -
- - Visual examples of using [image filters][CatalanoImageFilters]
+ - Visual examples of using [image filters][CatalanoImageFilters] ([Catalano Framework][CatalanoFramework])
  - Implemented as a simple SWING application.
 
 License
