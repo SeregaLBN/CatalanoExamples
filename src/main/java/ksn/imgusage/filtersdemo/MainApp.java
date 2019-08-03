@@ -1,21 +1,22 @@
 package ksn.imgusage.filtersdemo;
 
-import java.awt.AlphaComposite;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -50,6 +51,7 @@ public class MainApp {
 
     private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
     private static final String DEFAULT_CAPTION = "Demonstration of image filters";
+    private static final String CATALANO_TAB_PREFIX = "Catalano:";
 
     private final JFrame frame;
     private JTabbedPane tabPane;
@@ -148,32 +150,36 @@ public class MainApp {
             return;
 
         ITab lastTab = tabs.get(tabs.size() - 1);
-        // factory
-        if (filterClassName.equals(FrequencyFilter.class.getSimpleName()))
-            tabs.add(new           FrequencyFilterTab(getTabHandler(), lastTab));
-        else
-        if (filterClassName.equals(AdaptiveContrastEnhancement.class.getSimpleName()))
-            tabs.add(new           AdaptiveContrastTab(getTabHandler(), lastTab));
-        else
-        if (filterClassName.equals(BrightnessCorrection.class.getSimpleName()))
-            tabs.add(new           BrightnessCorrectionTab(getTabHandler(), lastTab));
-        else
-        if (filterClassName.equals(Rotate.class.getSimpleName()))
-            tabs.add(new           RotateTab(getTabHandler(), lastTab));
-        else
-        if (filterClassName.equals(ArtifactsRemoval.class.getSimpleName()))
-            tabs.add(new           ArtifactsRemovalTab(getTabHandler(), lastTab));
-        else
-        if (filterClassName.equals(Blur.class.getSimpleName()))
-            tabs.add(new           BlurTab(getTabHandler(), lastTab));
-        else
-        if (filterClassName.equals(BernsenThreshold.class.getSimpleName()))
-            tabs.add(new           BernsenThresholdTab(getTabHandler(), lastTab));
-        else
-        if (filterClassName.equals(BradleyLocalThreshold.class.getSimpleName()))
-            tabs.add(new           BradleyLocalThresholdTab(getTabHandler(), lastTab));
-        else
+        BiFunction<Class<?> /* Catalano filter class */, Class<? extends ITab>, ITab> handler = (filterClass, tabClass) -> {
+            if (filterClassName.equals(CATALANO_TAB_PREFIX + filterClass.getSimpleName())) try {
+                Constructor<? extends ITab> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class);
+                return ctor.newInstance(getTabHandler(), lastTab);
+            } catch (Exception ex) {
+                logger.error(ex.toString());
+            }
+            return null;
+        };
+
+        // map Catalano filter to tab class
+        Stream<Supplier<ITab>> catalanoMapping = Stream.of( // alphabetical sort
+            () -> handler.apply(AdaptiveContrastEnhancement.class,      AdaptiveContrastTab.class),
+            () -> handler.apply(ArtifactsRemoval           .class,      ArtifactsRemovalTab.class),
+            () -> handler.apply(BernsenThreshold           .class,      BernsenThresholdTab.class),
+            () -> handler.apply(Blur                       .class,                  BlurTab.class),
+            () -> handler.apply(BradleyLocalThreshold      .class, BradleyLocalThresholdTab.class),
+            () -> handler.apply(BrightnessCorrection       .class,  BrightnessCorrectionTab.class),
+            () -> handler.apply(FrequencyFilter            .class,       FrequencyFilterTab.class),
+            () -> handler.apply(Rotate                     .class,                RotateTab.class)
+        );
+
+        ITab newTab = catalanoMapping.map(Supplier::get)
+            .filter(Objects::nonNull)
+            .findAny()
+            .orElse(null);
+        if (newTab == null)
             logger.error("Not supported filter {}", filterClassName);
+        else
+            tabs.add(newTab);
     }
 
     private void onRemoveFilter(ITab tab) {

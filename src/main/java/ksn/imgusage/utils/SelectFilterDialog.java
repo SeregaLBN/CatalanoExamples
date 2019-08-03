@@ -2,7 +2,6 @@ package ksn.imgusage.utils;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
@@ -24,6 +23,14 @@ public class SelectFilterDialog {
         this.owner = owner;
     }
 
+    private static class FilterTabs {
+        public final Class<?> filterClass;
+        public final String description;
+        public FilterTabs(Class<?> catalanoClass, String description) {
+            this.filterClass = catalanoClass;
+            this.description = description;
+        }
+    }
     public String getFilterClassName() {
         logger.trace("getFilterClassName");
 
@@ -37,29 +44,40 @@ public class SelectFilterDialog {
             public void actionPerformed(ActionEvent e) { dlg.dispose(); }
         });
 
-        JPanel panel4Radio = new JPanel(new GridLayout(0, 1, 0, 5));
-        panel4Radio.setBorder(BorderFactory.createTitledBorder("Filters"));
+        Box boxCatalanoFilters = Box.createVerticalBox();
+        boxCatalanoFilters.setBorder(BorderFactory.createTitledBorder("Catalano filters"));
         ButtonGroup radioGroup = new ButtonGroup();
 
-        Arrays.asList(
-            new Object[] { BrightnessCorrection       .class, "Brightness adjusting in RGB color space" },
-            new Object[] { AdaptiveContrastEnhancement.class, "Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change" },
-            new Object[] { FrequencyFilter            .class, "Filtering of frequencies outside of specified range in complex Fourier transformed image" },
-            new Object[] { Rotate                     .class, "Rotate image" },
-            new Object[] { ArtifactsRemoval           .class, "Remove artifacts caused by uneven lightning" },
-            new Object[] { BernsenThreshold           .class, "The method uses a user-provided contrast threshold" },
-            new Object[] { Blur                       .class, "Blur filter" },
-            new Object[] { BradleyLocalThreshold      .class, "Adaptive thresholding using the integral image"}
-        ).forEach(arr -> {
-            String className = ((Class<?>)arr[0]).getSimpleName();
-            String description = (String)arr[1];
-            JRadioButton radioFilter = new JRadioButton(className + ": " + description);
-            radioFilter.setActionCommand(className);
-            panel4Radio.add(radioFilter);
+        Arrays.asList( // alphabetical sort
+            new FilterTabs(AdaptiveContrastEnhancement.class, "Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change"),
+            new FilterTabs(ArtifactsRemoval           .class, "Remove artifacts caused by uneven lightning"),
+            new FilterTabs(BernsenThreshold           .class, "The method uses a user-provided contrast threshold"),
+            new FilterTabs(Blur                       .class, "Blur filter"),
+            new FilterTabs(BradleyLocalThreshold      .class, "Adaptive thresholding using the integral image"),
+            new FilterTabs(BrightnessCorrection       .class, "Brightness adjusting in RGB color space"),
+            new FilterTabs(FrequencyFilter            .class, "Filtering of frequencies outside of specified range in complex Fourier transformed image"),
+            new FilterTabs(Rotate                     .class, "Rotate image")
+        ).forEach(tab -> {
+            String className = tab.filterClass.getSimpleName();
+            JRadioButton radioFilter = new JRadioButton(className + ": " + tab.description);
+            radioFilter.setActionCommand("Catalano:" + className);
+            boxCatalanoFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
 
-        dlg.add(panel4Radio);
+        Box boxSomeFilters = Box.createVerticalBox();
+        boxSomeFilters.setBorder(BorderFactory.createTitledBorder("Some filters"));
+
+        Arrays.<FilterTabs>asList( // alphabetical sort
+            // TODO
+        ).forEach(tab -> {
+            String className = tab.filterClass.getSimpleName();
+            JRadioButton radioFilter = new JRadioButton(className + ": " + tab.description);
+            radioFilter.setActionCommand("Some:" + className);
+            boxSomeFilters.add(radioFilter);
+            radioGroup.add(radioFilter);
+        });
+
 
         JButton btnOk = new JButton("Ok");
         String[] filterClassName = { null };
@@ -72,7 +90,11 @@ public class SelectFilterDialog {
             filterClassName[0] = bm.getActionCommand();
         });
 
-        dlg.add(panel4Radio, BorderLayout.CENTER);
+        Box boxCenter = Box.createVerticalBox();
+      //boxCenter.add(boxSomeFilters);
+        boxCenter.add(boxCatalanoFilters);
+
+        dlg.add(boxCenter, BorderLayout.CENTER);
         dlg.add(btnOk, BorderLayout.SOUTH);
 
         dlg.setResizable(false);
