@@ -12,6 +12,7 @@ import Catalano.Imaging.Filters.BrightnessCorrection;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.utils.ImgWrapper;
 import ksn.imgusage.utils.UiHelper;
 
 public class BrightnessCorrectionTab implements ITab {
@@ -45,15 +46,17 @@ public class BrightnessCorrectionTab implements ITab {
     }
 
     @Override
-    public FastBitmap getImage() {
+    public ImgWrapper getImage() {
         if (image != null)
-            return image;
+            return new ImgWrapper(image);
         if (source == null)
             return null;
 
-        image = source.getImage();
-        if (image == null)
+        ImgWrapper wrp = source.getImage();
+        if (wrp == null)
             return null;
+
+        image= wrp.getFastBitmap();
 
         JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
         try {
@@ -68,7 +71,7 @@ public class BrightnessCorrectionTab implements ITab {
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
         }
-        return image;
+        return new ImgWrapper(image);
     }
 
 

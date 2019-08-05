@@ -14,6 +14,7 @@ import Catalano.Imaging.Filters.Rotate.Algorithm;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.utils.ImgWrapper;
 import ksn.imgusage.utils.UiHelper;
 
 public class RotateTab implements ITab {
@@ -51,15 +52,18 @@ public class RotateTab implements ITab {
     }
 
     @Override
-    public FastBitmap getImage() {
+    public ImgWrapper getImage() {
         if (image != null)
-            return image;
+            return new ImgWrapper(image);
+
         if (source == null)
             return null;
 
-        image = source.getImage();
-        if (image == null)
+        ImgWrapper wrp = source.getImage();
+        if (wrp == null)
             return null;
+
+        image = wrp.getFastBitmap();
 
         JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
         try {
@@ -74,7 +78,7 @@ public class RotateTab implements ITab {
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
         }
-        return image;
+        return new ImgWrapper(image);
     }
 
 

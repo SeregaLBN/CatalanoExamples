@@ -1,6 +1,10 @@
 package ksn.imgusage.filtersdemo;
 
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -14,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -24,18 +29,13 @@ import javax.swing.event.ChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// https://github.com/DiegoCatalano/Catalano-Framework/releases
-// Download and unpack from libs.zip:
-//  ./libs/Catalano.Core.jar
-//  ./libs/Catalano.Math.jar
-//  ./libs/Catalano.IO.jar
-//  ./libs/Catalano.Image.jar
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.*;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.catalano.*;
+import ksn.imgusage.tabs.opencv.AsIsTab;
+import ksn.imgusage.utils.ImgWrapper;
 import ksn.imgusage.utils.SelectFilterDialog;
 
 public class MainApp {
@@ -51,7 +51,6 @@ public class MainApp {
 
     private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
     private static final String DEFAULT_CAPTION = "Demonstration of image filters";
-    private static final String CATALANO_TAB_PREFIX = "Catalano:";
 
     private final JFrame frame;
     private JTabbedPane tabPane;
@@ -150,8 +149,8 @@ public class MainApp {
             return;
 
         ITab lastTab = tabs.get(tabs.size() - 1);
-        BiFunction<Class<?> /* Catalano filter class */, Class<? extends ITab>, ITab> handler = (filterClass, tabClass) -> {
-            if (filterClassName.equals(CATALANO_TAB_PREFIX + filterClass.getSimpleName())) try {
+        Function<Class<? extends ITab>, ITab> callCtor = tabClass -> {
+            try {
                 Constructor<? extends ITab> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class);
                 return ctor.newInstance(getTabHandler(), lastTab);
             } catch (Exception ex) {
@@ -159,20 +158,36 @@ public class MainApp {
             }
             return null;
         };
+        BiFunction<Class<?> /* Catalano filter class */, Class<? extends ITab>, ITab> opencvHandler = (filterClass, tabClass) -> {
+            if (filterClassName.equals(SelectFilterDialog.OPENCV_TAB_PREFIX + filterClass.getSimpleName()))
+                return callCtor.apply(tabClass);
+            return null;
+        };
+        BiFunction<Class<?> /* Catalano filter class */, Class<? extends ITab>, ITab> catalanoHandler = (filterClass, tabClass) -> {
+            if (filterClassName.equals(SelectFilterDialog.CATALANO_TAB_PREFIX + filterClass.getSimpleName()))
+                return callCtor.apply(tabClass);
+            return null;
+        };
+
+        // map Catalano filter to tab class
+        Stream<Supplier<ITab>> opencvMapping = Stream.of( // alphabetical sort
+            () -> opencvHandler.apply(Void.class, AsIsTab.class)
+        );
 
         // map Catalano filter to tab class
         Stream<Supplier<ITab>> catalanoMapping = Stream.of( // alphabetical sort
-            () -> handler.apply(AdaptiveContrastEnhancement.class,      AdaptiveContrastTab.class),
-            () -> handler.apply(ArtifactsRemoval           .class,      ArtifactsRemovalTab.class),
-            () -> handler.apply(BernsenThreshold           .class,      BernsenThresholdTab.class),
-            () -> handler.apply(Blur                       .class,                  BlurTab.class),
-            () -> handler.apply(BradleyLocalThreshold      .class, BradleyLocalThresholdTab.class),
-            () -> handler.apply(BrightnessCorrection       .class,  BrightnessCorrectionTab.class),
-            () -> handler.apply(FrequencyFilter            .class,       FrequencyFilterTab.class),
-            () -> handler.apply(Rotate                     .class,                RotateTab.class)
+            () -> catalanoHandler.apply(AdaptiveContrastEnhancement.class,      AdaptiveContrastTab.class),
+            () -> catalanoHandler.apply(ArtifactsRemoval           .class,      ArtifactsRemovalTab.class),
+            () -> catalanoHandler.apply(BernsenThreshold           .class,      BernsenThresholdTab.class),
+            () -> catalanoHandler.apply(Blur                       .class,                  BlurTab.class),
+            () -> catalanoHandler.apply(BradleyLocalThreshold      .class, BradleyLocalThresholdTab.class),
+            () -> catalanoHandler.apply(BrightnessCorrection       .class,  BrightnessCorrectionTab.class),
+            () -> catalanoHandler.apply(FrequencyFilter            .class,       FrequencyFilterTab.class),
+            () -> catalanoHandler.apply(Rotate                     .class,                RotateTab.class)
         );
 
-        ITab newTab = catalanoMapping.map(Supplier::get)
+        ITab newTab = Stream.concat(opencvMapping, catalanoMapping)
+            .map(Supplier::get)
             .filter(Objects::nonNull)
             .findAny()
             .orElse(null);
@@ -208,11 +223,11 @@ public class MainApp {
         if (i >= tabs.size())
             return;
 
-        FastBitmap img = tabs.get(i).getImage();
-        if (img == null)
+        ImgWrapper wrp = tabs.get(i).getImage();
+        if (wrp == null)
             return;
 
-        BufferedImage image = img.toBufferedImage();
+        BufferedImage image = wrp.getBufferedImage();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         logger.trace("image.size={{}, {}}", image     .getWidth(), image     .getHeight());

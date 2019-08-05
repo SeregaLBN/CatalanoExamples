@@ -1,11 +1,11 @@
 
 package ksn.imgusage.tabs;
 
-import Catalano.Imaging.FastBitmap;
+import ksn.imgusage.utils.ImgWrapper;
 
 public interface ITab {
 
-    FastBitmap getImage();
+    ImgWrapper getImage();
     void updateSource(ITab newSource);
     void resetImage();
 

@@ -16,6 +16,8 @@ import Catalano.Imaging.Filters.*;
 public class SelectFilterDialog {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectFilterDialog.class);
+    public static final String CATALANO_TAB_PREFIX = "Catalano:";
+    public static final String   OPENCV_TAB_PREFIX = "OpenCV:";
 
     private final Frame owner;
 
@@ -60,7 +62,7 @@ public class SelectFilterDialog {
         ).forEach(tab -> {
             String className = tab.filterClass.getSimpleName();
             JRadioButton radioFilter = new JRadioButton(className + ": " + tab.description);
-            radioFilter.setActionCommand("Catalano:" + className);
+            radioFilter.setActionCommand(CATALANO_TAB_PREFIX + className);
             boxCatalanoFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
@@ -69,11 +71,11 @@ public class SelectFilterDialog {
         boxSomeFilters.setBorder(BorderFactory.createTitledBorder("Some filters"));
 
         Arrays.<FilterTabs>asList( // alphabetical sort
-            // TODO
+            new FilterTabs(Void.class, "As is")
         ).forEach(tab -> {
             String className = tab.filterClass.getSimpleName();
             JRadioButton radioFilter = new JRadioButton(className + ": " + tab.description);
-            radioFilter.setActionCommand("Some:" + className);
+            radioFilter.setActionCommand(OPENCV_TAB_PREFIX + className);
             boxSomeFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
@@ -91,7 +93,7 @@ public class SelectFilterDialog {
         });
 
         Box boxCenter = Box.createVerticalBox();
-      //boxCenter.add(boxSomeFilters);
+        boxCenter.add(boxSomeFilters);
         boxCenter.add(boxCatalanoFilters);
 
         dlg.add(boxCenter, BorderLayout.CENTER);
