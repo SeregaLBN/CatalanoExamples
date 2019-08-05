@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
 import java.awt.Cursor;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
@@ -13,7 +14,6 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.utils.ImgWrapper;
 import ksn.imgusage.utils.UiHelper;
 
 public class AdaptiveContrastTab implements ITab {
@@ -31,7 +31,7 @@ public class AdaptiveContrastTab implements ITab {
 
     private final ITabHandler tabHandler;
     private ITab source;
-    private FastBitmap image;
+    private BufferedImage image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
     private SliderIntModel    modelWinSize = new SliderIntModel   (  20, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
@@ -51,38 +51,34 @@ public class AdaptiveContrastTab implements ITab {
     public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, double k1, double k2, double minGain, double maxGain) {
         this.tabHandler = tabHandler;
         this.source = source;
+        this.boosting = boosting;
         this.modelWinSize.setValue(windowSize);
         this.modelK1     .setValue(k1);
         this.modelK2     .setValue(k2);
         this.modelMinGain.setValue(minGain);
         this.modelMaxGain.setValue(maxGain);
-        this.boosting = boosting;
 
         makeTab();
     }
 
     @Override
-    public ImgWrapper getImage() {
+    public BufferedImage getImage() {
         if (image != null)
-            return new ImgWrapper(image);
-        if (source == null)
-            return null;
+            return image;
 
-        ImgWrapper wrp = source.getImage();
-        if (wrp == null)
+        BufferedImage src = source.getImage();
+        if (src == null)
             return null;
-
-        image = wrp.getFastBitmap();
 
         JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
         try {
             frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            image = new FastBitmap(image);
+            FastBitmap bmp = new FastBitmap(src);
             if (boosting)
-                image = UiHelper.boostImage(image, logger);
-            if (!image.isGrayscale())
-                image.toGrayscale();
+                bmp = UiHelper.boostImage(bmp, logger);
+            if (!bmp.isGrayscale())
+                bmp.toGrayscale();
 
             AdaptiveContrastEnhancement adaptiveContrastEnhancement = new AdaptiveContrastEnhancement(
                         modelWinSize.getValue(),
@@ -91,11 +87,12 @@ public class AdaptiveContrastTab implements ITab {
                         modelMinGain.getValue(),
                         modelMaxGain.getValue()
                     );
-            adaptiveContrastEnhancement.applyInPlace(image);
+            adaptiveContrastEnhancement.applyInPlace(bmp);
+            image = bmp.toBufferedImage();
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
         }
-        return new ImgWrapper(image);
+        return image;
     }
 
 

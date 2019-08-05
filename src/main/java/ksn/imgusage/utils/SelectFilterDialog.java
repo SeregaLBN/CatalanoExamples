@@ -67,8 +67,8 @@ public class SelectFilterDialog {
             radioGroup.add(radioFilter);
         });
 
-        Box boxSomeFilters = Box.createVerticalBox();
-        boxSomeFilters.setBorder(BorderFactory.createTitledBorder("Some filters"));
+        Box boxOpenCvFilters = Box.createVerticalBox();
+        boxOpenCvFilters.setBorder(BorderFactory.createTitledBorder("OpenCV filters"));
 
         Arrays.<FilterTabs>asList( // alphabetical sort
             new FilterTabs(Void.class, "As is")
@@ -76,7 +76,7 @@ public class SelectFilterDialog {
             String className = tab.filterClass.getSimpleName();
             JRadioButton radioFilter = new JRadioButton(className + ": " + tab.description);
             radioFilter.setActionCommand(OPENCV_TAB_PREFIX + className);
-            boxSomeFilters.add(radioFilter);
+            boxOpenCvFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
 
@@ -93,7 +93,7 @@ public class SelectFilterDialog {
         });
 
         Box boxCenter = Box.createVerticalBox();
-        boxCenter.add(boxSomeFilters);
+        boxCenter.add(boxOpenCvFilters);
         boxCenter.add(boxCatalanoFilters);
 
         dlg.add(boxCenter, BorderLayout.CENTER);

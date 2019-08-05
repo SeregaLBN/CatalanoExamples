@@ -35,7 +35,7 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.AsIsTab;
-import ksn.imgusage.utils.ImgWrapper;
+import ksn.imgusage.tabs.opencv.InitLib;
 import ksn.imgusage.utils.SelectFilterDialog;
 
 public class MainApp {
@@ -223,11 +223,10 @@ public class MainApp {
         if (i >= tabs.size())
             return;
 
-        ImgWrapper wrp = tabs.get(i).getImage();
-        if (wrp == null)
+        BufferedImage image = tabs.get(i).getImage();
+        if (image == null)
             return;
 
-        BufferedImage image = wrp.getBufferedImage();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         logger.trace("image.size={{}, {}}", image     .getWidth(), image     .getHeight());
@@ -280,6 +279,14 @@ public class MainApp {
     }
 
     public static void main(String[] args) {
+        try {
+            InitLib.loadOpenCV();
+        } catch (Exception ex) {
+            logger.error("Can not load openCV library", ex);
+            System.exit(2);
+            return;
+        }
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             UIManager.put("Slider.paintValue", false);

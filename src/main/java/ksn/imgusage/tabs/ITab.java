@@ -1,11 +1,11 @@
 
 package ksn.imgusage.tabs;
 
-import ksn.imgusage.utils.ImgWrapper;
+import java.awt.image.BufferedImage;
 
 public interface ITab {
 
-    ImgWrapper getImage();
+    BufferedImage getImage();
     void updateSource(ITab newSource);
     void resetImage();
 

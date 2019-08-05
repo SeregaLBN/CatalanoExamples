@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
-import ksn.imgusage.utils.ImgWrapper;
 import ksn.imgusage.utils.UiHelper;
 
 public class FirstTab implements ITab {
@@ -29,7 +28,7 @@ public class FirstTab implements ITab {
     private final ITabHandler tabHandler;
 
     private BufferedImage source;
-    private FastBitmap image;
+    private BufferedImage image;
     private File latestImageDir;
     private Runnable imagePanelInvalidate;
 
@@ -66,16 +65,17 @@ public class FirstTab implements ITab {
     }
 
     @Override
-    public ImgWrapper getImage() {
+    public BufferedImage getImage() {
         if (source == null)
             return null;
 
         if (image == null) {
-            image = new FastBitmap(source);
-            if (isGray && !image.isGrayscale())
-                image.toGrayscale();
+            FastBitmap bmp = new FastBitmap(source);
+            if (isGray && !bmp.isGrayscale())
+                bmp.toGrayscale();
+            image = bmp.toBufferedImage();
         }
-        return new ImgWrapper(image);
+        return image;
     }
 
 

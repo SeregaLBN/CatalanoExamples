@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
 import java.awt.Cursor;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
@@ -13,7 +14,6 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.utils.ImgWrapper;
 import ksn.imgusage.utils.UiHelper;
 
 public class BernsenThresholdTab implements ITab {
@@ -27,7 +27,7 @@ public class BernsenThresholdTab implements ITab {
 
     private final ITabHandler tabHandler;
     private ITab source;
-    private FastBitmap image;
+    private BufferedImage image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
     private SliderIntModel    modelRadius            = new SliderIntModel   (15, 0, MIN_RADIUS            , MAX_RADIUS);
@@ -44,42 +44,40 @@ public class BernsenThresholdTab implements ITab {
     public BernsenThresholdTab(ITabHandler tabHandler, ITab source, boolean boosting, int radius, double contrastThreshold) {
         this.tabHandler = tabHandler;
         this.source = source;
+        this.boosting = boosting;
         this.modelRadius.setValue(radius);
         this.modelContrastThreshold.setValue(contrastThreshold);
-        this.boosting = boosting;
 
         makeTab();
     }
 
     @Override
-    public ImgWrapper getImage() {
+    public BufferedImage getImage() {
         if (image != null)
-            return new ImgWrapper(image);
-        if (source == null)
-            return null;
+            return image;
 
-        ImgWrapper wrp = source.getImage();
-        if (wrp == null)
+        BufferedImage src = source.getImage();
+        if (src == null)
             return null;
-
-        image = wrp.getFastBitmap();
 
         JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
         try {
             frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            image = new FastBitmap(image);
+            FastBitmap bmp = new FastBitmap(src);
             if (boosting)
-                image = UiHelper.boostImage(image, logger);
-            if (!image.isGrayscale())
-                image.toGrayscale();
+                bmp = UiHelper.boostImage(bmp, logger);
+            if (!bmp.isGrayscale())
+                bmp.toGrayscale();
 
             BernsenThreshold bernsenThreshold = new BernsenThreshold(modelRadius.getValue(), modelContrastThreshold.getValue());
-            bernsenThreshold.applyInPlace(image);
+            bernsenThreshold.applyInPlace(bmp);
+
+            image = bmp.toBufferedImage();
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
         }
-        return new ImgWrapper(image);
+        return image;
     }
 
 

@@ -18,10 +18,10 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
 
+import org.opencv.core.Mat;
 import org.slf4j.Logger;
 
 import Catalano.Imaging.FastBitmap;
-import Catalano.Imaging.Filters.Resize;
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
@@ -258,9 +258,19 @@ public final class UiHelper {
         if (zoom < 1) {
             int newWidth  = (int)(zoom * image.getWidth());
             int newHeight = (int)(zoom * image.getHeight());
-
-            Resize resize = new Resize(newWidth, newHeight);
-            image = resize.apply(image);
+            return ImgHelper.resize(image, newWidth, newHeight);
+        }
+        return image;
+    }
+    public static Mat boostImage(Mat image, Logger logger) {
+        double zoomX = 400 / (double)image.width();
+        double zoomY = 250 / (double)image.height();
+        double zoom = Math.min(zoomX, zoomY);
+        logger.trace("zoom={}", zoom);
+        if (zoom < 1) {
+            int newWidth  = (int)(zoom * image.width());
+            int newHeight = (int)(zoom * image.height());
+            return ImgHelper.resize(image, newWidth, newHeight);
         }
         return image;
     }

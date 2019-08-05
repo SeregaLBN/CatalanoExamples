@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
 import java.awt.Cursor;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
@@ -12,7 +13,6 @@ import Catalano.Imaging.Filters.BrightnessCorrection;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.utils.ImgWrapper;
 import ksn.imgusage.utils.UiHelper;
 
 public class BrightnessCorrectionTab implements ITab {
@@ -23,7 +23,7 @@ public class BrightnessCorrectionTab implements ITab {
 
     private final ITabHandler tabHandler;
     private ITab source;
-    private FastBitmap image;
+    private BufferedImage image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
     private SliderIntModel modelAdjust = new SliderIntModel(100, 0, MIN, MAX);
@@ -39,39 +39,37 @@ public class BrightnessCorrectionTab implements ITab {
     public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source, boolean boosting, int adjustValue) {
         this.tabHandler = tabHandler;
         this.source = source;
-        this.modelAdjust.setValue(adjustValue);
         this.boosting = boosting;
+        this.modelAdjust.setValue(adjustValue);
 
         makeTab();
     }
 
     @Override
-    public ImgWrapper getImage() {
+    public BufferedImage getImage() {
         if (image != null)
-            return new ImgWrapper(image);
-        if (source == null)
-            return null;
+            return image;
 
-        ImgWrapper wrp = source.getImage();
-        if (wrp == null)
+        BufferedImage src = source.getImage();
+        if (src == null)
             return null;
-
-        image= wrp.getFastBitmap();
 
         JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
         try {
             frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            image = new FastBitmap(image);
+            FastBitmap bmp = new FastBitmap(src);
             if (boosting)
-                image = UiHelper.boostImage(image, logger);
+                bmp = UiHelper.boostImage(bmp, logger);
 
             BrightnessCorrection brightnessCorrection = new BrightnessCorrection(modelAdjust.getValue());
-            brightnessCorrection.applyInPlace(image);
+            brightnessCorrection.applyInPlace(bmp);
+
+            image = bmp.toBufferedImage();
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
         }
-        return new ImgWrapper(image);
+        return image;
     }
 
 

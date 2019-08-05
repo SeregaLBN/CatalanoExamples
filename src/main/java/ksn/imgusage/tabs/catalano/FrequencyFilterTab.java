@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
 import java.awt.Cursor;
+import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
@@ -13,7 +14,6 @@ import Catalano.Imaging.Filters.FrequencyFilter;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.utils.ImgWrapper;
 import ksn.imgusage.utils.UiHelper;
 
 public class FrequencyFilterTab implements ITab {
@@ -24,7 +24,7 @@ public class FrequencyFilterTab implements ITab {
 
     private final ITabHandler tabHandler;
     private ITab source;
-    private FastBitmap image;
+    private BufferedImage image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
     private SliderIntModel modelMin = new SliderIntModel(  0, 0, MIN, MAX);
@@ -41,48 +41,46 @@ public class FrequencyFilterTab implements ITab {
     public FrequencyFilterTab(ITabHandler tabHandler, ITab source, boolean boosting, int min, int max) {
         this.tabHandler = tabHandler;
         this.source = source;
+        this.boosting = boosting;
         this.modelMin.setValue(min);
         this.modelMax.setValue(max);
-        this.boosting = boosting;
 
         makeTab();
     }
 
     @Override
-    public ImgWrapper getImage() {
+    public BufferedImage getImage() {
         if (image != null)
-            return new ImgWrapper(image);
-        if (source == null)
-            return null;
+            return image;
 
-        ImgWrapper wrp = source.getImage();
-        if (wrp == null)
+        BufferedImage src = source.getImage();
+        if (src == null)
             return null;
-
-        image = wrp.getFastBitmap();
 
         JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
         try {
             frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            image = new FastBitmap(image);
+            FastBitmap bmp = new FastBitmap(src);
             if (boosting)
-                image = UiHelper.boostImage(image, logger);
-            if (!image.isGrayscale())
-                image.toGrayscale();
+                bmp = UiHelper.boostImage(bmp, logger);
+            if (!bmp.isGrayscale())
+                bmp.toGrayscale();
 
-            FourierTransform fourierTransform = new FourierTransform(image);
+            FourierTransform fourierTransform = new FourierTransform(bmp);
             fourierTransform.Forward();
 
             FrequencyFilter frequencyFilter = new FrequencyFilter(modelMin.getValue(), modelMax.getValue());
             frequencyFilter.ApplyInPlace(fourierTransform);
 
             fourierTransform.Backward();
-            image = fourierTransform.toFastBitmap();
+            bmp = fourierTransform.toFastBitmap();
+
+            image = bmp.toBufferedImage();
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
         }
-        return new ImgWrapper(image);
+        return image;
     }
 
 

@@ -1,24 +1,34 @@
 package ksn.imgusage.tabs.opencv;
 
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.image.BufferedImage;
+
 import javax.swing.Box;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.opencv.core.Mat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.utils.ImgWrapper;
+import ksn.imgusage.utils.ImgHelper;
+import ksn.imgusage.utils.OpenCvHelper;
 import ksn.imgusage.utils.UiHelper;
 
 public class AsIsTab implements ITab {
 
-    //private static final Logger logger = LoggerFactory.getLogger(AsIsTab.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsIsTab.class);
 
     private final ITabHandler tabHandler;
     private ITab source;
-    private Mat mat;
+    private BufferedImage image;
+    private boolean boosting = true;
+    private boolean isGray = false;
     private Runnable imagePanelInvalidate;
 
     public AsIsTab(ITabHandler tabHandler, ITab source) {
@@ -28,29 +38,48 @@ public class AsIsTab implements ITab {
         makeTab();
     }
 
+    public AsIsTab(ITabHandler tabHandler, ITab source, boolean boosting, boolean isGray) {
+        this.tabHandler = tabHandler;
+        this.source = source;
+        this.boosting = boosting;
+        this.isGray = isGray;
+
+        makeTab();
+    }
+
     @Override
-    public ImgWrapper getImage() {
-        if (mat != null)
-            return new ImgWrapper(mat);
-        if (source == null)
+    public BufferedImage getImage() {
+        if (image != null)
+            return image;
+
+        BufferedImage src = source.getImage();
+        if (src == null)
             return null;
 
-        ImgWrapper wrp = source.getImage();
-        if (wrp == null)
-            return null;
+        JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
+        try {
+            frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-        mat = wrp.getMat();
+            Mat mat = ImgHelper.toMat(src);
+            if (boosting)
+                mat = UiHelper.boostImage(mat, logger);
+            if (isGray)
+                mat = OpenCvHelper.toGray(mat);
 
-        return new ImgWrapper(mat);
+            image = ImgHelper.toBufferedImage(mat);
+        } finally {
+            frame.setCursor(Cursor.getDefaultCursor());
+        }
+        return image;
     }
 
 
     @Override
     public void resetImage() {
-        if (mat == null)
+        if (image == null)
             return;
 
-        mat = null;
+        image = null;
         imagePanelInvalidate.run();
         SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
     }
@@ -65,7 +94,7 @@ public class AsIsTab implements ITab {
         UiHelper.makeTab(
              tabHandler,
              this,
-             AdaptiveContrastEnhancement.class.getSimpleName(),
+             "As is",
              true,
              this::makeFilterOptions
          );
@@ -73,6 +102,21 @@ public class AsIsTab implements ITab {
 
     public void makeFilterOptions(JPanel imagePanel, Box boxCenterLeft) {
         imagePanelInvalidate = imagePanel::repaint;
+
+        boxCenterLeft.add(UiHelper.makeAsBoostCheckBox(() -> boosting, b -> boosting = b, this::resetImage));
+
+        {
+            Box box = Box.createHorizontalBox();
+            JCheckBox btnAsGray = new JCheckBox("Gray", isGray);
+            btnAsGray.setAlignmentX(Component.LEFT_ALIGNMENT);
+            btnAsGray.setToolTipText("Speed up by reducing the image");
+            btnAsGray.addActionListener(ev -> {
+                isGray = btnAsGray.isSelected();
+                resetImage();
+            });
+            box.add(btnAsGray);
+            boxCenterLeft.add(box);
+        }
     }
 
 }
