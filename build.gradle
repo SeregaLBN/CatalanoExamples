@@ -46,10 +46,14 @@ dependencies {
     compile 'org.slf4j:slf4j-simple:1.7.26'
     compile 'org.openpnp:opencv:3.4.2-1'
 
-    compile name: 'Catalano.Core'
-    compile name: 'Catalano.Math'
-    compile name: 'Catalano.IO'
-    compile name: 'Catalano.Image'
+    if (project.file('./libs/Catalano.Core.jar' ).exists())
+        compile name:       'Catalano.Core'
+    if (project.file('./libs/Catalano.Math.jar' ).exists())
+        compile name:       'Catalano.Math'
+    if (project.file('./libs/Catalano.IO.jar'   ).exists())
+        compile name:       'Catalano.IO'
+    if (project.file('./libs/Catalano.Image.jar').exists())
+        compile name:       'Catalano.Image'
 }
 
 // can run as single JAR:
@@ -75,38 +79,38 @@ task fatJar(type: Jar) {
 project.tasks.build.dependsOn project.tasks.fatJar
 
 
-def downloadExampleImage() {
-    // https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0,_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG
+def downloadByUrl(url, targetFile, recheckSize) {
     try {
-        def url = new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG/1024px-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG')
+        if (targetFile.exists()) {
+            println 'File already downloaded! ' + targetFile.absolutePath
 
-        def file = project.file('./exampleImages/1024px-VolodimirHillAndDnieper.jpg')
-        if (file.exists()) {
-            println 'Example image already downloaded! ' + file.absolutePath
-            return
+            if (!recheckSize)
+                return true
 
-            // recheck size
+            println 'Trying to recheck file size...'
             def conn = null
             try {
                 conn = url.openConnection()
                 conn.setRequestMethod('HEAD')
                 long size = conn.contentLengthLong
-                if (file.length() == size)
-                    return // all ok
+                if (targetFile.length() == size) {
+                    println '...file size checked successfully'
+                    return true // all ok
+                }
 
-                System.err.println('Illegal file size: delete it')
-                file.delete()
+                System.err.println('...illegal file size: delete it')
+                targetFile.delete()
             } finally {
                 if (conn != null)
                     conn.disconnect()
             }
         }
 
-        file.parentFile.mkdir()
+        targetFile.parentFile.mkdirs()
 
-        println 'Try download example image from ' + url
+        println 'Trying to download a file ' + url
         new java.io.BufferedInputStream(url.openStream()).withCloseable { bin ->
-        new java.io.FileOutputStream(file).withCloseable { fos ->
+        new java.io.FileOutputStream(targetFile).withCloseable { fos ->
             def buffer = new byte[10240]
             long total = 0
             for (int i=0; true; ++i) {
@@ -117,16 +121,51 @@ def downloadExampleImage() {
                     continue
                 fos.write(buffer, 0, read)
                 total += read
-                println '  ...iteration #' + (1+i) + ': read=' + read + '; total=' + total
+                if ((i % 10) == 9)
+                    println '  ...iteration #' + (1+i) + ': read=' + read + '; total=' + total
             }
-            println 'Example image downloaded! ' + file.absolutePath
+            println 'File downloaded! ' + targetFile.absolutePath
         }}
+        return true
     } catch (Exception ex) {
-        System.err.println('Can`t download example image: ' + ex)
+        System.err.println('Can`t download file: ' + ex)
+        return false
     }
 }
 
-gradle.taskGraph.beforeTask { Task task ->
-    if ((task.project.name == 'ImageFilterExamples') && (task.name == 'processResources'))
-        downloadExampleImage()
+task downloadCatalanoFramefork(type: Copy) {
+    def lib1 = project.file('./libs/Catalano.Core.jar')
+    def lib2 = project.file('./libs/Catalano.Image.jar')
+    def lib3 = project.file('./libs/Catalano.IO.jar')
+    def lib4 = project.file('./libs/Catalano.Math.jar')
+    if (lib1.exists() &&
+        lib2.exists() &&
+        lib3.exists() &&
+        lib4.exists())
+        return;
+
+    def targetZipFile = project.file('./libs/libs.zip')
+    downloadByUrl(
+        new java.net.URL('https://github.com/DiegoCatalano/Catalano-Framework/releases/download/v1.6.1.1-libs/libs.zip'),
+        targetZipFile,
+        true)
+
+    def libZipTree = zipTree(targetZipFile)
+
+    from libZipTree
+    include 'Catalano.Core.jar'
+    include 'Catalano.Image.jar'
+    include 'Catalano.IO.jar'
+    include 'Catalano.Math.jar'
+    into(project.file('./libs'))
 }
+project.tasks.compileJava.dependsOn project.tasks.downloadCatalanoFramefork
+
+task downloadExampleImage() {
+    // https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0,_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG
+    downloadByUrl(
+        new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG/1024px-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG'),
+        project.file('./exampleImages/1024px-VolodimirHillAndDnieper.jpg'),
+        false)
+}
+project.tasks.processResources.dependsOn project.tasks.downloadExampleImage
