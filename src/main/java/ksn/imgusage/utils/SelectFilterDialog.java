@@ -26,10 +26,14 @@ public class SelectFilterDialog {
     }
 
     private static class FilterTabs {
-        public final Class<?> filterClass;
+        public final String filterName;
         public final String description;
-        public FilterTabs(Class<?> catalanoClass, String description) {
-            this.filterClass = catalanoClass;
+        public FilterTabs(Class<?> filterClass, String description) {
+            this.filterName  = filterClass.getSimpleName();
+            this.description = description;
+        }
+        public FilterTabs(String filterName, String description) {
+            this.filterName  = filterName;
             this.description = description;
         }
     }
@@ -60,9 +64,8 @@ public class SelectFilterDialog {
             new FilterTabs(FrequencyFilter            .class, "Filtering of frequencies outside of specified range in complex Fourier transformed image"),
             new FilterTabs(Rotate                     .class, "Rotate image")
         ).forEach(tab -> {
-            String className = tab.filterClass.getSimpleName();
-            JRadioButton radioFilter = new JRadioButton(className + ": " + tab.description);
-            radioFilter.setActionCommand(CATALANO_TAB_PREFIX + className);
+            JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
+            radioFilter.setActionCommand(CATALANO_TAB_PREFIX + tab.filterName);
             boxCatalanoFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
@@ -71,11 +74,11 @@ public class SelectFilterDialog {
         boxOpenCvFilters.setBorder(BorderFactory.createTitledBorder("OpenCV filters"));
 
         Arrays.<FilterTabs>asList( // alphabetical sort
-            new FilterTabs(Void.class, "As is")
+            new FilterTabs("AsIs"        , "As is"),
+            new FilterTabs("GaussianBlur", "Blurs an image using a Gaussian filter")
         ).forEach(tab -> {
-            String className = tab.filterClass.getSimpleName();
-            JRadioButton radioFilter = new JRadioButton(className + ": " + tab.description);
-            radioFilter.setActionCommand(OPENCV_TAB_PREFIX + className);
+            JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
+            radioFilter.setActionCommand(OPENCV_TAB_PREFIX + tab.filterName);
             boxOpenCvFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
