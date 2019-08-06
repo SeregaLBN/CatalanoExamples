@@ -56,6 +56,20 @@ dependencies {
         compile name:       'Catalano.Image'
 }
 
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Custom tasks
+
+task cleanAddons(type: Delete) {
+    //delete project.file('./libs')
+    //delete project.file('./exampleImages')
+}
+
+
 // can run as single JAR:
 //  java -jar ./ImageFilterExamples/build/libs/ImageFilterExamples-fat-{version}.jar
 task fatJar(type: Jar) {
@@ -76,8 +90,6 @@ task fatJar(type: Jar) {
     }
     with jar
 }
-project.tasks.build.dependsOn project.tasks.fatJar
-
 
 def downloadByUrl(url, targetFile, recheckSize) {
     try {
@@ -93,12 +105,16 @@ def downloadByUrl(url, targetFile, recheckSize) {
                 conn = url.openConnection()
                 conn.setRequestMethod('HEAD')
                 long size = conn.contentLengthLong
+                if (size < 0) {
+                    println '...remoute file size undefined! Trust the local size...'
+                    return true // ok
+                }
                 if (targetFile.length() == size) {
                     println '...file size checked successfully'
                     return true // all ok
                 }
 
-                System.err.println('...illegal file size: delete it')
+                System.err.println('...illegal file size: delete it: locatFileSize=' + targetFile.length() + '; remouteFileSize=' + size)
                 targetFile.delete()
             } finally {
                 if (conn != null)
@@ -133,7 +149,9 @@ def downloadByUrl(url, targetFile, recheckSize) {
     }
 }
 
-task downloadCatalanoFramefork(type: Copy) {
+// Im not found the Catalano-Framework in the Maven repository ;(
+// Trying to auto-download ZIP and unpack JARs
+task downloadCatalanoFramework(type: Copy) {
     def lib1 = project.file('./libs/Catalano.Core.jar')
     def lib2 = project.file('./libs/Catalano.Image.jar')
     def lib3 = project.file('./libs/Catalano.IO.jar')
@@ -142,13 +160,18 @@ task downloadCatalanoFramefork(type: Copy) {
         lib2.exists() &&
         lib3.exists() &&
         lib4.exists())
+    {
+        println 'Catalano-Framework exist'
         return;
+    }
 
     def targetZipFile = project.file('./libs/libs.zip')
-    downloadByUrl(
+    def succ = downloadByUrl(
         new java.net.URL('https://github.com/DiegoCatalano/Catalano-Framework/releases/download/v1.6.1.1-libs/libs.zip'),
         targetZipFile,
         true)
+    if (!succ)
+        return
 
     def libZipTree = zipTree(targetZipFile)
 
@@ -159,13 +182,23 @@ task downloadCatalanoFramefork(type: Copy) {
     include 'Catalano.Math.jar'
     into(project.file('./libs'))
 }
-project.tasks.compileJava.dependsOn project.tasks.downloadCatalanoFramefork
 
+// Download default example image
 task downloadExampleImage() {
-    // https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0,_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG
-    downloadByUrl(
-        new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG/1024px-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG'),
-        project.file('./exampleImages/1024px-VolodimirHillAndDnieper.jpg'),
-        false)
+    doLast {
+        // https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0,_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG
+        downloadByUrl(
+            new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG/1024px-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG'),
+            project.file('./exampleImages/1024px-VolodimirHillAndDnieper.jpg'),
+            false)
+    }
 }
+
+
+
+
+defaultTasks 'clean', 'build'
+project.tasks.clean           .dependsOn project.tasks.cleanAddons
+project.tasks.build           .dependsOn project.tasks.fatJar
+project.tasks.compileJava     .dependsOn project.tasks.downloadCatalanoFramework
 project.tasks.processResources.dependsOn project.tasks.downloadExampleImage
