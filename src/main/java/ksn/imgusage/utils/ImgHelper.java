@@ -14,7 +14,7 @@ import org.opencv.imgproc.Imgproc;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Resize;
 
-public class ImgHelper {
+public final class ImgHelper {
     private ImgHelper() {}
 
 

@@ -15,9 +15,13 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class OpenCvHelper {
     private OpenCvHelper() {}
+
+    private static final Logger logger = LoggerFactory.getLogger(OpenCvHelper.class);
 
     public static Mat fromImage(BufferedImage image) {
         Mat mat = fromImageFast(image);
@@ -34,35 +38,89 @@ public final class OpenCvHelper {
     }
 
     private static BufferedImage toImageFast(Mat mat) {
-        switch (mat.channels()) {
-        case 1: {
-                System.err.println("OpenCvHelper::toImageFast: TODO: Don`t verified: chanels 1");
-                // TODO
-                return null;
-            }
-        case 3: {
-                System.err.println("OpenCvHelper::toImageFast: TODO: Don`t verified: chanels 3");
-                int bufferSize = mat.channels() * mat.cols() * mat.rows();
-                byte[] b = new byte[bufferSize];
-                BufferedImage image = new BufferedImage(mat.width(), mat.height(), BufferedImage.TYPE_INT_RGB);
-
-                int[] targetPixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
-                System.arraycopy(b, 0, targetPixels, 0, b.length);
-                return image;
-            }
-        case 4: {
-                System.err.println("OpenCvHelper::toImageFast: TODO: Don`t verified: chanels 4");
-                // TODO
-                return null;
-            }
+        int channels = mat.channels();
+        switch (channels) {
+        case 1: return toImageFast1Channel(mat);
+        case 3: return toImageFast3Channel(mat);
+        case 4: return toImageFast4Channel(mat);
         default:
+            logger.warn("OpenCvHelper::toImageFast: Try add for Mat::channels == {}", channels);
             return null;
         }
     }
 
+    private static BufferedImage toImageFast1Channel(Mat mat) {
+        int depth = CvType.depth(mat.type());
+        switch (depth) {
+        case CvType.CV_8U: {
+                byte[] matBuff = new byte[mat.cols() * mat.rows() * (int)mat.elemSize()];
+                mat.get(0, 0, matBuff);
+
+                BufferedImage image = new BufferedImage(mat.width(), mat.height(), BufferedImage.TYPE_BYTE_GRAY);
+                byte[] imgBuff = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
+                assert imgBuff.length == matBuff.length;
+                System.arraycopy(matBuff, 0, imgBuff, 0, imgBuff.length);
+                return image;
+            }
+        default:
+            logger.warn("OpenCvHelper::toImageFast1Channel: Try add for depth == {}", depth);
+            return null;
+        }
+    }
+
+    private static BufferedImage toImageFast3Channel(Mat mat) {
+        int depth = CvType.depth(mat.type());
+        switch (depth) {
+        case CvType.CV_8U: {
+                byte[] matBuff = new byte[mat.cols() * mat.rows() * (int)mat.elemSize()];
+                mat.get(0, 0, matBuff);
+
+                BufferedImage image = new BufferedImage(mat.width(), mat.height(), BufferedImage.TYPE_3BYTE_BGR);
+                byte[] imgBuff = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
+                assert imgBuff.length == matBuff.length;
+                System.arraycopy(matBuff, 0, imgBuff, 0, imgBuff.length);
+                return image;
+            }
+        default:
+            logger.warn("OpenCvHelper::toImageFast3Channel: Try add for depth == {}", depth);
+            return null;
+        }
+    }
+
+    private static BufferedImage toImageFast4Channel(Mat mat) {
+        int depth = CvType.depth(mat.type());
+//        switch (depth) {
+//        case CvType.CV_8U: {
+//                System.err.println("OpenCvHelper::toImageFast4Channel: TODO: Don`t verified: depth CvType.CV_8U");
+//                byte[] matBuff = new byte[mat.cols() * mat.rows() * (int)mat.elemSize()];
+//                mat.get(0, 0, matBuff);
+//
+//                BufferedImage image = new BufferedImage(mat.width(), mat.height(), BufferedImage.TYPE_4BYTE_ABGR);
+//                byte[] imgBuff = ((DataBufferByte)image.getRaster().getDataBuffer()).getData();
+//                assert imgBuff.length == matBuff.length;
+//                System.arraycopy(matBuff, 0, imgBuff, 0, imgBuff.length);
+//
+////                //  R <-> B
+////                byte tmp;
+////                for (int i = 0; i < imgBuff.length; i += 4) {
+////                    tmp = imgBuff[i + 3];
+////                    imgBuff[i + 0] = imgBuff[i + 1];
+////                    imgBuff[i + 1] = imgBuff[i + 2];
+////                    imgBuff[i + 2] = tmp;
+////                    imgBuff[i + 3] = tmp;
+////                }
+//
+//                return image;
+//            }
+//        default:
+            logger.warn("OpenCvHelper::toImageFast4Channel: Try add for depth == {}", depth);
+            return null;
+//        }
+    }
+
     private static Mat fromImageFast(BufferedImage image) {
-        int colorType = image.getType();
-        switch (colorType) {
+        int imageType = image.getType();
+        switch (imageType) {
         case BufferedImage.TYPE_INT_RGB: {
                 Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
                 DataBufferInt intBuff = (DataBufferInt)image.getRaster().getDataBuffer();
@@ -103,12 +161,13 @@ public final class OpenCvHelper {
                 return mat;
             }
         case BufferedImage.TYPE_3BYTE_BGR: {
-                System.err.println("OpenCvHelper::fromImage: TODO: Don`t verified: BufferedImage.TYPE_3BYTE_BGR");
+                logger.warn("OpenCvHelper::fromImage: TODO: Don`t verified: BufferedImage.TYPE_3BYTE_BGR");
                 Mat mat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
                 mat.put(0, 0, ((DataBufferByte)image.getRaster().getDataBuffer()).getData());
                 return mat;
             }
         default:
+            logger.warn("OpenCvHelper::fromImage: Try add for imageType={}", imageType);
             return null;
         }
     }
