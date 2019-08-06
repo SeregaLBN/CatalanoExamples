@@ -173,6 +173,7 @@ public final class UiHelper {
 
         JSlider slider = new JSlider(JSlider.VERTICAL);
         slider.setModel(model.getWrapped());
+      //slider.setValueIsAdjusting(true);
 //        slider.setMajorTickSpacing(20);
 //        slider.setMinorTickSpacing(4);
 //        slider.setPaintTicks(true);

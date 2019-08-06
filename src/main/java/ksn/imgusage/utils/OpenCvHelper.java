@@ -23,6 +23,34 @@ public final class OpenCvHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(OpenCvHelper.class);
 
+
+
+    /** Various border types, image boundaries are denoted with `|`
+     * (see /opencv-master/modules/core/include/opencv2/core/base.hpp) */
+    public enum BorderTypes {
+      BORDER_CONSTANT   (0), //!< `iiiiii|abcdefgh|iiiiiii`  with some specified `i`
+      BORDER_REPLICATE  (1), //!< `aaaaaa|abcdefgh|hhhhhhh`
+      BORDER_REFLECT    (2), //!< `fedcba|abcdefgh|hgfedcb`
+      BORDER_WRAP       (3), //!< `cdefgh|abcdefgh|abcdefg`
+      BORDER_REFLECT_101(4), //!< `gfedcb|abcdefgh|gfedcba`
+      BORDER_TRANSPARENT(5), //!< `uvwxyz|abcdefgh|ijklmno`
+
+    //BORDER_REFLECT101 (BORDER_REFLECT_101), //!< same as BORDER_REFLECT_101
+      BORDER_DEFAULT    (BORDER_REFLECT_101.val), //!< same as BORDER_REFLECT_101
+      BORDER_ISOLATED   (16); //!< do not look outside of ROI
+
+      private final int val;
+      private BorderTypes(int val) {
+          this.val = val;
+      }
+
+      public int getVal() {
+          return val;
+      }
+
+  }
+
+
     public static Mat fromImage(BufferedImage image) {
         Mat mat = fromImageFast(image);
         if (mat == null)
