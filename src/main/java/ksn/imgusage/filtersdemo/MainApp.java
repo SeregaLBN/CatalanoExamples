@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 
+import org.opencv.core.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.AsIsTab;
 import ksn.imgusage.tabs.opencv.GaussianBlurTab;
 import ksn.imgusage.tabs.opencv.InitLib;
+import ksn.imgusage.utils.OpenCvHelper.BorderTypes;
 import ksn.imgusage.utils.SelectFilterDialog;
 
 public class MainApp {
@@ -268,16 +270,16 @@ public class MainApp {
     private ITab examplePipelineCatalanoFilters(ITab prevTab) {
         List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
             // supported full colors
-            prevTab2 -> new BrightnessCorrectionTab( getTabHandler(), prevTab2, true, 1),
-            prevTab2 -> new BlurTab(                 getTabHandler(), prevTab2, true),
-            prevTab2 -> new RotateTab(               getTabHandler(), prevTab2, true, 0.01, true, Rotate.Algorithm.BICUBIC),
+            prevTab2 -> new  BrightnessCorrectionTab(getTabHandler(), prevTab2, true, 1),
+            prevTab2 -> new                  BlurTab(getTabHandler(), prevTab2, true),
+            prevTab2 -> new                RotateTab(getTabHandler(), prevTab2, true, 0.01, true, Rotate.Algorithm.BICUBIC),
 
             // only grayscale
-            prevTab2 -> new FrequencyFilterTab(      getTabHandler(), prevTab2, true, 0, 200),
-            prevTab2 -> new AdaptiveContrastTab(     getTabHandler(), prevTab2, true, 4, 0.84, 0.02, 2.4, 4.93),
-            prevTab2 -> new BernsenThresholdTab(     getTabHandler(), prevTab2, true, 6, 30),
+            prevTab2 -> new       FrequencyFilterTab(getTabHandler(), prevTab2, true, 0, 200),
+            prevTab2 -> new      AdaptiveContrastTab(getTabHandler(), prevTab2, true, 4, 0.84, 0.02, 2.4, 4.93),
+            prevTab2 -> new      BernsenThresholdTab(getTabHandler(), prevTab2, true, 6, 30),
             prevTab2 -> new BradleyLocalThresholdTab(getTabHandler(), prevTab2, true, 10, 70),
-            prevTab2 -> new ArtifactsRemovalTab(     getTabHandler(), prevTab2, true, 9)
+            prevTab2 -> new      ArtifactsRemovalTab(getTabHandler(), prevTab2, true, 9)
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);
@@ -289,8 +291,8 @@ public class MainApp {
 
     private ITab examplePipelineOpenCvFilters(ITab prevTab) {
         List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
-          //prevTab2 -> new AsIsTab(        getTabHandler(), prevTab2, true, false),
-            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, false, 1,0,0.1,10,0)
+          //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2,  true, false),
+            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, false, new Size(7, 0), 25, 55, BorderTypes.BORDER_DEFAULT)
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);

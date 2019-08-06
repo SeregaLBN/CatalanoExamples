@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Cursor;
+import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.*;
@@ -17,6 +18,8 @@ import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.utils.ImgHelper;
+import ksn.imgusage.utils.OpenCvHelper;
+import ksn.imgusage.utils.OpenCvHelper.BorderTypes;
 import ksn.imgusage.utils.UiHelper;
 
 public class GaussianBlurTab implements ITab {
@@ -36,11 +39,11 @@ public class GaussianBlurTab implements ITab {
     private BufferedImage image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private SliderIntModel modelKernelSizeX = new SliderIntModel(1, 0, MIN_KSIZE , MAX_KSIZE);
-    private SliderIntModel modelKernelSizeY = new SliderIntModel(0, 0, MIN_KSIZE , MAX_KSIZE);
-    private SliderDoubleModel modelSigmaX   = new SliderDoubleModel(0.10, 0, MIN_SIGMA, MAX_SIGMA);
-    private SliderDoubleModel modelSigmaY   = new SliderDoubleModel(1.00, 0, MIN_SIGMA, MAX_SIGMA);
-    private int borderType = 0; // TODO from c++ code see BORDER_DEFAULT
+    private SliderIntModel modelKernelSizeW = new    SliderIntModel( 7, 1, MIN_KSIZE, MAX_KSIZE);
+    private SliderIntModel modelKernelSizeH = new    SliderIntModel( 0, 1, MIN_KSIZE, MAX_KSIZE);
+    private SliderDoubleModel modelSigmaX   = new SliderDoubleModel(25, 0, MIN_SIGMA, MAX_SIGMA);
+    private SliderDoubleModel modelSigmaY   = new SliderDoubleModel(25, 0, MIN_SIGMA, MAX_SIGMA);
+    private BorderTypes borderType = BorderTypes.BORDER_DEFAULT;
     private Timer timer;
 
     public GaussianBlurTab(ITabHandler tabHandler, ITab source) {
@@ -50,12 +53,12 @@ public class GaussianBlurTab implements ITab {
         makeTab();
     }
 
-    public GaussianBlurTab(ITabHandler tabHandler, ITab source, boolean boosting, int kernelSizeX, int kernelSizeY, double sigmaX, double sigmaY, int borderType) {
+    public GaussianBlurTab(ITabHandler tabHandler, ITab source, boolean boosting, Size kernelSize, double sigmaX, double sigmaY, BorderTypes borderType) {
         this.tabHandler = tabHandler;
         this.source = source;
         this.boosting = boosting;
-        this.modelKernelSizeX.setValue(kernelSizeX);
-        this.modelKernelSizeY.setValue(kernelSizeY);
+        this.modelKernelSizeW.setValue(onlyZeroOrOdd((int)kernelSize.width));
+        this.modelKernelSizeH.setValue(onlyZeroOrOdd((int)kernelSize.height));
         this.modelSigmaX     .setValue(sigmaX);
         this.modelSigmaY     .setValue(sigmaY);
         this.borderType = borderType;
@@ -82,11 +85,18 @@ public class GaussianBlurTab implements ITab {
 
             try {
                 Mat matDest = new Mat();
-                Imgproc.GaussianBlur(matSrc, matDest, new Size(modelKernelSizeX.getValue(), modelKernelSizeY.getValue()), modelSigmaX.getValue(), modelKernelSizeY.getValue());
+                Imgproc.GaussianBlur(
+                    matSrc,
+                    matDest,
+                    new Size(modelKernelSizeW.getValue(),
+                             modelKernelSizeH.getValue()),
+                    modelSigmaX.getValue(),
+                    modelSigmaY.getValue());
 
                 image = ImgHelper.toBufferedImage(matDest);
             } catch (CvException ex) {
-                logger.error("", ex);
+                logger.error(ex.toString());
+                image = ImgHelper.failedImage();
             }
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
@@ -127,28 +137,78 @@ public class GaussianBlurTab implements ITab {
         boxCenterLeft.add(UiHelper.makeAsBoostCheckBox(() -> boosting, b -> boosting = b, this::resetImage));
 
         {
-            Box boxOptions = Box.createHorizontalBox();
-            boxOptions.setBorder(BorderFactory.createTitledBorder("GaussianBlur"));
+            Box boxKernelSize = Box.createHorizontalBox();
+            boxKernelSize.setBorder(BorderFactory.createTitledBorder("Kernel size"));
+            boxKernelSize.setToolTipText("Gaussian kernel size. ksize.width and ksize.height can differ but they both must be positive and odd."
+                                       + " Or they can be zero’s and then they are computed from sigma* .");
+            boxKernelSize.add(Box.createHorizontalGlue());
+            UiHelper.makeSliderVert(boxKernelSize, modelKernelSizeW, "Width", "Kernel size Width");
+            boxKernelSize.add(Box.createHorizontalStrut(2));
+            UiHelper.makeSliderVert(boxKernelSize, modelKernelSizeH, "Height", "Kernel size Height");
+            boxKernelSize.add(Box.createHorizontalGlue());
 
-            boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, modelKernelSizeX     , "kSizeX"     , "Kernel size X");
-            boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, modelKernelSizeY     , "kSizeY"     , "Kernel size Y");
-            boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, modelSigmaX, "SigmaX", "The minimum gain factor");
-            boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, modelSigmaY, "SigmaY", "The maximum gain factor");
-            boxOptions.add(Box.createHorizontalGlue());
+            Box boxSigma = Box.createHorizontalBox();
+            boxSigma.setBorder(BorderFactory.createTitledBorder("Sigma"));
 
+            boxSigma.add(Box.createHorizontalGlue());
+            UiHelper.makeSliderVert(boxSigma, modelSigmaX, "X", "Gaussian kernel standard deviation in X direction");
+            boxSigma.add(Box.createHorizontalStrut(2));
+            UiHelper.makeSliderVert(boxSigma, modelSigmaY, "Y", "Gaussian kernel standard deviation in Y direction; if sigmaY is zero, it is set to be equal to sigmaX, if both sigmas are zeros, they are computed from ksize.width and ksize.height , respectively (see getGaussianKernel() for details); to fully control the result regardless of possible future modifications of all this semantics, it is recommended to specify all of ksize, sigmaX, and sigmaY.");
+            boxSigma.add(Box.createHorizontalGlue());
+
+            Box box4Borders = Box.createVerticalBox();
+            box4Borders.setBorder(BorderFactory.createTitledBorder("Border type"));
+            box4Borders.setToolTipText("Pixel extrapolation method");
+            ButtonGroup radioGroup = new ButtonGroup();
+            for (OpenCvHelper.BorderTypes border : OpenCvHelper.BorderTypes.values()) {
+                JRadioButton radioBtnAlg = new JRadioButton(border.name(), border == this.borderType);
+                radioBtnAlg.setActionCommand(border.name());
+                radioBtnAlg.setToolTipText("Pixel extrapolation method");
+                radioBtnAlg.addItemListener(ev -> {
+                    if (ev.getStateChange() == ItemEvent.SELECTED) {
+                        this.borderType = border;
+                        logger.trace("Border type changed to {}", border);
+                        resetImage();
+                    }
+                });
+                box4Borders.add(radioBtnAlg);
+                radioGroup.add(radioBtnAlg);
+            }
+
+            Box box4Sliders = Box.createHorizontalBox();
+            box4Sliders.setBorder(BorderFactory.createTitledBorder("GaussianBlur"));
+
+            box4Sliders.add(Box.createHorizontalGlue());
+            box4Sliders.add(boxKernelSize);
+            box4Sliders.add(Box.createHorizontalStrut(2));
+            box4Sliders.add(boxSigma);
+            box4Sliders.add(Box.createHorizontalGlue());
+
+            Box boxOptions = Box.createVerticalBox();
+            boxOptions.add(Box.createVerticalStrut(2));
+            boxOptions.add(box4Sliders);
+            boxOptions.add(Box.createVerticalStrut(2));
+            boxOptions.add(box4Borders);
+            boxOptions.add(Box.createVerticalStrut(2));
             boxCenterLeft.add(boxOptions);
 
-            modelKernelSizeX.getWrapped().addChangeListener(ev -> {
-                logger.trace("modelKernelSizeX: value={}", modelKernelSizeX.getFormatedText());
-                debounceResetImage();
+            modelKernelSizeW.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelKernelSizeW: value={}", modelKernelSizeW.getFormatedText());
+                int val = modelKernelSizeW.getValue();
+                int valValid = onlyZeroOrOdd(val);
+                if (val == valValid)
+                    debounceResetImage();
+                else
+                    SwingUtilities.invokeLater(() -> modelKernelSizeW.setValue(valValid));
             });
-            modelKernelSizeY.getWrapped().addChangeListener(ev -> {
-                logger.trace("modelKernelSizeY: value={}", modelKernelSizeY.getFormatedText());
-                debounceResetImage();
+            modelKernelSizeH.getWrapped().addChangeListener(ev -> {
+                logger.trace("modelKernelSizeH: value={}", modelKernelSizeH.getFormatedText());
+                int val = modelKernelSizeH.getValue();
+                int valValid = onlyZeroOrOdd(val);
+                if (val == valValid)
+                    debounceResetImage();
+                else
+                    SwingUtilities.invokeLater(() -> modelKernelSizeH.setValue(valValid));
             });
             modelSigmaX.getWrapped().addChangeListener(ev -> {
                 logger.trace("modelSigmaX: value={}", modelSigmaX.getFormatedText());
@@ -163,6 +223,14 @@ public class GaussianBlurTab implements ITab {
 
     private void debounceResetImage() {
         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
+    }
+
+    private static int onlyZeroOrOdd(int value) {
+        if (value == 0)
+            return value;
+        if ((value & 1) == 0)
+            return value - 1;
+        return value;
     }
 
 }

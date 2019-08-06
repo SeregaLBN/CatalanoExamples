@@ -76,4 +76,12 @@ public final class ImgHelper {
         return new Color((int)(c.getRed() * 0.2126), (int)(c.getGreen() * 0.7152), (int)(c.getBlue() * 0.0722), c.getAlpha());
     }
 
+    public static BufferedImage failedImage() {
+        BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+//        DataBufferInt intBuff = (DataBufferInt)image.getRaster().getDataBuffer();
+//        int[] buffer = intBuff.getData();
+//        buffer[0] = 0x000000FF;
+        return image;
+    }
+
 }
