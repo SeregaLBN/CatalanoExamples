@@ -3,6 +3,7 @@ package ksn.imgusage.tabs.opencv;
 import java.awt.Cursor;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
+import java.util.stream.Stream;
 
 import javax.swing.*;
 
@@ -91,7 +92,8 @@ public class GaussianBlurTab implements ITab {
                     new Size(modelKernelSizeW.getValue(),
                              modelKernelSizeH.getValue()),
                     modelSigmaX.getValue(),
-                    modelSigmaY.getValue());
+                    modelSigmaY.getValue(),
+                    borderType.getVal());
 
                 image = ImgHelper.toBufferedImage(matDest);
             } catch (CvException ex) {
@@ -160,8 +162,12 @@ public class GaussianBlurTab implements ITab {
             box4Borders.setBorder(BorderFactory.createTitledBorder("Border type"));
             box4Borders.setToolTipText("Pixel extrapolation method");
             ButtonGroup radioGroup = new ButtonGroup();
-            for (OpenCvHelper.BorderTypes border : OpenCvHelper.BorderTypes.values()) {
-                JRadioButton radioBtnAlg = new JRadioButton(border.name(), border == this.borderType);
+            Stream.of(OpenCvHelper.BorderTypes.values())
+                .filter(b -> b != BorderTypes.BORDER_TRANSPARENT) // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
+                .filter(b -> b != BorderTypes.BORDER_DEFAULT) // dublicate
+                .forEach(border ->
+            {
+                JRadioButton radioBtnAlg = new JRadioButton(border.name(), (border == this.borderType) || (border.getVal() == this.borderType.getVal()));
                 radioBtnAlg.setActionCommand(border.name());
                 radioBtnAlg.setToolTipText("Pixel extrapolation method");
                 radioBtnAlg.addItemListener(ev -> {
@@ -173,7 +179,7 @@ public class GaussianBlurTab implements ITab {
                 });
                 box4Borders.add(radioBtnAlg);
                 radioGroup.add(radioBtnAlg);
-            }
+            });
 
             Box box4Sliders = Box.createHorizontalBox();
             box4Sliders.setBorder(BorderFactory.createTitledBorder("GaussianBlur"));
