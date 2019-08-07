@@ -23,6 +23,7 @@ import ksn.imgusage.utils.OpenCvHelper;
 import ksn.imgusage.utils.OpenCvHelper.BorderTypes;
 import ksn.imgusage.utils.UiHelper;
 
+/** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1'>Blurs an image using a Gaussian filter</a> */
 public class GaussianBlurTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(GaussianBlurTab.class);

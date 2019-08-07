@@ -25,30 +25,74 @@ public final class OpenCvHelper {
 
 
 
-    /** Various border types, image boundaries are denoted with `|`
-     * (see /opencv-master/modules/core/include/opencv2/core/base.hpp) */
+    /** @see <a href='https://docs.opencv.org/3.4.2/d2/de8/group__core__array.html#ga209f2f4869e304c82d07739337eae7c5'>Various border types, image boundaries are denoted with `|`</a> */
     public enum BorderTypes {
-      BORDER_CONSTANT   (0), //!< `iiiiii|abcdefgh|iiiiiii`  with some specified `i`
-      BORDER_REPLICATE  (1), //!< `aaaaaa|abcdefgh|hhhhhhh`
-      BORDER_REFLECT    (2), //!< `fedcba|abcdefgh|hgfedcb`
-      BORDER_WRAP       (3), //!< `cdefgh|abcdefgh|abcdefg`
-      BORDER_REFLECT_101(4), //!< `gfedcb|abcdefgh|gfedcba`
-      BORDER_TRANSPARENT(5), //!< `uvwxyz|abcdefgh|ijklmno`
+        /** `iiiiii|abcdefgh|iiiiiii`  with some specified `i` */
+        BORDER_CONSTANT   (0),
+        /** `aaaaaa|abcdefgh|hhhhhhh` */
+        BORDER_REPLICATE  (1),
+        /** `fedcba|abcdefgh|hgfedcb` */
+        BORDER_REFLECT    (2),
+        /** `cdefgh|abcdefgh|abcdefg` */
+        BORDER_WRAP       (3),
+        /** `gfedcb|abcdefgh|gfedcba` */
+        BORDER_REFLECT_101(4),
+        /** `uvwxyz|abcdefgh|ijklmno` */
+        BORDER_TRANSPARENT(5),
 
-    //BORDER_REFLECT101 (BORDER_REFLECT_101), //!< same as BORDER_REFLECT_101
-      BORDER_DEFAULT    (BORDER_REFLECT_101.val), //!< same as BORDER_REFLECT_101
-      BORDER_ISOLATED   (16); //!< do not look outside of ROI
+      ///** same as BORDER_REFLECT_101 */
+      //BORDER_REFLECT101 (BORDER_REFLECT_101), //!<
+        /** same as {@link #BORDER_REFLECT_101} */
+        BORDER_DEFAULT    (BORDER_REFLECT_101.val),
+        /** do not look outside of ROI (Region Of Interest) */
+        BORDER_ISOLATED   (16);
 
-      private final int val;
-      private BorderTypes(int val) {
-          this.val = val;
-      }
+        private final int val;
+        private BorderTypes(int val) {
+            this.val = val;
+        }
 
-      public int getVal() {
-          return val;
-      }
+        public int getVal() {
+            return val;
+        }
 
-  }
+    }
+
+    /** @see <a href="https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga7be549266bad7b2e6a04db49827f9f32">type of morphological operation</a> */
+    public enum MorphTypes {
+        /** Erodes an image by using a specific structuring element. */
+        MORPH_ERODE    (0),
+        /** Dilates an image by using a specific structuring element. */
+        MORPH_DILATE   (1),
+        /** an opening operation
+            <p>𝚍𝚜𝚝=open(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)=dilate(erode(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)) */
+        MORPH_OPEN     (2),
+        /** a closing operation
+            <p>𝚍𝚜𝚝=close(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)=erode(dilate(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)) */
+        MORPH_CLOSE    (3),
+        /** a morphological gradient
+            <p>𝚍𝚜𝚝=morph_grad(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)=dilate(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)−erode(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝) */
+        MORPH_GRADIENT (4),
+        /** "top hat"
+            <p>𝚍𝚜𝚝=tophat(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)=𝚜𝚛𝚌−open(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝) */
+        MORPH_TOPHAT   (5),
+        /** "black hat"
+            <p>𝚍𝚜𝚝=blackhat(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)=close(𝚜𝚛𝚌,𝚎𝚕𝚎𝚖𝚎𝚗𝚝)−𝚜𝚛𝚌 */
+        MORPH_BLACKHAT (6),
+        /** "hit or miss" .- Only supported for CV_8UC1 binary images. A tutorial can be found in the documentation */
+        MORPH_HITMISS  (7);
+
+        private final int val;
+        private MorphTypes(int val) {
+            this.val = val;
+        }
+
+        public int getVal() {
+            return val;
+        }
+
+    }
+
 
 
     public static Mat fromImage(BufferedImage image) {

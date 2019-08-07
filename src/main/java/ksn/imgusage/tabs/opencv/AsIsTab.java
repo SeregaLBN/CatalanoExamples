@@ -20,6 +20,7 @@ import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 import ksn.imgusage.utils.UiHelper;
 
+/** for testing internal classes {@link ImgHelper} {@link OpenCvHelper} */
 public class AsIsTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(AsIsTab.class);

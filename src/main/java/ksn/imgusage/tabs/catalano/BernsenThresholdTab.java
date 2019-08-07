@@ -16,6 +16,7 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.utils.UiHelper;
 
+/** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BernsenThreshold.java'>Bernsen Threshold</a> */
 public class BernsenThresholdTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(BernsenThresholdTab.class);

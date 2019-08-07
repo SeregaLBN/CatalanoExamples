@@ -15,6 +15,7 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.utils.UiHelper;
 
+/** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/ArtifactsRemoval.java'>Remove artifacts caused by uneven lightning</a> */
 public class ArtifactsRemovalTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(ArtifactsRemovalTab.class);

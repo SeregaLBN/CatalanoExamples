@@ -16,6 +16,7 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.utils.UiHelper;
 
+/** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/AdaptiveContrastEnhancement.java'>Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change</a> */
 public class AdaptiveContrastTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(AdaptiveContrastTab.class);

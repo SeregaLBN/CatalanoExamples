@@ -15,6 +15,7 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.utils.UiHelper;
 
+/** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BrightnessCorrection.java'>Brightness adjusting in RGB color space</a> */
 public class BrightnessCorrectionTab implements ITab {
 
     private static final Logger logger = LoggerFactory.getLogger(BrightnessCorrectionTab.class);
