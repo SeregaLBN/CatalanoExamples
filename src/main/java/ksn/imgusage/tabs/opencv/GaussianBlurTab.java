@@ -158,9 +158,10 @@ public class GaussianBlurTab implements ITab {
             UiHelper.makeSliderVert(boxSigma, modelSigmaY, "Y", "Gaussian kernel standard deviation in Y direction; if sigmaY is zero, it is set to be equal to sigmaX, if both sigmas are zeros, they are computed from ksize.width and ksize.height , respectively (see getGaussianKernel() for details); to fully control the result regardless of possible future modifications of all this semantics, it is recommended to specify all of ksize, sigmaX, and sigmaY.");
             boxSigma.add(Box.createHorizontalGlue());
 
-            Box box4Borders = Box.createVerticalBox();
+            Box box4Borders = Box.createHorizontalBox();
             box4Borders.setBorder(BorderFactory.createTitledBorder("Border type"));
-            box4Borders.setToolTipText("Pixel extrapolation method");
+            Box box4Borders1 = Box.createVerticalBox();
+            box4Borders1.setToolTipText("Pixel extrapolation method");
             ButtonGroup radioGroup = new ButtonGroup();
             Stream.of(OpenCvHelper.BorderTypes.values())
                 .filter(b -> b != BorderTypes.BORDER_TRANSPARENT) // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
@@ -177,12 +178,14 @@ public class GaussianBlurTab implements ITab {
                         resetImage();
                     }
                 });
-                box4Borders.add(radioBtnAlg);
+                box4Borders1.add(radioBtnAlg);
                 radioGroup.add(radioBtnAlg);
             });
+            box4Borders.add(Box.createHorizontalGlue());
+            box4Borders.add(box4Borders1);
+            box4Borders.add(Box.createHorizontalGlue());
 
             Box box4Sliders = Box.createHorizontalBox();
-            box4Sliders.setBorder(BorderFactory.createTitledBorder("GaussianBlur"));
 
             box4Sliders.add(Box.createHorizontalGlue());
             box4Sliders.add(boxKernelSize);
@@ -191,6 +194,7 @@ public class GaussianBlurTab implements ITab {
             box4Sliders.add(Box.createHorizontalGlue());
 
             Box boxOptions = Box.createVerticalBox();
+            boxOptions.setBorder(BorderFactory.createTitledBorder("GaussianBlur"));
             boxOptions.add(Box.createVerticalStrut(2));
             boxOptions.add(box4Sliders);
             boxOptions.add(Box.createVerticalStrut(2));
@@ -237,6 +241,16 @@ public class GaussianBlurTab implements ITab {
         if ((value & 1) == 0)
             return value - 1;
         return value;
+    }
+
+    @Override
+    public void printParams() {
+        logger.info("kernelSize={{}, {}}, sigmaX={}, sigmaY={}, borderType={}",
+                modelKernelSizeW.getFormatedText(),
+                modelKernelSizeH.getFormatedText(),
+                modelSigmaX     .getFormatedText(),
+                modelSigmaY     .getFormatedText(),
+                borderType);
     }
 
 }
