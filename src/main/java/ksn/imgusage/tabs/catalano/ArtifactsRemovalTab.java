@@ -128,4 +128,9 @@ public class ArtifactsRemovalTab implements ITab {
         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
     }
 
+    @Override
+    public void printParams() {
+        logger.info("windowSize={}", modelWinSize.getFormatedText());
+    }
+
 }

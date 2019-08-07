@@ -139,4 +139,11 @@ public class BernsenThresholdTab implements ITab {
         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
     }
 
+    @Override
+    public void printParams() {
+        logger.info("radius={}, contrastThreshold={}",
+                modelRadius           .getFormatedText(),
+                modelContrastThreshold.getFormatedText());
+    }
+
 }

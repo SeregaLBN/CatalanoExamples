@@ -9,4 +9,6 @@ public interface ITab {
     void updateSource(ITab newSource);
     void resetImage();
 
+    void printParams();
+
 }

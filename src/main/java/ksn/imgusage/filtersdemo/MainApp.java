@@ -116,7 +116,8 @@ public class MainApp {
     }
     private void onClose() {
         frame.dispose();
-        logger.warn("Good bay!");
+        logger.warn("Good bay!\n\n");
+        tabs.forEach(ITab::printParams);
     }
 
     private void onSourceChanged(ITab tab) {
@@ -172,13 +173,13 @@ public class MainApp {
             return null;
         };
 
-        // map Catalano filter to tab class
+        // map OpenCV filters to tab classes
         Stream<Supplier<ITab>> opencvMapping = Stream.of( // alphabetical sort
             () -> opencvHandler.apply("AsIs"        , AsIsTab        .class),
             () -> opencvHandler.apply("GaussianBlur", GaussianBlurTab.class)
         );
 
-        // map Catalano filter to tab class
+        // map Catalano filters to tab classes
         Stream<Supplier<ITab>> catalanoMapping = Stream.of( // alphabetical sort
             () -> catalanoHandler.apply(AdaptiveContrastEnhancement.class,      AdaptiveContrastTab.class),
             () -> catalanoHandler.apply(ArtifactsRemoval           .class,      ArtifactsRemovalTab.class),

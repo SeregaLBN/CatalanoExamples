@@ -119,4 +119,9 @@ public class AsIsTab implements ITab {
         }
     }
 
+    @Override
+    public void printParams() {
+        logger.info("isGray={}", isGray);
+    }
+
 }

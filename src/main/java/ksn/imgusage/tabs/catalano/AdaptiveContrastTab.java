@@ -178,4 +178,14 @@ public class AdaptiveContrastTab implements ITab {
         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
     }
 
+    @Override
+    public void printParams() {
+        logger.info("windowSize={}, k1={}, k2={}, minGain={}, maxGain={}",
+                modelWinSize.getFormatedText(),
+                modelK1     .getFormatedText(),
+                modelK2     .getFormatedText(),
+                modelMinGain.getFormatedText(),
+                modelMaxGain.getFormatedText());
+    }
+
 }

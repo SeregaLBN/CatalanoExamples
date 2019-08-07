@@ -164,4 +164,12 @@ public class RotateTab implements ITab {
         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
     }
 
+    @Override
+    public void printParams() {
+        logger.info("angle={}, keepSize={}, rotateAlgorithm={}",
+                modelAngle.getFormatedText(),
+                keepSize,
+                algorithm);
+    }
+
 }

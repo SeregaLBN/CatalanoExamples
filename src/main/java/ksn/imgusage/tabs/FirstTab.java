@@ -163,4 +163,9 @@ public class FirstTab implements ITab {
         logger.info("onTabChanged");
     }
 
+    @Override
+    public void printParams() {
+        logger.info("isGray={}", isGray);
+    }
+
 }

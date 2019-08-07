@@ -102,4 +102,9 @@ public class BlurTab implements ITab {
         boxCenterLeft.add(UiHelper.makeAsBoostCheckBox(() -> boosting, b -> boosting = b, this::resetImage));
     }
 
+    @Override
+    public void printParams() {
+        logger.info("I am :)");
+    }
+
 }
