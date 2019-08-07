@@ -123,7 +123,7 @@ public class MainApp {
         tabs.forEach(ITab::printParams);
     }
 
-    private void onSourceChanged(ITab tab) {
+    private void onImageChanged(ITab tab) {
         int pos = tabs.lastIndexOf(tab);
         assert pos > 0;
 
@@ -135,7 +135,7 @@ public class MainApp {
             @Override
             public JTabbedPane getTabPanel() { return MainApp.this.getTabPanel(); }
             @Override
-            public void onImageChanged(ITab tab) {    MainApp.this.onSourceChanged(tab); }
+            public void onImageChanged(ITab tab) {    MainApp.this.onImageChanged(tab); }
             @Override
             public void onAddNewFilter() {            MainApp.this.onAddNewFilter(); }
             @Override
@@ -297,8 +297,8 @@ public class MainApp {
     private ITab examplePipelineOpenCvFilters(ITab prevTab) {
         List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
           //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2,  true, false),
-            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, false, new Size(7, 0), 25, 55, CvBorderTypes.BORDER_DEFAULT),
-            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, false, CvMorphTypes.MORPH_OPEN, new IMatter.StructuringElementParams())
+            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, false, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
+            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, false, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams())
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);

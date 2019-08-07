@@ -14,7 +14,7 @@ public interface IMatter {
 
     /** Describe how to created {@link Mat} */
     enum Source {
-        /** The {@link Mat> created directly through the constructor {@link Mat#Mat(int, int, int, org.opencv.core.Scalar)} */
+        /** The {@link Mat} created directly through the constructor {@link Mat#Mat(int, int, int, org.opencv.core.Scalar)} */
         CTOR,
 
         /** The {@link Mat} object created by calling {@link Imgproc#getStructuringElement(int, org.opencv.core.Size, org.opencv.core.Point)} */
@@ -22,6 +22,8 @@ public interface IMatter {
     }
 
     Mat createMat();
+
+    String getName();
 
 
 
@@ -35,6 +37,8 @@ public interface IMatter {
         private static final double MIN_SCALAR_VECTOR = -999;
         private static final double MAX_SCALAR_VECTOR =  999;
 
+        public static final String NAME = "Mat::new";
+
         private SliderIntModel    modelRows       = new SliderIntModel(1, 0, MIN_ROWS, MAX_ROWS);
         private SliderIntModel    modelCols       = new SliderIntModel(1, 0, MIN_COLS, MAX_COLS);
         private CvArrayType       type            = CvArrayType.CV_8UC1;
@@ -42,6 +46,17 @@ public interface IMatter {
         private SliderDoubleModel modelScalarVal1 = new SliderDoubleModel(0, 0, MIN_SCALAR_VECTOR, MAX_SCALAR_VECTOR);
         private SliderDoubleModel modelScalarVal2 = new SliderDoubleModel(0, 0, MIN_SCALAR_VECTOR, MAX_SCALAR_VECTOR);
         private SliderDoubleModel modelScalarVal3 = new SliderDoubleModel(0, 0, MIN_SCALAR_VECTOR, MAX_SCALAR_VECTOR);
+
+        public CtorParams() {}
+        public CtorParams(int rows, int cols, CvArrayType type, double scalarVal0, double scalarVal1, double scalarVal2, double scalarVal3) {
+            this.modelRows.setValue(rows);
+            this.modelCols.setValue(cols);
+            this.type = type;
+            this.modelScalarVal0.setValue(scalarVal0);
+            this.modelScalarVal1.setValue(scalarVal1);
+            this.modelScalarVal2.setValue(scalarVal2);
+            this.modelScalarVal3.setValue(scalarVal3);
+        }
 
         public SliderIntModel    getModelRows()       { return modelRows; }
         public SliderIntModel    getModelCols()       { return modelCols; }
@@ -68,8 +83,11 @@ public interface IMatter {
         }
 
         @Override
+        public String getName() { return NAME; }
+
+        @Override
         public String toString() {
-            return String.format("new Mat(rows={%s}, cols={%s}, type={%s}, new Scalar(v0={%s}, v1={%s}, v2={%s}, v3={%s}))",
+            return String.format(NAME + "(rows={%s}, cols={%s}, type={%s}, new Scalar(v0={%s}, v1={%s}, v2={%s}, v3={%s}))",
                     modelRows.getFormatedText(),
                     modelCols.getFormatedText(),
                     type.name(),
@@ -88,6 +106,8 @@ public interface IMatter {
         private static final int MAX_KERNEL_SIZE  = 999;
         private static final int MIN_ANCHOR  =  -1;
         private static final int MAX_ANCHOR  = 999;
+
+        public static final String NAME = "Imgproc.getStructuringElement";
 
         private CvMorphShapes  shape            = CvMorphShapes.MORPH_RECT;
         private SliderIntModel modelKernelSizeW = new SliderIntModel(10, 0, MIN_KERNEL_SIZE, MAX_KERNEL_SIZE);
@@ -127,8 +147,11 @@ public interface IMatter {
         }
 
         @Override
+        public String getName() { return NAME; }
+
+        @Override
         public String toString() {
-            return String.format("Imgproc.getStructuringElement(shape={%s}, kernel=new Size(width={%s}, height={%s}), anchor=new Point(x={%s}, y={%s}))",
+            return String.format(NAME + "(shape={%s}, kernel=new Size(width={%s}, height={%s}), anchor=new Point(x={%s}, y={%s}))",
                     shape,
                     modelKernelSizeW.getFormatedText(),
                     modelKernelSizeH.getFormatedText(),

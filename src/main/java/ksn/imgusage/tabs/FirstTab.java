@@ -12,7 +12,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,11 +155,6 @@ public class FirstTab implements ITab {
         boxCenterLeft.add(btnScale);
 
         UiHelper.makeSameWidth(new Component[] { btnLoadImage, btnAsGray, btnScale });
-    }
-
-
-    void onTabChanged(ChangeEvent ev) {
-        logger.info("onTabChanged");
     }
 
     @Override
