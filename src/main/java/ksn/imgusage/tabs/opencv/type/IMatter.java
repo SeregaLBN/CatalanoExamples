@@ -31,9 +31,9 @@ public interface IMatter {
     public static class CtorParams implements IMatter {
 
         private static final int MIN_ROWS = 1;
-        private static final int MAX_ROWS = 99999;
+        private static final int MAX_ROWS = 1000;
         private static final int MIN_COLS = 1;
-        private static final int MAX_COLS = 99999;
+        private static final int MAX_COLS = 1000;
         private static final double MIN_SCALAR_VECTOR = -999;
         private static final double MAX_SCALAR_VECTOR =  999;
 
@@ -87,14 +87,14 @@ public interface IMatter {
 
         @Override
         public String toString() {
-            return String.format(NAME + "(rows={%s}, cols={%s}, type={%s}, new Scalar(v0={%s}, v1={%s}, v2={%s}, v3={%s}))",
-                    modelRows.getFormatedText(),
-                    modelCols.getFormatedText(),
-                    type.name(),
-                    modelScalarVal0.getFormatedText(),
-                    modelScalarVal1.getFormatedText(),
-                    modelScalarVal2.getFormatedText(),
-                    modelScalarVal3.getFormatedText());
+            return String.format(NAME + "(rows=%s, cols=%s, type=%s, new Scalar(v0=%s, v1=%s, v2=%s, v3=%s))",
+                modelRows.getFormatedText(),
+                modelCols.getFormatedText(),
+                type.name(),
+                modelScalarVal0.getFormatedText(),
+                modelScalarVal1.getFormatedText(),
+                modelScalarVal2.getFormatedText(),
+                modelScalarVal3.getFormatedText());
         }
 
     }
@@ -151,12 +151,12 @@ public interface IMatter {
 
         @Override
         public String toString() {
-            return String.format(NAME + "(shape={%s}, kernel=new Size(width={%s}, height={%s}), anchor=new Point(x={%s}, y={%s}))",
-                    shape,
-                    modelKernelSizeW.getFormatedText(),
-                    modelKernelSizeH.getFormatedText(),
-                    modelAnchorX    .getFormatedText(),
-                    modelAnchorY    .getFormatedText());
+            return String.format(NAME + "(shape=%s, kernel=new Size(width=%s, height=%s), anchor=new Point(x=%s, y=%s))",
+                shape,
+                modelKernelSizeW.getFormatedText(),
+                modelKernelSizeH.getFormatedText(),
+                modelAnchorX    .getFormatedText(),
+                modelAnchorY    .getFormatedText());
         }
 
     }

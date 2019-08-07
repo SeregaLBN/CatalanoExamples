@@ -1,8 +1,8 @@
 package ksn.imgusage.tabs.opencv;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 
@@ -133,84 +133,94 @@ public class MorphologyExTab implements ITab {
 
         boxCenterLeft.add(UiHelper.makeAsBoostCheckBox(() -> boosting, b -> boosting = b, this::resetImage));
 
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("MorphologyEx"));
 
-        Box box4MorphOper = Box.createHorizontalBox();
-        box4MorphOper.setBorder(BorderFactory.createTitledBorder("Morphological operation"));
-        box4MorphOper.setMaximumSize(new Dimension(1000, 1));
-        JComboBox<CvMorphTypes> comboBoxMorphOper = new JComboBox<>(CvMorphTypes.values());
-        comboBoxMorphOper.setSelectedItem(morphologicalOperation);
-        comboBoxMorphOper.setAlignmentX(Component.LEFT_ALIGNMENT);
-        comboBoxMorphOper.setToolTipText("Type of a morphological operation");
-        comboBoxMorphOper.addActionListener(ev -> {
-            morphologicalOperation = (CvMorphTypes)comboBoxMorphOper.getSelectedItem();
-            debounceResetImage();
-        });
-        box4MorphOper.add(comboBoxMorphOper);
-
-
-        Box box4Kernel = Box.createHorizontalBox();
-        box4Kernel.setBorder(BorderFactory.createTitledBorder("Kernel"));
-        box4Kernel.setToolTipText("Structuring element");
-        Box box4Matter = Box.createVerticalBox();
-        box4Matter.setToolTipText("How to create kernel?");
-        Box box4Kernel2 = Box.createHorizontalBox();
-        ButtonGroup radioGroup = new ButtonGroup();
         {
-            JRadioButton radioBtn1 = new JRadioButton(IMatter.CtorParams.NAME, kernel instanceof IMatter.CtorParams);
-            radioBtn1.setToolTipText("The Kernel created directly through the constructor");
-            radioBtn1.addItemListener(ev -> {
-                if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    this.kernel = kernel1;
-                    logger.trace("Kernel type changed to {}", this.kernel.getClass().getSimpleName());
-                    makeKernel1(box4Kernel2);
-                    resetImage();
-                }
+            JComboBox<CvMorphTypes> comboBoxMorphOper = new JComboBox<>(CvMorphTypes.values());
+            comboBoxMorphOper.setBorder(BorderFactory.createTitledBorder("Morphological operation"));
+            comboBoxMorphOper.setSelectedItem(morphologicalOperation);
+            comboBoxMorphOper.setAlignmentX(Component.LEFT_ALIGNMENT);
+            comboBoxMorphOper.setToolTipText("Type of a morphological operation");
+            comboBoxMorphOper.addActionListener(ev -> {
+                morphologicalOperation = (CvMorphTypes)comboBoxMorphOper.getSelectedItem();
+                debounceResetImage();
             });
-            box4Matter.add(radioBtn1);
-            radioGroup.add(radioBtn1);
-
-            JRadioButton radioBtn2 = new JRadioButton(IMatter.StructuringElementParams.NAME, kernel instanceof IMatter.StructuringElementParams);
-            radioBtn2.setToolTipText("The Kernel created using getStructuringElement.");
-            radioBtn2.addItemListener(ev -> {
-                if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    this.kernel = kernel2;
-                    logger.trace("Kernel type changed to {}", this.kernel.getClass().getSimpleName());
-                    makeKernel2(box4Kernel2);
-                    resetImage();
-                }
-            });
-            box4Matter.add(radioBtn2);
-            radioGroup.add(radioBtn2);
-        }
-        box4Kernel.add(Box.createHorizontalGlue());
-        box4Kernel.add(box4Matter);
-        box4Kernel.add(Box.createHorizontalStrut(2));
-        box4Kernel.add(box4Kernel2);
-        box4Kernel.add(Box.createHorizontalGlue());
-
-        if (kernel instanceof IMatter.CtorParams) {
-
+            panel.add(comboBoxMorphOper, BorderLayout.NORTH);
         }
 
-        Box boxOptions = Box.createVerticalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder("MorphologyEx"));
+        {
+            JPanel panelKernel = new JPanel();
+            panelKernel.setLayout(new BorderLayout());
+            panelKernel.setBorder(BorderFactory.createTitledBorder("Kernel"));
 
-        boxOptions.add(Box.createVerticalStrut(4));
-        boxOptions.add(box4MorphOper);
-        boxOptions.add(Box.createVerticalStrut(2));
-        boxOptions.add(box4Kernel);
-        boxOptions.add(Box.createVerticalGlue());
+            JPanel panelKernel2 = new JPanel();
+            panelKernel2.setLayout(new BorderLayout());
 
-        boxCenterLeft.add(boxOptions);
+            {
+                JPanel panelCreateMethod = new JPanel();
+                panelCreateMethod.setLayout(new BorderLayout());
+                panelCreateMethod.setBorder(BorderFactory.createTitledBorder("Create method"));
+                panelCreateMethod.setToolTipText("How to create kernel?");
+                Box boxMatter = Box.createHorizontalBox();
+                ButtonGroup radioGroup = new ButtonGroup();
+
+                JRadioButton radioBtn1 = new JRadioButton(IMatter.CtorParams.NAME, kernel instanceof IMatter.CtorParams);
+                radioBtn1.setToolTipText("The Kernel created directly through the constructor");
+                radioBtn1.addItemListener(ev -> {
+                    if (ev.getStateChange() == ItemEvent.SELECTED) {
+                        this.kernel = kernel1;
+                        logger.trace("Kernel type changed to {}", this.kernel.getClass().getSimpleName());
+                        makeKernel1(panelKernel2);
+                        panelKernel2.revalidate();
+                        resetImage();
+                    }
+                });
+                boxMatter.add(radioBtn1);
+                radioGroup.add(radioBtn1);
+
+                JRadioButton radioBtn2 = new JRadioButton(IMatter.StructuringElementParams.NAME, kernel instanceof IMatter.StructuringElementParams);
+                radioBtn2.setToolTipText("The Kernel created using getStructuringElement.");
+                radioBtn2.addItemListener(ev -> {
+                    if (ev.getStateChange() == ItemEvent.SELECTED) {
+                        this.kernel = kernel2;
+                        logger.trace("Kernel type changed to {}", this.kernel.getClass().getSimpleName());
+                        makeKernel2(panelKernel2);
+                        panelKernel2.revalidate();
+                        resetImage();
+                    }
+                });
+                boxMatter.add(radioBtn2);
+                radioGroup.add(radioBtn2);
+
+                if (kernel instanceof IMatter.CtorParams)
+                    makeKernel1(panelKernel2);
+                else
+                if (kernel instanceof IMatter.StructuringElementParams)
+                    makeKernel2(panelKernel2);
+                else
+                    logger.error("Unknown kernel type! Support him!");
+
+                panelCreateMethod.add(boxMatter  , BorderLayout.CENTER);
+
+                panelKernel.add(panelCreateMethod, BorderLayout.NORTH);
+                panelKernel.add(panelKernel2     , BorderLayout.CENTER);
+            }
+
+            panel.add(panelKernel, BorderLayout.CENTER);
+        }
+
+        boxCenterLeft.add(panel);
     }
 
-    private Box boxKernel1, boxKernel2;
-    private void makeKernel1(Box own) {
-        if (boxKernel2 != null)
-            boxKernel2.setVisible(false);
+    private JPanel panelKernel1, panelKernel2;
+    private void makeKernel1(JPanel own) {
+        if (panelKernel2 != null)
+            panelKernel2.setVisible(false);
 
-        if (boxKernel1 != null) {
-            boxKernel1.setVisible(true);
+        if (panelKernel1 != null) {
+            panelKernel1.setVisible(true);
             return;
         }
 
@@ -256,21 +266,20 @@ public class MorphologyExTab implements ITab {
         box4Sliders.add(boxScalar);
         box4Sliders.add(Box.createHorizontalGlue());
 
-        boxKernel1 = Box.createVerticalBox();
-        boxKernel1.setBorder(BorderFactory.createTitledBorder("GaussianBlur"));
-        boxKernel1.add(Box.createVerticalStrut(2));
-        boxKernel1.add(box4Sliders);
-        boxKernel1.add(Box.createVerticalStrut(2));
-        boxKernel1.add(box4ArrayType);
-        boxKernel1.add(Box.createVerticalStrut(2));
-        own.add(boxKernel1);
+        JPanel panelKernel1 = new JPanel();
+        panelKernel1.setLayout(new BorderLayout());
+        panelKernel1.setBorder(BorderFactory.createTitledBorder(IMatter.CtorParams.NAME));
+        panelKernel1.add(box4Sliders, BorderLayout.CENTER);
+        panelKernel1.add(box4ArrayType, BorderLayout.SOUTH);
+        own.add(panelKernel1);
     }
-    private void makeKernel2(Box own) {
-        if (boxKernel1 != null)
-            boxKernel1.setVisible(false);
 
-        if (boxKernel2 != null) {
-            boxKernel2.setVisible(true);
+    private void makeKernel2(JPanel own) {
+        if (panelKernel1 != null)
+            panelKernel1.setVisible(false);
+
+        if (panelKernel2 != null) {
+            panelKernel2.setVisible(true);
             return;
         }
     }
