@@ -18,9 +18,8 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
 import ksn.imgusage.utils.ImgHelper;
-import ksn.imgusage.utils.OpenCvHelper;
-import ksn.imgusage.utils.OpenCvHelper.BorderTypes;
 import ksn.imgusage.utils.UiHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1'>Blurs an image using a Gaussian filter</a> */
@@ -41,11 +40,11 @@ public class GaussianBlurTab implements ITab {
     private BufferedImage image;
     private boolean boosting = true;
     private Runnable imagePanelInvalidate;
-    private SliderIntModel modelKernelSizeW = new    SliderIntModel( 7, 1, MIN_KSIZE, MAX_KSIZE);
-    private SliderIntModel modelKernelSizeH = new    SliderIntModel( 0, 1, MIN_KSIZE, MAX_KSIZE);
+    private SliderIntModel modelKernelSizeW = new    SliderIntModel( 7, 0, MIN_KSIZE, MAX_KSIZE);
+    private SliderIntModel modelKernelSizeH = new    SliderIntModel( 0, 0, MIN_KSIZE, MAX_KSIZE);
     private SliderDoubleModel modelSigmaX   = new SliderDoubleModel(25, 0, MIN_SIGMA, MAX_SIGMA);
     private SliderDoubleModel modelSigmaY   = new SliderDoubleModel(25, 0, MIN_SIGMA, MAX_SIGMA);
-    private BorderTypes borderType = BorderTypes.BORDER_DEFAULT;
+    private CvBorderTypes borderType = CvBorderTypes.BORDER_DEFAULT;
     private Timer timer;
 
     public GaussianBlurTab(ITabHandler tabHandler, ITab source) {
@@ -55,7 +54,7 @@ public class GaussianBlurTab implements ITab {
         makeTab();
     }
 
-    public GaussianBlurTab(ITabHandler tabHandler, ITab source, boolean boosting, Size kernelSize, double sigmaX, double sigmaY, BorderTypes borderType) {
+    public GaussianBlurTab(ITabHandler tabHandler, ITab source, boolean boosting, Size kernelSize, double sigmaX, double sigmaY, CvBorderTypes borderType) {
         this.tabHandler = tabHandler;
         this.source = source;
         this.boosting = boosting;
@@ -164,9 +163,9 @@ public class GaussianBlurTab implements ITab {
             Box box4Borders1 = Box.createVerticalBox();
             box4Borders1.setToolTipText("Pixel extrapolation method");
             ButtonGroup radioGroup = new ButtonGroup();
-            Stream.of(OpenCvHelper.BorderTypes.values())
-                .filter(b -> b != BorderTypes.BORDER_TRANSPARENT) // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
-                .filter(b -> b != BorderTypes.BORDER_DEFAULT) // dublicate
+            Stream.of(CvBorderTypes.values())
+                .filter(b -> b != CvBorderTypes.BORDER_TRANSPARENT) // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
+                .filter(b -> b != CvBorderTypes.BORDER_DEFAULT) // dublicate
                 .forEach(border ->
             {
                 JRadioButton radioBtnAlg = new JRadioButton(border.name(), (border == this.borderType) || (border.getVal() == this.borderType.getVal()));

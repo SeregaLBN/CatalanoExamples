@@ -38,7 +38,10 @@ import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.AsIsTab;
 import ksn.imgusage.tabs.opencv.GaussianBlurTab;
 import ksn.imgusage.tabs.opencv.InitLib;
-import ksn.imgusage.utils.OpenCvHelper.BorderTypes;
+import ksn.imgusage.tabs.opencv.MorphologyExTab;
+import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
+import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
+import ksn.imgusage.tabs.opencv.type.IMatter;
 import ksn.imgusage.utils.SelectFilterDialog;
 
 public class MainApp {
@@ -176,7 +179,8 @@ public class MainApp {
         // map OpenCV filters to tab classes
         Stream<Supplier<ITab>> opencvMapping = Stream.of( // alphabetical sort
             () -> opencvHandler.apply("AsIs"        , AsIsTab        .class),
-            () -> opencvHandler.apply("GaussianBlur", GaussianBlurTab.class)
+            () -> opencvHandler.apply("GaussianBlur", GaussianBlurTab.class),
+            () -> opencvHandler.apply("MorphologyEx", MorphologyExTab.class)
         );
 
         // map Catalano filters to tab classes
@@ -250,7 +254,7 @@ public class MainApp {
     }
 
     void onTabChanged(ChangeEvent ev) {
-        logger.info("onTabChanged");
+        logger.trace("onTabChanged");
     }
 
     private void examplePipeline() {
@@ -293,7 +297,8 @@ public class MainApp {
     private ITab examplePipelineOpenCvFilters(ITab prevTab) {
         List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
           //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2,  true, false),
-            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, false, new Size(7, 0), 25, 55, BorderTypes.BORDER_DEFAULT)
+            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, false, new Size(7, 0), 25, 55, CvBorderTypes.BORDER_DEFAULT),
+            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, false, CvMorphTypes.MORPH_OPEN, new IMatter.StructuringElementParams())
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);
