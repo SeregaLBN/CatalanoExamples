@@ -54,7 +54,7 @@ public class MorphologyExTab extends OpencvFilterTab {
 
     @Override
     protected void applyFilter() {
-        Mat matSrc = ImgHelper.toMat(source.getImage());
+        Mat matSrc = ImgHelper.toMat(getSourceImage());
         // TODO
         // Source image. The number of channels can be arbitrary. The depth should be one of CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 
@@ -264,7 +264,7 @@ public class MorphologyExTab extends OpencvFilterTab {
 
         Box boxAnchor = Box.createHorizontalBox();
         boxAnchor.setBorder(BorderFactory.createTitledBorder("Anchor"));
-        boxKernelSize.setToolTipText("Anchor position within the element. The default value (−1,−1) means that the anchor is at the center. Note that only the shape of a cross-shaped element depends on the anchor position. In other cases the anchor just regulates how much the result of the morphological operation is shifted.");
+        boxAnchor.setToolTipText("Anchor position within the element. The default value (−1,−1) means that the anchor is at the center. Note that only the shape of a cross-shaped element depends on the anchor position. In other cases the anchor just regulates how much the result of the morphological operation is shifted.");
         boxAnchor.add(Box.createHorizontalGlue());
         boxAnchor.add(makeSliderVert(kernel2.getModelAnchorX(), "X", "X direction"));
         boxAnchor.add(Box.createHorizontalStrut(2));

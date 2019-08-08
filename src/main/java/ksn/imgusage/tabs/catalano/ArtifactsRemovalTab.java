@@ -34,7 +34,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
 
     @Override
     protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(source.getImage());
+        FastBitmap bmp = new FastBitmap(getSourceImage());
         if (boosting)
             bmp = boostImage(bmp, logger);
         if (!bmp.isGrayscale())

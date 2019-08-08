@@ -20,7 +20,7 @@ public abstract class BaseTab implements ITab {
     protected static final int WIDTH_LEFT_PANEL = 250;
 
     protected final ITabHandler tabHandler;
-    protected ITab source;
+    private ITab source;
     protected BufferedImage image;
     protected Boolean boosting;
     protected boolean addRemoveFilterButton = true;
@@ -35,15 +35,19 @@ public abstract class BaseTab implements ITab {
 
     public abstract String getTabName();
 
+    protected BufferedImage getSourceImage() {
+        if (source == null)
+            return null;
+
+        return source.getImage();
+    }
+
     @Override
     public BufferedImage getImage() {
         if (image != null)
             return image;
 
-        if (source == null)
-            return null;
-
-        BufferedImage src = source.getImage();
+        BufferedImage src = getSourceImage();
         if (src == null)
             return null;
 

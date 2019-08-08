@@ -7,11 +7,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.utils.UiHelper;
@@ -45,6 +41,11 @@ public class FirstTab extends BaseTab {
 
     @Override
     public String getTabName() { return "Original"; }
+
+    @Override
+    protected BufferedImage getSourceImage() {
+        return sourceImage;
+    }
 
     public boolean isScale() {
         return isScale;
@@ -91,7 +92,7 @@ public class FirstTab extends BaseTab {
             imagePanel.repaint();
         });
         SwingUtilities.invokeLater(btnLoadImage::requestFocus);
-        if (source == null)
+        if (sourceImage == null)
             SwingUtilities.invokeLater(btnLoadImage::doClick);
         boxCenterLeft.add(btnLoadImage);
 

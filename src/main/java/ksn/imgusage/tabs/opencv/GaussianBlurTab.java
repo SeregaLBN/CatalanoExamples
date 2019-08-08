@@ -53,7 +53,7 @@ public class GaussianBlurTab extends OpencvFilterTab {
 
     @Override
     protected void applyFilter() {
-        Mat matSrc = ImgHelper.toMat(source.getImage());
+        Mat matSrc = ImgHelper.toMat(getSourceImage());
         // TODO
         // input image; the image can have any number of channels, which are processed independently, but the depth should be CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 
