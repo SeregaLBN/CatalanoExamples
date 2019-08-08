@@ -30,7 +30,7 @@ public class FirstTab extends BaseTab {
         boolean isGray,
         boolean isScale
     ) {
-        super(tabHandler, null, false);
+        super(tabHandler, null, null);
         this.isGray  = isGray;
         this.isScale = isScale;
         this.addRemoveFilterButton = false;

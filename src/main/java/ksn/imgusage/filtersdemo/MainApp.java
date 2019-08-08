@@ -1,10 +1,6 @@
 package ksn.imgusage.filtersdemo;
 
-import java.awt.AlphaComposite;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -16,11 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
-import java.util.function.BooleanSupplier;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 import javax.swing.*;
@@ -40,6 +32,7 @@ import ksn.imgusage.tabs.opencv.GaussianBlurTab;
 import ksn.imgusage.tabs.opencv.InitLib;
 import ksn.imgusage.tabs.opencv.MorphologyExTab;
 import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
+import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
 import ksn.imgusage.tabs.opencv.type.IMatter;
 import ksn.imgusage.utils.SelectFilterDialog;
@@ -296,9 +289,9 @@ public class MainApp {
 
     private ITab examplePipelineOpenCvFilters(ITab prevTab) {
         List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
-          //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2,  true, false),
-            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, false, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
-            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, false, CvMorphTypes.MORPH_CLOSE, new IMatter.CtorParams())
+          //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, null, false),
+            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, null, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
+            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, null, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1))
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);

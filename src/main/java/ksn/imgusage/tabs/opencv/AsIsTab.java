@@ -35,7 +35,7 @@ public class AsIsTab extends OpencvFilterTab {
     @Override
     protected void applyFilter() {
         Mat mat = ImgHelper.toMat(getSourceImage());
-        if (boosting)
+        if ((boosting != null) && boosting.booleanValue())
             mat = boostImage(mat, logger);
         if (isGray)
             mat = OpenCvHelper.toGray(mat);

@@ -6,6 +6,7 @@ import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.tabs.BaseTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.opencv.OpencvFilterTab;
 import ksn.imgusage.utils.ImgHelper;
 
 public abstract class CatalanoFilterTab extends BaseTab {
@@ -15,8 +16,8 @@ public abstract class CatalanoFilterTab extends BaseTab {
     }
 
     public static FastBitmap boostImage(FastBitmap image, Logger logger) {
-        double zoomX = 400 / (double)image.getWidth();
-        double zoomY = 250 / (double)image.getHeight();
+        double zoomX = OpencvFilterTab.BOOST_SIZE_MAX_X / (double)image.getWidth();
+        double zoomY = OpencvFilterTab.BOOST_SIZE_MAX_Y / (double)image.getHeight();
         double zoom = Math.min(zoomX, zoomY);
         logger.trace("zoom={}", zoom);
         if (zoom < 1) {

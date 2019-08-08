@@ -9,14 +9,17 @@ import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.utils.ImgHelper;
 
 public abstract class OpencvFilterTab extends BaseTab {
+    
+    public static final int BOOST_SIZE_MAX_X = 400;
+    public static final int BOOST_SIZE_MAX_Y = 250;
 
     protected OpencvFilterTab(ITabHandler tabHandler, ITab source, Boolean boosting) {
         super(tabHandler, source, boosting);
     }
 
     public static Mat boostImage(Mat image, Logger logger) {
-        double zoomX = 400 / (double)image.width();
-        double zoomY = 250 / (double)image.height();
+        double zoomX = BOOST_SIZE_MAX_X / (double)image.width();
+        double zoomY = BOOST_SIZE_MAX_Y / (double)image.height();
         double zoom = Math.min(zoomX, zoomY);
         logger.trace("zoom={}", zoom);
         if (zoom < 1) {
