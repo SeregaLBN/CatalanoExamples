@@ -11,7 +11,7 @@ public enum CvMorphShapes {
     /** a cross-shaped structuring element */
     MORPH_CROSS  (Imgproc.MORPH_CROSS),
 
-    /** an elliptic structuring element, that is, a filled ellipse inscribed into the rectangle Rect(0, 0, esize.width, 0.esize.height) */
+    /** an elliptic structuring element, that is, a filled ellipse inscribed into the rectangle Rect(0, 0, esize.width, esize.height) */
     MORPH_ELLIPSE(Imgproc.MORPH_ELLIPSE);
 
 

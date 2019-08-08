@@ -102,10 +102,10 @@ public interface IMatter {
     /** for {@link Source#STRUCTURING_ELEMENT} */
     public static class StructuringElementParams implements IMatter {
 
-        private static final int MIN_KERNEL_SIZE  =   0;
-        private static final int MAX_KERNEL_SIZE  = 999;
-        private static final int MIN_ANCHOR  =  -1;
-        private static final int MAX_ANCHOR  = 999;
+        private static final int MIN_KERNEL_SIZE =   1;
+        private static final int MAX_KERNEL_SIZE = 999;
+        private static final int MIN_ANCHOR      =  -1;
+        private static final int MAX_ANCHOR      = MAX_KERNEL_SIZE;
 
         public static final String NAME = "Imgproc.getStructuringElement";
 

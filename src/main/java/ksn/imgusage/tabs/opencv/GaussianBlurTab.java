@@ -151,7 +151,6 @@ public class GaussianBlurTab implements ITab {
 
             Box boxSigma = Box.createHorizontalBox();
             boxSigma.setBorder(BorderFactory.createTitledBorder("Sigma"));
-
             boxSigma.add(Box.createHorizontalGlue());
             boxSigma.add(UiHelper.makeSliderVert(modelSigmaX, "X", "Gaussian kernel standard deviation in X direction"));
             boxSigma.add(Box.createHorizontalStrut(2));
@@ -186,7 +185,6 @@ public class GaussianBlurTab implements ITab {
             box4Borders.add(Box.createHorizontalGlue());
 
             Box box4Sliders = Box.createHorizontalBox();
-
             box4Sliders.add(Box.createHorizontalGlue());
             box4Sliders.add(boxKernelSize);
             box4Sliders.add(Box.createHorizontalStrut(2));

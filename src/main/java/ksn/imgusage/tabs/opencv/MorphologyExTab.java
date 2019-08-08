@@ -19,6 +19,7 @@ import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
+import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
 import ksn.imgusage.tabs.opencv.type.IMatter;
 import ksn.imgusage.utils.ImgHelper;
@@ -296,6 +297,81 @@ public class MorphologyExTab implements ITab {
             panelKernel2.setVisible(true);
             return;
         }
+
+        Box box4Shapes = Box.createHorizontalBox();
+        box4Shapes.setBorder(BorderFactory.createTitledBorder("Shape"));
+        Box box4Borders1 = Box.createVerticalBox();
+        box4Borders1.setToolTipText("Shape of the structuring element");
+        ButtonGroup radioGroup = new ButtonGroup();
+        for (CvMorphShapes shape : CvMorphShapes.values()) {
+            JRadioButton radioBtnAlg = new JRadioButton(shape.name(), shape == this.kernel2.getShape());
+            radioBtnAlg.setActionCommand(shape.name());
+            radioBtnAlg.setToolTipText("Shape of the structuring element");
+            radioBtnAlg.addItemListener(ev -> {
+                if (ev.getStateChange() == ItemEvent.SELECTED) {
+                    this.kernel2.setShape(shape);
+                    logger.trace("Shape param changed to {}", shape);
+                    resetImage();
+                }
+            });
+            box4Borders1.add(radioBtnAlg);
+            radioGroup.add(radioBtnAlg);
+        }
+        box4Shapes.add(Box.createHorizontalGlue());
+        box4Shapes.add(box4Borders1);
+        box4Shapes.add(Box.createHorizontalGlue());
+
+        Box boxKernelSize = Box.createHorizontalBox();
+        boxKernelSize.setBorder(BorderFactory.createTitledBorder("Kernel size"));
+        boxKernelSize.setToolTipText("Size of the structuring element");
+        boxKernelSize.add(Box.createHorizontalGlue());
+        boxKernelSize.add(UiHelper.makeSliderVert(kernel2.getModelKernelSizeW(), "Width", "Kernel size Width"));
+        boxKernelSize.add(Box.createHorizontalStrut(2));
+        boxKernelSize.add(UiHelper.makeSliderVert(kernel2.getModelKernelSizeH(), "Height", "Kernel size Height"));
+        boxKernelSize.add(Box.createHorizontalGlue());
+
+        Box boxAnchor = Box.createHorizontalBox();
+        boxAnchor.setBorder(BorderFactory.createTitledBorder("Anchor"));
+        boxKernelSize.setToolTipText("Anchor position within the element. The default value (−1,−1) means that the anchor is at the center. Note that only the shape of a cross-shaped element depends on the anchor position. In other cases the anchor just regulates how much the result of the morphological operation is shifted.");
+        boxAnchor.add(Box.createHorizontalGlue());
+        boxAnchor.add(UiHelper.makeSliderVert(kernel2.getModelAnchorX(), "X", "X direction"));
+        boxAnchor.add(Box.createHorizontalStrut(2));
+        boxAnchor.add(UiHelper.makeSliderVert(kernel2.getModelAnchorY(), "Y", "Y direction"));
+        boxAnchor.add(Box.createHorizontalGlue());
+
+        Box box4Sliders = Box.createHorizontalBox();
+        box4Sliders.add(Box.createHorizontalGlue());
+        box4Sliders.add(boxKernelSize);
+        box4Sliders.add(Box.createHorizontalStrut(2));
+        box4Sliders.add(boxAnchor);
+        box4Sliders.add(Box.createHorizontalGlue());
+
+        panelKernel2 = new JPanel();
+        panelKernel2.setLayout(new BorderLayout());
+        panelKernel2.setBorder(BorderFactory.createTitledBorder(IMatter.StructuringElementParams.NAME));
+        panelKernel2.add(box4Shapes , BorderLayout.NORTH);
+        panelKernel2.add(box4Sliders, BorderLayout.CENTER);
+        panelCreateParams.add(panelKernel2);
+
+        addModelChangeListener("kernel2ModelKernelSizeW", kernel2.getModelKernelSizeW(),  true, kernel2.getModelAnchorX());
+        addModelChangeListener("kernel2ModelKernelSizeH", kernel2.getModelKernelSizeH(),  true, kernel2.getModelAnchorY());
+        addModelChangeListener("kernel2ModelAnchorX"    , kernel2.getModelAnchorX()    , false, kernel2.getModelKernelSizeW());
+        addModelChangeListener("kernel2ModelAnchorY"    , kernel2.getModelAnchorY()    , false, kernel2.getModelKernelSizeH());
+    }
+
+    private void addModelChangeListener(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck) {
+        model.getWrapped().addChangeListener(ev -> {
+            logger.trace("{}: value={}", name, model.getFormatedText());
+            Integer val = model.getValue();
+            if (checkMax) {
+                if (val <= modelToCheck.getValue())
+                    modelToCheck.setValue(val - 1);
+            } else {
+                if (val >= modelToCheck.getValue())
+                    modelToCheck.setValue(val + 1);
+            }
+            debounceResetImage();
+        });
     }
 
     private void debounceResetImage() {
