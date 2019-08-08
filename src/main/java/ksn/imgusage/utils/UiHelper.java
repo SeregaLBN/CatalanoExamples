@@ -162,7 +162,7 @@ public final class UiHelper {
         }
     }
 
-    public static void makeSliderVert(Box doAdd, ISliderModel<?> model, String title, String tip) {
+    public static Component makeSliderVert(ISliderModel<?> model, String title, String tip) {
         JLabel labTitle = new JLabel(title);
         labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -173,10 +173,6 @@ public final class UiHelper {
 
         JSlider slider = new JSlider(JSlider.VERTICAL);
         slider.setModel(model.getWrapped());
-      //slider.setValueIsAdjusting(true);
-//        slider.setMajorTickSpacing(20);
-//        slider.setMinorTickSpacing(4);
-//        slider.setPaintTicks(true);
         slider  .setToolTipText(tip);
         txtValue.setToolTipText(tip);
         labTitle.setToolTipText(tip);
@@ -186,8 +182,6 @@ public final class UiHelper {
         boxColumn.add(labTitle);
         boxColumn.add(slider);
         boxColumn.add(txtValue);
-
-        doAdd.add(boxColumn);
 
         Runnable executor = () -> txtValue.setText(model.getFormatedText());
         executor.run();
@@ -218,6 +212,8 @@ public final class UiHelper {
                 });
             }
         });
+
+        return boxColumn;
     }
 
     public static void debounceExecutor(Supplier<Timer> getterTimer, Consumer<Timer> setterTimer, int debounceTimer, Runnable executor, Logger logger) {

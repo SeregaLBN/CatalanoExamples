@@ -1,3 +1,4 @@
+
 package ksn.imgusage.tabs.catalano;
 
 import java.awt.Cursor;
@@ -110,7 +111,7 @@ public class BrightnessCorrectionTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Brightness correction"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, modelAdjust, "Adjust", "Brightness adjust value");
+            boxOptions.add(UiHelper.makeSliderVert(modelAdjust, "Adjust", "Brightness adjust value"));
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

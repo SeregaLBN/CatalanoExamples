@@ -118,9 +118,9 @@ public class BernsenThresholdTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, modelRadius, "Radius", "Radius");
+            boxOptions.add(UiHelper.makeSliderVert(modelRadius, "Radius", "Radius"));
             boxOptions.add(Box.createHorizontalStrut(8));
-            UiHelper.makeSliderVert(boxOptions, modelContrastThreshold, "Contrast Threshold", "Contrast Threshold");
+            boxOptions.add(UiHelper.makeSliderVert(modelContrastThreshold, "Contrast Threshold", "Contrast Threshold"));
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

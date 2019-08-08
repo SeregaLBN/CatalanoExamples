@@ -133,15 +133,15 @@ public class AdaptiveContrastTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, modelWinSize, "WinSize", "Size of window");
+            boxOptions.add(UiHelper.makeSliderVert(modelWinSize, "WinSize", "Size of window"));
             boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, modelK1     , "K1"     , "Local gain factor");
+            boxOptions.add(UiHelper.makeSliderVert(modelK1     , "K1"     , "Local gain factor"));
             boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, modelK2     , "K2"     , "Local mean constant");
+            boxOptions.add(UiHelper.makeSliderVert(modelK2     , "K2"     , "Local mean constant"));
             boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, modelMinGain, "MinGain", "The minimum gain factor");
+            boxOptions.add(UiHelper.makeSliderVert(modelMinGain, "MinGain", "The minimum gain factor"));
             boxOptions.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxOptions, modelMaxGain, "MaxGain", "The maximum gain factor");
+            boxOptions.add(UiHelper.makeSliderVert(modelMaxGain, "MaxGain", "The maximum gain factor"));
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

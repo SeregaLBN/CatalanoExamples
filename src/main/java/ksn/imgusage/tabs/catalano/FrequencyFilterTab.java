@@ -121,9 +121,9 @@ public class FrequencyFilterTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Frequency filter"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, modelMin, "Min", "Minimum value for to keep");
+            boxOptions.add(UiHelper.makeSliderVert(modelMin, "Min", "Minimum value for to keep"));
             boxOptions.add(Box.createHorizontalStrut(8));
-            UiHelper.makeSliderVert(boxOptions, modelMax, "Max", "Maximum value for to keep");
+            boxOptions.add(UiHelper.makeSliderVert(modelMax, "Max", "Maximum value for to keep"));
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

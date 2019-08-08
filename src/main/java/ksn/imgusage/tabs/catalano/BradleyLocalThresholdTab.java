@@ -118,9 +118,9 @@ public class BradleyLocalThresholdTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, modelWindowSize, "Window size", "Window size to calculate average value of pixels for");
+            boxOptions.add(UiHelper.makeSliderVert(modelWindowSize, "Window size", "Window size to calculate average value of pixels for"));
             boxOptions.add(Box.createHorizontalStrut(8));
-            UiHelper.makeSliderVert(boxOptions, modelPixelBrightnessDiff, "Brightness difference", "Brightness difference limit between processing pixel and average value across neighbors");
+            boxOptions.add(UiHelper.makeSliderVert(modelPixelBrightnessDiff, "Brightness difference", "Brightness difference limit between processing pixel and average value across neighbors"));
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

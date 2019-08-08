@@ -147,7 +147,7 @@ public class RotateTab implements ITab {
             box2.add(box4Alg);
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, modelAngle, "Angle", "Angle");
+            boxOptions.add(UiHelper.makeSliderVert(modelAngle, "Angle", "Angle"));
             boxOptions.add(Box.createHorizontalStrut(8));
             boxOptions.add(box2);
             boxOptions.add(Box.createHorizontalGlue());

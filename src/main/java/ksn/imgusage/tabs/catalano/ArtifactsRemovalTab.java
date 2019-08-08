@@ -113,7 +113,7 @@ public class ArtifactsRemovalTab implements ITab {
             boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
             boxOptions.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxOptions, modelWinSize, "WinSize", "Size of window");
+            boxOptions.add(UiHelper.makeSliderVert(modelWinSize, "WinSize", "Size of window"));
             boxOptions.add(Box.createHorizontalGlue());
 
             boxCenterLeft.add(boxOptions);

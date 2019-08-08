@@ -144,18 +144,18 @@ public class GaussianBlurTab implements ITab {
             boxKernelSize.setToolTipText("Gaussian kernel size. ksize.width and ksize.height can differ but they both must be positive and odd."
                                        + " Or they can be zero’s and then they are computed from sigma* .");
             boxKernelSize.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxKernelSize, modelKernelSizeW, "Width", "Kernel size Width");
+            boxKernelSize.add(UiHelper.makeSliderVert(modelKernelSizeW, "Width", "Kernel size Width"));
             boxKernelSize.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxKernelSize, modelKernelSizeH, "Height", "Kernel size Height");
+            boxKernelSize.add(UiHelper.makeSliderVert(modelKernelSizeH, "Height", "Kernel size Height"));
             boxKernelSize.add(Box.createHorizontalGlue());
 
             Box boxSigma = Box.createHorizontalBox();
             boxSigma.setBorder(BorderFactory.createTitledBorder("Sigma"));
 
             boxSigma.add(Box.createHorizontalGlue());
-            UiHelper.makeSliderVert(boxSigma, modelSigmaX, "X", "Gaussian kernel standard deviation in X direction");
+            boxSigma.add(UiHelper.makeSliderVert(modelSigmaX, "X", "Gaussian kernel standard deviation in X direction"));
             boxSigma.add(Box.createHorizontalStrut(2));
-            UiHelper.makeSliderVert(boxSigma, modelSigmaY, "Y", "Gaussian kernel standard deviation in Y direction; if sigmaY is zero, it is set to be equal to sigmaX, if both sigmas are zeros, they are computed from ksize.width and ksize.height , respectively (see getGaussianKernel() for details); to fully control the result regardless of possible future modifications of all this semantics, it is recommended to specify all of ksize, sigmaX, and sigmaY.");
+            boxSigma.add(UiHelper.makeSliderVert(modelSigmaY, "Y", "Gaussian kernel standard deviation in Y direction; if sigmaY is zero, it is set to be equal to sigmaX, if both sigmas are zeros, they are computed from ksize.width and ksize.height , respectively (see getGaussianKernel() for details); to fully control the result regardless of possible future modifications of all this semantics, it is recommended to specify all of ksize, sigmaX, and sigmaY."));
             boxSigma.add(Box.createHorizontalGlue());
 
             Box box4Borders = Box.createHorizontalBox();
