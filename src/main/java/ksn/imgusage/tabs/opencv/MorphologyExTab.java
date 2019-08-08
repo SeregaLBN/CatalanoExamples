@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
+import java.util.function.BiConsumer;
 
 import javax.swing.*;
 
@@ -14,6 +15,7 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
@@ -37,6 +39,8 @@ public class MorphologyExTab implements ITab {
     private IMatter.CtorParams               kernel1 = new IMatter.CtorParams();
     private IMatter.StructuringElementParams kernel2 = new IMatter.StructuringElementParams();
     private Timer timer;
+    private JPanel panelKernel1; // for this.kernel1
+    private JPanel panelKernel2; // for this.kernel2
 
     public MorphologyExTab(ITabHandler tabHandler, ITab source) {
         this.tabHandler = tabHandler;
@@ -155,15 +159,15 @@ public class MorphologyExTab implements ITab {
             panelKernel.setLayout(new BorderLayout());
             panelKernel.setBorder(BorderFactory.createTitledBorder("Kernel"));
 
-            JPanel panelKernel2 = new JPanel();
-            panelKernel2.setLayout(new BorderLayout());
+            JPanel panelCreateParams = new JPanel();
+            panelCreateParams.setLayout(new BorderLayout());
 
             {
                 JPanel panelCreateMethod = new JPanel();
                 panelCreateMethod.setLayout(new BorderLayout());
                 panelCreateMethod.setBorder(BorderFactory.createTitledBorder("Create method"));
                 panelCreateMethod.setToolTipText("How to create kernel?");
-                Box boxMatter = Box.createHorizontalBox();
+                Box boxMatter = Box.createVerticalBox();
                 ButtonGroup radioGroup = new ButtonGroup();
 
                 JRadioButton radioBtn1 = new JRadioButton(IMatter.CtorParams.NAME, kernel instanceof IMatter.CtorParams);
@@ -172,8 +176,8 @@ public class MorphologyExTab implements ITab {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
                         this.kernel = kernel1;
                         logger.trace("Kernel type changed to {}", this.kernel.getClass().getSimpleName());
-                        makeKernel1(panelKernel2);
-                        panelKernel2.revalidate();
+                        makeKernel1(panelCreateParams);
+                        panelCreateParams.revalidate();
                         resetImage();
                     }
                 });
@@ -186,8 +190,8 @@ public class MorphologyExTab implements ITab {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
                         this.kernel = kernel2;
                         logger.trace("Kernel type changed to {}", this.kernel.getClass().getSimpleName());
-                        makeKernel2(panelKernel2);
-                        panelKernel2.revalidate();
+                        makeKernel2(panelCreateParams);
+                        panelCreateParams.revalidate();
                         resetImage();
                     }
                 });
@@ -195,17 +199,17 @@ public class MorphologyExTab implements ITab {
                 radioGroup.add(radioBtn2);
 
                 if (kernel instanceof IMatter.CtorParams)
-                    makeKernel1(panelKernel2);
+                    makeKernel1(panelCreateParams);
                 else
                 if (kernel instanceof IMatter.StructuringElementParams)
-                    makeKernel2(panelKernel2);
+                    makeKernel2(panelCreateParams);
                 else
                     logger.error("Unknown kernel type! Support him!");
 
                 panelCreateMethod.add(boxMatter  , BorderLayout.CENTER);
 
                 panelKernel.add(panelCreateMethod, BorderLayout.NORTH);
-                panelKernel.add(panelKernel2     , BorderLayout.CENTER);
+                panelKernel.add(panelCreateParams, BorderLayout.CENTER);
             }
 
             panel.add(panelKernel, BorderLayout.CENTER);
@@ -214,8 +218,7 @@ public class MorphologyExTab implements ITab {
         boxCenterLeft.add(panel);
     }
 
-    private JPanel panelKernel1, panelKernel2;
-    private void makeKernel1(JPanel own) {
+    private void makeKernel1(JPanel panelCreateParams) {
         if (panelKernel2 != null)
             panelKernel2.setVisible(false);
 
@@ -228,9 +231,9 @@ public class MorphologyExTab implements ITab {
         boxKernelSize.setBorder(BorderFactory.createTitledBorder("Size"));
         boxKernelSize.setToolTipText("2D array size");
         boxKernelSize.add(Box.createHorizontalGlue());
-        UiHelper.makeSliderVert(boxKernelSize, kernel1.getModelRows(), "Rows", "Kernel size Width / number of rows");
+        boxKernelSize.add(UiHelper.makeSliderVert(kernel1.getModelRows(), "Rows", "Kernel size Width / number of rows"));
         boxKernelSize.add(Box.createHorizontalStrut(2));
-        UiHelper.makeSliderVert(boxKernelSize, kernel1.getModelCols(), "Cols", "Kernel size Height / number of columns");
+        boxKernelSize.add(UiHelper.makeSliderVert(kernel1.getModelCols(), "Cols", "Kernel size Height / number of columns"));
         boxKernelSize.add(Box.createHorizontalGlue());
 
         Box boxScalar = Box.createHorizontalBox();
@@ -238,43 +241,54 @@ public class MorphologyExTab implements ITab {
         boxScalar.setToolTipText("An optional value to initialize each matrix element with");
 
         boxScalar.add(Box.createHorizontalGlue());
-        UiHelper.makeSliderVert(boxScalar, kernel1.getModelScalarVal0(), "v0", null);
-        boxScalar.add(Box.createHorizontalStrut(2));
-        UiHelper.makeSliderVert(boxScalar, kernel1.getModelScalarVal1(), "v1", null);
-        boxScalar.add(Box.createHorizontalStrut(2));
-        UiHelper.makeSliderVert(boxScalar, kernel1.getModelScalarVal2(), "v2", null);
-        boxScalar.add(Box.createHorizontalStrut(2));
-        UiHelper.makeSliderVert(boxScalar, kernel1.getModelScalarVal3(), "v3", null);
+        boxScalar.add(UiHelper.makeSliderVert(kernel1.getModelScalarVal0(), "v0", null));
+        boxScalar.add(Box.createHorizontalStrut(0));
+        boxScalar.add(UiHelper.makeSliderVert(kernel1.getModelScalarVal1(), "v1", null));
+        boxScalar.add(Box.createHorizontalStrut(0));
+        boxScalar.add(UiHelper.makeSliderVert(kernel1.getModelScalarVal2(), "v2", null));
+        boxScalar.add(Box.createHorizontalStrut(0));
+        boxScalar.add(UiHelper.makeSliderVert(kernel1.getModelScalarVal3(), "v3", null));
         boxScalar.add(Box.createHorizontalGlue());
 
         Box box4ArrayType = Box.createHorizontalBox();
         box4ArrayType.setBorder(BorderFactory.createTitledBorder("Array type"));
-//        Box box4ArrayType1 = Box.createVerticalBox();
         JComboBox<CvArrayType> comboArrayType = new JComboBox<>(CvArrayType.values());
         comboArrayType.setSelectedItem(kernel1.getType());
-//        comboArrayType.setAlignmentX(Component.LEFT_ALIGNMENT);
         comboArrayType.addActionListener(ev -> {
             kernel1.setType((CvArrayType)comboArrayType.getSelectedItem());
             debounceResetImage();
         });
         box4ArrayType.add(comboArrayType);
 
-        Box box4Sliders = Box.createHorizontalBox();
-        box4Sliders.add(Box.createHorizontalGlue());
+        Box box4Sliders = Box.createVerticalBox();
+        box4Sliders.add(Box.createVerticalStrut(2));
         box4Sliders.add(boxKernelSize);
-        box4Sliders.add(Box.createHorizontalStrut(2));
+        box4Sliders.add(Box.createVerticalStrut(2));
         box4Sliders.add(boxScalar);
-        box4Sliders.add(Box.createHorizontalGlue());
+        box4Sliders.add(Box.createVerticalStrut(2));
 
-        JPanel panelKernel1 = new JPanel();
+        panelKernel1 = new JPanel();
         panelKernel1.setLayout(new BorderLayout());
         panelKernel1.setBorder(BorderFactory.createTitledBorder(IMatter.CtorParams.NAME));
         panelKernel1.add(box4Sliders, BorderLayout.CENTER);
         panelKernel1.add(box4ArrayType, BorderLayout.SOUTH);
-        own.add(panelKernel1);
+        panelCreateParams.add(panelKernel1);
+
+
+        BiConsumer<String, ISliderModel<?>> modelListener = (name, model) ->
+            model.getWrapped().addChangeListener(ev -> {
+                logger.trace("{}: value={}", name, model.getFormatedText());
+                debounceResetImage();
+            });
+        modelListener.accept("kernel1ModelRows"      , kernel1.getModelRows());
+        modelListener.accept("kernel1ModelCols"      , kernel1.getModelCols());
+        modelListener.accept("kernel1ModelScalarVal0", kernel1.getModelScalarVal0());
+        modelListener.accept("kernel1ModelScalarVal1", kernel1.getModelScalarVal1());
+        modelListener.accept("kernel1ModelScalarVal2", kernel1.getModelScalarVal2());
+        modelListener.accept("kernel1ModelScalarVal3", kernel1.getModelScalarVal3());
     }
 
-    private void makeKernel2(JPanel own) {
+    private void makeKernel2(JPanel panelCreateParams) {
         if (panelKernel1 != null)
             panelKernel1.setVisible(false);
 
