@@ -2,18 +2,13 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.event.ItemEvent;
-import java.awt.image.BufferedImage;
 import java.util.function.BiConsumer;
 
 import javax.swing.*;
 
-import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.tabs.ITab;
@@ -23,39 +18,23 @@ import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
 import ksn.imgusage.tabs.opencv.type.IMatter;
 import ksn.imgusage.utils.ImgHelper;
-import ksn.imgusage.utils.UiHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f'>Performs advanced morphological transformations</a> */
-public class MorphologyExTab implements ITab {
+public class MorphologyExTab extends OpencvFilterTab {
 
-    private static final Logger logger = LoggerFactory.getLogger(MorphologyExTab.class);
-
-    private final ITabHandler tabHandler;
-    private ITab source;
-    private BufferedImage image;
-    private boolean boosting = true;
-    private Runnable imagePanelInvalidate;
     private CvMorphTypes morphologicalOperation;
     private IMatter kernel;
     private IMatter.CtorParams               kernel1 = new IMatter.CtorParams();
     private IMatter.StructuringElementParams kernel2 = new IMatter.StructuringElementParams();
-    private Timer timer;
     private JPanel panelKernel1; // for this.kernel1
     private JPanel panelKernel2; // for this.kernel2
 
     public MorphologyExTab(ITabHandler tabHandler, ITab source) {
-        this.tabHandler = tabHandler;
-        this.source = source;
-        this.morphologicalOperation = CvMorphTypes.MORPH_GRADIENT;
-        this.kernel = new IMatter.StructuringElementParams();
-
-        makeTab();
+        this(tabHandler, source, null, CvMorphTypes.MORPH_GRADIENT, new IMatter.StructuringElementParams());
     }
 
-    public MorphologyExTab(ITabHandler tabHandler, ITab source, boolean boosting, CvMorphTypes morphologicalOperation, IMatter kernel) {
-        this.tabHandler = tabHandler;
-        this.source = source;
-        this.boosting = boosting;
+    public MorphologyExTab(ITabHandler tabHandler, ITab source, Boolean boosting, CvMorphTypes morphologicalOperation, IMatter kernel) {
+        super(tabHandler, source, boosting);
         this.morphologicalOperation = morphologicalOperation;
         this.kernel = kernel;
 
@@ -71,73 +50,26 @@ public class MorphologyExTab implements ITab {
     }
 
     @Override
-    public BufferedImage getImage() {
-        if (image != null)
-            return image;
-
-        BufferedImage src = source.getImage();
-        if (src == null)
-            return null;
-
-        JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
-        try {
-            frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-            Mat matSrc = ImgHelper.toMat(src);
-            // TODO
-            // Source image. The number of channels can be arbitrary. The depth should be one of CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
-
-            try {
-                Mat matDest = new Mat();
-                Imgproc.morphologyEx(
-                    matSrc,
-                    matDest,
-                    morphologicalOperation.getVal(),
-                    kernel.createMat());
-
-                image = ImgHelper.toBufferedImage(matDest);
-            } catch (CvException ex) {
-                logger.error(ex.toString());
-                image = ImgHelper.failedImage();
-            }
-        } finally {
-            frame.setCursor(Cursor.getDefaultCursor());
-        }
-        return image;
-    }
-
+    public String getTabName() { return "MorphologyEx"; }
 
     @Override
-    public void resetImage() {
-        if (image == null)
-            return;
+    protected void applyFilter() {
+        Mat matSrc = ImgHelper.toMat(source.getImage());
+        // TODO
+        // Source image. The number of channels can be arbitrary. The depth should be one of CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 
-        image = null;
-        imagePanelInvalidate.run();
-        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
+        Mat matDest = new Mat();
+        Imgproc.morphologyEx(
+            matSrc,
+            matDest,
+            morphologicalOperation.getVal(),
+            kernel.createMat());
+
+        image = ImgHelper.toBufferedImage(matDest);
     }
 
     @Override
-    public void updateSource(ITab newSource) {
-        this.source = newSource;
-        resetImage();
-    }
-
-    private void makeTab() {
-        UiHelper.makeTab(
-             tabHandler,
-             this,
-             "MorphologyEx",
-             true,
-             this::makeFilterOptions
-         );
-    }
-
-    public void makeFilterOptions(JPanel imagePanel, Box boxCenterLeft) {
-        imagePanelInvalidate = imagePanel::repaint;
-
-        boxCenterLeft.add(UiHelper.makeAsBoostCheckBox(() -> boosting, b -> boosting = b, this::resetImage));
-
+    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder("MorphologyEx"));
@@ -232,9 +164,9 @@ public class MorphologyExTab implements ITab {
         boxKernelSize.setBorder(BorderFactory.createTitledBorder("Size"));
         boxKernelSize.setToolTipText("2D array size");
         boxKernelSize.add(Box.createHorizontalGlue());
-        boxKernelSize.add(UiHelper.makeSliderVert(kernel1.getModelRows(), "Rows", "Kernel size Width / number of rows"));
+        boxKernelSize.add(makeSliderVert(kernel1.getModelRows(), "Rows", "Kernel size Width / number of rows"));
         boxKernelSize.add(Box.createHorizontalStrut(2));
-        boxKernelSize.add(UiHelper.makeSliderVert(kernel1.getModelCols(), "Cols", "Kernel size Height / number of columns"));
+        boxKernelSize.add(makeSliderVert(kernel1.getModelCols(), "Cols", "Kernel size Height / number of columns"));
         boxKernelSize.add(Box.createHorizontalGlue());
 
         Box boxScalar = Box.createHorizontalBox();
@@ -242,13 +174,13 @@ public class MorphologyExTab implements ITab {
         boxScalar.setToolTipText("An optional value to initialize each matrix element with");
 
         boxScalar.add(Box.createHorizontalGlue());
-        boxScalar.add(UiHelper.makeSliderVert(kernel1.getModelScalarVal0(), "v0", null));
+        boxScalar.add(makeSliderVert(kernel1.getModelScalarVal0(), "v0", null));
         boxScalar.add(Box.createHorizontalStrut(0));
-        boxScalar.add(UiHelper.makeSliderVert(kernel1.getModelScalarVal1(), "v1", null));
+        boxScalar.add(makeSliderVert(kernel1.getModelScalarVal1(), "v1", null));
         boxScalar.add(Box.createHorizontalStrut(0));
-        boxScalar.add(UiHelper.makeSliderVert(kernel1.getModelScalarVal2(), "v2", null));
+        boxScalar.add(makeSliderVert(kernel1.getModelScalarVal2(), "v2", null));
         boxScalar.add(Box.createHorizontalStrut(0));
-        boxScalar.add(UiHelper.makeSliderVert(kernel1.getModelScalarVal3(), "v3", null));
+        boxScalar.add(makeSliderVert(kernel1.getModelScalarVal3(), "v3", null));
         boxScalar.add(Box.createHorizontalGlue());
 
         Box box4ArrayType = Box.createHorizontalBox();
@@ -325,18 +257,18 @@ public class MorphologyExTab implements ITab {
         boxKernelSize.setBorder(BorderFactory.createTitledBorder("Kernel size"));
         boxKernelSize.setToolTipText("Size of the structuring element");
         boxKernelSize.add(Box.createHorizontalGlue());
-        boxKernelSize.add(UiHelper.makeSliderVert(kernel2.getModelKernelSizeW(), "Width", "Kernel size Width"));
+        boxKernelSize.add(makeSliderVert(kernel2.getModelKernelSizeW(), "Width", "Kernel size Width"));
         boxKernelSize.add(Box.createHorizontalStrut(2));
-        boxKernelSize.add(UiHelper.makeSliderVert(kernel2.getModelKernelSizeH(), "Height", "Kernel size Height"));
+        boxKernelSize.add(makeSliderVert(kernel2.getModelKernelSizeH(), "Height", "Kernel size Height"));
         boxKernelSize.add(Box.createHorizontalGlue());
 
         Box boxAnchor = Box.createHorizontalBox();
         boxAnchor.setBorder(BorderFactory.createTitledBorder("Anchor"));
         boxKernelSize.setToolTipText("Anchor position within the element. The default value (−1,−1) means that the anchor is at the center. Note that only the shape of a cross-shaped element depends on the anchor position. In other cases the anchor just regulates how much the result of the morphological operation is shifted.");
         boxAnchor.add(Box.createHorizontalGlue());
-        boxAnchor.add(UiHelper.makeSliderVert(kernel2.getModelAnchorX(), "X", "X direction"));
+        boxAnchor.add(makeSliderVert(kernel2.getModelAnchorX(), "X", "X direction"));
         boxAnchor.add(Box.createHorizontalStrut(2));
-        boxAnchor.add(UiHelper.makeSliderVert(kernel2.getModelAnchorY(), "Y", "Y direction"));
+        boxAnchor.add(makeSliderVert(kernel2.getModelAnchorY(), "Y", "Y direction"));
         boxAnchor.add(Box.createHorizontalGlue());
 
         Box box4Sliders = Box.createHorizontalBox();
@@ -372,10 +304,6 @@ public class MorphologyExTab implements ITab {
             }
             debounceResetImage();
         });
-    }
-
-    private void debounceResetImage() {
-        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
     }
 
     @Override

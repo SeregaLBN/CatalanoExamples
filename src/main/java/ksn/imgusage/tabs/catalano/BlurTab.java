@@ -1,106 +1,43 @@
 package ksn.imgusage.tabs.catalano;
 
-import java.awt.Cursor;
-import java.awt.image.BufferedImage;
-
 import javax.swing.Box;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Blur;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.utils.UiHelper;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/Blur.java'>Blur filter</a> */
-public class BlurTab implements ITab {
-
-    private static final Logger logger = LoggerFactory.getLogger(BlurTab.class);
-
-    private final ITabHandler tabHandler;
-    private ITab source;
-    private BufferedImage image;
-    private boolean boosting = true;
-    private Runnable imagePanelInvalidate;
+public class BlurTab extends CatalanoFilterTab {
 
     public BlurTab(ITabHandler tabHandler, ITab source) {
-        this.tabHandler = tabHandler;
-        this.source = source;
-
-        makeTab();
+        this(tabHandler, source, true);
     }
 
     public BlurTab(ITabHandler tabHandler, ITab source, boolean boosting) {
-        this.tabHandler = tabHandler;
-        this.source = source;
-        this.boosting = boosting;
-
+        super(tabHandler, source, boosting);
         makeTab();
     }
 
     @Override
-    public BufferedImage getImage() {
-        if (image != null)
-            return image;
-
-        BufferedImage src = source.getImage();
-        if (src == null)
-            return null;
-
-        JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
-        try {
-            frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-            FastBitmap bmp = new FastBitmap(src);
-            if (boosting)
-                bmp = UiHelper.boostImage(bmp, logger);
-
-            Blur blur = new Blur();
-            blur.applyInPlace(bmp);
-
-            image = bmp.toBufferedImage();
-        } finally {
-            frame.setCursor(Cursor.getDefaultCursor());
-        }
-        return image;
-    }
-
+    public String getTabName() { return Blur.class.getSimpleName(); }
 
     @Override
-    public void resetImage() {
-        if (image == null)
-            return;
+    protected void applyFilter() {
+        FastBitmap bmp = new FastBitmap(source.getImage());
+        if (boosting)
+            bmp = boostImage(bmp, logger);
 
-        image = null;
-        imagePanelInvalidate.run();
-        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
+        Blur blur = new Blur();
+        blur.applyInPlace(bmp);
+
+        image = bmp.toBufferedImage();
     }
 
     @Override
-    public void updateSource(ITab newSource) {
-        this.source = newSource;
-        resetImage();
-    }
-
-    private void makeTab() {
-        UiHelper.makeTab(
-             tabHandler,
-             this,
-             Blur.class.getSimpleName(),
-             true,
-             this::makeFilterOptions
-         );
-    }
-
-    public void makeFilterOptions(JPanel imagePanel, Box boxCenterLeft) {
-        imagePanelInvalidate = imagePanel::repaint;
-
-        boxCenterLeft.add(UiHelper.makeAsBoostCheckBox(() -> boosting, b -> boosting = b, this::resetImage));
+    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+        // none
     }
 
     @Override

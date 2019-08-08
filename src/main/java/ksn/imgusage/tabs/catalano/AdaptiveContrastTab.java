@@ -1,12 +1,8 @@
 package ksn.imgusage.tabs.catalano;
 
-import java.awt.Cursor;
-import java.awt.image.BufferedImage;
-
-import javax.swing.*;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JPanel;
 
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
@@ -14,12 +10,9 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.utils.UiHelper;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/AdaptiveContrastEnhancement.java'>Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change</a> */
-public class AdaptiveContrastTab implements ITab {
-
-    private static final Logger logger = LoggerFactory.getLogger(AdaptiveContrastTab.class);
+public class AdaptiveContrastTab extends CatalanoFilterTab {
 
     private static final int    MIN_WINDOW_SIZE =   1; // Size of window (should be an odd number).
     private static final int    MAX_WINDOW_SIZE = 201;
@@ -30,163 +23,104 @@ public class AdaptiveContrastTab implements ITab {
     private static final double MIN_GAIN        =   0; // The minimum gain factor
     private static final double MAX_GAIN        =  20; // The maximum gain factor
 
-    private final ITabHandler tabHandler;
-    private ITab source;
-    private BufferedImage image;
-    private boolean boosting = true;
-    private Runnable imagePanelInvalidate;
-    private SliderIntModel    modelWinSize = new SliderIntModel   (  20, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
-    private SliderDoubleModel modelK1      = new SliderDoubleModel(0.30, 0, MIN_K1         , MAX_K1);
-    private SliderDoubleModel modelK2      = new SliderDoubleModel(0.60, 0, MIN_K2         , MAX_K2);
-    private SliderDoubleModel modelMinGain = new SliderDoubleModel(0.10, 0, MIN_GAIN       , MAX_GAIN);
-    private SliderDoubleModel modelMaxGain = new SliderDoubleModel(1.00, 0, MIN_GAIN       , MAX_GAIN);
-    private Timer timer;
+    private final SliderIntModel    modelWinSize;
+    private final SliderDoubleModel modelK1;
+    private final SliderDoubleModel modelK2;
+    private final SliderDoubleModel modelMinGain;
+    private final SliderDoubleModel modelMaxGain;
 
     public AdaptiveContrastTab(ITabHandler tabHandler, ITab source) {
-        this.tabHandler = tabHandler;
-        this.source = source;
-
-        makeTab();
+        this(tabHandler, source, true, 20, 0.3, 0.6, 0.1, 1);
     }
 
     public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, double k1, double k2, double minGain, double maxGain) {
-        this.tabHandler = tabHandler;
-        this.source = source;
-        this.boosting = boosting;
-        this.modelWinSize.setValue(windowSize);
-        this.modelK1     .setValue(k1);
-        this.modelK2     .setValue(k2);
-        this.modelMinGain.setValue(minGain);
-        this.modelMaxGain.setValue(maxGain);
+        super(tabHandler, source, boosting);
+        this.modelWinSize = new SliderIntModel   (windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
+        this.modelK1      = new SliderDoubleModel(k1        , 0, MIN_K1         , MAX_K1);
+        this.modelK2      = new SliderDoubleModel(k2        , 0, MIN_K2         , MAX_K2);
+        this.modelMinGain = new SliderDoubleModel(minGain   , 0, MIN_GAIN       , MAX_GAIN);
+        this.modelMaxGain = new SliderDoubleModel(maxGain   , 0, MIN_GAIN       , MAX_GAIN);
 
         makeTab();
     }
 
     @Override
-    public BufferedImage getImage() {
-        if (image != null)
-            return image;
-
-        BufferedImage src = source.getImage();
-        if (src == null)
-            return null;
-
-        JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
-        try {
-            frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-            FastBitmap bmp = new FastBitmap(src);
-            if (boosting)
-                bmp = UiHelper.boostImage(bmp, logger);
-            if (!bmp.isGrayscale())
-                bmp.toGrayscale();
-
-            AdaptiveContrastEnhancement adaptiveContrastEnhancement = new AdaptiveContrastEnhancement(
-                        modelWinSize.getValue(),
-                        modelK1     .getValue(),
-                        modelK2     .getValue(),
-                        modelMinGain.getValue(),
-                        modelMaxGain.getValue()
-                    );
-            adaptiveContrastEnhancement.applyInPlace(bmp);
-            image = bmp.toBufferedImage();
-        } finally {
-            frame.setCursor(Cursor.getDefaultCursor());
-        }
-        return image;
-    }
-
+    public String getTabName() { return AdaptiveContrastEnhancement.class.getSimpleName(); }
 
     @Override
-    public void resetImage() {
-        if (image == null)
-            return;
+    protected void applyFilter() {
+        FastBitmap bmp = new FastBitmap(source.getImage());
+        if (boosting)
+            bmp = boostImage(bmp, logger);
+        if (!bmp.isGrayscale())
+            bmp.toGrayscale();
 
-        image = null;
-        imagePanelInvalidate.run();
-        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
+        AdaptiveContrastEnhancement adaptiveContrastEnhancement = new AdaptiveContrastEnhancement(
+                    modelWinSize.getValue(),
+                    modelK1     .getValue(),
+                    modelK2     .getValue(),
+                    modelMinGain.getValue(),
+                    modelMaxGain.getValue()
+                );
+        adaptiveContrastEnhancement.applyInPlace(bmp);
+        image = bmp.toBufferedImage();
     }
 
     @Override
-    public void updateSource(ITab newSource) {
-        this.source = newSource;
-        resetImage();
-    }
+    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+        Box boxOptions = Box.createHorizontalBox();
+        boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
 
-    private void makeTab() {
-        UiHelper.makeTab(
-             tabHandler,
-             this,
-             AdaptiveContrastEnhancement.class.getSimpleName(),
-             true,
-             this::makeFilterOptions
-         );
-    }
+        boxOptions.add(Box.createHorizontalGlue());
+        boxOptions.add(makeSliderVert(modelWinSize, "WinSize", "Size of window"));
+        boxOptions.add(Box.createHorizontalStrut(2));
+        boxOptions.add(makeSliderVert(modelK1     , "K1"     , "Local gain factor"));
+        boxOptions.add(Box.createHorizontalStrut(2));
+        boxOptions.add(makeSliderVert(modelK2     , "K2"     , "Local mean constant"));
+        boxOptions.add(Box.createHorizontalStrut(2));
+        boxOptions.add(makeSliderVert(modelMinGain, "MinGain", "The minimum gain factor"));
+        boxOptions.add(Box.createHorizontalStrut(2));
+        boxOptions.add(makeSliderVert(modelMaxGain, "MaxGain", "The maximum gain factor"));
+        boxOptions.add(Box.createHorizontalGlue());
 
-    public void makeFilterOptions(JPanel imagePanel, Box boxCenterLeft) {
-        imagePanelInvalidate = imagePanel::repaint;
+        boxCenterLeft.add(boxOptions);
 
-        boxCenterLeft.add(UiHelper.makeAsBoostCheckBox(() -> boosting, b -> boosting = b, this::resetImage));
-
-        {
-            Box boxOptions = Box.createHorizontalBox();
-            boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
-
-            boxOptions.add(Box.createHorizontalGlue());
-            boxOptions.add(UiHelper.makeSliderVert(modelWinSize, "WinSize", "Size of window"));
-            boxOptions.add(Box.createHorizontalStrut(2));
-            boxOptions.add(UiHelper.makeSliderVert(modelK1     , "K1"     , "Local gain factor"));
-            boxOptions.add(Box.createHorizontalStrut(2));
-            boxOptions.add(UiHelper.makeSliderVert(modelK2     , "K2"     , "Local mean constant"));
-            boxOptions.add(Box.createHorizontalStrut(2));
-            boxOptions.add(UiHelper.makeSliderVert(modelMinGain, "MinGain", "The minimum gain factor"));
-            boxOptions.add(Box.createHorizontalStrut(2));
-            boxOptions.add(UiHelper.makeSliderVert(modelMaxGain, "MaxGain", "The maximum gain factor"));
-            boxOptions.add(Box.createHorizontalGlue());
-
-            boxCenterLeft.add(boxOptions);
-
-            modelWinSize.getWrapped().addChangeListener(ev -> {
-                logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
-                debounceResetImage();
-            });
-            modelK1.getWrapped().addChangeListener(ev -> {
-                logger.trace("modelK1: value={}", modelK1.getFormatedText());
-                debounceResetImage();
-            });
-            modelK2.getWrapped().addChangeListener(ev -> {
-                logger.trace("modelK2: value={}", modelK2.getFormatedText());
-                debounceResetImage();
-            });
-            modelMinGain.getWrapped().addChangeListener(ev -> {
-                logger.trace("modelMinGain: value={}", modelMinGain.getFormatedText());
-                double valMinGain = modelMinGain.getValue();
-                if (valMinGain > modelMaxGain.getValue())
-                    modelMaxGain.setValue(valMinGain);
-                debounceResetImage();
-            });
-            modelMaxGain.getWrapped().addChangeListener(ev -> {
-                logger.trace("modelMaxGain: value={}", modelMaxGain.getFormatedText());
-                double valMaxGain = modelMaxGain.getValue();
-                if (valMaxGain < modelMinGain.getValue())
-                    modelMinGain.setValue(valMaxGain);
-                debounceResetImage();
-            });
-        }
-    }
-
-    private void debounceResetImage() {
-        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
+        modelWinSize.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
+            debounceResetImage();
+        });
+        modelK1.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelK1: value={}", modelK1.getFormatedText());
+            debounceResetImage();
+        });
+        modelK2.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelK2: value={}", modelK2.getFormatedText());
+            debounceResetImage();
+        });
+        modelMinGain.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelMinGain: value={}", modelMinGain.getFormatedText());
+            double valMinGain = modelMinGain.getValue();
+            if (valMinGain > modelMaxGain.getValue())
+                modelMaxGain.setValue(valMinGain);
+            debounceResetImage();
+        });
+        modelMaxGain.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelMaxGain: value={}", modelMaxGain.getFormatedText());
+            double valMaxGain = modelMaxGain.getValue();
+            if (valMaxGain < modelMinGain.getValue())
+                modelMinGain.setValue(valMaxGain);
+            debounceResetImage();
+        });
     }
 
     @Override
     public void printParams() {
         logger.info("windowSize={}, k1={}, k2={}, minGain={}, maxGain={}",
-                modelWinSize.getFormatedText(),
-                modelK1     .getFormatedText(),
-                modelK2     .getFormatedText(),
-                modelMinGain.getFormatedText(),
-                modelMaxGain.getFormatedText());
+            modelWinSize.getFormatedText(),
+            modelK1     .getFormatedText(),
+            modelK2     .getFormatedText(),
+            modelMinGain.getFormatedText(),
+            modelMaxGain.getFormatedText());
     }
 
 }

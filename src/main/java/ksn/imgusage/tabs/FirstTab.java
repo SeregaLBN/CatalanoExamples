@@ -13,36 +13,20 @@ import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.utils.UiHelper;
 
-public class FirstTab implements ITab {
+public class FirstTab extends BaseTab {
 
-    private static final Logger logger = LoggerFactory.getLogger(FirstTab.class);
     public static final File DEFAULT_IMAGE = Paths.get("./exampleImages", "1024px-VolodimirHillAndDnieper.jpg").toFile();
 
-    private final ITabHandler tabHandler;
-
-    private BufferedImage source;
-    private BufferedImage image;
+    private BufferedImage sourceImage;
     private File latestImageDir;
-    private Runnable imagePanelInvalidate;
-
-    private boolean isGray = false;
-    private boolean isScale = true;
-
+    private boolean isGray;
+    private boolean isScale;
 
     public FirstTab(ITabHandler tabHandler) {
-        this.tabHandler = tabHandler;
-
-        latestImageDir = DEFAULT_IMAGE.getParentFile();
-        if (!latestImageDir.exists())
-            latestImageDir = null;
-
-        makeTab();
+        this(tabHandler, DEFAULT_IMAGE, false, true);
     }
     public FirstTab(
         ITabHandler tabHandler,
@@ -50,43 +34,28 @@ public class FirstTab implements ITab {
         boolean isGray,
         boolean isScale
     ) {
-        this.tabHandler = tabHandler;
+        super(tabHandler, null, false);
         this.isGray  = isGray;
         this.isScale = isScale;
-        if (readImageFile(imageFile))
-            latestImageDir = imageFile.getParentFile();
+        this.addRemoveFilterButton = false;
 
+        readImageFile(imageFile);
         makeTab();
     }
+
+    @Override
+    public String getTabName() { return "Original"; }
 
     public boolean isScale() {
         return isScale;
     }
 
     @Override
-    public BufferedImage getImage() {
-        if (source == null)
-            return null;
-
-        if (image == null) {
-            FastBitmap bmp = new FastBitmap(source);
-            if (isGray && !bmp.isGrayscale())
-                bmp.toGrayscale();
-            image = bmp.toBufferedImage();
-        }
-        return image;
-    }
-
-
-    @Override
-    public void resetImage() {
-        if (image == null)
-            return;
-
-        image = null;
-        if (imagePanelInvalidate != null)
-            imagePanelInvalidate.run();
-        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
+    protected void applyFilter() {
+        FastBitmap bmp = new FastBitmap(sourceImage);
+        if (isGray && !bmp.isGrayscale())
+            bmp.toGrayscale();
+        image = bmp.toBufferedImage();
     }
 
     @Override
@@ -94,23 +63,13 @@ public class FirstTab implements ITab {
         throw new UnsupportedOperationException("Illegal call");
     }
 
-    private void makeTab() {
-        UiHelper.makeTab(
-            tabHandler,
-            this,
-            "Original",
-            false,
-            this::makeOptions
-        );
-    }
-
-
     private boolean readImageFile(File imageFile) {
         if (imageFile == null)
             return false;
 
         try {
-            source = ImageIO.read(imageFile);
+            sourceImage = ImageIO.read(imageFile);
+            latestImageDir = imageFile.getParentFile();
             resetImage();
             return true;
         } catch (IOException ex) {
@@ -119,9 +78,8 @@ public class FirstTab implements ITab {
         }
     }
 
-    public void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
-        imagePanelInvalidate = imagePanel::repaint;
-
+    @Override
+    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
         JButton btnLoadImage = new JButton("Load image...");
         btnLoadImage.addActionListener(ev -> {
             logger.trace("onSelectImage");
@@ -130,7 +88,6 @@ public class FirstTab implements ITab {
             if (!readImageFile(file))
                 return;
 
-            latestImageDir = file.getParentFile();
             imagePanel.repaint();
         });
         SwingUtilities.invokeLater(btnLoadImage::requestFocus);
