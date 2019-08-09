@@ -36,7 +36,29 @@ public class ThresholdTab extends OpencvFilterTab {
         super(tabHandler, source, boosting);
         this.modelThresh = new SliderDoubleModel(thresh, 0, MIN_THRESH, MAX_THRESH);
         this.modelMaxVal = new SliderDoubleModel(maxval, 0, MIN_MAXVAL, MAX_MAXVAL);
-        this.threshType  = threshType;
+        switch (threshType) {
+            case THRESH_BINARY    :
+            case THRESH_BINARY_INV:
+            case THRESH_TRUNC     :
+            case THRESH_TOZERO    :
+            case THRESH_TOZERO_INV:
+                this.threshType = threshType;
+                break;
+
+            case THRESH_OTSU:
+                this.threshType = CvThresholdTypes.THRESH_BINARY;
+                this.useOtsuMask = true;
+                break;
+
+            case THRESH_TRIANGLE:
+                this.threshType = CvThresholdTypes.THRESH_BINARY;
+                this.useTriangleMask = true;
+                break;
+
+            case THRESH_MASK:
+            default:
+                throw new IllegalArgumentException("Unsupported threshType=" + threshType);
+        }
 
         makeTab();
     }
@@ -59,31 +81,66 @@ public class ThresholdTab extends OpencvFilterTab {
 
     @Override
     protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
-        Box box4Types = Box.createHorizontalBox();
+        Box box4Types = Box.createVerticalBox();
         box4Types.setBorder(BorderFactory.createTitledBorder("Thresholding type"));
-        Box box4Types1 = Box.createVerticalBox();
-        box4Types1.setToolTipText("Thresholding types");
-        ButtonGroup radioGroup = new ButtonGroup();
-        Stream.of(CvThresholdTypes.values())
-            .filter(b -> b.getVal() < CvThresholdTypes.THRESH_MASK.getVal())
-            .forEach(thresholdingType ->
+        Box box4TypesRadioBttns = Box.createVerticalBox();
+        Box box4TypesCheckBoxes = Box.createVerticalBox();
         {
-            JRadioButton radioBtnThresh = new JRadioButton(thresholdingType.name(), thresholdingType == this.threshType);
-            radioBtnThresh.setActionCommand(thresholdingType.name());
-            radioBtnThresh.setToolTipText("Type of the threshold operation");
-            radioBtnThresh.addItemListener(ev -> {
-                if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    this.threshType = thresholdingType;
-                    logger.trace("Thresholding type changed to {}", thresholdingType);
-                    resetImage();
-                }
+            box4TypesRadioBttns.setToolTipText("Thresholding types");
+            ButtonGroup radioGroup1 = new ButtonGroup();
+            Stream.of(CvThresholdTypes.values())
+                .filter(b -> b.getVal() < CvThresholdTypes.THRESH_MASK.getVal())
+                .forEach(thresholdingType ->
+            {
+                JRadioButton radioBtnThresh = new JRadioButton(thresholdingType.name(), thresholdingType == this.threshType);
+                radioBtnThresh.setActionCommand(thresholdingType.name());
+                radioBtnThresh.setToolTipText("Type of the threshold operation");
+                radioBtnThresh.addItemListener(ev -> {
+                    if (ev.getStateChange() == ItemEvent.SELECTED) {
+                        this.threshType = thresholdingType;
+                        logger.trace("Thresholding type changed to {}", thresholdingType);
+                        resetImage();
+                    }
+                });
+                box4TypesRadioBttns.add(radioBtnThresh);
+                radioGroup1.add(radioBtnThresh);
             });
-            box4Types1.add(radioBtnThresh);
-            radioGroup.add(radioBtnThresh);
-        });
-        box4Types.add(Box.createHorizontalGlue());
-        box4Types.add(box4Types1);
-        box4Types.add(Box.createHorizontalGlue());
+        }
+        {
+            box4TypesCheckBoxes.setBorder(BorderFactory.createTitledBorder("Special values"));
+
+            JCheckBox checkBoxOtsuMask = new JCheckBox(CvThresholdTypes.THRESH_OTSU.name(), this.useOtsuMask);
+            checkBoxOtsuMask.setActionCommand(CvThresholdTypes.THRESH_OTSU.name());
+            checkBoxOtsuMask.setToolTipText("the function determines the optimal threshold value using the Otsu's algorithm and uses it instead of the specified thresh");
+
+            JCheckBox checkBoxTriangleMask = new JCheckBox(CvThresholdTypes.THRESH_TRIANGLE.name(), this.useTriangleMask);
+            checkBoxTriangleMask.setActionCommand(CvThresholdTypes.THRESH_TRIANGLE.name());
+            checkBoxTriangleMask.setToolTipText("the function determines the optimal threshold value using the Triangle algorithm and uses it instead of the specified thresh");
+
+            checkBoxOtsuMask.addItemListener(ev -> {
+                useOtsuMask = (ev.getStateChange() == ItemEvent.SELECTED);
+                logger.trace("Thresholding type THRESH_OTSU is {}", (useOtsuMask ? "checked" : "unchecked"));
+                if (useOtsuMask)
+                    checkBoxTriangleMask.setSelected(false);
+                resetImage();
+            });
+            checkBoxTriangleMask.addItemListener(ev -> {
+                useTriangleMask = (ev.getStateChange() == ItemEvent.SELECTED);
+                logger.trace("Thresholding type THRESH_TRIANGLE is {}", (useTriangleMask ? "checked" : "unchecked"));
+                if (useTriangleMask)
+                    checkBoxOtsuMask.setSelected(false);
+                resetImage();
+            });
+
+            box4TypesCheckBoxes.add(checkBoxOtsuMask);
+            box4TypesCheckBoxes.add(checkBoxTriangleMask);
+        }
+
+//        box4Types.add(Box.createVerticalGlue());
+        box4Types.add(box4TypesRadioBttns);
+        box4Types.add(Box.createVerticalStrut(2));
+        box4Types.add(box4TypesCheckBoxes);
+//        box4Types.add(Box.createVerticalGlue());
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
