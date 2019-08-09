@@ -3,7 +3,6 @@ package ksn.imgusage.tabs.catalano;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Blur;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
@@ -16,7 +15,7 @@ public class BlurTab extends CatalanoFilterTab {
     }
 
     public BlurTab(ITabHandler tabHandler, ITab source, boolean boosting) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source, boosting, false);
         makeTab();
     }
 
@@ -24,15 +23,8 @@ public class BlurTab extends CatalanoFilterTab {
     public String getTabName() { return Blur.class.getSimpleName(); }
 
     @Override
-    protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(getSourceImage());
-        if (boosting)
-            bmp = boostImage(bmp, logger);
-
-        Blur blur = new Blur();
-        blur.applyInPlace(bmp);
-
-        image = bmp.toBufferedImage();
+    protected void applyCatalanoFilter() {
+        new Blur().applyInPlace(imageFBmp);
     }
 
     @Override

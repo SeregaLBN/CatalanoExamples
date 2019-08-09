@@ -69,6 +69,10 @@ public class FirstTab extends BaseTab {
             return false;
 
         try {
+            if (!imageFile.exists()) {
+                logger.warn("File not found: {}", imageFile);
+                return false;
+            }
             sourceImage = ImageIO.read(imageFile);
             latestImageDir = imageFile.getParentFile();
             resetImage();

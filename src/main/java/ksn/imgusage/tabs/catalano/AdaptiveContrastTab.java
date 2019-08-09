@@ -4,7 +4,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
@@ -34,7 +33,7 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
     }
 
     public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, double k1, double k2, double minGain, double maxGain) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source, boosting, true);
         this.modelWinSize = new SliderIntModel   (windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
         this.modelK1      = new SliderDoubleModel(k1        , 0, MIN_K1         , MAX_K1);
         this.modelK2      = new SliderDoubleModel(k2        , 0, MIN_K2         , MAX_K2);
@@ -48,22 +47,14 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
     public String getTabName() { return AdaptiveContrastEnhancement.class.getSimpleName(); }
 
     @Override
-    protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(getSourceImage());
-        if (boosting)
-            bmp = boostImage(bmp, logger);
-        if (!bmp.isGrayscale())
-            bmp.toGrayscale();
-
-        AdaptiveContrastEnhancement adaptiveContrastEnhancement = new AdaptiveContrastEnhancement(
-                    modelWinSize.getValue(),
-                    modelK1     .getValue(),
-                    modelK2     .getValue(),
-                    modelMinGain.getValue(),
-                    modelMaxGain.getValue()
-                );
-        adaptiveContrastEnhancement.applyInPlace(bmp);
-        image = bmp.toBufferedImage();
+    protected void applyCatalanoFilter() {
+        new AdaptiveContrastEnhancement(
+            modelWinSize.getValue(),
+            modelK1     .getValue(),
+            modelK2     .getValue(),
+            modelMinGain.getValue(),
+            modelMaxGain.getValue()
+        ).applyInPlace(imageFBmp);
     }
 
     @Override

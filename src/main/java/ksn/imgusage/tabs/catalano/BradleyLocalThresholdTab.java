@@ -4,7 +4,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.BradleyLocalThreshold;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
@@ -27,7 +26,7 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
     }
 
     public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, double pixelBrightnessDiff) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source, boosting, true);
         this.modelWindowSize          = new SliderIntModel   (windowSize         , 0, MIN_WINDOW_SIZE          , MAX_WINDOW_SIZE);
         this.modelPixelBrightnessDiff = new SliderDoubleModel(pixelBrightnessDiff, 0, MIN_PIXEL_BRIGHTNESS_DIFF, MAX_PIXEL_BRIGHTNESS_DIFF);
 
@@ -38,17 +37,9 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
     public String getTabName() { return BradleyLocalThreshold.class.getSimpleName(); }
 
     @Override
-    protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(getSourceImage());
-        if (boosting)
-            bmp = boostImage(bmp, logger);
-        if (!bmp.isGrayscale())
-            bmp.toGrayscale();
-
-        BradleyLocalThreshold bradleyLocalThreshold = new BradleyLocalThreshold(modelWindowSize.getValue(), (float)(double)modelPixelBrightnessDiff.getValue());
-        bradleyLocalThreshold.applyInPlace(bmp);
-
-        image = bmp.toBufferedImage();
+    protected void applyCatalanoFilter() {
+        new BradleyLocalThreshold(modelWindowSize.getValue(), (float)(double)modelPixelBrightnessDiff.getValue())
+            .applyInPlace(imageFBmp);
     }
 
     @Override

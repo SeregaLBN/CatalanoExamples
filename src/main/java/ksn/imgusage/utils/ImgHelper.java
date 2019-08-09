@@ -12,7 +12,6 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import Catalano.Imaging.FastBitmap;
-import Catalano.Imaging.Filters.Resize;
 
 public final class ImgHelper {
     private ImgHelper() {}
@@ -58,7 +57,8 @@ public final class ImgHelper {
         return resizeimage;
     }
     public static FastBitmap resize(FastBitmap from, int newWidth, int newHeight) {
-        return new Resize(newWidth, newHeight).apply(from);
+        // return new Catalano.Imaging.Filters.Resize(newWidth, newHeight).apply(from); // ;(
+        return new FastBitmap(resize(from.toBufferedImage(), newWidth, newHeight));
     }
     public static BufferedImage resize(BufferedImage from, int newWidth, int newHeight) {
         Image tmp = from.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);

@@ -4,7 +4,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.FourierTransform;
 import Catalano.Imaging.Filters.FrequencyFilter;
 import ksn.imgusage.model.SliderIntModel;
@@ -25,7 +24,7 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
     }
 
     public FrequencyFilterTab(ITabHandler tabHandler, ITab source, boolean boosting, int min, int max) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source, boosting, true);
         this.modelMin = new SliderIntModel(min, 0, MIN, MAX);
         this.modelMax = new SliderIntModel(max, 0, MIN, MAX);
 
@@ -36,23 +35,15 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
     public String getTabName() { return FrequencyFilter.class.getSimpleName(); }
 
     @Override
-    protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(getSourceImage());
-        if (boosting)
-            bmp = boostImage(bmp, logger);
-        if (!bmp.isGrayscale())
-            bmp.toGrayscale();
-
-        FourierTransform fourierTransform = new FourierTransform(bmp);
+    protected void applyCatalanoFilter() {
+        FourierTransform fourierTransform = new FourierTransform(imageFBmp);
         fourierTransform.Forward();
 
         FrequencyFilter frequencyFilter = new FrequencyFilter(modelMin.getValue(), modelMax.getValue());
         frequencyFilter.ApplyInPlace(fourierTransform);
 
         fourierTransform.Backward();
-        bmp = fourierTransform.toFastBitmap();
-
-        image = bmp.toBufferedImage();
+        imageFBmp = fourierTransform.toFastBitmap();
     }
 
     @Override

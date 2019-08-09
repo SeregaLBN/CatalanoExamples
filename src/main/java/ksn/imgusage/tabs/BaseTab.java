@@ -20,7 +20,7 @@ public abstract class BaseTab implements ITab {
     protected static final int WIDTH_LEFT_PANEL = 250;
 
     protected final ITabHandler tabHandler;
-    private ITab source;
+    protected ITab source;
     protected BufferedImage image;
     protected Boolean boosting;
     protected boolean addRemoveFilterButton = true;

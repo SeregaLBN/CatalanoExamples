@@ -4,7 +4,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.ArtifactsRemoval;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
@@ -23,7 +22,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
     }
 
     public ArtifactsRemovalTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source, boosting, true);
         this.modelWinSize = new SliderIntModel(windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
 
         makeTab();
@@ -33,17 +32,9 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
     public String getTabName() { return ArtifactsRemoval.class.getSimpleName(); }
 
     @Override
-    protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(getSourceImage());
-        if (boosting)
-            bmp = boostImage(bmp, logger);
-        if (!bmp.isGrayscale())
-            bmp.toGrayscale();
-
-        ArtifactsRemoval artifactsRemoval = new ArtifactsRemoval(modelWinSize.getValue());
-        artifactsRemoval.applyInPlace(bmp);
-
-        image = bmp.toBufferedImage();
+    protected void applyCatalanoFilter() {
+        new ArtifactsRemoval(modelWinSize.getValue())
+            .applyInPlace(imageFBmp);
     }
 
     @Override

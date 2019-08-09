@@ -4,7 +4,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.BrightnessCorrection;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
@@ -23,7 +22,7 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab {
     }
 
     public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source, boolean boosting, int adjustValue) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source, boosting, false);
         this.modelAdjust = new SliderIntModel(adjustValue, 0, MIN, MAX);
 
         makeTab();
@@ -33,15 +32,9 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab {
     public String getTabName() { return BrightnessCorrection.class.getSimpleName(); }
 
     @Override
-    protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(getSourceImage());
-        if (boosting)
-            bmp = boostImage(bmp, logger);
-
-        BrightnessCorrection brightnessCorrection = new BrightnessCorrection(modelAdjust.getValue());
-        brightnessCorrection.applyInPlace(bmp);
-
-        image = bmp.toBufferedImage();
+    protected void applyCatalanoFilter() {
+        new BrightnessCorrection(modelAdjust.getValue())
+            .applyInPlace(imageFBmp);
     }
 
     @Override

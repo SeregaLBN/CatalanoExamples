@@ -4,7 +4,6 @@ import java.awt.event.ItemEvent;
 
 import javax.swing.*;
 
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.Rotate;
 import Catalano.Imaging.Filters.Rotate.Algorithm;
 import ksn.imgusage.model.SliderDoubleModel;
@@ -26,7 +25,7 @@ public class RotateTab extends CatalanoFilterTab {
     }
 
     public RotateTab(ITabHandler tabHandler, ITab source, boolean boosting, double angle, boolean keepSize, Rotate.Algorithm algorithm) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source, boosting, false);
         this.modelAngle = new SliderDoubleModel(angle, 0, MIN, MAX);
         this.keepSize = keepSize;
         this.algorithm = algorithm;
@@ -38,15 +37,9 @@ public class RotateTab extends CatalanoFilterTab {
     public String getTabName() { return Rotate.class.getSimpleName(); }
 
     @Override
-    protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(getSourceImage());
-        if (boosting)
-            bmp = boostImage(bmp, logger);
-
-        Rotate rotate = new Rotate(modelAngle.getValue(), keepSize, algorithm);
-        rotate.applyInPlace(bmp);
-
-        image = bmp.toBufferedImage();
+    protected void applyCatalanoFilter() {
+        new Rotate(modelAngle.getValue(), keepSize, algorithm)
+            .applyInPlace(imageFBmp);
     }
 
     @Override

@@ -4,7 +4,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.Filters.BernsenThreshold;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
@@ -27,7 +26,7 @@ public class BernsenThresholdTab extends CatalanoFilterTab {
     }
 
     public BernsenThresholdTab(ITabHandler tabHandler, ITab source, boolean boosting, int radius, double contrastThreshold) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source, boosting, true);
         this.modelRadius            = new SliderIntModel   (radius           , 0, MIN_RADIUS            , MAX_RADIUS);
         this.modelContrastThreshold = new SliderDoubleModel(contrastThreshold, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
 
@@ -38,17 +37,9 @@ public class BernsenThresholdTab extends CatalanoFilterTab {
     public String getTabName() { return BernsenThreshold.class.getSimpleName(); }
 
     @Override
-    protected void applyFilter() {
-        FastBitmap bmp = new FastBitmap(getSourceImage());
-        if (boosting)
-            bmp = boostImage(bmp, logger);
-        if (!bmp.isGrayscale())
-            bmp.toGrayscale();
-
-        BernsenThreshold bernsenThreshold = new BernsenThreshold(modelRadius.getValue(), modelContrastThreshold.getValue());
-        bernsenThreshold.applyInPlace(bmp);
-
-        image = bmp.toBufferedImage();
+    protected void applyCatalanoFilter() {
+        new BernsenThreshold(modelRadius.getValue(), modelContrastThreshold.getValue())
+            .applyInPlace(imageFBmp);
     }
 
     @Override
