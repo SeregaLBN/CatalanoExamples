@@ -40,7 +40,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
     @Override
     protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
         boxOptions.add(Box.createHorizontalGlue());
         boxOptions.add(makeSliderVert(modelWinSize, "WinSize", "Size of window"));

@@ -28,14 +28,8 @@ import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.catalano.*;
-import ksn.imgusage.tabs.opencv.AsIsTab;
-import ksn.imgusage.tabs.opencv.GaussianBlurTab;
-import ksn.imgusage.tabs.opencv.InitLib;
-import ksn.imgusage.tabs.opencv.MorphologyExTab;
-import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
-import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
-import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
-import ksn.imgusage.tabs.opencv.type.IMatter;
+import ksn.imgusage.tabs.opencv.*;
+import ksn.imgusage.tabs.opencv.type.*;
 import ksn.imgusage.utils.SelectFilterDialog;
 import ksn.imgusage.utils.UiHelper;
 
@@ -180,9 +174,10 @@ public class MainApp {
 
         // map OpenCV filters to tab classes
         Stream<Supplier<ITab>> opencvMapping = Stream.of( // alphabetical sort
-            () -> opencvHandler.apply("AsIs"        , AsIsTab        .class),
+            () -> opencvHandler.apply("AsIs"        ,         AsIsTab.class),
             () -> opencvHandler.apply("GaussianBlur", GaussianBlurTab.class),
-            () -> opencvHandler.apply("MorphologyEx", MorphologyExTab.class)
+            () -> opencvHandler.apply("MorphologyEx", MorphologyExTab.class),
+            () -> opencvHandler.apply("Threshold"   ,    ThresholdTab.class)
         );
 
         // map Catalano filters to tab classes
@@ -300,7 +295,8 @@ public class MainApp {
         List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
           //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, null, false),
             prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, null, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
-            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, null, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1))
+            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, null, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1)),
+            prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, null, 150, 350, CvThresholdTypes.THRESH_TRUNC)
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);

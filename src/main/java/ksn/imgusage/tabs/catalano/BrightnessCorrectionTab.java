@@ -40,7 +40,7 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab {
     @Override
     protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder("Brightness correction"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
         boxOptions.add(Box.createHorizontalGlue());
         boxOptions.add(makeSliderVert(modelAdjust, "Adjust", "Brightness adjust value"));

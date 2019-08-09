@@ -122,7 +122,7 @@ public class GaussianBlurTab extends OpencvFilterTab {
         box4Sliders.add(Box.createHorizontalGlue());
 
         Box boxOptions = Box.createVerticalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder("GaussianBlur"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(box4Sliders);
         boxOptions.add(Box.createVerticalStrut(2));

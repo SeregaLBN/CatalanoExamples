@@ -76,7 +76,8 @@ public class SelectFilterDialog {
         Arrays.<FilterTabs>asList( // alphabetical sort
             new FilterTabs("AsIs"        , "As is"),
             new FilterTabs("GaussianBlur", "Blurs an image using a Gaussian filter"),
-            new FilterTabs("MorphologyEx", "Performs advanced morphological transformations")
+            new FilterTabs("MorphologyEx", "Performs advanced morphological transformations"),
+            new FilterTabs("Threshold"   , "Applies a fixed-level threshold to each array element")
         ).forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
             radioFilter.setActionCommand(OPENCV_TAB_PREFIX + tab.filterName);

@@ -69,7 +69,7 @@ public class MorphologyExTab extends OpencvFilterTab {
     protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder("MorphologyEx"));
+        panel.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
         {
             JComboBox<CvMorphTypes> comboBoxMorphOper = new JComboBox<>(CvMorphTypes.values());

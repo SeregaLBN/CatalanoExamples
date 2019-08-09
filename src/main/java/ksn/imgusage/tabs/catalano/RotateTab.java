@@ -47,7 +47,7 @@ public class RotateTab extends CatalanoFilterTab {
     @Override
     protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder("Rotate options"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
         Box box2 = Box.createVerticalBox();
         box2.setBorder(BorderFactory.createTitledBorder(""));

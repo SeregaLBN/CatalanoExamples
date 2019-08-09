@@ -45,7 +45,7 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
     @Override
     protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder("Adaptive contrast"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
         boxOptions.add(Box.createHorizontalGlue());
         boxOptions.add(makeSliderVert(modelWindowSize, "Window size", "Window size to calculate average value of pixels for"));
