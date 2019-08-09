@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 
 import javax.swing.*;
 
-import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -14,7 +13,6 @@ import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
-import ksn.imgusage.utils.ImgHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1'>Blurs an image using a Gaussian filter</a> */
 public class GaussianBlurTab extends OpencvFilterTab {
@@ -52,22 +50,18 @@ public class GaussianBlurTab extends OpencvFilterTab {
     public String getTabName() { return "GaussianBlur"; }
 
     @Override
-    protected void applyFilter() {
-        Mat matSrc = ImgHelper.toMat(getSourceImage());
+    protected void applyOpencvFilter() {
         // TODO
         // input image; the image can have any number of channels, which are processed independently, but the depth should be CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 
-        Mat matDest = new Mat();
         Imgproc.GaussianBlur(
-            matSrc,
-            matDest,
+            imageMat, // src
+            imageMat, // dst
             new Size(modelKernelSizeW.getValue(),
                      modelKernelSizeH.getValue()),
             modelSigmaX.getValue(),
             modelSigmaY.getValue(),
             borderType.getVal());
-
-        image = ImgHelper.toBufferedImage(matDest);
     }
 
     @Override

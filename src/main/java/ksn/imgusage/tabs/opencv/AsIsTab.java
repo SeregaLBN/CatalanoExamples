@@ -6,8 +6,6 @@ import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
-import org.opencv.core.Mat;
-
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.utils.ImgHelper;
@@ -33,14 +31,9 @@ public class AsIsTab extends OpencvFilterTab {
     public String getTabName() { return "As is"; }
 
     @Override
-    protected void applyFilter() {
-        Mat mat = ImgHelper.toMat(getSourceImage());
-        if ((boosting != null) && boosting.booleanValue())
-            mat = boostImage(mat, logger);
+    protected void applyOpencvFilter() {
         if (isGray)
-            mat = OpenCvHelper.toGray(mat);
-
-        image = ImgHelper.toBufferedImage(mat);
+            imageMat = OpenCvHelper.toGray(imageMat);
     }
 
     @Override

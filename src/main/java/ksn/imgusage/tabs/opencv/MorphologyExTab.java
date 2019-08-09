@@ -7,7 +7,6 @@ import java.util.function.BiConsumer;
 
 import javax.swing.*;
 
-import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.ISliderModel;
@@ -17,7 +16,6 @@ import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
 import ksn.imgusage.tabs.opencv.type.IMatter;
-import ksn.imgusage.utils.ImgHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f'>Performs advanced morphological transformations</a> */
 public class MorphologyExTab extends OpencvFilterTab {
@@ -53,19 +51,15 @@ public class MorphologyExTab extends OpencvFilterTab {
     public String getTabName() { return "MorphologyEx"; }
 
     @Override
-    protected void applyFilter() {
-        Mat matSrc = ImgHelper.toMat(getSourceImage());
+    protected void applyOpencvFilter() {
         // TODO
         // Source image. The number of channels can be arbitrary. The depth should be one of CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 
-        Mat matDest = new Mat();
         Imgproc.morphologyEx(
-            matSrc,
-            matDest,
+            imageMat, // src
+            imageMat, // dst
             morphologicalOperation.getVal(),
             kernel.createMat());
-
-        image = ImgHelper.toBufferedImage(matDest);
     }
 
     @Override
