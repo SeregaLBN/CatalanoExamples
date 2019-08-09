@@ -72,13 +72,20 @@ public abstract class BaseTab implements ITab {
 
     @Override
     public void resetImage() {
-        if (image == null)
+        if (image == null) {
+            logger.trace("> resetImage: already reseted");
             return;
+        }
 
+        logger.trace("> resetImage: reset...");
         image = null;
-        if (imagePanelInvalidate != null)
-            imagePanelInvalidate.run();
-        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
+        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300,
+            () -> {
+                logger.trace("  resetImage: invalidate panel");
+                if (imagePanelInvalidate != null)
+                    imagePanelInvalidate.run();
+                SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
+            }, logger);
     }
 
     @Override
@@ -161,10 +168,6 @@ public abstract class BaseTab implements ITab {
     }
 
     protected abstract void makeOptions(JPanel imagePanel, Box boxCenterLeft);
-
-    protected void debounceResetImage() {
-        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::resetImage, logger);
-    }
 
     private Box makeAsBoostCheckBox() {
         Box box = Box.createHorizontalBox();

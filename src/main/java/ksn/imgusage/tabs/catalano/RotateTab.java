@@ -90,7 +90,7 @@ public class RotateTab extends CatalanoFilterTab {
 
         modelAngle.getWrapped().addChangeListener(ev -> {
             logger.trace("modelAngle: value={}", modelAngle.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
     }
 

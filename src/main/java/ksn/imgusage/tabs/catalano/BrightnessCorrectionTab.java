@@ -50,7 +50,7 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab {
 
         modelAdjust.getWrapped().addChangeListener(ev -> {
             logger.trace("modelAdjust: value={}", modelAdjust.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
     }
 

@@ -77,7 +77,7 @@ public final class UiHelper {
             Timer[] wrapper = { null };
             wrapper[0] = timer = new Timer(debounceTimer, ev -> {
                 wrapper[0].stop();
-                logger.info("debounce: call resetImage");
+                logger.trace("debounce: call executor...");
                 executor.run();
             });
             setterTimer.accept(timer);

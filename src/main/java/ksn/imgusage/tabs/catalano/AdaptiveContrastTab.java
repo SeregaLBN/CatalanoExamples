@@ -78,29 +78,29 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
 
         modelWinSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
         modelK1.getWrapped().addChangeListener(ev -> {
             logger.trace("modelK1: value={}", modelK1.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
         modelK2.getWrapped().addChangeListener(ev -> {
             logger.trace("modelK2: value={}", modelK2.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
         modelMinGain.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMinGain: value={}", modelMinGain.getFormatedText());
             double valMinGain = modelMinGain.getValue();
             if (valMinGain > modelMaxGain.getValue())
                 modelMaxGain.setValue(valMinGain);
-            debounceResetImage();
+            resetImage();
         });
         modelMaxGain.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMaxGain: value={}", modelMaxGain.getFormatedText());
             double valMaxGain = modelMaxGain.getValue();
             if (valMaxGain < modelMinGain.getValue())
                 modelMinGain.setValue(valMaxGain);
-            debounceResetImage();
+            resetImage();
         });
     }
 

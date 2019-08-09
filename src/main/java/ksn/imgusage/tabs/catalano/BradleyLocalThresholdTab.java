@@ -57,11 +57,11 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
 
         modelWindowSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelRadius: value={}", modelWindowSize.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
         modelPixelBrightnessDiff.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPixelBrightnessDiff: value={}", modelPixelBrightnessDiff.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
     }
 

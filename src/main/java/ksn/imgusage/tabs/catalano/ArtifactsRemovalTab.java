@@ -50,7 +50,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
 
         modelWinSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
     }
 

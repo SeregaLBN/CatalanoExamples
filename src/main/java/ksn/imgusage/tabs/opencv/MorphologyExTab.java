@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 
 import javax.swing.*;
 
+import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.ISliderModel;
@@ -55,11 +56,13 @@ public class MorphologyExTab extends OpencvFilterTab {
         // TODO
         // Source image. The number of channels can be arbitrary. The depth should be one of CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 
+        Mat dst = new Mat();
         Imgproc.morphologyEx(
             imageMat, // src
-            imageMat, // dst
+            dst,
             morphologicalOperation.getVal(),
             kernel.createMat());
+        imageMat = dst;
     }
 
     @Override
@@ -76,7 +79,7 @@ public class MorphologyExTab extends OpencvFilterTab {
             comboBoxMorphOper.setToolTipText("Type of a morphological operation");
             comboBoxMorphOper.addActionListener(ev -> {
                 morphologicalOperation = (CvMorphTypes)comboBoxMorphOper.getSelectedItem();
-                debounceResetImage();
+                resetImage();
             });
             panel.add(comboBoxMorphOper, BorderLayout.NORTH);
         }
@@ -183,7 +186,7 @@ public class MorphologyExTab extends OpencvFilterTab {
         comboArrayType.setSelectedItem(kernel1.getType());
         comboArrayType.addActionListener(ev -> {
             kernel1.setType((CvArrayType)comboArrayType.getSelectedItem());
-            debounceResetImage();
+            resetImage();
         });
         box4ArrayType.add(comboArrayType);
 
@@ -205,7 +208,7 @@ public class MorphologyExTab extends OpencvFilterTab {
         BiConsumer<String, ISliderModel<?>> modelListener = (name, model) ->
             model.getWrapped().addChangeListener(ev -> {
                 logger.trace("{}: value={}", name, model.getFormatedText());
-                debounceResetImage();
+                resetImage();
             });
         modelListener.accept("kernel1ModelRows"      , kernel1.getModelRows());
         modelListener.accept("kernel1ModelCols"      , kernel1.getModelCols());
@@ -296,7 +299,7 @@ public class MorphologyExTab extends OpencvFilterTab {
                 if (val >= modelToCheck.getValue())
                     modelToCheck.setValue(val + 1);
             }
-            debounceResetImage();
+            resetImage();
         });
     }
 

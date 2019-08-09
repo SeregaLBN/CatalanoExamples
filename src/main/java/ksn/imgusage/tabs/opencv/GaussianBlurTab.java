@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 
 import javax.swing.*;
 
+import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -54,14 +55,16 @@ public class GaussianBlurTab extends OpencvFilterTab {
         // TODO
         // input image; the image can have any number of channels, which are processed independently, but the depth should be CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 
+        Mat dst = new Mat();
         Imgproc.GaussianBlur(
             imageMat, // src
-            imageMat, // dst
+            dst,
             new Size(modelKernelSizeW.getValue(),
                      modelKernelSizeH.getValue()),
             modelSigmaX.getValue(),
             modelSigmaY.getValue(),
             borderType.getVal());
+        imageMat = dst;
     }
 
     @Override
@@ -132,7 +135,7 @@ public class GaussianBlurTab extends OpencvFilterTab {
             int val = modelKernelSizeW.getValue();
             int valValid = onlyZeroOrOdd(val);
             if (val == valValid)
-                debounceResetImage();
+                resetImage();
             else
                 SwingUtilities.invokeLater(() -> modelKernelSizeW.setValue(valValid));
         });
@@ -141,17 +144,17 @@ public class GaussianBlurTab extends OpencvFilterTab {
             int val = modelKernelSizeH.getValue();
             int valValid = onlyZeroOrOdd(val);
             if (val == valValid)
-                debounceResetImage();
+                resetImage();
             else
                 SwingUtilities.invokeLater(() -> modelKernelSizeH.setValue(valValid));
         });
         modelSigmaX.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSigmaX: value={}", modelSigmaX.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
         modelSigmaY.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSigmaY: value={}", modelSigmaY.getFormatedText());
-            debounceResetImage();
+            resetImage();
         });
     }
 

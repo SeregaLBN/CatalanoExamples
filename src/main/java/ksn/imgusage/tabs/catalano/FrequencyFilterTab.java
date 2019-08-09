@@ -64,14 +64,14 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
             int valMin = modelMin.getValue();
             if (valMin > modelMax.getValue())
                 modelMax.setValue(valMin);
-            debounceResetImage();
+            resetImage();
         });
         modelMax.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMax: value={}", modelMax.getFormatedText());
             int valMax = modelMax.getValue();
             if (valMax < modelMin.getValue())
                 modelMin.setValue(valMax);
-            debounceResetImage();
+            resetImage();
         });
     }
 
