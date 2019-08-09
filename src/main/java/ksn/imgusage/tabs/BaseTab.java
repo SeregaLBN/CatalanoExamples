@@ -183,7 +183,7 @@ public abstract class BaseTab implements ITab {
         return box;
     }
 
-    protected static Component makeSliderVert(ISliderModel<?> model, String title, String tip) {
+    protected static Container makeSliderVert(ISliderModel<?> model, String title, String tip) {
         JLabel labTitle = new JLabel(title);
         labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 

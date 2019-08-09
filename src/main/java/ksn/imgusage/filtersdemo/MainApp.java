@@ -296,7 +296,7 @@ public class MainApp {
           //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, null, false),
             prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, null, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
             prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, null, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1)),
-            prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, null, 150, 350, CvThresholdTypes.THRESH_TRUNC)
+            prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, null, 150, 350, CvThresholdTypes.THRESH_TRUNC, false, false)
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);

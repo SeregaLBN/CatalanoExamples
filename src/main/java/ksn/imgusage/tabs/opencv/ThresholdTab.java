@@ -1,6 +1,8 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ItemEvent;
 import java.util.stream.Stream;
 
@@ -29,10 +31,10 @@ public class ThresholdTab extends OpencvFilterTab {
     private       boolean           useTriangleMask;
 
     public ThresholdTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, null, 100, 250, CvThresholdTypes.THRESH_BINARY);
+        this(tabHandler, source, null, 100, 250, CvThresholdTypes.THRESH_BINARY, false, false);
     }
 
-    public ThresholdTab(ITabHandler tabHandler, ITab source, Boolean boosting, double thresh, double maxval, CvThresholdTypes threshType) {
+    public ThresholdTab(ITabHandler tabHandler, ITab source, Boolean boosting, double thresh, double maxval, CvThresholdTypes threshType, boolean useOtsuMask, boolean useTriangleMask) {
         super(tabHandler, source, boosting);
         this.modelThresh = new SliderDoubleModel(thresh, 0, MIN_THRESH, MAX_THRESH);
         this.modelMaxVal = new SliderDoubleModel(maxval, 0, MIN_MAXVAL, MAX_MAXVAL);
@@ -46,19 +48,13 @@ public class ThresholdTab extends OpencvFilterTab {
                 break;
 
             case THRESH_OTSU:
-                this.threshType = CvThresholdTypes.THRESH_BINARY;
-                this.useOtsuMask = true;
-                break;
-
             case THRESH_TRIANGLE:
-                this.threshType = CvThresholdTypes.THRESH_BINARY;
-                this.useTriangleMask = true;
-                break;
-
             case THRESH_MASK:
             default:
                 throw new IllegalArgumentException("Unsupported threshType=" + threshType);
         }
+        this.useOtsuMask     = useOtsuMask;
+        this.useTriangleMask = useTriangleMask;
 
         makeTab();
     }
@@ -81,6 +77,25 @@ public class ThresholdTab extends OpencvFilterTab {
 
     @Override
     protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+        Container cntrlThreshSlider = makeSliderVert(modelThresh, "Thresh", "Threshold value");
+        Container cntrlMaxvalSlider = makeSliderVert(modelMaxVal, "MaxVal", "Maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types");
+
+        Runnable applyThresholdingType = () -> {
+            // maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types.
+            boolean enabled1 = (this.threshType == CvThresholdTypes.THRESH_BINARY) ||
+                               (this.threshType == CvThresholdTypes.THRESH_BINARY_INV);
+
+            // Also, the special values THRESH_OTSU or THRESH_TRIANGLE may be combined with one of the above values.
+            // In these cases, the function determines the optimal threshold value using the Otsu's or Triangle algorithm and uses it instead of the specified thresh.
+            boolean enabled2 = !this.useOtsuMask && !this.useTriangleMask;
+
+            for (Component c : cntrlMaxvalSlider.getComponents())
+                c.setEnabled(enabled1 && enabled2);
+            for (Component c : cntrlThreshSlider.getComponents())
+                c.setEnabled(enabled2);
+        };
+
+
         Box box4Types = Box.createVerticalBox();
         box4Types.setBorder(BorderFactory.createTitledBorder("Thresholding type"));
         Box box4TypesRadioBttns = Box.createVerticalBox();
@@ -99,6 +114,7 @@ public class ThresholdTab extends OpencvFilterTab {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
                         this.threshType = thresholdingType;
                         logger.trace("Thresholding type changed to {}", thresholdingType);
+                        applyThresholdingType.run();
                         resetImage();
                     }
                 });
@@ -122,6 +138,7 @@ public class ThresholdTab extends OpencvFilterTab {
                 logger.trace("Thresholding type THRESH_OTSU is {}", (useOtsuMask ? "checked" : "unchecked"));
                 if (useOtsuMask)
                     checkBoxTriangleMask.setSelected(false);
+                applyThresholdingType.run();
                 resetImage();
             });
             checkBoxTriangleMask.addItemListener(ev -> {
@@ -129,6 +146,7 @@ public class ThresholdTab extends OpencvFilterTab {
                 logger.trace("Thresholding type THRESH_TRIANGLE is {}", (useTriangleMask ? "checked" : "unchecked"));
                 if (useTriangleMask)
                     checkBoxOtsuMask.setSelected(false);
+                applyThresholdingType.run();
                 resetImage();
             });
 
@@ -136,17 +154,15 @@ public class ThresholdTab extends OpencvFilterTab {
             box4TypesCheckBoxes.add(checkBoxTriangleMask);
         }
 
-//        box4Types.add(Box.createVerticalGlue());
         box4Types.add(box4TypesRadioBttns);
         box4Types.add(Box.createVerticalStrut(2));
         box4Types.add(box4TypesCheckBoxes);
-//        box4Types.add(Box.createVerticalGlue());
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
-        box4Sliders.add(makeSliderVert(modelThresh, "Thresh", "Threshold value"));
+        box4Sliders.add(cntrlThreshSlider);
         box4Sliders.add(Box.createHorizontalStrut(2));
-        box4Sliders.add(makeSliderVert(modelMaxVal, "MaxVal", "Maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types"));
+        box4Sliders.add(cntrlMaxvalSlider);
         box4Sliders.add(Box.createHorizontalGlue());
 
         JPanel panelOptions = new JPanel();
@@ -156,6 +172,8 @@ public class ThresholdTab extends OpencvFilterTab {
         panelOptions.add(box4Types  , BorderLayout.SOUTH);
 
         boxCenterLeft.add(panelOptions);
+
+        applyThresholdingType.run();
 
         // Note
         // Currently, the Otsu's and Triangle methods are implemented only for 8-bit single-channel images.
