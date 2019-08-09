@@ -190,10 +190,12 @@ public class ThresholdTab extends OpencvFilterTab {
 
     @Override
     public void printParams() {
-        logger.info("thresh={}, maxval={}, type={}",
+        logger.info("thresh={}, maxval={}, type={}{}{}",
                 modelThresh.getFormatedText(),
                 modelMaxVal.getFormatedText(),
-                threshType);
+                threshType,
+                useOtsuMask     ? " | THRESH_OTSU"     : "",
+                useTriangleMask ? " | THRESH_TRIANGLE" : "");
     }
 
 }
