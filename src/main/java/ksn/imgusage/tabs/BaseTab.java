@@ -107,32 +107,32 @@ public abstract class BaseTab implements ITab {
                 makeOptions(imagePanel, boxCenterLeft);
             }
 
-            Box boxBottomLeft = Box.createVerticalBox();
+            Box boxBottom = Box.createHorizontalBox();
             { // fill boxBottomLeft
-                boxBottomLeft.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+                boxBottom.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
 
                 JButton btnAddFilter = new JButton("Add filter");
                 btnAddFilter.addActionListener(ev -> tabHandler.onAddNewFilter());
-                boxBottomLeft.add(btnAddFilter);
+                boxBottom.add(btnAddFilter);
 
-                boxBottomLeft.add(Box.createVerticalStrut(6));
+                boxBottom.add(Box.createHorizontalStrut(6));
 
                 if (addRemoveFilterButton) {
                     JButton btnRemoveFilter = new JButton("Remove filter");
                     btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(this));
-                    boxBottomLeft.add(btnRemoveFilter);
-                    UiHelper.makeSameWidth(new Component[] { btnAddFilter, btnRemoveFilter });
+                    boxBottom.add(btnRemoveFilter);
+//                    UiHelper.makeSameWidth(new Component[] { btnAddFilter, btnRemoveFilter });
                 } else {
                     JButton btnCancel = new JButton("Cancel");
                     btnCancel.addActionListener(ev -> tabHandler.onCancel());
-                    boxBottomLeft.add(btnCancel);
-                    UiHelper.makeSameWidth(new Component[] { btnAddFilter, btnCancel });
+                    boxBottom.add(btnCancel);
+//                    UiHelper.makeSameWidth(new Component[] { btnAddFilter, btnCancel });
                 }
             }
 
             leftPanel.setLayout(new BorderLayout());
             leftPanel.add(boxCenterLeft, BorderLayout.CENTER);
-            leftPanel.add(boxBottomLeft, BorderLayout.SOUTH);
+            leftPanel.add(boxBottom, BorderLayout.SOUTH);
             leftPanel.setMinimumSize(new Dimension(WIDTH_LEFT_PANEL, 200));
             leftPanel.setPreferredSize(new Dimension(WIDTH_LEFT_PANEL, -1));
         }
