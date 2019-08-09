@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.lang.reflect.Constructor;
@@ -62,6 +63,7 @@ public class MainApp {
 
     public MainApp() {
         frame = new JFrame(DEFAULT_CAPTION);
+        makeLogo();
         initialize();
 
         // DEBUG
@@ -328,6 +330,43 @@ public class MainApp {
          errorWindow.setVisible(true);
 
          UiHelper.debounceExecutor(() -> timer, t -> timer = t, 5000, () -> errorWindow.setVisible(false), logger);
+    }
+
+    private void makeLogo() {
+        final int w = 128;
+        final int h = 128;
+        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g = img.createGraphics();
+
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, w, h);
+        g.setColor(Color.WHITE);
+        int border = 10;
+        g.fillRect(border, border, w-2*border, h-2*border);
+
+        g.setColor(Color.ORANGE);
+        g.fillOval(20, 20, 40, 40);
+
+        g.setColor(Color.BLACK);
+        Path2D.Double triangleShape = new Path2D.Double();
+        triangleShape.moveTo( 20, h - 20);
+        triangleShape.lineTo( 50, h - 20 - 30);
+        triangleShape.lineTo(100, h - 20);
+        triangleShape.closePath();
+        g.fill(triangleShape);
+
+        g.setColor(Color.DARK_GRAY);
+        triangleShape = new Path2D.Double();
+        triangleShape.moveTo(w - 80, h - 20);
+        triangleShape.lineTo(w - 40, h - 20 - 70);
+        triangleShape.lineTo(w - 20, h - 20);
+        triangleShape.closePath();
+        g.fill(triangleShape);
+
+        g.dispose();
+
+        frame.setIconImage(img);
     }
 
     public static void main(String[] args) {
