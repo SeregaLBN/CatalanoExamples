@@ -14,6 +14,9 @@ import ksn.imgusage.utils.OpenCvHelper;
 /** for testing internal classes {@link ImgHelper} {@link OpenCvHelper} */
 public class AsIsTab extends OpencvFilterTab {
 
+    public static final String TAB_NAME = "AsIs";
+    public static final String TAB_DESCRIPTION = "As is";
+
     private boolean isGray;
 
     public AsIsTab(ITabHandler tabHandler, ITab source) {
@@ -28,7 +31,7 @@ public class AsIsTab extends OpencvFilterTab {
     }
 
     @Override
-    public String getTabName() { return "As is"; }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

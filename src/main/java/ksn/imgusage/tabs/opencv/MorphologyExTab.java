@@ -21,6 +21,9 @@ import ksn.imgusage.tabs.opencv.type.IMatter;
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f'>Performs advanced morphological transformations</a> */
 public class MorphologyExTab extends OpencvFilterTab {
 
+    public static final String TAB_NAME = "MorphologyEx";
+    public static final String TAB_DESCRIPTION = "Performs advanced morphological transformations";
+
     private CvMorphTypes morphologicalOperation;
     private IMatter kernel;
     private IMatter.CtorParams               kernel1 = new IMatter.CtorParams();
@@ -49,7 +52,7 @@ public class MorphologyExTab extends OpencvFilterTab {
     }
 
     @Override
-    public String getTabName() { return "MorphologyEx"; }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

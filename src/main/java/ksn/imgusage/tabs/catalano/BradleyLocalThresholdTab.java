@@ -13,6 +13,9 @@ import ksn.imgusage.tabs.ITabHandler;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BradleyLocalThreshold.java'>Adaptive thresholding using the integral image</a> */
 public class BradleyLocalThresholdTab extends CatalanoFilterTab {
 
+    public static final String TAB_NAME = BradleyLocalThreshold.class.getSimpleName();
+    public static final String TAB_DESCRIPTION = "Adaptive thresholding using the integral image";
+
     private static final int    MIN_WINDOW_SIZE           =    2;
     private static final int    MAX_WINDOW_SIZE           = 1000;
     private static final double MIN_PIXEL_BRIGHTNESS_DIFF =    0;
@@ -34,7 +37,7 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
     }
 
     @Override
-    public String getTabName() { return BradleyLocalThreshold.class.getSimpleName(); }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

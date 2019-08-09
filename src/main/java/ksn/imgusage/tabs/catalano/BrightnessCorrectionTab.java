@@ -12,6 +12,9 @@ import ksn.imgusage.tabs.ITabHandler;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BrightnessCorrection.java'>Brightness adjusting in RGB color space</a> */
 public class BrightnessCorrectionTab extends CatalanoFilterTab {
 
+    public static final String TAB_NAME = BrightnessCorrection.class.getSimpleName();
+    public static final String TAB_DESCRIPTION = "Brightness adjusting in RGB color space";
+
     private static final int MIN = -255;
     private static final int MAX =  255;
 
@@ -29,7 +32,7 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab {
     }
 
     @Override
-    public String getTabName() { return BrightnessCorrection.class.getSimpleName(); }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

@@ -19,6 +19,9 @@ import ksn.imgusage.tabs.opencv.type.CvThresholdTypes;
 /** <a href='https://docs.opencv.org/3.4.2/d7/d1b/group__imgproc__misc.html#gae8a4a146d1ca78c626a53577199e9c57'>Applies a fixed-level threshold to each array element</a> */
 public class ThresholdTab extends OpencvFilterTab {
 
+    public static final String TAB_NAME = "Threshold";
+    public static final String TAB_DESCRIPTION = "Applies a fixed-level threshold to each array element";
+
     private static final double MIN_THRESH =   0;
     private static final double MAX_THRESH = 999;
     private static final double MIN_MAXVAL =   0;
@@ -60,7 +63,7 @@ public class ThresholdTab extends OpencvFilterTab {
     }
 
     @Override
-    public String getTabName() { return "Threshold"; }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

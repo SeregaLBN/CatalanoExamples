@@ -4,20 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.Arrays;
 
 import javax.swing.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import Catalano.Imaging.Filters.*;
+import ksn.imgusage.tabs.catalano.CatalanoFilterTab;
+import ksn.imgusage.tabs.opencv.OpencvFilterTab;
 
 public class SelectFilterDialog {
 
     private static final Logger logger = LoggerFactory.getLogger(SelectFilterDialog.class);
-    public static final String CATALANO_TAB_PREFIX = "Catalano:";
-    public static final String   OPENCV_TAB_PREFIX = "OpenCV:";
 
     private final Frame owner;
 
@@ -25,18 +23,6 @@ public class SelectFilterDialog {
         this.owner = owner;
     }
 
-    private static class FilterTabs {
-        public final String filterName;
-        public final String description;
-        public FilterTabs(Class<?> filterClass, String description) {
-            this.filterName  = filterClass.getSimpleName();
-            this.description = description;
-        }
-        public FilterTabs(String filterName, String description) {
-            this.filterName  = filterName;
-            this.description = description;
-        }
-    }
     public String getFilterClassName() {
         logger.trace("getFilterClassName");
 
@@ -54,18 +40,9 @@ public class SelectFilterDialog {
         boxCatalanoFilters.setBorder(BorderFactory.createTitledBorder("Catalano filters"));
         ButtonGroup radioGroup = new ButtonGroup();
 
-        Arrays.asList( // alphabetical sort
-            new FilterTabs(AdaptiveContrastEnhancement.class, "Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change"),
-            new FilterTabs(ArtifactsRemoval           .class, "Remove artifacts caused by uneven lightning"),
-            new FilterTabs(BernsenThreshold           .class, "The method uses a user-provided contrast threshold"),
-            new FilterTabs(Blur                       .class, "Blur filter"),
-            new FilterTabs(BradleyLocalThreshold      .class, "Adaptive thresholding using the integral image"),
-            new FilterTabs(BrightnessCorrection       .class, "Brightness adjusting in RGB color space"),
-            new FilterTabs(FrequencyFilter            .class, "Filtering of frequencies outside of specified range in complex Fourier transformed image"),
-            new FilterTabs(Rotate                     .class, "Rotate image")
-        ).forEach(tab -> {
+        MapFilterToTab.getAllCatalanoTabs().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
-            radioFilter.setActionCommand(CATALANO_TAB_PREFIX + tab.filterName);
+            radioFilter.setActionCommand(CatalanoFilterTab.TAB_PREFIX + tab.filterName);
             boxCatalanoFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
@@ -73,15 +50,9 @@ public class SelectFilterDialog {
         Box boxOpenCvFilters = Box.createVerticalBox();
         boxOpenCvFilters.setBorder(BorderFactory.createTitledBorder("OpenCV filters"));
 
-        Arrays.<FilterTabs>asList( // alphabetical sort
-            new FilterTabs("AsIs"        , "As is"),
-            new FilterTabs("Canny"       , "Finds edges in an image using the Canny algorithm"),
-            new FilterTabs("GaussianBlur", "Blurs an image using a Gaussian filter"),
-            new FilterTabs("MorphologyEx", "Performs advanced morphological transformations"),
-            new FilterTabs("Threshold"   , "Applies a fixed-level threshold to each array element")
-        ).forEach(tab -> {
+        MapFilterToTab.getAllOpencvTabs().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
-            radioFilter.setActionCommand(OPENCV_TAB_PREFIX + tab.filterName);
+            radioFilter.setActionCommand(OpencvFilterTab.TAB_PREFIX + tab.filterName);
             boxOpenCvFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });

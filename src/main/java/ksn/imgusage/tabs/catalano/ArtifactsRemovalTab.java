@@ -12,6 +12,9 @@ import ksn.imgusage.tabs.ITabHandler;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/ArtifactsRemoval.java'>Remove artifacts caused by uneven lightning</a> */
 public class ArtifactsRemovalTab extends CatalanoFilterTab {
 
+    public static final String TAB_NAME = ArtifactsRemoval.class.getSimpleName();
+    public static final String TAB_DESCRIPTION = "Remove artifacts caused by uneven lightning";
+
     private static final int MIN_WINDOW_SIZE = 1;
     private static final int MAX_WINDOW_SIZE = 201;
 
@@ -29,7 +32,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
     }
 
     @Override
-    public String getTabName() { return ArtifactsRemoval.class.getSimpleName(); }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

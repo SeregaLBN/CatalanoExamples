@@ -13,6 +13,9 @@ import ksn.imgusage.tabs.ITabHandler;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/Rotate.java'>Rotate image</a> */
 public class RotateTab extends CatalanoFilterTab {
 
+    public static final String TAB_NAME = Rotate.class.getSimpleName();
+    public static final String TAB_DESCRIPTION = "Rotate image";
+
     private static final double MIN =   0;
     private static final double MAX = 360;
 
@@ -34,7 +37,7 @@ public class RotateTab extends CatalanoFilterTab {
     }
 
     @Override
-    public String getTabName() { return Rotate.class.getSimpleName(); }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

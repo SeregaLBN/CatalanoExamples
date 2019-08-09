@@ -23,13 +23,14 @@ import org.opencv.core.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import Catalano.Imaging.Filters.*;
+import Catalano.Imaging.Filters.Rotate;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.tabs.opencv.type.*;
+import ksn.imgusage.utils.MapFilterToTab;
 import ksn.imgusage.utils.SelectFilterDialog;
 import ksn.imgusage.utils.UiHelper;
 
@@ -162,38 +163,18 @@ public class MainApp {
             return null;
         };
         BiFunction<String /* filterName */, Class<? extends ITab>, ITab> opencvHandler = (filterName, tabClass) -> {
-            if (filterClassName.equals(SelectFilterDialog.OPENCV_TAB_PREFIX + filterName))
+            if (filterClassName.equals(OpencvFilterTab.TAB_PREFIX + filterName))
                 return callCtor.apply(tabClass);
             return null;
         };
-        BiFunction<Class<?> /* Catalano filter class */, Class<? extends ITab>, ITab> catalanoHandler = (filterClass, tabClass) -> {
-            if (filterClassName.equals(SelectFilterDialog.CATALANO_TAB_PREFIX + filterClass.getSimpleName()))
+        BiFunction<String /* Catalano filter name */, Class<? extends ITab>, ITab> catalanoHandler = (filterName, tabClass) -> {
+            if (filterClassName.equals(CatalanoFilterTab.TAB_PREFIX + filterName))
                 return callCtor.apply(tabClass);
             return null;
         };
 
-        // map OpenCV filters to tab classes
-        Stream<Supplier<ITab>> opencvMapping = Stream.of( // alphabetical sort
-            () -> opencvHandler.apply("AsIs"        ,         AsIsTab.class),
-            () -> opencvHandler.apply("Canny"       ,        CannyTab.class),
-            () -> opencvHandler.apply("GaussianBlur", GaussianBlurTab.class),
-            () -> opencvHandler.apply("MorphologyEx", MorphologyExTab.class),
-            () -> opencvHandler.apply("Threshold"   ,    ThresholdTab.class)
-        );
-
-        // map Catalano filters to tab classes
-        Stream<Supplier<ITab>> catalanoMapping = Stream.of( // alphabetical sort
-            () -> catalanoHandler.apply(AdaptiveContrastEnhancement.class,      AdaptiveContrastTab.class),
-            () -> catalanoHandler.apply(ArtifactsRemoval           .class,      ArtifactsRemovalTab.class),
-            () -> catalanoHandler.apply(BernsenThreshold           .class,      BernsenThresholdTab.class),
-            () -> catalanoHandler.apply(Blur                       .class,                  BlurTab.class),
-            () -> catalanoHandler.apply(BradleyLocalThreshold      .class, BradleyLocalThresholdTab.class),
-            () -> catalanoHandler.apply(BrightnessCorrection       .class,  BrightnessCorrectionTab.class),
-            () -> catalanoHandler.apply(FrequencyFilter            .class,       FrequencyFilterTab.class),
-            () -> catalanoHandler.apply(Rotate                     .class,                RotateTab.class)
-        );
-
-        ITab newTab = Stream.concat(opencvMapping, catalanoMapping)
+        ITab newTab = Stream.concat(MapFilterToTab.getOpencvMapping(opencvHandler),
+                                    MapFilterToTab.getCatalanoMapping(catalanoHandler))
             .map(Supplier::get)
             .filter(Objects::nonNull)
             .findAny()

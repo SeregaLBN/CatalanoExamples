@@ -13,6 +13,9 @@ import ksn.imgusage.tabs.ITabHandler;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BernsenThreshold.java'>Bernsen Threshold</a> */
 public class BernsenThresholdTab extends CatalanoFilterTab {
 
+    public static final String TAB_NAME = BernsenThreshold.class.getSimpleName();
+    public static final String TAB_DESCRIPTION = "The method uses a user-provided contrast threshold";
+
     private static final int    MIN_RADIUS = 0;
     private static final int    MAX_RADIUS = 100;
     private static final double MIN_CONTRAST_THRESHOLD = 0;
@@ -34,7 +37,7 @@ public class BernsenThresholdTab extends CatalanoFilterTab {
     }
 
     @Override
-    public String getTabName() { return BernsenThreshold.class.getSimpleName(); }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

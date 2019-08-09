@@ -13,6 +13,9 @@ import ksn.imgusage.tabs.ITabHandler;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/AdaptiveContrastEnhancement.java'>Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change</a> */
 public class AdaptiveContrastTab extends CatalanoFilterTab {
 
+    public static final String TAB_NAME = AdaptiveContrastEnhancement.class.getSimpleName();
+    public static final String TAB_DESCRIPTION = "Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change";
+
     private static final int    MIN_WINDOW_SIZE =   1; // Size of window (should be an odd number).
     private static final int    MAX_WINDOW_SIZE = 201;
     private static final double MIN_K1          =   0; // Local gain factor, between 0 and 1.
@@ -44,7 +47,7 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
     }
 
     @Override
-    public String getTabName() { return AdaptiveContrastEnhancement.class.getSimpleName(); }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

@@ -11,6 +11,8 @@ import ksn.imgusage.utils.ImgHelper;
 
 public abstract class OpencvFilterTab extends BaseTab {
 
+    public static final String TAB_PREFIX = "OpenCV:";
+
     public static final int BOOST_SIZE_MAX_X = 400;
     public static final int BOOST_SIZE_MAX_Y = 250;
 

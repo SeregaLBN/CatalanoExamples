@@ -13,6 +13,9 @@ import ksn.imgusage.tabs.ITabHandler;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/FrequencyFilter.java'>Filtering of frequencies outside of specified range in complex Fourier transformed image</a> */
 public class FrequencyFilterTab extends CatalanoFilterTab {
 
+    public static final String TAB_NAME = FrequencyFilter.class.getSimpleName();
+    public static final String TAB_DESCRIPTION = "Filtering of frequencies outside of specified range in complex Fourier transformed image";
+
     private static final int MIN = 0;
     private static final int MAX = 1024;
 
@@ -32,7 +35,7 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
     }
 
     @Override
-    public String getTabName() { return FrequencyFilter.class.getSimpleName(); }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

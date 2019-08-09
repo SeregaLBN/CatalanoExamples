@@ -11,6 +11,8 @@ import ksn.imgusage.utils.ImgHelper;
 
 public abstract class CatalanoFilterTab extends BaseTab {
 
+    public static final String TAB_PREFIX = "Catalano:";
+
     /** filter only works with gray image */
     protected final boolean onlyGray;
     /** filtered image of the current tab */

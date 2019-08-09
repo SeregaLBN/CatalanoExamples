@@ -10,6 +10,9 @@ import ksn.imgusage.tabs.ITabHandler;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/Blur.java'>Blur filter</a> */
 public class BlurTab extends CatalanoFilterTab {
 
+    public static final String TAB_NAME = Blur.class.getSimpleName();
+    public static final String TAB_DESCRIPTION = "Blur filter";
+
     public BlurTab(ITabHandler tabHandler, ITab source) {
         this(tabHandler, source, true);
     }
@@ -20,7 +23,7 @@ public class BlurTab extends CatalanoFilterTab {
     }
 
     @Override
-    public String getTabName() { return Blur.class.getSimpleName(); }
+    public String getTabName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {
