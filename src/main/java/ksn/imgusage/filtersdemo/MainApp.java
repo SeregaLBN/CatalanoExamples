@@ -36,6 +36,7 @@ import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
 import ksn.imgusage.tabs.opencv.type.IMatter;
 import ksn.imgusage.utils.SelectFilterDialog;
+import ksn.imgusage.utils.UiHelper;
 
 public class MainApp {
 
@@ -56,6 +57,8 @@ public class MainApp {
     private BooleanSupplier isScale;
     private List<ITab> tabs = new ArrayList<>();
     private boolean useExamplePipeline = true;
+    private JWindow errorWindow;
+    private Timer timer;
 
     public MainApp() {
         frame = new JFrame(DEFAULT_CAPTION);
@@ -138,6 +141,10 @@ public class MainApp {
             @Override
             public void onImagePanelPaint(JPanel imagePanel, Graphics2D g) {
                                                       MainApp.this.onImagePanelPaint(imagePanel, g);
+            }
+            @Override
+            public void onError(String message, ITab tab, Component from) {
+                                                      MainApp.this.onErrorInTab(message, tab, from);
             }
         };
     }
@@ -299,6 +306,28 @@ public class MainApp {
             prevTab = next;
         }
         return prevTab;
+    }
+
+    private void onErrorInTab(String message, ITab tab, Component from) {
+        if (from == null)
+            from = frame.getRootPane();
+
+        if (errorWindow == null) {
+            JLabel errorLabel = new JLabel(message);
+            Window topLevelWin = SwingUtilities.getWindowAncestor(from);
+            errorWindow = new JWindow(topLevelWin);
+            JPanel contentPane = (JPanel) errorWindow.getContentPane();
+            contentPane.add(errorLabel);
+            contentPane.setBackground(new Color(0xFA, 0xC5, 0xAF));
+            contentPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+            errorWindow.pack();
+         }
+
+         Point loc = from.getLocationOnScreen();
+         errorWindow.setLocation(loc.x + 20, loc.y + 30);
+         errorWindow.setVisible(true);
+
+         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 5000, () -> errorWindow.setVisible(false), logger);
     }
 
     public static void main(String[] args) {

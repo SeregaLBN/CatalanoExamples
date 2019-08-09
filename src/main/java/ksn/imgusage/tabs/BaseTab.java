@@ -60,6 +60,7 @@ public abstract class BaseTab implements ITab {
             } catch (Exception ex) {
                 logger.error(ex.toString());
                 image = ImgHelper.failedImage();
+                tabHandler.onError(ex.getMessage(), this, null);
             }
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
