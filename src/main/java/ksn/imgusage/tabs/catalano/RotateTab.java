@@ -38,6 +38,8 @@ public class RotateTab extends CatalanoFilterTab {
 
     @Override
     protected void applyCatalanoFilter() {
+        if (imageFBmp.isARGB()) // rotate filter form Catalano-Framework don`t supported argb
+            imageFBmp.toRGB();
         new Rotate(modelAngle.getValue(), keepSize, algorithm)
             .applyInPlace(imageFBmp);
     }
