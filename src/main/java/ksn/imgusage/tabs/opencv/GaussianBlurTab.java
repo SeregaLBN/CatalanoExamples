@@ -158,7 +158,7 @@ public class GaussianBlurTab extends OpencvFilterTab {
         });
     }
 
-    private static int onlyZeroOrOdd(int value) {
+    static int onlyZeroOrOdd(int value) {
         if (value == 0)
             return value;
         if ((value & 1) == 0)

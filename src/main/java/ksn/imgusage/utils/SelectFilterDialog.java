@@ -75,6 +75,7 @@ public class SelectFilterDialog {
 
         Arrays.<FilterTabs>asList( // alphabetical sort
             new FilterTabs("AsIs"        , "As is"),
+            new FilterTabs("Canny"       , "Finds edges in an image using the Canny algorithm"),
             new FilterTabs("GaussianBlur", "Blurs an image using a Gaussian filter"),
             new FilterTabs("MorphologyEx", "Performs advanced morphological transformations"),
             new FilterTabs("Threshold"   , "Applies a fixed-level threshold to each array element")
