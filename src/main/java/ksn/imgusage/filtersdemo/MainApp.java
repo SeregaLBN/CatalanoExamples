@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.*;
+import java.util.function.BooleanSupplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import javax.swing.*;
@@ -148,41 +149,25 @@ public class MainApp {
 
     private void onAddNewFilter() {
         logger.trace("onAddNewFilter");
-        String filterClassName = new SelectFilterDialog(frame).getFilterClassName();
-        if (filterClassName == null)
+        String filterTabName = new SelectFilterDialog(frame).getFilterTabName();
+        if (filterTabName == null)
             return;
 
-        ITab lastTab = tabs.get(tabs.size() - 1);
-        Function<Class<? extends ITab>, ITab> callCtor = tabClass -> {
-            try {
-                Constructor<? extends ITab> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class);
-                return ctor.newInstance(getTabHandler(), lastTab);
-            } catch (Exception ex) {
-                logger.error(ex.toString());
-            }
-            return null;
-        };
-        BiFunction<String /* filterName */, Class<? extends ITab>, ITab> opencvHandler = (filterName, tabClass) -> {
-            if (filterClassName.equals(OpencvFilterTab.TAB_PREFIX + filterName))
-                return callCtor.apply(tabClass);
-            return null;
-        };
-        BiFunction<String /* Catalano filter name */, Class<? extends ITab>, ITab> catalanoHandler = (filterName, tabClass) -> {
-            if (filterClassName.equals(CatalanoFilterTab.TAB_PREFIX + filterName))
-                return callCtor.apply(tabClass);
-            return null;
-        };
-
-        ITab newTab = Stream.concat(MapFilterToTab.getOpencvMapping(opencvHandler),
-                                    MapFilterToTab.getCatalanoMapping(catalanoHandler))
-            .map(Supplier::get)
+        Class<? extends ITab> tabClass = Stream.of(MapFilterToTab.getOpencvTabClass  (filterTabName),
+                                                   MapFilterToTab.getCatalanoTabClass(filterTabName))
             .filter(Objects::nonNull)
             .findAny()
             .orElse(null);
-        if (newTab == null)
-            logger.error("Not supported filter {}", filterClassName);
+        if (tabClass == null)
+            logger.error("Not supported filter {}", filterTabName);
         else
-            tabs.add(newTab);
+            try {
+                Constructor<? extends ITab> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class);
+                ITab lastTab = tabs.get(tabs.size() - 1);
+                tabs.add(ctor.newInstance(getTabHandler(), lastTab));
+            } catch (Exception ex) {
+                logger.error(ex.toString());
+            }
     }
 
     private void onRemoveFilter(ITab tab) {

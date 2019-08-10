@@ -2,11 +2,7 @@ package ksn.imgusage.utils;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.*;
 
@@ -22,7 +18,7 @@ public final class MapFilterToTab {
         }
     }
 
-    public static List<FilterTabs> getAllCatalanoTabs() {
+    public static List<FilterTabs> getAllCatalanoTabsDescr() {
         return Arrays.asList( // alphabetical sort
             new FilterTabs(     AdaptiveContrastTab.TAB_NAME,
                                 AdaptiveContrastTab.TAB_DESCRIPTION),
@@ -43,7 +39,7 @@ public final class MapFilterToTab {
         );
     }
 
-    public static List<FilterTabs> getAllOpencvTabs() {
+    public static List<FilterTabs> getAllOpencvTabsDescr() {
         return Arrays.<FilterTabs>asList( // alphabetical sort
             new FilterTabs(        AsIsTab.TAB_NAME,
                                    AsIsTab.TAB_DESCRIPTION),
@@ -60,41 +56,51 @@ public final class MapFilterToTab {
 
 
     /** map OpenCV filters to tab classes */
-    public static Stream<Supplier<ITab>> getOpencvMapping(BiFunction<String /* filterName */, Class<? extends ITab>, ITab> opencvHandler) {
-        return Stream.of( // alphabetical sort
-            () -> opencvHandler.apply(        AsIsTab.TAB_NAME,
-                                              AsIsTab.class),
-            () -> opencvHandler.apply(       CannyTab.TAB_NAME,
-                                             CannyTab.class),
-            () -> opencvHandler.apply(GaussianBlurTab.TAB_NAME,
-                                      GaussianBlurTab.class),
-            () -> opencvHandler.apply(MorphologyExTab.TAB_NAME,
-                                      MorphologyExTab.class),
-            () -> opencvHandler.apply(   ThresholdTab.TAB_NAME,
-                                         ThresholdTab.class)
-        );
+    public static Class<? extends OpencvFilterTab> getOpencvTabClass(String fullFilterTabName) {
+        if (fullFilterTabName.startsWith(OpencvFilterTab.TAB_PREFIX))
+            return null;
+
+        String  filterTabName = fullFilterTabName.substring(OpencvFilterTab.TAB_PREFIX.length());
+        switch (filterTabName) { // alphabetical sort
+        case               AsIsTab.TAB_NAME:
+            return         AsIsTab.class;
+        case              CannyTab.TAB_NAME:
+            return        CannyTab.class;
+        case       GaussianBlurTab.TAB_NAME:
+            return GaussianBlurTab.class;
+        case       MorphologyExTab.TAB_NAME:
+            return MorphologyExTab.class;
+        case          ThresholdTab.TAB_NAME:
+            return    ThresholdTab.class;
+        default:
+            return null;
+        }
     }
 
     /** map Catalano filters to tab classes */
-    public static Stream<Supplier<ITab>> getCatalanoMapping(BiFunction<String /* Catalano filter name */, Class<? extends ITab>, ITab> catalanoHandler) {
-        return Stream.of( // alphabetical sort
-            () -> catalanoHandler.apply(     AdaptiveContrastTab.TAB_NAME,
-                                             AdaptiveContrastTab.class),
-            () -> catalanoHandler.apply(     ArtifactsRemovalTab.TAB_NAME,
-                                             ArtifactsRemovalTab.class),
-            () -> catalanoHandler.apply(     BernsenThresholdTab.TAB_NAME,
-                                             BernsenThresholdTab.class),
-            () -> catalanoHandler.apply(                 BlurTab.TAB_NAME,
-                                                         BlurTab.class),
-            () -> catalanoHandler.apply(BradleyLocalThresholdTab.TAB_NAME,
-                                        BradleyLocalThresholdTab.class),
-            () -> catalanoHandler.apply( BrightnessCorrectionTab.TAB_NAME,
-                                         BrightnessCorrectionTab.class),
-            () -> catalanoHandler.apply(      FrequencyFilterTab.TAB_NAME,
-                                              FrequencyFilterTab.class),
-            () -> catalanoHandler.apply(               RotateTab.TAB_NAME,
-                                                       RotateTab.class)
-        );
+    public static Class<? extends CatalanoFilterTab> getCatalanoTabClass(String fullFilterTabName) {
+        if (fullFilterTabName.startsWith(CatalanoFilterTab.TAB_PREFIX))
+            return null;
+
+        String  filterTabName = fullFilterTabName.substring(CatalanoFilterTab.TAB_PREFIX.length());
+        // alphabetical sort
+        if (filterTabName.equals(     AdaptiveContrastTab.TAB_NAME))
+            return                    AdaptiveContrastTab.class;
+        if (filterTabName.equals(     ArtifactsRemovalTab.TAB_NAME))
+            return                    ArtifactsRemovalTab.class;
+        if (filterTabName.equals(     BernsenThresholdTab.TAB_NAME))
+            return                    BernsenThresholdTab.class;
+        if (filterTabName.equals(                 BlurTab.TAB_NAME))
+            return                                BlurTab.class;
+        if (filterTabName.equals(BradleyLocalThresholdTab.TAB_NAME))
+            return               BradleyLocalThresholdTab.class;
+        if (filterTabName.equals( BrightnessCorrectionTab.TAB_NAME))
+            return                BrightnessCorrectionTab.class;
+        if (filterTabName.equals(      FrequencyFilterTab.TAB_NAME))
+            return                     FrequencyFilterTab.class;
+        if (filterTabName.equals(               RotateTab.TAB_NAME))
+            return                              RotateTab.class;
+        return null;
     }
 
 }

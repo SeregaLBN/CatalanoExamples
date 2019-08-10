@@ -23,8 +23,8 @@ public class SelectFilterDialog {
         this.owner = owner;
     }
 
-    public String getFilterClassName() {
-        logger.trace("getFilterClassName");
+    public String getFilterTabName() {
+        logger.trace("getFilterTabName");
 
         JDialog dlg = new JDialog(owner, "Select filter...", true);
 
@@ -40,7 +40,7 @@ public class SelectFilterDialog {
         boxCatalanoFilters.setBorder(BorderFactory.createTitledBorder("Catalano filters"));
         ButtonGroup radioGroup = new ButtonGroup();
 
-        MapFilterToTab.getAllCatalanoTabs().forEach(tab -> {
+        MapFilterToTab.getAllCatalanoTabsDescr().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
             radioFilter.setActionCommand(CatalanoFilterTab.TAB_PREFIX + tab.filterName);
             boxCatalanoFilters.add(radioFilter);
@@ -50,7 +50,7 @@ public class SelectFilterDialog {
         Box boxOpenCvFilters = Box.createVerticalBox();
         boxOpenCvFilters.setBorder(BorderFactory.createTitledBorder("OpenCV filters"));
 
-        MapFilterToTab.getAllOpencvTabs().forEach(tab -> {
+        MapFilterToTab.getAllOpencvTabsDescr().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
             radioFilter.setActionCommand(OpencvFilterTab.TAB_PREFIX + tab.filterName);
             boxOpenCvFilters.add(radioFilter);
@@ -59,14 +59,14 @@ public class SelectFilterDialog {
 
 
         JButton btnOk = new JButton("Ok");
-        String[] filterClassName = { null };
+        String[] filterTabName = { null };
         btnOk.addActionListener(ev -> {
             dlg.dispose();
 
             ButtonModel bm = radioGroup.getSelection();
             if (bm == null)
                 return;
-            filterClassName[0] = bm.getActionCommand();
+            filterTabName[0] = bm.getActionCommand();
         });
 
         Box boxCenter = Box.createVerticalBox();
@@ -81,7 +81,7 @@ public class SelectFilterDialog {
         dlg.setLocationRelativeTo(owner);
         dlg.setVisible(true);
 
-        return filterClassName[0];
+        return filterTabName[0];
     }
 
 }
