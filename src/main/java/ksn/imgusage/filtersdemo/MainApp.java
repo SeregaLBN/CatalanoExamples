@@ -264,7 +264,8 @@ public class MainApp {
             prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, null, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
             prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, null, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1)),
             prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, null, 150, 350, CvThresholdTypes.THRESH_TRUNC, false, false),
-            prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, null, 5, 5, 3, false)
+            prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, null, 5, 5, 3, false),
+            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, null, CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, new org.opencv.core.Point(0, 0), false, new Size(15,15))
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);
@@ -287,13 +288,13 @@ public class MainApp {
             contentPane.setBackground(new Color(0xFA, 0xC5, 0xAF));
             contentPane.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
             errorWindow.pack();
-         }
+        }
 
-         Point loc = from.getLocationOnScreen();
-         errorWindow.setLocation(loc.x + 20, loc.y + 30);
-         errorWindow.setVisible(true);
+        Point loc = from.getLocationOnScreen();
+        errorWindow.setLocation(loc.x + 20, loc.y + 30);
+        errorWindow.setVisible(true);
 
-         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 5000, () -> errorWindow.setVisible(false), logger);
+        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 5000, () -> errorWindow.setVisible(false), logger);
     }
 
     private void makeLogo() {

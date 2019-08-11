@@ -82,6 +82,7 @@ public class MorphologyExTab extends OpencvFilterTab {
             comboBoxMorphOper.setToolTipText("Type of a morphological operation");
             comboBoxMorphOper.addActionListener(ev -> {
                 morphologicalOperation = (CvMorphTypes)comboBoxMorphOper.getSelectedItem();
+                logger.trace("Morphological operation changed to {}", this.morphologicalOperation);
                 resetImage();
             });
             panel.add(comboBoxMorphOper, BorderLayout.NORTH);
@@ -237,7 +238,6 @@ public class MorphologyExTab extends OpencvFilterTab {
         ButtonGroup radioGroup = new ButtonGroup();
         for (CvMorphShapes shape : CvMorphShapes.values()) {
             JRadioButton radioBtnAlg = new JRadioButton(shape.name(), shape == this.kernel2.getShape());
-            radioBtnAlg.setActionCommand(shape.name());
             radioBtnAlg.setToolTipText("Shape of the structuring element");
             radioBtnAlg.addItemListener(ev -> {
                 if (ev.getStateChange() == ItemEvent.SELECTED) {

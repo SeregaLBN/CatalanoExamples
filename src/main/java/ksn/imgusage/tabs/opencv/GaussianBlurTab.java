@@ -1,10 +1,6 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.event.ItemEvent;
-import java.io.Externalizable;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
 import java.util.stream.Stream;
 
 import javax.swing.*;
@@ -45,8 +41,8 @@ public class GaussianBlurTab extends OpencvFilterTab {
 
     public GaussianBlurTab(ITabHandler tabHandler, ITab source, Boolean boosting, Size kernelSize, double sigmaX, double sigmaY, CvBorderTypes borderType) {
         super(tabHandler, source, boosting);
-        this.modelKernelSizeW = new    SliderIntModel(onlyZeroOrOdd((int)kernelSize.width ), 0, MIN_KSIZE, MAX_KSIZE);
-        this.modelKernelSizeH = new    SliderIntModel(onlyZeroOrOdd((int)kernelSize.height), 0, MIN_KSIZE, MAX_KSIZE);
+        this.modelKernelSizeW = new    SliderIntModel(onlyZeroOrOdd((int)kernelSize.width , MIN_KSIZE), 0, MIN_KSIZE, MAX_KSIZE);
+        this.modelKernelSizeH = new    SliderIntModel(onlyZeroOrOdd((int)kernelSize.height, MIN_KSIZE), 0, MIN_KSIZE, MAX_KSIZE);
         this.modelSigmaX      = new SliderDoubleModel(sigmaX, 0, MIN_SIGMA, MAX_SIGMA);
         this.modelSigmaY      = new SliderDoubleModel(sigmaY, 0, MIN_SIGMA, MAX_SIGMA);
         this.borderType = borderType;
@@ -105,7 +101,6 @@ public class GaussianBlurTab extends OpencvFilterTab {
             .forEach(border ->
         {
             JRadioButton radioBtnAlg = new JRadioButton(border.name(), (border == this.borderType) || (border.getVal() == this.borderType.getVal()));
-            radioBtnAlg.setActionCommand(border.name());
             radioBtnAlg.setToolTipText("Pixel extrapolation method");
             radioBtnAlg.addItemListener(ev -> {
                 if (ev.getStateChange() == ItemEvent.SELECTED) {
@@ -137,23 +132,28 @@ public class GaussianBlurTab extends OpencvFilterTab {
         boxOptions.add(Box.createVerticalStrut(2));
         boxCenterLeft.add(boxOptions);
 
+        int[] prevValues = { modelKernelSizeW.getValue(), modelKernelSizeH.getValue() };
         modelKernelSizeW.getWrapped().addChangeListener(ev -> {
             logger.trace("modelKernelSizeW: value={}", modelKernelSizeW.getFormatedText());
             int val = modelKernelSizeW.getValue();
-            int valValid = onlyZeroOrOdd(val);
-            if (val == valValid)
+            int valValid = onlyZeroOrOdd(val, prevValues[0]);
+            if (val == valValid) {
+                prevValues[0] = valValid;
                 resetImage();
-            else
+            } else {
                 SwingUtilities.invokeLater(() -> modelKernelSizeW.setValue(valValid));
+            }
         });
         modelKernelSizeH.getWrapped().addChangeListener(ev -> {
             logger.trace("modelKernelSizeH: value={}", modelKernelSizeH.getFormatedText());
             int val = modelKernelSizeH.getValue();
-            int valValid = onlyZeroOrOdd(val);
-            if (val == valValid)
+            int valValid = onlyZeroOrOdd(val, prevValues[1]);
+            if (val == valValid) {
+                prevValues[1] = valValid;
                 resetImage();
-            else
+            } else {
                 SwingUtilities.invokeLater(() -> modelKernelSizeH.setValue(valValid));
+            }
         });
         modelSigmaX.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSigmaX: value={}", modelSigmaX.getFormatedText());
@@ -165,11 +165,13 @@ public class GaussianBlurTab extends OpencvFilterTab {
         });
     }
 
-    static int onlyZeroOrOdd(int value) {
+    private static int onlyZeroOrOdd(int value, int prevValue) {
         if (value == 0)
             return value;
         if ((value & 1) == 0)
-            return value - 1;
+            return ((value - 1) == prevValue)
+                ? value + 1
+                : value - 1;
         return value;
     }
 

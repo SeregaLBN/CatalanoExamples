@@ -69,7 +69,6 @@ public class RotateTab extends CatalanoFilterTab {
         ButtonGroup radioGroup = new ButtonGroup();
         for (Rotate.Algorithm alg : Rotate.Algorithm.values()) {
             JRadioButton radioBtnAlg = new JRadioButton(alg.name(), alg == this.algorithm);
-            radioBtnAlg.setActionCommand(alg.name());
             radioBtnAlg.setToolTipText("Interpolation algorithm");
             radioBtnAlg.addItemListener(ev -> {
                 if (ev.getStateChange() == ItemEvent.SELECTED) {

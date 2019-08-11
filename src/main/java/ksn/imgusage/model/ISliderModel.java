@@ -10,6 +10,8 @@ public interface ISliderModel<T extends Number> {
     String getFormatedText();
     void setFormatedText(String value);
 
+    void setMaximum(T max);
+
     BoundedRangeModel getWrapped();
 
 }

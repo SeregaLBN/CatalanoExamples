@@ -29,4 +29,12 @@ public enum CvThresholdTypes {
         return val;
     }
 
+    public int getVal(boolean useOtsuAlg, boolean useTriangleAlg) {
+        if (useOtsuAlg)
+            return val | THRESH_OTSU.val;
+        if (useTriangleAlg)
+            return val | THRESH_TRIANGLE.val;
+        return val;
+    }
+
 }

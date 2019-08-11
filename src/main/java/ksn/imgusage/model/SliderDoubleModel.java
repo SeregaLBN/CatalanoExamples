@@ -34,6 +34,11 @@ public class SliderDoubleModel implements ISliderModel<Double> {
     }
 
     @Override
+    public void setMaximum(Double max) {
+        model.setMaximum((int)(max / coefficient));
+    }
+
+    @Override
     public String getFormatedText() {
         return String.format(Locale.US, "%.2f", getValue());
     }

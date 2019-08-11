@@ -37,7 +37,7 @@ public class CannyTab extends OpencvFilterTab {
         super(tabHandler, source, boosting);
         this.modelThreshold1   = new SliderDoubleModel(threshold1, 0, MIN_THRESHOLD, MAX_THRESHOLD);
         this.modelThreshold2   = new SliderDoubleModel(threshold2, 0, MIN_THRESHOLD, MAX_THRESHOLD);
-        this.modelApertureSize = new    SliderIntModel(onlyZeroOrOdd(apertureSize), 0, MIN_APERTURE_SIZE, MAX_APERTURE_SIZE);
+        this.modelApertureSize = new    SliderIntModel(onlyOdd(apertureSize, MIN_APERTURE_SIZE), 0, MIN_APERTURE_SIZE, MAX_APERTURE_SIZE);
         this.l2gradient = l2gradient;
 
         makeTab();
@@ -76,7 +76,6 @@ public class CannyTab extends OpencvFilterTab {
         Box box4L2gradient = Box.createVerticalBox();
         box4L2gradient.setBorder(BorderFactory.createTitledBorder(""));
         JCheckBox checkBoxL2gradient = new JCheckBox("L2 gradient", this.l2gradient);
-      //checkBoxL2gradient.setActionCommand("");
         checkBoxL2gradient.setToolTipText("a flag, indicating whether a more accurate L2 norm =√‾((dI/dx)^2+(dI/dy)^2) should be used to calculate the image gradient magnitude ( L2gradient=true ), or whether the default L1 norm =|dI/dx|+|dI/dy| is enough ( L2gradient=false ). ");
         checkBoxL2gradient.addItemListener(ev -> {
             this.l2gradient = (ev.getStateChange() == ItemEvent.SELECTED);
@@ -101,19 +100,27 @@ public class CannyTab extends OpencvFilterTab {
             logger.trace("modelThreshold2: value={}", modelThreshold2.getFormatedText());
             resetImage();
         });
+
+        int[] prevValues = { modelApertureSize.getValue() };
         modelApertureSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelApertureSize: value={}", modelApertureSize.getFormatedText());
             int val = modelApertureSize.getValue();
-            int valValid = onlyZeroOrOdd(val);
-            if (val == valValid)
+            int valValid = onlyOdd(val, prevValues[0]);
+            if (val == valValid) {
+                prevValues[0] = valValid;
                 resetImage();
-            else
+            } else {
                 SwingUtilities.invokeLater(() -> modelApertureSize.setValue(valValid));
+            }
         });
     }
 
-    private static int onlyZeroOrOdd(int value) {
-        return GaussianBlurTab.onlyZeroOrOdd(value);
+    private static int onlyOdd(int value, int prevValue) {
+        if ((value & 1) == 0)
+            return ((value - 1) == prevValue)
+                ? value + 1
+                : value - 1;
+        return value;
     }
 
     @Override

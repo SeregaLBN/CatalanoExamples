@@ -45,6 +45,8 @@ public final class MapFilterToTab {
                                    AsIsTab.TAB_DESCRIPTION),
             new FilterTabs(       CannyTab.TAB_NAME,
                                   CannyTab.TAB_DESCRIPTION),
+            new FilterTabs(FindContoursTab.TAB_NAME,
+                           FindContoursTab.TAB_DESCRIPTION),
             new FilterTabs(GaussianBlurTab.TAB_NAME,
                            GaussianBlurTab.TAB_DESCRIPTION),
             new FilterTabs(MorphologyExTab.TAB_NAME,
@@ -66,6 +68,8 @@ public final class MapFilterToTab {
             return         AsIsTab.class;
         case              CannyTab.TAB_NAME:
             return        CannyTab.class;
+        case       FindContoursTab.TAB_NAME:
+            return FindContoursTab.class;
         case       GaussianBlurTab.TAB_NAME:
             return GaussianBlurTab.class;
         case       MorphologyExTab.TAB_NAME:
