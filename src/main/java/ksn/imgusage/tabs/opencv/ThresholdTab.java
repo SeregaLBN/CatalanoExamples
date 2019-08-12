@@ -78,7 +78,7 @@ public class ThresholdTab extends OpencvFilterTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         Container cntrlThreshSlider = makeSliderVert(modelThresh, "Thresh", "Threshold value");
         Container cntrlMaxvalSlider = makeSliderVert(modelMaxVal, "MaxVal", "Maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types");
 
@@ -170,7 +170,7 @@ public class ThresholdTab extends OpencvFilterTab {
         panelOptions.add(box4Sliders, BorderLayout.CENTER);
         panelOptions.add(box4Types  , BorderLayout.SOUTH);
 
-        boxCenterLeft.add(panelOptions);
+        box4Options.add(panelOptions);
 
         applyThresholdingType.run();
 

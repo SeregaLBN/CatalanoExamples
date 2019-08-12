@@ -159,7 +159,7 @@ public class FindContoursTab extends OpencvFilterTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         Box boxFindContoursOptions = Box.createVerticalBox();
         {
             Box boxMode = Box.createHorizontalBox();
@@ -254,7 +254,7 @@ public class FindContoursTab extends OpencvFilterTab {
         panelAll.add(boxFindContoursOptions  , BorderLayout.NORTH);
         panelAll.add(panelDrawContoursOptions, BorderLayout.CENTER);
 
-        boxCenterLeft.add(panelAll);
+        box4Options.add(panelAll);
 
         modelMinLimitContoursW.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMinLimitContoursW: value={}", modelMinLimitContoursW.getFormatedText());

@@ -2,7 +2,6 @@ package ksn.imgusage.tabs.catalano;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.JPanel;
 
 import Catalano.Imaging.Filters.FourierTransform;
 import Catalano.Imaging.Filters.FrequencyFilter;
@@ -50,7 +49,7 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
@@ -60,7 +59,7 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
         boxOptions.add(makeSliderVert(modelMax, "Max", "Maximum value for to keep"));
         boxOptions.add(Box.createHorizontalGlue());
 
-        boxCenterLeft.add(boxOptions);
+        box4Options.add(boxOptions);
 
         modelMin.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMin: value={}", modelMin.getFormatedText());

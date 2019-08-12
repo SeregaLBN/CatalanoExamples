@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.SwingUtilities;
 
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.utils.UiHelper;
@@ -84,7 +87,7 @@ public class FirstTab extends BaseTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         JButton btnLoadImage = new JButton("Load image...");
         btnLoadImage.addActionListener(ev -> {
             logger.trace("onSelectImage");
@@ -93,28 +96,28 @@ public class FirstTab extends BaseTab {
             if (!readImageFile(file))
                 return;
 
-            imagePanel.repaint();
+            resetImage();
         });
         SwingUtilities.invokeLater(btnLoadImage::requestFocus);
         if (sourceImage == null)
             SwingUtilities.invokeLater(btnLoadImage::doClick);
-        boxCenterLeft.add(btnLoadImage);
+        box4Options.add(btnLoadImage);
 
-        boxCenterLeft.add(Box.createVerticalStrut(6));
+        box4Options.add(Box.createVerticalStrut(6));
 
         JCheckBox btnAsGray = new JCheckBox("Gray", isGray);
         btnAsGray.addActionListener(ev -> {
             isGray  = btnAsGray.isSelected();
             resetImage();
         });
-        boxCenterLeft.add(btnAsGray);
+        box4Options.add(btnAsGray);
 
         JCheckBox btnScale = new JCheckBox("Scale", isScale);
         btnScale.addActionListener(ev -> {
             isScale = btnScale.isSelected();
-            imagePanel.repaint();
+            resetImage();
         });
-        boxCenterLeft.add(btnScale);
+        box4Options.add(btnScale);
 
         UiHelper.makeSameWidth(new Component[] { btnLoadImage, btnAsGray, btnScale });
     }

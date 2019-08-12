@@ -1,7 +1,6 @@
 package ksn.imgusage.tabs.catalano;
 
 import javax.swing.Box;
-import javax.swing.JPanel;
 
 import Catalano.Imaging.Filters.Blur;
 import ksn.imgusage.tabs.ITab;
@@ -31,7 +30,7 @@ public class BlurTab extends CatalanoFilterTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         // none
     }
 

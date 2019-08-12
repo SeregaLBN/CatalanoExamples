@@ -71,7 +71,7 @@ public class GaussianBlurTab extends OpencvFilterTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         Box boxKernelSize = Box.createHorizontalBox();
         boxKernelSize.setBorder(BorderFactory.createTitledBorder("Kernel size"));
         boxKernelSize.setToolTipText("Gaussian kernel size. ksize.width and ksize.height can differ but they both must be positive and odd."
@@ -130,7 +130,7 @@ public class GaussianBlurTab extends OpencvFilterTab {
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(box4Borders);
         boxOptions.add(Box.createVerticalStrut(2));
-        boxCenterLeft.add(boxOptions);
+        box4Options.add(boxOptions);
 
         int[] prevValues = { modelKernelSizeW.getValue(), modelKernelSizeH.getValue() };
         modelKernelSizeW.getWrapped().addChangeListener(ev -> {

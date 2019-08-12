@@ -4,7 +4,6 @@ import java.awt.Component;
 
 import javax.swing.Box;
 import javax.swing.JCheckBox;
-import javax.swing.JPanel;
 
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
@@ -40,7 +39,7 @@ public class AsIsTab extends OpencvFilterTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         Box box = Box.createHorizontalBox();
         JCheckBox btnAsGray = new JCheckBox("Gray", isGray);
         btnAsGray.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -50,7 +49,7 @@ public class AsIsTab extends OpencvFilterTab {
             resetImage();
         });
         box.add(btnAsGray);
-        boxCenterLeft.add(box);
+        box4Options.add(box);
     }
 
     @Override

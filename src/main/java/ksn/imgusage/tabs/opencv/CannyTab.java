@@ -63,7 +63,7 @@ public class CannyTab extends OpencvFilterTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
         box4Sliders.add(makeSliderVert(modelThreshold1, "Threshold1", "First threshold for the hysteresis procedure"));
@@ -90,7 +90,7 @@ public class CannyTab extends OpencvFilterTab {
         panelOptions.add(box4Sliders   , BorderLayout.CENTER);
         panelOptions.add(box4L2gradient, BorderLayout.SOUTH);
 
-        boxCenterLeft.add(panelOptions);
+        box4Options.add(panelOptions);
 
         modelThreshold1.getWrapped().addChangeListener(ev -> {
             logger.trace("modelThreshold1: value={}", modelThreshold1.getFormatedText());

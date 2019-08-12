@@ -48,7 +48,7 @@ public class RotateTab extends CatalanoFilterTab {
     }
 
     @Override
-    protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
+    protected void makeOptions(Box box4Options) {
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
@@ -88,7 +88,7 @@ public class RotateTab extends CatalanoFilterTab {
         boxOptions.add(box2);
         boxOptions.add(Box.createHorizontalGlue());
 
-        boxCenterLeft.add(boxOptions);
+        box4Options.add(boxOptions);
 
         modelAngle.getWrapped().addChangeListener(ev -> {
             logger.trace("modelAngle: value={}", modelAngle.getFormatedText());

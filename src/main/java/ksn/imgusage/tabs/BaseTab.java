@@ -99,12 +99,12 @@ public abstract class BaseTab implements ITab {
         JPanel imagePanel = buildImagePanel(tabHandler);
         JPanel leftPanel = new JPanel();
         { // fill leftPanel
-            Box boxCenterLeft = Box.createVerticalBox();
-            { // fill boxCenterLeft
-                boxCenterLeft.setBorder(BorderFactory.createTitledBorder(""));
+            Box box4Options = Box.createVerticalBox();
+            { // fill box4Options
+                box4Options.setBorder(BorderFactory.createTitledBorder(""));
                 if (boosting != null)
-                    boxCenterLeft.add(makeAsBoostCheckBox());
-                makeOptions(imagePanel, boxCenterLeft);
+                    box4Options.add(makeAsBoostCheckBox());
+                makeOptions(box4Options);
             }
 
             Box boxBottom = Box.createHorizontalBox();
@@ -131,7 +131,7 @@ public abstract class BaseTab implements ITab {
             }
 
             leftPanel.setLayout(new BorderLayout());
-            leftPanel.add(boxCenterLeft, BorderLayout.CENTER);
+            leftPanel.add(box4Options, BorderLayout.CENTER);
             leftPanel.add(boxBottom, BorderLayout.SOUTH);
             leftPanel.setMinimumSize(new Dimension(WIDTH_LEFT_PANEL, 200));
             leftPanel.setPreferredSize(new Dimension(WIDTH_LEFT_PANEL, -1));
@@ -169,7 +169,7 @@ public abstract class BaseTab implements ITab {
         return imagePanel;
     }
 
-    protected abstract void makeOptions(JPanel imagePanel, Box boxCenterLeft);
+    protected abstract void makeOptions(Box box4Options);
 
     private Box makeAsBoostCheckBox() {
         Box box = Box.createHorizontalBox();
