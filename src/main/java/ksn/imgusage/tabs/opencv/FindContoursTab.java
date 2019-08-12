@@ -24,37 +24,44 @@ public class FindContoursTab extends OpencvFilterTab {
     public static final String TAB_NAME = "FindContours";
     public static final String TAB_DESCRIPTION = "Finds contours in a binary image";
 
-    private static final int MIN_OFFSET =    0;
-    private static final int MAX_OFFSET = 1000;
-    private static final int MIN_MIN_LIMIT_COUNTOUR_SIZE =    0;
-    private static final int MAX_MIN_LIMIT_COUNTOUR_SIZE = 1000;
+    private static final int MIN_MIN_LIMIT_CONTOUR_SIZE =    0;
+    private static final int MAX_MIN_LIMIT_CONTOUR_SIZE = 1000;
+    private static final int MIN_MAX_CONTOUR_AREA =    0;
+    private static final int MAX_MAX_CONTOUR_AREA = 10000;
+
+    public enum EDrawMethod {
+        /** to display the contours using <a href='https://docs.opencv.org/3.4.2/d6/d6e/group__imgproc__draw.html#ga746c0625f1781f1ffc9056259103edbc'>drawContours()</a> method. */
+        DRAW_CONTOURS,
+        /** draw external rectangle of contours region */
+        EXTERNAL_RECT
+    }
 
     private CvRetrievalModes            mode;
     private CvContourApproximationModes method;
-    private final SliderIntModel        modelOffsetX;
-    private final SliderIntModel        modelOffsetY;
-    private boolean showHierarhy;
+    private EDrawMethod drawMethod;
     private final SliderIntModel        modelMinLimitContoursW;
     private final SliderIntModel        modelMinLimitContoursH;
+    private final SliderIntModel        modelMaxContourArea;
 
     public FindContoursTab(ITabHandler tabHandler, ITab source) {
         this(tabHandler, source, null,
-             CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, new Point(0, 0),
-             false, new Size(10, 10));
+             CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
+             EDrawMethod.EXTERNAL_RECT, new Size(10, 10),
+             100);
     }
 
     public FindContoursTab(ITabHandler tabHandler, ITab source, Boolean boosting,
-            CvRetrievalModes mode, CvContourApproximationModes method, Point offset,
-            boolean showHierarhy, Size minLimitContours
+        CvRetrievalModes mode, CvContourApproximationModes method,
+        EDrawMethod drawMethod, Size minLimitContours,
+        int maxContourArea
     ) {
         super(tabHandler, source, boosting);
         this.mode   = mode;
         this.method = method;
-        this.modelOffsetX = new SliderIntModel((int)offset.x, 0, MIN_OFFSET, MAX_OFFSET);
-        this.modelOffsetY = new SliderIntModel((int)offset.y, 0, MIN_OFFSET, MAX_OFFSET);
-        this.showHierarhy = showHierarhy;
-        this.modelMinLimitContoursW = new SliderIntModel((int)minLimitContours.width , 0, MIN_MIN_LIMIT_COUNTOUR_SIZE, MAX_MIN_LIMIT_COUNTOUR_SIZE);
-        this.modelMinLimitContoursH = new SliderIntModel((int)minLimitContours.height, 0, MIN_MIN_LIMIT_COUNTOUR_SIZE, MAX_MIN_LIMIT_COUNTOUR_SIZE);
+        this.drawMethod = drawMethod;
+        this.modelMinLimitContoursW = new SliderIntModel((int)minLimitContours.width , 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
+        this.modelMinLimitContoursH = new SliderIntModel((int)minLimitContours.height, 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
+        this.modelMaxContourArea    = new SliderIntModel(maxContourArea, 0, MIN_MAX_CONTOUR_AREA, MAX_MAX_CONTOUR_AREA);
 
         makeTab();
     }
@@ -64,10 +71,12 @@ public class FindContoursTab extends OpencvFilterTab {
 
     @Override
     protected void applyOpencvFilter() {
-//        this.modelMinLimitContoursW.setMaximum(imageMat.width());
-//        this.modelMinLimitContoursH.setMaximum(imageMat.height());
+//        if (this.modelMinLimitContoursW.getMaximum() != imageMat.width())
+//            SwingUtilities.invokeLater(() -> this.modelMinLimitContoursW.setMaximum(imageMat.width()) );
+//        if (this.modelMinLimitContoursH.getMaximum() != imageMat.height())
+//            SwingUtilities.invokeLater(() -> this.modelMinLimitContoursH.setMaximum(imageMat.height()) );
 
-        // only 8UC1
+        // cast to gray image
         if (imageMat.type() != CvArrayType.CV_8UC1.getVal())
             imageMat = OpenCvHelper.toGray(imageMat);
 
@@ -78,37 +87,86 @@ public class FindContoursTab extends OpencvFilterTab {
             contours, // out
             hierarchy, // dst
             mode.getVal(),
-            method.getVal(),
-            new Point(modelOffsetX.getValue(),
-                      modelOffsetY.getValue()));
-        if (showHierarhy)
-            imageMat = hierarchy;
+            method.getVal());
 
-        { // to color image
+        { // cast to color image
             Mat mat = new Mat();
             Imgproc.cvtColor(imageMat, mat, Imgproc.COLOR_GRAY2RGB);
             imageMat = mat;
         }
 
-        contours.stream()
-            .map(Imgproc::boundingRect)
-            .filter(rc -> (rc.width > modelMinLimitContoursW.getValue()) && (rc.height > modelMinLimitContoursH.getValue()))
-            .forEach(rc -> Imgproc.rectangle(imageMat,
-                                             new Point(rc.x, rc.y),
-                                             new Point(rc.x + rc.width, rc.y + rc.height),
-                                             new Scalar(0, 0, 255), 2));
+        Scalar green = new Scalar(0, 255, 0);
+        final Point offset = new Point();
+        switch (drawMethod) {
+        case DRAW_CONTOURS:
+            final int maxArea = modelMaxContourArea.getValue();
+            if (maxArea > 0) {
+                for (int i = 0; i < contours.size(); i++) {
+                    MatOfPoint contour = contours.get(i);
+                    double area = Math.abs(Imgproc.contourArea(contour));
+                    if ( area > maxArea) {
+                        Imgproc.drawContours(//contours, contourList, i, new Scalar(r.nextInt(255), r.nextInt(255), r.nextInt(255)), -1);
+                                imageMat, // Mat image
+                                contours, // List<MatOfPoint> contours
+                                i,        // int contourIdx
+                                green,    // Scalar color
+                                1         // int thickness
+                            );
+                    }
+                }
+
+            } else {
+
+                List<MatOfPoint> contours2;
+                if (true) {
+                    contours2 = contours;
+                } else {
+                    contours2 = new ArrayList<>(contours.size());
+                    for (int k = 0; k < contours.size(); k++ ) {
+                        MatOfPoint2f in = new MatOfPoint2f(contours.get(k).toArray());
+                        MatOfPoint2f out = new MatOfPoint2f();
+                        Imgproc.approxPolyDP(in, out, 3, true);
+                        MatOfPoint out2 = new MatOfPoint(out.toArray());
+                        contours2.add(out2);
+                    }
+                }
+
+                Imgproc.drawContours(
+                    imageMat,        // Mat image
+                    contours2,       // List<MatOfPoint> contours
+                    -1,              // int contourIdx
+                    green,           // Scalar color
+                    1,               // int thickness
+                    Imgproc.LINE_AA, // int lineType
+                    hierarchy,       // Mat hierarchy
+                    3,               // int maxLevel
+                    offset           // Point offset
+                );
+            }
+            break;
+        case EXTERNAL_RECT:
+            contours.stream()
+                .map(Imgproc::boundingRect)
+                .filter(rc -> (rc.width > modelMinLimitContoursW.getValue()) && (rc.height > modelMinLimitContoursH.getValue()))
+                .forEach(rc -> Imgproc.rectangle(imageMat,
+                                                 new Point(rc.x, rc.y),
+                                                 new Point(rc.x + rc.width, rc.y + rc.height),
+                                                 green, 1));
+            break;
+        default:
+            logger.error("Unknown this.drawMethod={}! Support him!", this.drawMethod);
+        }
     }
 
     @Override
     protected void makeOptions(JPanel imagePanel, Box boxCenterLeft) {
-        JPanel panelOptions;
+        Box boxFindContoursOptions = Box.createVerticalBox();
         {
             Box boxMode = Box.createHorizontalBox();
             {
                 boxMode.setBorder(BorderFactory.createTitledBorder("Contour retrieval mode"));
                 JComboBox<CvRetrievalModes> comboBoxMode = new JComboBox<>(CvRetrievalModes.values());
                 comboBoxMode.setSelectedItem(this.mode);
-              //comboBoxMode.setAlignmentX(Component.LEFT_ALIGNMENT);
                 comboBoxMode.setToolTipText("Contour retrieval mode");
                 comboBoxMode.addActionListener(ev -> {
                     this.mode = (CvRetrievalModes)comboBoxMode.getSelectedItem();
@@ -122,7 +180,6 @@ public class FindContoursTab extends OpencvFilterTab {
                 boxMethod.setBorder(BorderFactory.createTitledBorder("Contour approximation method"));
                 JComboBox<CvContourApproximationModes> comboBoxMeethod = new JComboBox<>(CvContourApproximationModes.values());
                 comboBoxMeethod.setSelectedItem(this.method);
-              //comboBoxMode.setAlignmentX(Component.LEFT_ALIGNMENT);
                 comboBoxMeethod.setToolTipText("Contour approximation method");
                 comboBoxMeethod.addActionListener(ev -> {
                     this.method = (CvContourApproximationModes)comboBoxMeethod.getSelectedItem();
@@ -131,67 +188,74 @@ public class FindContoursTab extends OpencvFilterTab {
                 });
                 boxMethod.add(comboBoxMeethod);
             }
-            Box boxTop = Box.createVerticalBox();
-            boxTop.add(boxMode);
-            boxTop.add(Box.createVerticalStrut(2));
-            boxTop.add(boxMethod);
 
-            Box boxOffsetSliders = Box.createHorizontalBox();
-            boxOffsetSliders.setBorder(BorderFactory.createTitledBorder("Offset"));
-            boxOffsetSliders.setToolTipText("Optional offset by which every contour point is shifted. This is useful if the contours are extracted from the image ROI and then they should be analyzed in the whole image context");
-            boxOffsetSliders.add(Box.createHorizontalGlue());
-            boxOffsetSliders.add(makeSliderVert(modelOffsetX, "X", "offset.X"));
-            boxOffsetSliders.add(Box.createHorizontalStrut(2));
-            boxOffsetSliders.add(makeSliderVert(modelOffsetY, "Y", "offset.Y"));
-            boxOffsetSliders.add(Box.createHorizontalGlue());
-
-            panelOptions = new JPanel();
-            panelOptions.setLayout(new BorderLayout());
-            panelOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
-            panelOptions.add(boxTop     , BorderLayout.NORTH);
-            panelOptions.add(boxOffsetSliders, BorderLayout.CENTER);
+            boxFindContoursOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+            boxFindContoursOptions.add(boxMode);
+            boxFindContoursOptions.add(Box.createVerticalStrut(2));
+            boxFindContoursOptions.add(boxMethod);
         }
 
-        JPanel panelCustom;
+        JPanel panelDrawContoursOptions = new JPanel();
         {
-            JCheckBox checkBoxShowHierarhy = new JCheckBox("showHierarhy", this.showHierarhy);
-            checkBoxShowHierarhy.addItemListener(ev -> {
-                this.showHierarhy = (ev.getStateChange() == ItemEvent.SELECTED);
-                logger.trace("showHierarhy changet to {}", (showHierarhy ? "checked" : "unchecked"));
-                resetImage();
-            });
+            panelDrawContoursOptions.setLayout(new BorderLayout());
+            panelDrawContoursOptions.setBorder(BorderFactory.createTitledBorder("Draw contours"));
 
-            Box boxMinLimitContourSliders = Box.createHorizontalBox();
-            boxMinLimitContourSliders.setBorder(BorderFactory.createTitledBorder("MinLimitContour"));
-          //boxMinLimitContourSliders.setToolTipText("...");
-            boxMinLimitContourSliders.add(Box.createHorizontalGlue());
-            boxMinLimitContourSliders.add(makeSliderVert(modelMinLimitContoursW, "Width", "MinLimitContour.Width"));
-            boxMinLimitContourSliders.add(Box.createHorizontalStrut(2));
-            boxMinLimitContourSliders.add(makeSliderVert(modelMinLimitContoursH, "Height", "MinLimitContour.Height"));
-            boxMinLimitContourSliders.add(Box.createHorizontalGlue());
+            JPanel panelCustomParams = new JPanel();
+            panelCustomParams.setLayout(new BorderLayout());
 
-            panelCustom = new JPanel();
-            panelCustom.setLayout(new BorderLayout());
-            panelCustom.setBorder(BorderFactory.createTitledBorder("Custom"));
-            panelCustom.add(checkBoxShowHierarhy     , BorderLayout.NORTH);
-            panelCustom.add(boxMinLimitContourSliders, BorderLayout.CENTER);
+            Box boxSelectDrawMethod = Box.createVerticalBox();
+            {
+                boxSelectDrawMethod.setBorder(BorderFactory.createTitledBorder("Draw method"));
+                boxSelectDrawMethod.setToolTipText("How to draw contours?");
+                ButtonGroup radioGroup = new ButtonGroup();
+
+                JRadioButton radioBtn1 = new JRadioButton(EDrawMethod.DRAW_CONTOURS.name(), this.drawMethod == EDrawMethod.DRAW_CONTOURS);
+                radioBtn1.setToolTipText("to display the contours using <p>drawContours()</p> method");
+                radioBtn1.addItemListener(ev -> {
+                    if (ev.getStateChange() == ItemEvent.SELECTED) {
+                        this.drawMethod = EDrawMethod.DRAW_CONTOURS;
+                        logger.trace("this.drawMethod changed to {}", this.drawMethod);
+                        makeDrawContoursParams(panelCustomParams);
+                        panelCustomParams.revalidate();
+                        resetImage();
+                    }
+                });
+                boxSelectDrawMethod.add(radioBtn1);
+                radioGroup.add(radioBtn1);
+
+                JRadioButton radioBtn2 = new JRadioButton(EDrawMethod.EXTERNAL_RECT.name(), this.drawMethod == EDrawMethod.EXTERNAL_RECT);
+                radioBtn2.setToolTipText("draw external rectangle of contours region");
+                radioBtn2.addItemListener(ev -> {
+                    if (ev.getStateChange() == ItemEvent.SELECTED) {
+                        this.drawMethod = EDrawMethod.EXTERNAL_RECT;
+                        logger.trace("this.drawMethod changed to {}", this.drawMethod);
+                        makeExteranlRectParams(panelCustomParams);
+                        panelCustomParams.revalidate();
+                        resetImage();
+                    }
+                });
+                boxSelectDrawMethod.add(radioBtn2);
+                radioGroup.add(radioBtn2);
+
+                switch (this.drawMethod) {
+                case DRAW_CONTOURS: makeDrawContoursParams(panelCustomParams); break;
+                case EXTERNAL_RECT: makeExteranlRectParams(panelCustomParams); break;
+                default:
+                    logger.error("Unknown this.drawMethod={}! Support him!", this.drawMethod);
+                }
+            }
+
+            panelDrawContoursOptions.add(boxSelectDrawMethod, BorderLayout.NORTH);
+            panelDrawContoursOptions.add(panelCustomParams  , BorderLayout.CENTER);
         }
 
-        Box boxAll = Box.createVerticalBox();
-        boxAll.add(panelOptions);
-        boxAll.add(Box.createVerticalStrut(2));
-        boxAll.add(panelCustom);
+        JPanel panelAll = new JPanel();
+        panelAll.setLayout(new BorderLayout());
+        panelAll.add(boxFindContoursOptions  , BorderLayout.NORTH);
+        panelAll.add(panelDrawContoursOptions, BorderLayout.CENTER);
 
-        boxCenterLeft.add(boxAll);
+        boxCenterLeft.add(panelAll);
 
-        modelOffsetX.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelOffsetX: value={}", modelOffsetX.getFormatedText());
-            resetImage();
-        });
-        modelOffsetY.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelOffsetY: value={}", modelOffsetY.getFormatedText());
-            resetImage();
-        });
         modelMinLimitContoursW.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMinLimitContoursW: value={}", modelMinLimitContoursW.getFormatedText());
             resetImage();
@@ -200,17 +264,61 @@ public class FindContoursTab extends OpencvFilterTab {
             logger.trace("modelMinLimitContoursH: value={}", modelMinLimitContoursH.getFormatedText());
             resetImage();
         });
+        modelMaxContourArea.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelMaxContourArea: value={}", modelMaxContourArea.getFormatedText());
+            resetImage();
+        });
+    }
+
+    private Box boxDrawContoursParams;
+    private void makeDrawContoursParams(JPanel panelCustomParams) {
+        if (boxExteranlRectParams != null)
+            boxExteranlRectParams.setVisible(false);
+
+        if (boxDrawContoursParams == null) {
+            boxDrawContoursParams = Box.createHorizontalBox();
+            boxDrawContoursParams.setBorder(BorderFactory.createTitledBorder("..."));
+
+            boxDrawContoursParams.add(Box.createHorizontalGlue());
+            boxDrawContoursParams.add(makeSliderVert(modelMaxContourArea, "Area", "Max show contour area"));
+            boxDrawContoursParams.add(Box.createHorizontalGlue());
+}
+        boxDrawContoursParams.setVisible(true);
+
+        panelCustomParams.setBorder(BorderFactory.createTitledBorder("Method drawContours() options"));
+        panelCustomParams.add(boxDrawContoursParams, BorderLayout.CENTER);
+    }
+
+
+    private Box boxExteranlRectParams;
+    private void makeExteranlRectParams(JPanel panelCustomParams) {
+        if (boxDrawContoursParams != null)
+            boxDrawContoursParams.setVisible(false);
+
+        if (boxExteranlRectParams == null) {
+            boxExteranlRectParams = Box.createHorizontalBox();
+            boxExteranlRectParams.setBorder(BorderFactory.createTitledBorder("MinLimitContour"));
+          //boxMinLimitContourSliders.setToolTipText("...");
+            boxExteranlRectParams.add(Box.createHorizontalGlue());
+            boxExteranlRectParams.add(makeSliderVert(modelMinLimitContoursW, "Width", "MinLimitContour.Width"));
+            boxExteranlRectParams.add(Box.createHorizontalStrut(2));
+            boxExteranlRectParams.add(makeSliderVert(modelMinLimitContoursH, "Height", "MinLimitContour.Height"));
+            boxExteranlRectParams.add(Box.createHorizontalGlue());
+        }
+        boxExteranlRectParams.setVisible(true);
+
+        panelCustomParams.setBorder(BorderFactory.createTitledBorder("Raw contours options"));
+        panelCustomParams.add(boxExteranlRectParams, BorderLayout.CENTER);
     }
 
     @Override
     public void printParams() {
-        logger.info("showHierarhy={}, mode={}, method={}, offset={{}, {}}, minLimitContours={{}, {}}",
-                showHierarhy,
+        logger.info("mode={}, method={}, drawMethod={}, minLimitContours={{}, {}}, maxContourArea={}",
                 mode, method,
-                modelOffsetX.getFormatedText(),
-                modelOffsetY.getFormatedText(),
+                drawMethod,
                 modelMinLimitContoursW.getFormatedText(),
-                modelMinLimitContoursH.getFormatedText());
+                modelMinLimitContoursH.getFormatedText(),
+                modelMaxContourArea.getFormatedText());
     }
 
 }

@@ -25,6 +25,10 @@ public class SliderIntModel implements ISliderModel<Integer> {
     }
 
     @Override
+    public Integer getMaximum() {
+        return model.getMaximum();
+    }
+    @Override
     public void setMaximum(Integer max) {
         model.setMaximum(max);
     }

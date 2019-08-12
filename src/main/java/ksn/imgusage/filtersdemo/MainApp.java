@@ -265,7 +265,7 @@ public class MainApp {
             prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, null, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1)),
             prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, null, 150, 350, CvThresholdTypes.THRESH_TRUNC, false, false),
             prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, null, 5, 5, 3, false),
-            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, null, CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, new org.opencv.core.Point(0, 0), false, new Size(15,15))
+            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, null, CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000)
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);

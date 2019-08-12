@@ -145,6 +145,7 @@ public abstract class BaseTab implements ITab {
             JTabbedPane tabPane = tabHandler.getTabPanel();
             tabPane.addTab(getTabName(), panel);
             tabPane.setSelectedIndex(tabPane.getTabCount() - 1);
+            SwingUtilities.invokeLater(tabPane::requestFocus);
         }
     }
 

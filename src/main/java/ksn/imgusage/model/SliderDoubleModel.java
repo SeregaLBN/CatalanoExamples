@@ -34,6 +34,10 @@ public class SliderDoubleModel implements ISliderModel<Double> {
     }
 
     @Override
+    public Double getMaximum() {
+        return model.getMaximum() * coefficient;
+    }
+    @Override
     public void setMaximum(Double max) {
         model.setMaximum((int)(max / coefficient));
     }
