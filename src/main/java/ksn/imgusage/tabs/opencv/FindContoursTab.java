@@ -44,18 +44,18 @@ public class FindContoursTab extends OpencvFilterTab {
     private final SliderIntModel        modelMaxContourArea;
 
     public FindContoursTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, null,
+        this(tabHandler, source,
              CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
              EDrawMethod.EXTERNAL_RECT, new Size(10, 10),
              100);
     }
 
-    public FindContoursTab(ITabHandler tabHandler, ITab source, Boolean boosting,
+    public FindContoursTab(ITabHandler tabHandler, ITab source,
         CvRetrievalModes mode, CvContourApproximationModes method,
         EDrawMethod drawMethod, Size minLimitContours,
         int maxContourArea
     ) {
-        super(tabHandler, source, boosting);
+        super(tabHandler, source);
         this.mode   = mode;
         this.method = method;
         this.drawMethod = drawMethod;

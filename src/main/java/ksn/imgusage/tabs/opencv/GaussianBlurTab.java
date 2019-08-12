@@ -36,11 +36,11 @@ public class GaussianBlurTab extends OpencvFilterTab {
     private       CvBorderTypes     borderType;
 
     public GaussianBlurTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, null, new Size(7, 0), 25, 25, CvBorderTypes.BORDER_DEFAULT);
+        this(tabHandler, source, new Size(7, 0), 25, 25, CvBorderTypes.BORDER_DEFAULT);
     }
 
-    public GaussianBlurTab(ITabHandler tabHandler, ITab source, Boolean boosting, Size kernelSize, double sigmaX, double sigmaY, CvBorderTypes borderType) {
-        super(tabHandler, source, boosting);
+    public GaussianBlurTab(ITabHandler tabHandler, ITab source, Size kernelSize, double sigmaX, double sigmaY, CvBorderTypes borderType) {
+        super(tabHandler, source);
         this.modelKernelSizeW = new    SliderIntModel(onlyZeroOrOdd((int)kernelSize.width , MIN_KSIZE), 0, MIN_KSIZE, MAX_KSIZE);
         this.modelKernelSizeH = new    SliderIntModel(onlyZeroOrOdd((int)kernelSize.height, MIN_KSIZE), 0, MIN_KSIZE, MAX_KSIZE);
         this.modelSigmaX      = new SliderDoubleModel(sigmaX, 0, MIN_SIGMA, MAX_SIGMA);

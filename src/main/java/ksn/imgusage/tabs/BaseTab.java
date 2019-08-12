@@ -22,15 +22,13 @@ public abstract class BaseTab implements ITab {
     protected final ITabHandler tabHandler;
     protected ITab source;
     protected BufferedImage image;
-    protected Boolean boosting;
     protected boolean addRemoveFilterButton = true;
     private Runnable imagePanelInvalidate;
     private Timer timer;
 
-    protected BaseTab(ITabHandler tabHandler, ITab source, Boolean boosting) {
+    protected BaseTab(ITabHandler tabHandler, ITab source) {
         this.tabHandler = tabHandler;
         this.source = source;
-        this.boosting = boosting;
     }
 
     public abstract String getTabName();
@@ -102,8 +100,6 @@ public abstract class BaseTab implements ITab {
             Box box4Options = Box.createVerticalBox();
             { // fill box4Options
                 box4Options.setBorder(BorderFactory.createTitledBorder(""));
-                if (boosting != null)
-                    box4Options.add(makeAsBoostCheckBox());
                 makeOptions(box4Options);
             }
 
@@ -170,19 +166,6 @@ public abstract class BaseTab implements ITab {
     }
 
     protected abstract void makeOptions(Box box4Options);
-
-    private Box makeAsBoostCheckBox() {
-        Box box = Box.createHorizontalBox();
-        JCheckBox btnAsBoost = new JCheckBox("Boosting", this.boosting);
-        btnAsBoost.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnAsBoost.setToolTipText("Speed up by reducing the image");
-        btnAsBoost.addActionListener(ev -> {
-            this.boosting = btnAsBoost.isSelected();
-            resetImage();
-        });
-        box.add(btnAsBoost);
-        return box;
-    }
 
     protected static Container makeSliderVert(ISliderModel<?> model, String title, String tip) {
         JLabel labTitle = new JLabel(title);

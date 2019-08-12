@@ -31,11 +31,11 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
     private final SliderDoubleModel modelMaxGain;
 
     public AdaptiveContrastTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, true, 20, 0.3, 0.6, 0.1, 1);
+        this(tabHandler, source, 20, 0.3, 0.6, 0.1, 1);
     }
 
-    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, double k1, double k2, double minGain, double maxGain) {
-        super(tabHandler, source, boosting, true);
+    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, int windowSize, double k1, double k2, double minGain, double maxGain) {
+        super(tabHandler, source, true);
         this.modelWinSize = new SliderIntModel   (windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
         this.modelK1      = new SliderDoubleModel(k1        , 0, MIN_K1         , MAX_K1);
         this.modelK2      = new SliderDoubleModel(k2        , 0, MIN_K2         , MAX_K2);

@@ -6,8 +6,6 @@ import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.tabs.BaseTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.opencv.OpencvFilterTab;
-import ksn.imgusage.utils.ImgHelper;
 
 public abstract class CatalanoFilterTab extends BaseTab {
 
@@ -18,8 +16,8 @@ public abstract class CatalanoFilterTab extends BaseTab {
     /** filtered image of the current tab */
     protected FastBitmap imageFBmp;
 
-    protected CatalanoFilterTab(ITabHandler tabHandler, ITab source, boolean boosting, boolean onlyGray) {
-        super(tabHandler, source, boosting);
+    protected CatalanoFilterTab(ITabHandler tabHandler, ITab source, boolean onlyGray) {
+        super(tabHandler, source);
         this.onlyGray = onlyGray;
     }
 
@@ -41,8 +39,6 @@ public abstract class CatalanoFilterTab extends BaseTab {
         imageFBmp = new FastBitmap(getSourceFastBitmap()); // clone
 
         // predefined filters
-        if ((boosting != null) && boosting.booleanValue())
-            boostImage();
         if (onlyGray && !imageFBmp.isGrayscale())
             imageFBmp.toGrayscale();
 
@@ -56,18 +52,6 @@ public abstract class CatalanoFilterTab extends BaseTab {
     public void resetImage() {
         imageFBmp = null;
         super.resetImage();
-    }
-
-    private void boostImage() {
-        double zoomX = OpencvFilterTab.BOOST_SIZE_MAX_X / (double)imageFBmp.getWidth();
-        double zoomY = OpencvFilterTab.BOOST_SIZE_MAX_Y / (double)imageFBmp.getHeight();
-        double zoom = Math.min(zoomX, zoomY);
-        logger.trace("zoom={}", zoom);
-        if (zoom < 1) {
-            int newWidth  = (int)(zoom * imageFBmp.getWidth());
-            int newHeight = (int)(zoom * imageFBmp.getHeight());
-            imageFBmp = ImgHelper.resize(imageFBmp, newWidth, newHeight);
-        }
     }
 
 }

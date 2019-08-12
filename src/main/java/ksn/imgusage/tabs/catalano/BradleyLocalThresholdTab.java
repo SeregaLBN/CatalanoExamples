@@ -24,11 +24,11 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
     private final SliderDoubleModel modelPixelBrightnessDiff;
 
     public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, true, 41, 0.15);
+        this(tabHandler, source, 41, 0.15);
     }
 
-    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize, double pixelBrightnessDiff) {
-        super(tabHandler, source, boosting, true);
+    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab source, int windowSize, double pixelBrightnessDiff) {
+        super(tabHandler, source, true);
         this.modelWindowSize          = new SliderIntModel   (windowSize         , 0, MIN_WINDOW_SIZE          , MAX_WINDOW_SIZE);
         this.modelPixelBrightnessDiff = new SliderDoubleModel(pixelBrightnessDiff, 0, MIN_PIXEL_BRIGHTNESS_DIFF, MAX_PIXEL_BRIGHTNESS_DIFF);
 

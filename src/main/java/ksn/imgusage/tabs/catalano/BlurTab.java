@@ -13,11 +13,7 @@ public class BlurTab extends CatalanoFilterTab {
     public static final String TAB_DESCRIPTION = "Blur filter";
 
     public BlurTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, true);
-    }
-
-    public BlurTab(ITabHandler tabHandler, ITab source, boolean boosting) {
-        super(tabHandler, source, boosting, false);
+        super(tabHandler, source, false);
         makeTab();
     }
 

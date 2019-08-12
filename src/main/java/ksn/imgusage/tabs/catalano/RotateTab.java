@@ -24,11 +24,11 @@ public class RotateTab extends CatalanoFilterTab {
     private final SliderDoubleModel modelAngle;
 
     public RotateTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, true, 0, true, Algorithm.BICUBIC);
+        this(tabHandler, source, 0, true, Algorithm.BICUBIC);
     }
 
-    public RotateTab(ITabHandler tabHandler, ITab source, boolean boosting, double angle, boolean keepSize, Rotate.Algorithm algorithm) {
-        super(tabHandler, source, boosting, false);
+    public RotateTab(ITabHandler tabHandler, ITab source, double angle, boolean keepSize, Rotate.Algorithm algorithm) {
+        super(tabHandler, source, false);
         this.modelAngle = new SliderDoubleModel(angle, 0, MIN, MAX);
         this.keepSize = keepSize;
         this.algorithm = algorithm;

@@ -20,11 +20,11 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
     private final SliderIntModel modelWinSize;
 
     public ArtifactsRemovalTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, true, 15);
+        this(tabHandler, source, 15);
     }
 
-    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab source, boolean boosting, int windowSize) {
-        super(tabHandler, source, boosting, true);
+    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab source, int windowSize) {
+        super(tabHandler, source, true);
         this.modelWinSize = new SliderIntModel(windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
 
         makeTab();

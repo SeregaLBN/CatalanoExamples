@@ -32,11 +32,11 @@ public class MorphologyExTab extends OpencvFilterTab {
     private JPanel panelKernel2; // for this.kernel2
 
     public MorphologyExTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, null, CvMorphTypes.MORPH_GRADIENT, new IMatter.StructuringElementParams());
+        this(tabHandler, source, CvMorphTypes.MORPH_GRADIENT, new IMatter.StructuringElementParams());
     }
 
-    public MorphologyExTab(ITabHandler tabHandler, ITab source, Boolean boosting, CvMorphTypes morphologicalOperation, IMatter kernel) {
-        super(tabHandler, source, boosting);
+    public MorphologyExTab(ITabHandler tabHandler, ITab source, CvMorphTypes morphologicalOperation, IMatter kernel) {
+        super(tabHandler, source);
         this.morphologicalOperation = morphologicalOperation;
         this.kernel = kernel;
 

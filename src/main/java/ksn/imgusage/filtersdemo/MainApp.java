@@ -239,16 +239,16 @@ public class MainApp {
     private ITab examplePipelineCatalanoFilters(ITab prevTab) {
         List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
             // supported full colors
-            prevTab2 -> new  BrightnessCorrectionTab(getTabHandler(), prevTab2, true, 1),
-            prevTab2 -> new                  BlurTab(getTabHandler(), prevTab2, true),
-            prevTab2 -> new                RotateTab(getTabHandler(), prevTab2, true, 0.01, true, Rotate.Algorithm.BICUBIC),
+            prevTab2 -> new  BrightnessCorrectionTab(getTabHandler(), prevTab2, 1),
+            prevTab2 -> new                  BlurTab(getTabHandler(), prevTab2),
+            prevTab2 -> new                RotateTab(getTabHandler(), prevTab2, 0.01, true, Rotate.Algorithm.BICUBIC),
 
             // only grayscale
-            prevTab2 -> new       FrequencyFilterTab(getTabHandler(), prevTab2, true, 0, 200),
-            prevTab2 -> new      AdaptiveContrastTab(getTabHandler(), prevTab2, true, 4, 0.84, 0.02, 2.4, 4.93),
-            prevTab2 -> new      BernsenThresholdTab(getTabHandler(), prevTab2, true, 6, 30),
-            prevTab2 -> new BradleyLocalThresholdTab(getTabHandler(), prevTab2, true, 10, 70),
-            prevTab2 -> new      ArtifactsRemovalTab(getTabHandler(), prevTab2, true, 9)
+            prevTab2 -> new       FrequencyFilterTab(getTabHandler(), prevTab2, 0, 200),
+            prevTab2 -> new      AdaptiveContrastTab(getTabHandler(), prevTab2, 4, 0.84, 0.02, 2.4, 4.93),
+            prevTab2 -> new      BernsenThresholdTab(getTabHandler(), prevTab2, 6, 30),
+            prevTab2 -> new BradleyLocalThresholdTab(getTabHandler(), prevTab2, 10, 70),
+            prevTab2 -> new      ArtifactsRemovalTab(getTabHandler(), prevTab2, 9)
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);
@@ -261,11 +261,11 @@ public class MainApp {
     private ITab examplePipelineOpenCvFilters(ITab prevTab) {
         List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
           //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, null, false),
-            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, null, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
-            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, null, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1)),
-            prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, null, 150, 350, CvThresholdTypes.THRESH_TRUNC, false, false),
-            prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, null, 5, 5, 3, false),
-            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, null, CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000)
+            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
+            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1)),
+            prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, 150, 350, CvThresholdTypes.THRESH_TRUNC, false, false),
+            prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, 5, 5, 3, false),
+            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000)
         );
         for (UnaryOperator<ITab> fTab : nextTabs) {
             ITab next = fTab.apply(prevTab);

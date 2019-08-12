@@ -19,11 +19,11 @@ public class AsIsTab extends OpencvFilterTab {
     private boolean isGray;
 
     public AsIsTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, null, false);
+        this(tabHandler, source, false);
     }
 
-    public AsIsTab(ITabHandler tabHandler, ITab source, Boolean boosting, boolean isGray) {
-        super(tabHandler, source, boosting);
+    public AsIsTab(ITabHandler tabHandler, ITab source, boolean isGray) {
+        super(tabHandler, source);
         this.isGray = isGray;
 
         makeTab();

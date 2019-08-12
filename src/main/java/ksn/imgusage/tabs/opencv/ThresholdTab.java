@@ -34,11 +34,11 @@ public class ThresholdTab extends OpencvFilterTab {
     private       boolean           useTriangleMask;
 
     public ThresholdTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, null, 100, 250, CvThresholdTypes.THRESH_BINARY, false, false);
+        this(tabHandler, source, 100, 250, CvThresholdTypes.THRESH_BINARY, false, false);
     }
 
-    public ThresholdTab(ITabHandler tabHandler, ITab source, Boolean boosting, double thresh, double maxval, CvThresholdTypes threshType, boolean useOtsuMask, boolean useTriangleMask) {
-        super(tabHandler, source, boosting);
+    public ThresholdTab(ITabHandler tabHandler, ITab source, double thresh, double maxval, CvThresholdTypes threshType, boolean useOtsuMask, boolean useTriangleMask) {
+        super(tabHandler, source);
         this.modelThresh = new SliderDoubleModel(thresh, 0, MIN_THRESH, MAX_THRESH);
         this.modelMaxVal = new SliderDoubleModel(maxval, 0, MIN_MAXVAL, MAX_MAXVAL);
         switch (threshType) {

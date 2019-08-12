@@ -20,11 +20,11 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab {
     private final SliderIntModel modelAdjust;
 
     public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, true, 100);
+        this(tabHandler, source, 100);
     }
 
-    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source, boolean boosting, int adjustValue) {
-        super(tabHandler, source, boosting, false);
+    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab source, int adjustValue) {
+        super(tabHandler, source, false);
         this.modelAdjust = new SliderIntModel(adjustValue, 0, MIN, MAX);
 
         makeTab();

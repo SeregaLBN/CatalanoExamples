@@ -24,11 +24,11 @@ public class BernsenThresholdTab extends CatalanoFilterTab {
     private final SliderDoubleModel modelContrastThreshold;
 
     public BernsenThresholdTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, true, 15, 15);
+        this(tabHandler, source, 15, 15);
     }
 
-    public BernsenThresholdTab(ITabHandler tabHandler, ITab source, boolean boosting, int radius, double contrastThreshold) {
-        super(tabHandler, source, boosting, true);
+    public BernsenThresholdTab(ITabHandler tabHandler, ITab source, int radius, double contrastThreshold) {
+        super(tabHandler, source, true);
         this.modelRadius            = new SliderIntModel   (radius           , 0, MIN_RADIUS            , MAX_RADIUS);
         this.modelContrastThreshold = new SliderDoubleModel(contrastThreshold, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
 

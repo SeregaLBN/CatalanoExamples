@@ -30,11 +30,11 @@ public class CannyTab extends OpencvFilterTab {
     private       boolean           l2gradient;
 
     public CannyTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, null, 3, 3, 5, true);
+        this(tabHandler, source, 3, 3, 5, true);
     }
 
-    public CannyTab(ITabHandler tabHandler, ITab source, Boolean boosting, double threshold1, double threshold2, int apertureSize, boolean l2gradient) {
-        super(tabHandler, source, boosting);
+    public CannyTab(ITabHandler tabHandler, ITab source, double threshold1, double threshold2, int apertureSize, boolean l2gradient) {
+        super(tabHandler, source);
         this.modelThreshold1   = new SliderDoubleModel(threshold1, 0, MIN_THRESHOLD, MAX_THRESHOLD);
         this.modelThreshold2   = new SliderDoubleModel(threshold2, 0, MIN_THRESHOLD, MAX_THRESHOLD);
         this.modelApertureSize = new    SliderIntModel(onlyOdd(apertureSize, MIN_APERTURE_SIZE), 0, MIN_APERTURE_SIZE, MAX_APERTURE_SIZE);

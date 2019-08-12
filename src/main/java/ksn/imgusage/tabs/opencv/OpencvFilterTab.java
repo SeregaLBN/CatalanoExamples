@@ -19,8 +19,8 @@ public abstract class OpencvFilterTab extends BaseTab {
     /** filtered image of the current tab */
     protected Mat imageMat;
 
-    protected OpencvFilterTab(ITabHandler tabHandler, ITab source, Boolean boosting) {
-        super(tabHandler, source, boosting);
+    protected OpencvFilterTab(ITabHandler tabHandler, ITab source) {
+        super(tabHandler, source);
     }
 
     protected Mat getSourceMat() {
@@ -40,8 +40,6 @@ public abstract class OpencvFilterTab extends BaseTab {
     protected final void applyFilter() {
         Mat srcMat = getSourceMat();
         imageMat = srcMat.clone();
-        if ((boosting != null) && boosting.booleanValue())
-            boostImage();
 
         // specific filter
         applyOpencvFilter();
@@ -53,18 +51,6 @@ public abstract class OpencvFilterTab extends BaseTab {
     public void resetImage() {
         imageMat = null;
         super.resetImage();
-    }
-
-    private void boostImage() {
-        double zoomX = BOOST_SIZE_MAX_X / (double)imageMat.width();
-        double zoomY = BOOST_SIZE_MAX_Y / (double)imageMat.height();
-        double zoom = Math.min(zoomX, zoomY);
-        logger.trace("zoom={}", zoom);
-        if (zoom < 1) {
-            int newWidth  = (int)(zoom * imageMat.width());
-            int newHeight = (int)(zoom * imageMat.height());
-            ImgHelper.resize(imageMat, newWidth, newHeight);
-        }
     }
 
 }

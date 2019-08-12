@@ -22,11 +22,11 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
     private final SliderIntModel modelMax;
 
     public FrequencyFilterTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, true, 0, 100);
+        this(tabHandler, source, 0, 100);
     }
 
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab source, boolean boosting, int min, int max) {
-        super(tabHandler, source, boosting, true);
+    public FrequencyFilterTab(ITabHandler tabHandler, ITab source, int min, int max) {
+        super(tabHandler, source, true);
         this.modelMin = new SliderIntModel(min, 0, MIN, MAX);
         this.modelMax = new SliderIntModel(max, 0, MIN, MAX);
 
