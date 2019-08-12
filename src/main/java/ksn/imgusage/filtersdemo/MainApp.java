@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.Filters.Rotate;
 import ksn.imgusage.tabs.FirstTab;
+import ksn.imgusage.tabs.FirstTab.BoundOfRoi;
+import ksn.imgusage.tabs.FirstTab.SizeImage;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.catalano.*;
@@ -222,7 +224,7 @@ public class MainApp {
     }
 
     private void examplePipeline() {
-        FirstTab firstTab = new FirstTab(getTabHandler(), FirstTab.DEFAULT_IMAGE, false, true, 300, 200, true);
+        FirstTab firstTab = new FirstTab(getTabHandler(), FirstTab.DEFAULT_IMAGE, false, true, new SizeImage(300, 200), true, new BoundOfRoi(0,0,0,0));
         isScale = firstTab::isScale;
         tabs.add(firstTab);
 
