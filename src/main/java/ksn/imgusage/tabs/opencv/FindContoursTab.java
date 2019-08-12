@@ -38,7 +38,7 @@ public class FindContoursTab extends OpencvFilterTab {
 
     private CvRetrievalModes            mode;
     private CvContourApproximationModes method;
-    private EDrawMethod drawMethod;
+    private EDrawMethod                 drawMethod;
     private final SliderIntModel        modelMinLimitContoursW;
     private final SliderIntModel        modelMinLimitContoursH;
     private final SliderIntModel        modelMaxContourArea;

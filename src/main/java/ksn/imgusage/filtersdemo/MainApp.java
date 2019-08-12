@@ -222,7 +222,7 @@ public class MainApp {
     }
 
     private void examplePipeline() {
-        FirstTab firstTab = new FirstTab(getTabHandler(), FirstTab.DEFAULT_IMAGE, false, true);
+        FirstTab firstTab = new FirstTab(getTabHandler(), FirstTab.DEFAULT_IMAGE, false, true, 300, 200, true);
         isScale = firstTab::isScale;
         tabs.add(firstTab);
 
