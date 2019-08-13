@@ -3,50 +3,154 @@ package ksn.imgusage.tabs.opencv;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 import javax.swing.*;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
 import ksn.imgusage.tabs.opencv.type.IMatter;
+import ksn.imgusage.utils.Size;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f'>Performs advanced morphological transformations</a> */
-public class MorphologyExTab extends OpencvFilterTab {
+public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
 
     public static final String TAB_NAME = "MorphologyEx";
     public static final String TAB_DESCRIPTION = "Performs advanced morphological transformations";
 
-    private CvMorphTypes morphologicalOperation;
-    private IMatter kernel;
-    private IMatter.CtorParams               kernel1 = new IMatter.CtorParams();
-    private IMatter.StructuringElementParams kernel2 = new IMatter.StructuringElementParams();
-    private JPanel panelKernel1; // for this.kernel1
-    private JPanel panelKernel2; // for this.kernel2
+    private static final int MIN_ROWS = 1;
+    private static final int MAX_ROWS = 1000;
+    private static final int MIN_COLS = 1;
+    private static final int MAX_COLS = 1000;
+    private static final double MIN_SCALAR_VECTOR = -999;
+    private static final double MAX_SCALAR_VECTOR =  999;
 
-    public MorphologyExTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, CvMorphTypes.MORPH_GRADIENT, new IMatter.StructuringElementParams());
+    private static final int MIN_KERNEL_SIZE =   1;
+    private static final int MAX_KERNEL_SIZE = 999;
+    private static final int MIN_ANCHOR      =  -1;
+    private static final int MAX_ANCHOR      = MAX_KERNEL_SIZE;
+
+
+    /** Describe how to created {@link Mat}
+     * @see <a href='https://docs.opencv.org/3.4.2/d3/d63/classcv_1_1Mat.html'>n-dimensional dense array class </a> */
+    public enum EMatSource {
+        /** The {@link Mat} created directly through the constructor {@link Mat#Mat(int, int, int, org.opencv.core.Scalar)}
+         * @see <a href='https://docs.opencv.org/3.4.2/d3/d63/classcv_1_1Mat.html#a3620c370690b5ca4d40c767be6fb4ceb'>cv::Mat(int rows, int cols, int type, const Scalar &s)</a> */
+        CTOR,
+
+        /** The {@link Mat} object created by calling {@link Imgproc#getStructuringElement(int, org.opencv.core.Size, org.opencv.core.Point)}
+         * @see <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#gac342a1bb6eabf6f55c803b09268e36dc'>Mat cv::getStructuringElement(int shape, Size ksize, Point anchor = Point(-1,-1) )</a> */
+        STRUCTURING_ELEMENT
     }
 
-    public MorphologyExTab(ITabHandler tabHandler, ITab source, CvMorphTypes morphologicalOperation, IMatter kernel) {
-        super(tabHandler, source);
-        this.morphologicalOperation = morphologicalOperation;
-        this.kernel = kernel;
+    /** for {@link EMatSource#CTOR} */
+    public static class CtorParams {
 
-        if (kernel instanceof IMatter.CtorParams)
-            this.kernel1 = (IMatter.CtorParams)kernel;
-        else
-        if (kernel instanceof IMatter.StructuringElementParams)
-            this.kernel2 = (IMatter.StructuringElementParams)kernel;
-        else
-            logger.error("Unknown kernel type! Support him!");
+        public int         rows;
+        public int         cols;
+        public CvArrayType type;
+        public double scalarVal0;
+        public double scalarVal1;
+        public double scalarVal2;
+        public double scalarVal3;
+
+        public CtorParams(int rows, int cols, CvArrayType type, double scalarVal0, double scalarVal1, double scalarVal2, double scalarVal3) {
+            this.rows = rows;
+            this.cols = cols;
+            this.type = type;
+            this.scalarVal0 = scalarVal0;
+            this.scalarVal1 = scalarVal1;
+            this.scalarVal2 = scalarVal2;
+            this.scalarVal3 = scalarVal3;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(Locale.US, "{ rows=%d, cols=%d, type=%s, scalar={%.2f, %.2f, %.2f, %.2f} }",
+                                 rows, cols,
+                                 type.name(),
+                                 scalarVal0, scalarVal1, scalarVal2, scalarVal3);
+        }
+
+    }
+
+    /** for {@link EMatSource#STRUCTURING_ELEMENT} */
+    public static class StructuringElementParams {
+
+        private CvMorphShapes shape;
+        private Size kernelSize;
+        private int anchorX;
+        private int anchorY;
+
+        public StructuringElementParams(CvMorphShapes shape, Size kernelSize, int anchorX, int anchorY) {
+            this.shape      = shape;
+            this.kernelSize = kernelSize;
+            this.anchorX    = anchorX;
+            this.anchorY    = anchorY;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(Locale.US, "{ shape=%s, kernelSize=%s, anchorX=%d, anchorY=%d }",
+                                 shape.name(),
+                                 kernelSize.toString(),
+                                 anchorX, anchorY);
+        }
+
+    }
+
+    public static class Params implements ITabParams {
+        public CvMorphTypes morphologicalOperation;
+        public EMatSource               kernelSource;
+        public CtorParams               kernel1;
+        public StructuringElementParams kernel2;
+
+        public Params(CvMorphTypes morphologicalOperation,
+                      EMatSource               kernelSource,
+                      CtorParams               kernel1,
+                      StructuringElementParams kernel2)
+        {
+            this.morphologicalOperation = morphologicalOperation;
+            this.kernelSource = kernelSource;
+            this.kernel1 = kernel1;
+            this.kernel2 = kernel2;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(Locale.US, "{ morphologicalOperation=%s, kernelSource=%s, kernel1=%s, kernel2=%s }",
+                    morphologicalOperation.name(),
+                    kernelSource,
+                    kernel1.toString(),
+                    kernel2.toString());
+        }
+    }
+
+    private JPanel panelKernel1; // for this.kernel1
+    private JPanel panelKernel2; // for this.kernel2
+    private final Params params;
+
+    public MorphologyExTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, new Params(CvMorphTypes.MORPH_GRADIENT,
+                                            EMatSource.STRUCTURING_ELEMENT,
+                                            new CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
+                                            new StructuringElementParams(CvMorphShapes.MORPH_RECT, new Size(10, 10), -1,-1)));
+    }
+
+    public MorphologyExTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+        super(tabHandler, source);
+        this.params = params;
 
         makeTab();
     }
@@ -59,12 +163,43 @@ public class MorphologyExTab extends OpencvFilterTab {
         // TODO
         // Source image. The number of channels can be arbitrary. The depth should be one of CV_8U, CV_16U, CV_16S, CV_32F or CV_64F.
 
+        Mat kernel;
+        switch (params.kernelSource) {
+        case CTOR:
+            kernel = new Mat(
+                params.kernel1.rows,
+                params.kernel1.cols,
+                params.kernel1.type.getVal(),
+                new Scalar(
+                    params.kernel1.scalarVal0,
+                    params.kernel1.scalarVal1,
+                    params.kernel1.scalarVal2,
+                    params.kernel1.scalarVal3
+                )
+            );
+            break;
+        case STRUCTURING_ELEMENT:
+            kernel = Imgproc.getStructuringElement(
+                params.kernel2.shape.getVal(),
+                new org.opencv.core.Size(
+                    params.kernel2.kernelSize.width,
+                    params.kernel2.kernelSize.height),
+                new Point(
+                    params.kernel2.anchorX,
+                    params.kernel2.anchorY)
+            );
+            break;
+        default:
+            logger.error("Unknown kernel source! Support him!");
+            throw new IllegalArgumentException("Unknown kernel source " + params.kernelSource);
+        }
+
         Mat dst = new Mat();
         Imgproc.morphologyEx(
             imageMat, // src
             dst,
-            morphologicalOperation.getVal(),
-            kernel.createMat());
+            params.morphologicalOperation.getVal(),
+            kernel);
         imageMat = dst;
     }
 
