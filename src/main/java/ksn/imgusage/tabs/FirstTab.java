@@ -16,14 +16,60 @@ import ksn.imgusage.utils.UiHelper;
 
 public class FirstTab extends BaseTab {
 
-    public static class SizeImage {
+    public static class Size {
         public int width, height;
-        public SizeImage(int width, int height) { this.width = width; this.height = height; }
+        public Size(int width, int height) { this.width = width; this.height = height; }
+        @Override
+        public String toString() {
+            return "{width=" + width + ", height=" + height + "}";
+        }
     }
-    /** padding of Region Of Interest */
-    public static class BoundOfRoi {
+    public static class Padding {
         public int left, top, right, bottom;
-        public BoundOfRoi(int left, int top, int right, int bottom) { this.left = left; this.top = top; this.right = right; this.bottom = bottom; }
+        public Padding(int left, int top, int right, int bottom) { this.left = left; this.top = top; this.right = right; this.bottom = bottom; }
+        @Override
+        public String toString() {
+            return "{left=" + left + ", right=" + right + ", top=" + top + ", bottom=" + bottom + "}";
+        }
+    }
+
+    public static class Params implements ITabParams {
+        /** source image */
+        public File    imageFile;
+        public boolean useGray;
+        public boolean useScale;
+        public Size    keepToSize;
+        public boolean useKeepAspectRatio;
+        /** padding of Region Of Interest */
+        public Padding boundOfRoi;
+
+        public Params(
+            File    imageFile,
+            boolean useGray,
+            boolean useScale,
+            Size    keepToSize,
+            boolean useKeepAspectRatio,
+            Padding boundOfRoi)
+        {
+            this.imageFile          = imageFile;
+            this.useGray            = useGray;
+            this.useScale           = useScale;
+            this.keepToSize         = keepToSize;
+            this.useKeepAspectRatio = useKeepAspectRatio;
+            this.boundOfRoi         = boundOfRoi;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(
+                    "imageFile='%s', useGray=%b, useScale=%b, keepToSize=%s, useKeepAspectRatio=%b, boundOfRoi=%s",
+                    imageFile,
+                    useGray,
+                    useScale,
+                    keepToSize,
+                    useKeepAspectRatio,
+                    boundOfRoi);
+        }
     }
 
     public static final File DEFAULT_IMAGE = Paths.get("./exampleImages", "1024px-VolodimirHillAndDnieper.jpg").toFile();
@@ -39,47 +85,34 @@ public class FirstTab extends BaseTab {
 
     private BufferedImage sourceImage;
     private BufferedImage previewImage;
-    private File sourceImageFile;
     private File latestImageDir;
-    private boolean isGray;
-    private boolean isScale;
+    private final Params params;
     private final SliderIntModel modelSizeW;
     private final SliderIntModel modelSizeH;
-    private boolean isKeepAspectRatio;
     private final SliderIntModel modelPadLeft;
     private final SliderIntModel modelPadRight;
     private final SliderIntModel modelPadTop;
     private final SliderIntModel modelPadBottom;
 
     public FirstTab(ITabHandler tabHandler) {
-        this(tabHandler, DEFAULT_IMAGE, false, true, new SizeImage(-1, -1), true, new BoundOfRoi(0,0,0,0));
+        this(tabHandler, new Params(DEFAULT_IMAGE, false, true, new Size(-1, -1), true, new Padding(0,0,0,0)));
     }
-    public FirstTab(
-        ITabHandler tabHandler,
-        File imageFile,
-        boolean isGray,
-        boolean isScale,
-        SizeImage imageResize,
-        boolean isKeepAspectRatio,
-        BoundOfRoi roi
-    ) {
+    public FirstTab(ITabHandler tabHandler, Params params) {
         super(tabHandler, null);
-        this.isGray  = isGray;
-        this.isScale = isScale;
-        if (imageResize.width < MIN_IMAGE_WIDTH)
-            imageResize.width = MAX_IMAGE_WIDTH;
-        if (imageResize.height < MIN_IMAGE_HEIGHT)
-            imageResize.height = MAX_IMAGE_HEIGHT;
-        this.modelSizeW = new SliderIntModel(Math.max(imageResize.width , MIN_IMAGE_WIDTH ), 0, MIN_IMAGE_WIDTH , MAX_IMAGE_WIDTH);
-        this.modelSizeH = new SliderIntModel(Math.max(imageResize.height, MIN_IMAGE_HEIGHT), 0, MIN_IMAGE_HEIGHT, MAX_IMAGE_HEIGHT);
-        this.isKeepAspectRatio = isKeepAspectRatio;
         this.addRemoveFilterButton = false;
-        this.modelPadLeft   = new SliderIntModel(roi.left  , 0, 0, MAX_IMAGE_WIDTH);
-        this.modelPadRight  = new SliderIntModel(roi.right , 0, 0, MAX_IMAGE_WIDTH);
-        this.modelPadTop    = new SliderIntModel(roi.top   , 0, 0, MAX_IMAGE_HEIGHT);
-        this.modelPadBottom = new SliderIntModel(roi.bottom, 0, 0, MAX_IMAGE_HEIGHT);
+        if (params.keepToSize.width < MIN_IMAGE_WIDTH)
+            params.keepToSize.width = MAX_IMAGE_WIDTH;
+        if (params.keepToSize.height < MIN_IMAGE_HEIGHT)
+            params.keepToSize.height = MAX_IMAGE_HEIGHT;
+        this.params = params;
+        this.modelSizeW = new SliderIntModel(params.keepToSize.width, 0, MIN_IMAGE_WIDTH , MAX_IMAGE_WIDTH);
+        this.modelSizeH = new SliderIntModel(params.keepToSize.height, 0, MIN_IMAGE_HEIGHT, MAX_IMAGE_HEIGHT);
+        this.modelPadLeft   = new SliderIntModel(params.boundOfRoi.left  , 0, 0, MAX_IMAGE_WIDTH);
+        this.modelPadRight  = new SliderIntModel(params.boundOfRoi.right , 0, 0, MAX_IMAGE_WIDTH);
+        this.modelPadTop    = new SliderIntModel(params.boundOfRoi.top   , 0, 0, MAX_IMAGE_HEIGHT);
+        this.modelPadBottom = new SliderIntModel(params.boundOfRoi.bottom, 0, 0, MAX_IMAGE_HEIGHT);
 
-        readImageFile(imageFile);
+        readImageFile(params.imageFile);
         makeTab();
     }
 
@@ -92,7 +125,7 @@ public class FirstTab extends BaseTab {
     }
 
     public boolean isScale() {
-        return isScale;
+        return params.useScale;
     }
 
     @Override
@@ -103,19 +136,19 @@ public class FirstTab extends BaseTab {
 
     @Override
     protected void applyFilter() {
-        image = ImgHelper.resize(sourceImage, modelSizeW.getValue(), modelSizeH.getValue());
+        image = ImgHelper.resize(sourceImage, params.keepToSize.width, params.keepToSize.height);
         FastBitmap bmp = new FastBitmap(image);
-        if (isGray && !bmp.isGrayscale())
+        if (params.useGray && !bmp.isGrayscale())
             bmp.toGrayscale();
         image = bmp.toBufferedImage();
         cutIndent();
     }
 
     private void cutIndent() {
-        int left   = modelPadLeft  .getValue();
-        int right  = modelPadRight .getValue();
-        int top    = modelPadTop   .getValue();
-        int bottom = modelPadBottom.getValue();
+        int left   = params.boundOfRoi.left;
+        int right  = params.boundOfRoi.right;
+        int top    = params.boundOfRoi.top;
+        int bottom = params.boundOfRoi.bottom;
         if ((left   <= 0) &&
             (right  <= 0) &&
             (top    <= 0) &&
@@ -126,8 +159,8 @@ public class FirstTab extends BaseTab {
 
         int wSrc = sourceImage.getWidth();
         int hSrc = sourceImage.getHeight();
-        int wDst = modelSizeW.getValue();
-        int hDst = modelSizeH.getValue();
+        int wDst = params.keepToSize.width;
+        int hDst = params.keepToSize.height;
         double koefX = wDst / (double)wSrc;
         double koefY = hDst / (double)hSrc;
 
@@ -155,10 +188,10 @@ public class FirstTab extends BaseTab {
         if (previewImage != null)
             return previewImage;
 
-        int left   = modelPadLeft  .getValue();
-        int right  = modelPadRight .getValue();
-        int top    = modelPadTop   .getValue();
-        int bottom = modelPadBottom.getValue();
+        int left   = params.boundOfRoi.left;
+        int right  = params.boundOfRoi.right;
+        int top    = params.boundOfRoi.top;
+        int bottom = params.boundOfRoi.bottom;
         if ((left   <= 0) &&
             (right  <= 0) &&
             (top    <= 0) &&
@@ -170,14 +203,14 @@ public class FirstTab extends BaseTab {
 
         int wSrc = sourceImage.getWidth();
         int hSrc = sourceImage.getHeight();
-        int wDst = modelSizeW.getValue();
-        int hDst = modelSizeH.getValue();
+        int wDst = params.keepToSize.width;
+        int hDst = params.keepToSize.height;
         double koefX = wDst / (double)wSrc;
         double koefY = hDst / (double)hSrc;
 
         previewImage = ImgHelper.resize(sourceImage, wDst, hDst);
         FastBitmap bmp = new FastBitmap(previewImage);
-        if (isGray && !bmp.isGrayscale()) {
+        if (params.useGray && !bmp.isGrayscale()) {
             bmp.toGrayscale();
             bmp.toRGB(); // ! restore colors for preview !
         }
@@ -252,7 +285,7 @@ public class FirstTab extends BaseTab {
             modelPadTop   .setMaximum(sourceImage.getHeight() - 1);
             modelPadBottom.setMaximum(sourceImage.getHeight() - 1);
 
-            sourceImageFile = imageFile;
+            params.imageFile = imageFile;
             latestImageDir = imageFile.getParentFile();
             resetImage();
             return true;
@@ -278,16 +311,16 @@ public class FirstTab extends BaseTab {
         if (sourceImage == null)
             SwingUtilities.invokeLater(btnLoadImage::doClick);
 
-        JCheckBox btnAsGray = new JCheckBox("Gray", isGray);
+        JCheckBox btnAsGray = new JCheckBox("Gray", params.useGray);
         btnAsGray.addActionListener(ev -> {
-            isGray  = btnAsGray.isSelected();
+            params.useGray  = btnAsGray.isSelected();
             resetImage();
         });
         btnAsGray.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JCheckBox btnScale = new JCheckBox("Scale", isScale);
+        JCheckBox btnScale = new JCheckBox("Scale", params.useScale);
         btnScale.addActionListener(ev -> {
-            isScale = btnScale.isSelected();
+            params.useScale = btnScale.isSelected();
             resetImage();
         });
         btnScale.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -304,9 +337,9 @@ public class FirstTab extends BaseTab {
             box4ImageSize.add(makeSliderVert(modelSizeH, "Height", "Image width"));
             box4ImageSize.add(Box.createHorizontalGlue());
 
-            JCheckBox btnKeepAspectRatio = new JCheckBox("Keep aspect ratio", isKeepAspectRatio);
+            JCheckBox btnKeepAspectRatio = new JCheckBox("Keep aspect ratio", params.useKeepAspectRatio);
             btnKeepAspectRatio.addActionListener(ev -> {
-                isKeepAspectRatio = btnKeepAspectRatio.isSelected();
+                params.useKeepAspectRatio = btnKeepAspectRatio.isSelected();
                 onCheckKeepAspectRationByWidth();
                 resetImage();
             });
@@ -347,35 +380,41 @@ public class FirstTab extends BaseTab {
 
         modelSizeW.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSizeW: value={}", modelSizeW.getFormatedText());
+            params.keepToSize.width = modelSizeW.getValue();
             onCheckKeepAspectRationByWidth();
             resetImage();
         });
         modelSizeH.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSizeH: value={}", modelSizeH.getFormatedText());
+            params.keepToSize.height = modelSizeH.getValue();
             onCheckKeepAspectRationByHeight();
             resetImage();
         });
 
         modelPadLeft.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPadLeft: value={}", modelPadLeft.getFormatedText());
+            params.boundOfRoi.left = modelPadLeft.getValue();
             if ((modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
                 SwingUtilities.invokeLater(() -> modelPadRight.setValue(sourceImage.getWidth() - 1 - modelPadLeft.getValue()) );
             resetImage();
         });
         modelPadRight.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPadRight: value={}", modelPadRight.getFormatedText());
+            params.boundOfRoi.right = modelPadRight.getValue();
             if ((modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
                 SwingUtilities.invokeLater(() -> modelPadLeft.setValue(sourceImage.getWidth() - 1 - modelPadRight.getValue()) );
             resetImage();
         });
         modelPadTop.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPadTop: value={}", modelPadTop.getFormatedText());
+            params.boundOfRoi.top = modelPadTop.getValue();
             if ((modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
                 SwingUtilities.invokeLater(() -> modelPadBottom.setValue(sourceImage.getHeight() - 1 - modelPadTop.getValue()) );
             resetImage();
         });
         modelPadBottom.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPadBottom: value={}", modelPadBottom.getFormatedText());
+            params.boundOfRoi.bottom = modelPadBottom.getValue();
             if ((modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
                 SwingUtilities.invokeLater(() -> modelPadTop.setValue(sourceImage.getHeight() - 1 - modelPadBottom.getValue()) );
             resetImage();
@@ -388,10 +427,10 @@ public class FirstTab extends BaseTab {
             return;
         lockCheckKeepAspectRation = true;
         try {
-            if (isKeepAspectRatio) {
-                double koef = modelSizeW.getValue() / (double)sourceImage.getWidth();
+            if (params.useKeepAspectRatio) {
+                double koef = params.keepToSize.width / (double)sourceImage.getWidth();
                 double newHeight = sourceImage.getHeight() * koef;
-                int currentHeight = modelSizeH.getValue();
+                int currentHeight = params.keepToSize.height;
                 if (Math.abs(newHeight - currentHeight) > 1) {
                     logger.trace("onCheckKeepAspectRationByWidth: diff={}; old={}; newDouble={}; new={}", (newHeight - currentHeight), currentHeight, newHeight, (int)newHeight);
                     modelSizeH.setValue((int)newHeight);
@@ -407,10 +446,10 @@ public class FirstTab extends BaseTab {
             return;
         lockCheckKeepAspectRation = true;
         try {
-            if (isKeepAspectRatio) {
-                double koef = modelSizeH.getValue() / (double)sourceImage.getHeight();
+            if (params.useKeepAspectRatio) {
+                double koef = params.keepToSize.height / (double)sourceImage.getHeight();
                 double newWidth = sourceImage.getWidth() * koef;
-                int currentWidth = modelSizeW.getValue();
+                int currentWidth = params.keepToSize.width;
                 if (Math.abs(newWidth - currentWidth) > 1) {
                     logger.trace("onCheckKeepAspectRationByHeight: diff={}; old={}; newDouble={}; new={}", (newWidth - currentWidth), currentWidth, newWidth, (int)newWidth);
                     modelSizeW.setValue((int)newWidth);
@@ -423,12 +462,7 @@ public class FirstTab extends BaseTab {
 
     @Override
     public void printParams() {
-        logger.info("file={}, isGray={}, sizeImage={{}x{}}, isKeeapAspectRatio={}, ",
-            sourceImageFile,
-            isGray,
-            modelSizeW.getFormatedText(),
-            modelSizeH.getFormatedText(),
-            isKeepAspectRatio);
+        logger.info("params={{}}", params);
     }
 
 }

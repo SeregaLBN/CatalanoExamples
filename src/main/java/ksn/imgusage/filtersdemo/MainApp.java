@@ -26,8 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.Filters.Rotate;
 import ksn.imgusage.tabs.FirstTab;
-import ksn.imgusage.tabs.FirstTab.BoundOfRoi;
-import ksn.imgusage.tabs.FirstTab.SizeImage;
+import ksn.imgusage.tabs.FirstTab.Padding;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.catalano.*;
@@ -228,7 +227,7 @@ public class MainApp {
     }
 
     private void examplePipeline() {
-        FirstTab firstTab = new FirstTab(getTabHandler(), FirstTab.DEFAULT_IMAGE, false, true, new SizeImage(300, 200), true, new BoundOfRoi(0,0,0,0));
+        FirstTab firstTab = new FirstTab(getTabHandler(), new FirstTab.Params(FirstTab.DEFAULT_IMAGE, false, true, new FirstTab.Size(300, 200), true, new Padding(0,0,0,0)));
         isScale = firstTab::isScale;
         tabs.add(firstTab);
 
@@ -251,7 +250,7 @@ public class MainApp {
 
             // only grayscale
             prevTab2 -> new       FrequencyFilterTab(getTabHandler(), prevTab2, 0, 200),
-            prevTab2 -> new      AdaptiveContrastTab(getTabHandler(), prevTab2, 4, 0.84, 0.02, 2.4, 4.93),
+            prevTab2 -> new      AdaptiveContrastTab(getTabHandler(), prevTab2, new      AdaptiveContrastTab.Params(4, 0.84, 0.02, 2.4, 4.93)),
             prevTab2 -> new      BernsenThresholdTab(getTabHandler(), prevTab2, 6, 30),
             prevTab2 -> new BradleyLocalThresholdTab(getTabHandler(), prevTab2, 10, 70),
             prevTab2 -> new      ArtifactsRemovalTab(getTabHandler(), prevTab2, 9)

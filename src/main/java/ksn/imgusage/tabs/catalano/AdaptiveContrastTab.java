@@ -1,5 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.util.Locale;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 
@@ -8,6 +10,7 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/AdaptiveContrastEnhancement.java'>Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change</a> */
 public class AdaptiveContrastTab extends CatalanoFilterTab {
@@ -24,23 +27,47 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
     private static final double MIN_GAIN        =   0; // The minimum gain factor
     private static final double MAX_GAIN        =  20; // The maximum gain factor
 
-    private final SliderIntModel    modelWinSize;
-    private final SliderDoubleModel modelK1;
-    private final SliderDoubleModel modelK2;
-    private final SliderDoubleModel modelMinGain;
-    private final SliderDoubleModel modelMaxGain;
+    public static class Params implements ITabParams {
+        public int    winSize;
+        public double k1;
+        public double k2;
+        public double minGain;
+        public double maxGain;
+
+        public Params(
+            int    winSize,
+            double k1,
+            double k2,
+            double minGain,
+            double maxGain)
+        {
+            this.winSize = winSize;
+            this.k1      = k1;
+            this.k2      = k2;
+            this.minGain = minGain;
+            this.maxGain = maxGain;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(Locale.US,
+                    "winSize=%d, k1=%.2f, k2=%.2f, minGain=%.2f, maxGain=%.2f",
+                    winSize,
+                    k1,
+                    k1,
+                    minGain,
+                    maxGain);
+        }
+    }
+    private final Params params;
 
     public AdaptiveContrastTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, 20, 0.3, 0.6, 0.1, 1);
+        this(tabHandler, source, new Params(20, 0.3, 0.6, 0.1, 1));
     }
 
-    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, int windowSize, double k1, double k2, double minGain, double maxGain) {
+    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, Params params) {
         super(tabHandler, source, true);
-        this.modelWinSize = new SliderIntModel   (windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
-        this.modelK1      = new SliderDoubleModel(k1        , 0, MIN_K1         , MAX_K1);
-        this.modelK2      = new SliderDoubleModel(k2        , 0, MIN_K2         , MAX_K2);
-        this.modelMinGain = new SliderDoubleModel(minGain   , 0, MIN_GAIN       , MAX_GAIN);
-        this.modelMaxGain = new SliderDoubleModel(maxGain   , 0, MIN_GAIN       , MAX_GAIN);
+        this.params = params;
 
         makeTab();
     }
@@ -51,16 +78,22 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
     @Override
     protected void applyCatalanoFilter() {
         new AdaptiveContrastEnhancement(
-            modelWinSize.getValue(),
-            modelK1     .getValue(),
-            modelK2     .getValue(),
-            modelMinGain.getValue(),
-            modelMaxGain.getValue()
+            params.winSize,
+            params.k1,
+            params.k2,
+            params.minGain,
+            params.maxGain
         ).applyInPlace(imageFBmp);
     }
 
     @Override
     protected void makeOptions(Box box4Options) {
+        SliderIntModel    modelWinSize = new SliderIntModel   (params.winSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
+        SliderDoubleModel modelK1      = new SliderDoubleModel(params.k1     , 0, MIN_K1         , MAX_K1);
+        SliderDoubleModel modelK2      = new SliderDoubleModel(params.k2     , 0, MIN_K2         , MAX_K2);
+        SliderDoubleModel modelMinGain = new SliderDoubleModel(params.minGain, 0, MIN_GAIN       , MAX_GAIN);
+        SliderDoubleModel modelMaxGain = new SliderDoubleModel(params.maxGain, 0, MIN_GAIN       , MAX_GAIN);
+
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
@@ -80,40 +113,38 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
 
         modelWinSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
+            params.winSize = modelWinSize.getValue();
             resetImage();
         });
         modelK1.getWrapped().addChangeListener(ev -> {
             logger.trace("modelK1: value={}", modelK1.getFormatedText());
+            params.k1 = modelK1.getValue();
             resetImage();
         });
         modelK2.getWrapped().addChangeListener(ev -> {
             logger.trace("modelK2: value={}", modelK2.getFormatedText());
+            params.k2 = modelK2.getValue();
             resetImage();
         });
         modelMinGain.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMinGain: value={}", modelMinGain.getFormatedText());
-            double valMinGain = modelMinGain.getValue();
-            if (valMinGain > modelMaxGain.getValue())
-                modelMaxGain.setValue(valMinGain);
+            params.minGain = modelMinGain.getValue();
+            if (params.minGain > modelMaxGain.getValue())
+                modelMaxGain.setValue(params.minGain);
             resetImage();
         });
         modelMaxGain.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMaxGain: value={}", modelMaxGain.getFormatedText());
-            double valMaxGain = modelMaxGain.getValue();
-            if (valMaxGain < modelMinGain.getValue())
-                modelMinGain.setValue(valMaxGain);
+            params.maxGain = modelMaxGain.getValue();
+            if (params.maxGain < modelMinGain.getValue())
+                modelMinGain.setValue(params.maxGain);
             resetImage();
         });
     }
 
     @Override
     public void printParams() {
-        logger.info("windowSize={}, k1={}, k2={}, minGain={}, maxGain={}",
-            modelWinSize.getFormatedText(),
-            modelK1     .getFormatedText(),
-            modelK2     .getFormatedText(),
-            modelMinGain.getFormatedText(),
-            modelMaxGain.getFormatedText());
+        logger.info("params={{}}", params);
     }
 
 }
