@@ -5,14 +5,15 @@ import javax.swing.Box;
 import Catalano.Imaging.Filters.Blur;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/Blur.java'>Blur filter</a> */
-public class BlurTab extends CatalanoFilterTab {
+public class BlurTab extends CatalanoFilterTab<ITabParams> {
 
     public static final String TAB_NAME = Blur.class.getSimpleName();
     public static final String TAB_DESCRIPTION = "Blur filter";
 
-    public BlurTab(ITabHandler tabHandler, ITab source) {
+    public BlurTab(ITabHandler tabHandler, ITab<?> source) {
         super(tabHandler, source, false);
         makeTab();
     }
@@ -31,8 +32,8 @@ public class BlurTab extends CatalanoFilterTab {
     }
 
     @Override
-    public void printParams() {
-        logger.info("I am :)");
+    public ITabParams getParams() {
+        return null;
     }
 
 }

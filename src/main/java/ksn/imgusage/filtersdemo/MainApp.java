@@ -20,21 +20,17 @@ import java.util.stream.Stream;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 
-import org.opencv.core.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Catalano.Imaging.Filters.Rotate;
 import ksn.imgusage.tabs.FirstTab;
-import ksn.imgusage.tabs.FirstTab.Padding;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.tabs.opencv.type.*;
-import ksn.imgusage.utils.MapFilterToTab;
-import ksn.imgusage.utils.SelectFilterDialog;
-import ksn.imgusage.utils.UiHelper;
+import ksn.imgusage.utils.*;
 
 public class MainApp {
 
@@ -53,7 +49,7 @@ public class MainApp {
     private final JFrame frame;
     private JTabbedPane tabPane;
     private BooleanSupplier isScale;
-    private List<ITab> tabs = new ArrayList<>();
+    private List<ITab<?>> tabs = new ArrayList<>();
     private boolean useExamplePipeline = true;
     private JWindow errorWindow;
     private Timer timer;
@@ -115,10 +111,10 @@ public class MainApp {
     private void onClose() {
         frame.dispose();
         logger.warn("Good bay!\n\n");
-        tabs.forEach(ITab::printParams);
+        tabs.forEach(tab -> logger.info("{}.params={{}}", tab.getClass().getName(), tab.getParams()));
     }
 
-    private void onImageChanged(ITab tab) {
+    private void onImageChanged(ITab<?> tab) {
         int pos = tabs.lastIndexOf(tab);
         assert pos > 0;
 
@@ -128,22 +124,19 @@ public class MainApp {
     private ITabHandler getTabHandler() {
         return new ITabHandler() {
             @Override
-            public JTabbedPane getTabPanel() { return MainApp.this.getTabPanel(); }
+            public JTabbedPane getTabPanel()                                 { return MainApp.this.getTabPanel(); }
             @Override
-            public void onImageChanged(ITab tab) {    MainApp.this.onImageChanged(tab); }
+            public void onImageChanged(ITab<?> tab)                          { MainApp.this.onImageChanged(tab); }
             @Override
-            public void onAddNewFilter() {            MainApp.this.onAddNewFilter(); }
+            public void onAddNewFilter()                                     { MainApp.this.onAddNewFilter(); }
             @Override
-            public void onRemoveFilter(ITab tab) {    MainApp.this.onRemoveFilter(tab); }
+            public void onRemoveFilter(ITab<?> tab)                          { MainApp.this.onRemoveFilter(tab); }
             @Override
-            public void onCancel() {                  MainApp.this.onCancel(); }
+            public void onCancel()                                           { MainApp.this.onCancel(); }
             @Override
-            public void onImagePanelPaint(JPanel imagePanel, Graphics2D g) {
-                                                      MainApp.this.onImagePanelPaint(imagePanel, g);
-            }
+            public void onImagePanelPaint(JPanel imagePanel, Graphics2D g)   { MainApp.this.onImagePanelPaint(imagePanel, g); }
             @Override
-            public void onError(String message, ITab tab, Component from) {
-                                                      MainApp.this.onErrorInTab(message, tab, from);
+            public void onError(String message, ITab<?> tab, Component from) { MainApp.this.onErrorInTab(message, tab, from);
             }
         };
     }
@@ -154,7 +147,7 @@ public class MainApp {
         if (filterTabName == null)
             return;
 
-        Class<? extends ITab> tabClass = Stream.of(MapFilterToTab.getOpencvTabClass  (filterTabName),
+        Class<? extends ITab<?>> tabClass = Stream.of(MapFilterToTab.getOpencvTabClass  (filterTabName),
                                                    MapFilterToTab.getCatalanoTabClass(filterTabName))
             .filter(Objects::nonNull)
             .findAny()
@@ -163,23 +156,23 @@ public class MainApp {
             logger.error("Not supported filter {}", filterTabName);
         else
             try {
-                Constructor<? extends ITab> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class);
-                ITab lastTab = tabs.get(tabs.size() - 1);
+                Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class);
+                ITab<?> lastTab = tabs.get(tabs.size() - 1);
                 tabs.add(ctor.newInstance(getTabHandler(), lastTab));
             } catch (Exception ex) {
                 logger.error(ex.toString());
             }
     }
 
-    private void onRemoveFilter(ITab tab) {
+    private void onRemoveFilter(ITab<?> tab) {
         int pos = tabs.lastIndexOf(tab);
         assert pos > 0;
 
         tabPane.removeTabAt(pos);
         tabs.remove(tab);
         for (int i = pos; i < tabs.size(); ++i) {
-            ITab prev = tabs.get(i-1);
-            ITab curr = tabs.get(i);
+            ITab<?> prev = tabs.get(i-1);
+            ITab<?> curr = tabs.get(i);
             curr.updateSource(prev);
         }
     }
@@ -197,7 +190,7 @@ public class MainApp {
         if (i >= tabs.size())
             return;
 
-        ITab tab = tabs.get(i);
+        ITab<?> tab = tabs.get(i);
         BufferedImage image = tab.getImage();
         if (image == null)
             return;
@@ -227,60 +220,60 @@ public class MainApp {
     }
 
     private void examplePipeline() {
-        FirstTab firstTab = new FirstTab(getTabHandler(), new FirstTab.Params(FirstTab.DEFAULT_IMAGE, false, true, new FirstTab.Size(300, 200), true, new Padding(0,0,0,0)));
+        FirstTab firstTab = new FirstTab(getTabHandler(), new FirstTab.Params(FirstTab.DEFAULT_IMAGE, false, true, new Size(300, 200), true, new Padding(0,0,0,0)));
         isScale = firstTab::isScale;
         tabs.add(firstTab);
 
         if (firstTab.getImage() != null) {
-            ITab prevTab = firstTab;
+            ITab<?> prevTab = firstTab;
 
-          //prevTab = examplePipelineCatalanoFilters(prevTab);
-            prevTab = examplePipelineOpenCvFilters  (prevTab);
+          prevTab = examplePipelineCatalanoFilters(prevTab);
+//            prevTab = examplePipelineOpenCvFilters  (prevTab);
         }
 
         frame.pack();
     }
 
-    private ITab examplePipelineCatalanoFilters(ITab prevTab) {
-        List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
+    private ITab<?> examplePipelineCatalanoFilters(ITab<?> prevTab) {
+        List<UnaryOperator<ITab<?>>> nextTabs = Arrays.asList(
             // supported full colors
-            prevTab2 -> new  BrightnessCorrectionTab(getTabHandler(), prevTab2, 1),
+            prevTab2 -> new  BrightnessCorrectionTab(getTabHandler(), prevTab2, new  BrightnessCorrectionTab.Params(1)),
             prevTab2 -> new                  BlurTab(getTabHandler(), prevTab2),
-            prevTab2 -> new                RotateTab(getTabHandler(), prevTab2, 0.01, true, Rotate.Algorithm.BICUBIC),
+            prevTab2 -> new                RotateTab(getTabHandler(), prevTab2, new                RotateTab.Params(0.01, true, Rotate.Algorithm.BICUBIC)),
 
             // only grayscale
-            prevTab2 -> new       FrequencyFilterTab(getTabHandler(), prevTab2, 0, 200),
+            prevTab2 -> new       FrequencyFilterTab(getTabHandler(), prevTab2, new       FrequencyFilterTab.Params(0, 200)),
             prevTab2 -> new      AdaptiveContrastTab(getTabHandler(), prevTab2, new      AdaptiveContrastTab.Params(4, 0.84, 0.02, 2.4, 4.93)),
-            prevTab2 -> new      BernsenThresholdTab(getTabHandler(), prevTab2, 6, 30),
-            prevTab2 -> new BradleyLocalThresholdTab(getTabHandler(), prevTab2, 10, 70),
-            prevTab2 -> new      ArtifactsRemovalTab(getTabHandler(), prevTab2, 9)
+            prevTab2 -> new      BernsenThresholdTab(getTabHandler(), prevTab2, new      BernsenThresholdTab.Params(6, 30)),
+            prevTab2 -> new BradleyLocalThresholdTab(getTabHandler(), prevTab2, new BradleyLocalThresholdTab.Params(10, 70)),
+            prevTab2 -> new      ArtifactsRemovalTab(getTabHandler(), prevTab2, new      ArtifactsRemovalTab.Params(9))
         );
-        for (UnaryOperator<ITab> fTab : nextTabs) {
-            ITab next = fTab.apply(prevTab);
+        for (UnaryOperator<ITab<?>> fTab : nextTabs) {
+            ITab<?> next = fTab.apply(prevTab);
             tabs.add(next);
             prevTab = next;
         }
         return prevTab;
     }
 
-    private ITab examplePipelineOpenCvFilters(ITab prevTab) {
-        List<UnaryOperator<ITab>> nextTabs = Arrays.asList(
-          //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, null, false),
-            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT),
+    private ITab<?> examplePipelineOpenCvFilters(ITab<?> prevTab) {
+        List<UnaryOperator<ITab<?>>> nextTabs = Arrays.asList(
+          //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, new         AsIsTab.Params(false)),
+            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, new GaussianBlurTab.Params(new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT)),
             prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1)),
             prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, 150, 350, CvThresholdTypes.THRESH_TRUNC, false, false),
-            prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, 5, 5, 3, false),
-            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000)
+            prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, new        CannyTab.Params(5, 5, 3, false)),
+            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, new FindContoursTab.Params(CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000))
         );
-        for (UnaryOperator<ITab> fTab : nextTabs) {
-            ITab next = fTab.apply(prevTab);
+        for (UnaryOperator<ITab<?>> fTab : nextTabs) {
+            ITab<?> next = fTab.apply(prevTab);
             tabs.add(next);
             prevTab = next;
         }
         return prevTab;
     }
 
-    private void onErrorInTab(String message, ITab tab, Component from) {
+    private void onErrorInTab(String message, ITab<?> tab, Component from) {
         if (from == null)
             from = frame.getRootPane();
 

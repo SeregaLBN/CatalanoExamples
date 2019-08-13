@@ -1,22 +1,24 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.event.ItemEvent;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import javax.swing.*;
 
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
+import ksn.imgusage.utils.Size;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1'>Blurs an image using a Gaussian filter</a> */
-public class GaussianBlurTab extends OpencvFilterTab {
+public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTab.Params> {
 
     public static final String TAB_NAME = "GaussianBlur";
     public static final String TAB_DESCRIPTION = "Blurs an image using a Gaussian filter";
@@ -29,23 +31,34 @@ public class GaussianBlurTab extends OpencvFilterTab {
                                                  //  respectively (see getGaussianKernel() for details); to fully control the result regardless of possible future
                                                  //  modifications of all this semantics, it is recommended to specify all of ksize, sigmaX, and sigmaY.
 
-    private final SliderIntModel    modelKernelSizeW;
-    private final SliderIntModel    modelKernelSizeH;
-    private final SliderDoubleModel modelSigmaX;
-    private final SliderDoubleModel modelSigmaY;
-    private       CvBorderTypes     borderType;
-
-    public GaussianBlurTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, new Size(7, 0), 25, 25, CvBorderTypes.BORDER_DEFAULT);
+    public static class Params implements ITabParams {
+        public Size          kernelSize;
+        public double        sigmaX;
+        public double        sigmaY;
+        public CvBorderTypes borderType;
+        public Params(Size kernelSize, double sigmaX, double sigmaY, CvBorderTypes borderType) {
+            kernelSize.width  = onlyZeroOrOdd(kernelSize.width , MIN_KSIZE);
+            kernelSize.height = onlyZeroOrOdd(kernelSize.height, MIN_KSIZE);
+            this.kernelSize = kernelSize;
+            this.sigmaX     = sigmaX;
+            this.sigmaY     = sigmaY;
+            this.borderType = borderType;
+        }
+        @Override
+        public String toString() {
+            return String.format(Locale.US, "{ kernelSize=%s, sigmaX=%.2f, sigmaY=%.2f, borderType=%s }", kernelSize.toString(), sigmaX, sigmaY, borderType.name());
+        }
     }
 
-    public GaussianBlurTab(ITabHandler tabHandler, ITab source, Size kernelSize, double sigmaX, double sigmaY, CvBorderTypes borderType) {
+    private final Params params;
+
+    public GaussianBlurTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, new Params(new Size(7, 0), 25, 25, CvBorderTypes.BORDER_DEFAULT));
+    }
+
+    public GaussianBlurTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source);
-        this.modelKernelSizeW = new    SliderIntModel(onlyZeroOrOdd((int)kernelSize.width , MIN_KSIZE), 0, MIN_KSIZE, MAX_KSIZE);
-        this.modelKernelSizeH = new    SliderIntModel(onlyZeroOrOdd((int)kernelSize.height, MIN_KSIZE), 0, MIN_KSIZE, MAX_KSIZE);
-        this.modelSigmaX      = new SliderDoubleModel(sigmaX, 0, MIN_SIGMA, MAX_SIGMA);
-        this.modelSigmaY      = new SliderDoubleModel(sigmaY, 0, MIN_SIGMA, MAX_SIGMA);
-        this.borderType = borderType;
+        this.params = params;
 
         makeTab();
     }
@@ -62,16 +75,22 @@ public class GaussianBlurTab extends OpencvFilterTab {
         Imgproc.GaussianBlur(
             imageMat, // src
             dst,
-            new Size(modelKernelSizeW.getValue(),
-                     modelKernelSizeH.getValue()),
-            modelSigmaX.getValue(),
-            modelSigmaY.getValue(),
-            borderType.getVal());
+            new org.opencv.core.Size(
+                    params.kernelSize.width,
+                    params.kernelSize.height),
+            params.sigmaX,
+            params.sigmaY,
+            params.borderType.getVal());
         imageMat = dst;
     }
 
     @Override
     protected void makeOptions(Box box4Options) {
+        SliderIntModel modelKernelSizeW = new    SliderIntModel(params.kernelSize.width , 0, MIN_KSIZE, MAX_KSIZE);
+        SliderIntModel modelKernelSizeH = new    SliderIntModel(params.kernelSize.height, 0, MIN_KSIZE, MAX_KSIZE);
+        SliderDoubleModel modelSigmaX   = new SliderDoubleModel(params.sigmaX, 0, MIN_SIGMA, MAX_SIGMA);
+        SliderDoubleModel modelSigmaY   = new SliderDoubleModel(params.sigmaY, 0, MIN_SIGMA, MAX_SIGMA);
+
         Box boxKernelSize = Box.createHorizontalBox();
         boxKernelSize.setBorder(BorderFactory.createTitledBorder("Kernel size"));
         boxKernelSize.setToolTipText("Gaussian kernel size. ksize.width and ksize.height can differ but they both must be positive and odd."
@@ -100,11 +119,11 @@ public class GaussianBlurTab extends OpencvFilterTab {
             .filter(b -> b != CvBorderTypes.BORDER_DEFAULT) // dublicate
             .forEach(border ->
         {
-            JRadioButton radioBtnAlg = new JRadioButton(border.name(), (border == this.borderType) || (border.getVal() == this.borderType.getVal()));
+            JRadioButton radioBtnAlg = new JRadioButton(border.name(), (border == params.borderType) || (border.getVal() == params.borderType.getVal()));
             radioBtnAlg.setToolTipText("Pixel extrapolation method");
             radioBtnAlg.addItemListener(ev -> {
                 if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    this.borderType = border;
+                    params.borderType = border;
                     logger.trace("Border type changed to {}", border);
                     resetImage();
                 }
@@ -132,13 +151,12 @@ public class GaussianBlurTab extends OpencvFilterTab {
         boxOptions.add(Box.createVerticalStrut(2));
         box4Options.add(boxOptions);
 
-        int[] prevValues = { modelKernelSizeW.getValue(), modelKernelSizeH.getValue() };
         modelKernelSizeW.getWrapped().addChangeListener(ev -> {
             logger.trace("modelKernelSizeW: value={}", modelKernelSizeW.getFormatedText());
             int val = modelKernelSizeW.getValue();
-            int valValid = onlyZeroOrOdd(val, prevValues[0]);
+            int valValid = onlyZeroOrOdd(val, params.kernelSize.width);
             if (val == valValid) {
-                prevValues[0] = valValid;
+                params.kernelSize.width = valValid;
                 resetImage();
             } else {
                 SwingUtilities.invokeLater(() -> modelKernelSizeW.setValue(valValid));
@@ -147,9 +165,9 @@ public class GaussianBlurTab extends OpencvFilterTab {
         modelKernelSizeH.getWrapped().addChangeListener(ev -> {
             logger.trace("modelKernelSizeH: value={}", modelKernelSizeH.getFormatedText());
             int val = modelKernelSizeH.getValue();
-            int valValid = onlyZeroOrOdd(val, prevValues[1]);
+            int valValid = onlyZeroOrOdd(val, params.kernelSize.height);
             if (val == valValid) {
-                prevValues[1] = valValid;
+                params.kernelSize.height = valValid;
                 resetImage();
             } else {
                 SwingUtilities.invokeLater(() -> modelKernelSizeH.setValue(valValid));
@@ -157,10 +175,12 @@ public class GaussianBlurTab extends OpencvFilterTab {
         });
         modelSigmaX.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSigmaX: value={}", modelSigmaX.getFormatedText());
+            params.sigmaX = modelSigmaX.getValue();
             resetImage();
         });
         modelSigmaY.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSigmaY: value={}", modelSigmaY.getFormatedText());
+            params.sigmaY = modelSigmaY.getValue();
             resetImage();
         });
     }
@@ -176,13 +196,8 @@ public class GaussianBlurTab extends OpencvFilterTab {
     }
 
     @Override
-    public void printParams() {
-        logger.info("kernelSize={{}, {}}, sigmaX={}, sigmaY={}, borderType={}",
-                modelKernelSizeW.getFormatedText(),
-                modelKernelSizeH.getFormatedText(),
-                modelSigmaX     .getFormatedText(),
-                modelSigmaY     .getFormatedText(),
-                borderType);
+    public Params getParams() {
+        return params;
     }
 
 }

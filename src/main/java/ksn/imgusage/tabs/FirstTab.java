@@ -12,26 +12,11 @@ import javax.swing.*;
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.utils.ImgHelper;
+import ksn.imgusage.utils.Padding;
+import ksn.imgusage.utils.Size;
 import ksn.imgusage.utils.UiHelper;
 
-public class FirstTab extends BaseTab {
-
-    public static class Size {
-        public int width, height;
-        public Size(int width, int height) { this.width = width; this.height = height; }
-        @Override
-        public String toString() {
-            return "{width=" + width + ", height=" + height + "}";
-        }
-    }
-    public static class Padding {
-        public int left, top, right, bottom;
-        public Padding(int left, int top, int right, int bottom) { this.left = left; this.top = top; this.right = right; this.bottom = bottom; }
-        @Override
-        public String toString() {
-            return "{left=" + left + ", right=" + right + ", top=" + top + ", bottom=" + bottom + "}";
-        }
-    }
+public class FirstTab extends BaseTab<FirstTab.Params> {
 
     public static class Params implements ITabParams {
         /** source image */
@@ -62,7 +47,7 @@ public class FirstTab extends BaseTab {
         @Override
         public String toString() {
             return String.format(
-                    "imageFile='%s', useGray=%b, useScale=%b, keepToSize=%s, useKeepAspectRatio=%b, boundOfRoi=%s",
+                    "{imageFile='%s', useGray=%b, useScale=%b, keepToSize=%s, useKeepAspectRatio=%b, boundOfRoi=%s}",
                     imageFile,
                     useGray,
                     useScale,
@@ -264,7 +249,7 @@ public class FirstTab extends BaseTab {
     }
 
     @Override
-    public void updateSource(ITab newSource) {
+    public void updateSource(ITab<?> newSource) {
         throw new UnsupportedOperationException("Illegal call");
     }
 
@@ -461,8 +446,8 @@ public class FirstTab extends BaseTab {
     }
 
     @Override
-    public void printParams() {
-        logger.info("params={{}}", params);
+    public Params getParams() {
+        return params;
     }
 
 }

@@ -7,9 +7,10 @@ import org.opencv.core.Mat;
 import ksn.imgusage.tabs.BaseTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.utils.ImgHelper;
 
-public abstract class OpencvFilterTab extends BaseTab {
+public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends BaseTab<TTabParams>  {
 
     public static final String TAB_PREFIX = "OpenCV:";
 
@@ -19,13 +20,13 @@ public abstract class OpencvFilterTab extends BaseTab {
     /** filtered image of the current tab */
     protected Mat imageMat;
 
-    protected OpencvFilterTab(ITabHandler tabHandler, ITab source) {
+    protected OpencvFilterTab(ITabHandler tabHandler, ITab<?> source) {
         super(tabHandler, source);
     }
 
     protected Mat getSourceMat() {
         if (source instanceof OpencvFilterTab) {
-            return ((OpencvFilterTab)source).imageMat;
+            return ((OpencvFilterTab<?>)source).imageMat;
         } else {
             BufferedImage src = source.getImage();
             if (src == null)

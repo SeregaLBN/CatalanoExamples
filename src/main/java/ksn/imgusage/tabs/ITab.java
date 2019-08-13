@@ -3,12 +3,12 @@ package ksn.imgusage.tabs;
 
 import java.awt.image.BufferedImage;
 
-public interface ITab {
+public interface ITab<TTabParams extends ITabParams> {
 
     BufferedImage getImage();
-    void updateSource(ITab newSource);
+    void updateSource(ITab<?> newSource);
     void resetImage();
 
-    void printParams();
+    TTabParams getParams();
 
 }

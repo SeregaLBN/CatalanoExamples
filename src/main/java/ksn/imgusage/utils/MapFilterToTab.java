@@ -58,7 +58,7 @@ public final class MapFilterToTab {
 
 
     /** map OpenCV filters to tab classes */
-    public static Class<? extends OpencvFilterTab> getOpencvTabClass(String fullFilterTabName) {
+    public static Class<? extends OpencvFilterTab<?>> getOpencvTabClass(String fullFilterTabName) {
         if (!fullFilterTabName.startsWith(OpencvFilterTab.TAB_PREFIX))
             return null;
 
@@ -82,7 +82,7 @@ public final class MapFilterToTab {
     }
 
     /** map Catalano filters to tab classes */
-    public static Class<? extends CatalanoFilterTab> getCatalanoTabClass(String fullFilterTabName) {
+    public static Class<? extends CatalanoFilterTab<?>> getCatalanoTabClass(String fullFilterTabName) {
         if (!fullFilterTabName.startsWith(CatalanoFilterTab.TAB_PREFIX))
             return null;
 

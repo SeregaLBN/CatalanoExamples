@@ -7,24 +7,32 @@ import javax.swing.JCheckBox;
 
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 
 /** for testing internal classes {@link ImgHelper} {@link OpenCvHelper} */
-public class AsIsTab extends OpencvFilterTab {
+public class AsIsTab extends OpencvFilterTab<AsIsTab.Params> {
 
     public static final String TAB_NAME = "AsIs";
     public static final String TAB_DESCRIPTION = "As is";
 
-    private boolean isGray;
-
-    public AsIsTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, false);
+    public static class Params implements ITabParams {
+        public boolean useGray;
+        public Params(boolean useGray) { this.useGray = useGray; }
+        @Override
+        public String toString() { return "{ useGray=" + useGray + " }"; }
     }
 
-    public AsIsTab(ITabHandler tabHandler, ITab source, boolean isGray) {
+    private Params params;
+
+    public AsIsTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, new Params(false));
+    }
+
+    public AsIsTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source);
-        this.isGray = isGray;
+        this.params = params;
 
         makeTab();
     }
@@ -34,18 +42,18 @@ public class AsIsTab extends OpencvFilterTab {
 
     @Override
     protected void applyOpencvFilter() {
-        if (isGray)
+        if (params.useGray)
             imageMat = OpenCvHelper.toGray(imageMat);
     }
 
     @Override
     protected void makeOptions(Box box4Options) {
         Box box = Box.createHorizontalBox();
-        JCheckBox btnAsGray = new JCheckBox("Gray", isGray);
+        JCheckBox btnAsGray = new JCheckBox("Gray", params.useGray);
         btnAsGray.setAlignmentX(Component.LEFT_ALIGNMENT);
         btnAsGray.setToolTipText("Speed up by reducing the image");
         btnAsGray.addActionListener(ev -> {
-            isGray = btnAsGray.isSelected();
+            params.useGray = btnAsGray.isSelected();
             resetImage();
         });
         box.add(btnAsGray);
@@ -53,8 +61,8 @@ public class AsIsTab extends OpencvFilterTab {
     }
 
     @Override
-    public void printParams() {
-        logger.info("isGray={}", isGray);
+    public Params getParams() {
+        return params;
     }
 
 }

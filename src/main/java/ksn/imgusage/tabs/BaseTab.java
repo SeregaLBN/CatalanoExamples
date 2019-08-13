@@ -14,19 +14,19 @@ import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.UiHelper;
 
-public abstract class BaseTab implements ITab {
+public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTabParams> {
 
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected static final int WIDTH_LEFT_PANEL = 250;
 
     protected final ITabHandler tabHandler;
-    protected ITab source;
+    protected ITab<?> source;
     protected BufferedImage image;
     protected boolean addRemoveFilterButton = true;
     private Runnable imagePanelInvalidate;
     private Timer timer;
 
-    protected BaseTab(ITabHandler tabHandler, ITab source) {
+    protected BaseTab(ITabHandler tabHandler, ITab<?> source) {
         this.tabHandler = tabHandler;
         this.source = source;
     }
@@ -88,7 +88,7 @@ public abstract class BaseTab implements ITab {
     }
 
     @Override
-    public void updateSource(ITab newSource) {
+    public void updateSource(ITab<?> newSource) {
         this.source = newSource;
         resetImage();
     }

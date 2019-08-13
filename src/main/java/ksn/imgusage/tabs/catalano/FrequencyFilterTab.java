@@ -8,9 +8,10 @@ import Catalano.Imaging.Filters.FrequencyFilter;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/FrequencyFilter.java'>Filtering of frequencies outside of specified range in complex Fourier transformed image</a> */
-public class FrequencyFilterTab extends CatalanoFilterTab {
+public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Params> {
 
     public static final String TAB_NAME = FrequencyFilter.class.getSimpleName();
     public static final String TAB_DESCRIPTION = "Filtering of frequencies outside of specified range in complex Fourier transformed image";
@@ -18,17 +19,22 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
     private static final int MIN = 0;
     private static final int MAX = 1024;
 
-    private final SliderIntModel modelMin;
-    private final SliderIntModel modelMax;
-
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, 0, 100);
+    public static class Params implements ITabParams {
+        public int min, max;
+        public Params(int min, int max) { this.min = min; this.max = max; }
+        @Override
+        public String toString() { return "{ min=" + min + ", max=" + max + " }"; }
     }
 
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab source, int min, int max) {
+    private final Params params;
+
+    public FrequencyFilterTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, new Params(0, 100));
+    }
+
+    public FrequencyFilterTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source, true);
-        this.modelMin = new SliderIntModel(min, 0, MIN, MAX);
-        this.modelMax = new SliderIntModel(max, 0, MIN, MAX);
+        this.params = params;
 
         makeTab();
     }
@@ -41,7 +47,7 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
         FourierTransform fourierTransform = new FourierTransform(imageFBmp);
         fourierTransform.Forward();
 
-        FrequencyFilter frequencyFilter = new FrequencyFilter(modelMin.getValue(), modelMax.getValue());
+        FrequencyFilter frequencyFilter = new FrequencyFilter(params.min, params.max);
         frequencyFilter.ApplyInPlace(fourierTransform);
 
         fourierTransform.Backward();
@@ -50,6 +56,9 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
 
     @Override
     protected void makeOptions(Box box4Options) {
+        SliderIntModel modelMin = new SliderIntModel(params.min, 0, MIN, MAX);
+        SliderIntModel modelMax = new SliderIntModel(params.max, 0, MIN, MAX);
+
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
@@ -63,25 +72,23 @@ public class FrequencyFilterTab extends CatalanoFilterTab {
 
         modelMin.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMin: value={}", modelMin.getFormatedText());
-            int valMin = modelMin.getValue();
-            if (valMin > modelMax.getValue())
-                modelMax.setValue(valMin);
+            params.min = modelMin.getValue();
+            if (params.min > modelMax.getValue())
+                modelMax.setValue(params.min);
             resetImage();
         });
         modelMax.getWrapped().addChangeListener(ev -> {
             logger.trace("modelMax: value={}", modelMax.getFormatedText());
-            int valMax = modelMax.getValue();
-            if (valMax < modelMin.getValue())
-                modelMin.setValue(valMax);
+            params.max = modelMax.getValue();
+            if (params.max < modelMin.getValue())
+                modelMin.setValue(params.max);
             resetImage();
         });
     }
 
     @Override
-    public void printParams() {
-        logger.info("min={}, max={}",
-            modelMin.getFormatedText(),
-            modelMax.getFormatedText());
+    public Params getParams() {
+        return params;
     }
 
 }

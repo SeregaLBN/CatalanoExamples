@@ -7,9 +7,10 @@ import Catalano.Imaging.Filters.ArtifactsRemoval;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/ArtifactsRemoval.java'>Remove artifacts caused by uneven lightning</a> */
-public class ArtifactsRemovalTab extends CatalanoFilterTab {
+public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.Params> {
 
     public static final String TAB_NAME = ArtifactsRemoval.class.getSimpleName();
     public static final String TAB_DESCRIPTION = "Remove artifacts caused by uneven lightning";
@@ -17,15 +18,24 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
     private static final int MIN_WINDOW_SIZE = 1;
     private static final int MAX_WINDOW_SIZE = 201;
 
-    private final SliderIntModel modelWinSize;
-
-    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, 15);
+    public static class Params implements ITabParams {
+        public int windowSize;
+        public Params(int windowSize) { this.windowSize = windowSize; }
+        @Override
+        public String toString() {
+            return "{ windowSize=" + windowSize + " }";
+        }
     }
 
-    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab source, int windowSize) {
+    private final Params params;
+
+    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, new Params(15));
+    }
+
+    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source, true);
-        this.modelWinSize = new SliderIntModel(windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
+        this.params = params;
 
         makeTab();
     }
@@ -35,12 +45,14 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
 
     @Override
     protected void applyCatalanoFilter() {
-        new ArtifactsRemoval(modelWinSize.getValue())
+        new ArtifactsRemoval(params.windowSize)
             .applyInPlace(imageFBmp);
     }
 
     @Override
     protected void makeOptions(Box box4Options) {
+        SliderIntModel modelWinSize = new SliderIntModel(params.windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
+
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
@@ -52,13 +64,14 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab {
 
         modelWinSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
+            params.windowSize = modelWinSize.getValue();
             resetImage();
         });
     }
 
     @Override
-    public void printParams() {
-        logger.info("windowSize={}", modelWinSize.getFormatedText());
+    public Params getParams() {
+        return params;
     }
 
 }

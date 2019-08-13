@@ -1,5 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.util.Locale;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 
@@ -8,9 +10,10 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BradleyLocalThreshold.java'>Adaptive thresholding using the integral image</a> */
-public class BradleyLocalThresholdTab extends CatalanoFilterTab {
+public class BradleyLocalThresholdTab extends CatalanoFilterTab<BradleyLocalThresholdTab.Params> {
 
     public static final String TAB_NAME = BradleyLocalThreshold.class.getSimpleName();
     public static final String TAB_DESCRIPTION = "Adaptive thresholding using the integral image";
@@ -20,17 +23,36 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
     private static final double MIN_PIXEL_BRIGHTNESS_DIFF =    0;
     private static final double MAX_PIXEL_BRIGHTNESS_DIFF =  300;
 
-    private final SliderIntModel    modelWindowSize;
-    private final SliderDoubleModel modelPixelBrightnessDiff;
+    public static class Params implements ITabParams {
+        public int    windowSize;
+        public double pixelBrightnessDiff;
 
-    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, 41, 0.15);
+        public Params(
+            int    windowSize,
+            double pixelBrightnessDiff)
+        {
+            this.windowSize          = windowSize;
+            this.pixelBrightnessDiff = pixelBrightnessDiff;
+        }
+
+        @Override
+        public String toString() {
+            return String.format(Locale.US,
+                    "{ windowSize=%d, pixelBrightnessDiff=%.2f }",
+                    windowSize,
+                    pixelBrightnessDiff);
+        }
+    }
+    private final Params params;
+
+
+    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, new Params(41, 0.15));
     }
 
-    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab source, int windowSize, double pixelBrightnessDiff) {
+    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source, true);
-        this.modelWindowSize          = new SliderIntModel   (windowSize         , 0, MIN_WINDOW_SIZE          , MAX_WINDOW_SIZE);
-        this.modelPixelBrightnessDiff = new SliderDoubleModel(pixelBrightnessDiff, 0, MIN_PIXEL_BRIGHTNESS_DIFF, MAX_PIXEL_BRIGHTNESS_DIFF);
+        this.params = params;
 
         makeTab();
     }
@@ -40,12 +62,15 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
 
     @Override
     protected void applyCatalanoFilter() {
-        new BradleyLocalThreshold(modelWindowSize.getValue(), (float)(double)modelPixelBrightnessDiff.getValue())
+        new BradleyLocalThreshold(params.windowSize, (float)params.pixelBrightnessDiff)
             .applyInPlace(imageFBmp);
     }
 
     @Override
     protected void makeOptions(Box box4Options) {
+        SliderIntModel    modelWindowSize          = new SliderIntModel   (params.windowSize         , 0, MIN_WINDOW_SIZE          , MAX_WINDOW_SIZE);
+        SliderDoubleModel modelPixelBrightnessDiff = new SliderDoubleModel(params.pixelBrightnessDiff, 0, MIN_PIXEL_BRIGHTNESS_DIFF, MAX_PIXEL_BRIGHTNESS_DIFF);
+
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
@@ -59,17 +84,19 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab {
 
         modelWindowSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelRadius: value={}", modelWindowSize.getFormatedText());
+            params.windowSize = modelWindowSize.getValue();
             resetImage();
         });
         modelPixelBrightnessDiff.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPixelBrightnessDiff: value={}", modelPixelBrightnessDiff.getFormatedText());
+            params.pixelBrightnessDiff = modelPixelBrightnessDiff.getValue();
             resetImage();
         });
     }
 
     @Override
-    public void printParams() {
-        logger.info("windowSize={}, pixelBrightnessDiff={}", modelWindowSize.getFormatedText(), modelPixelBrightnessDiff.getFormatedText());
+    public Params getParams() {
+        return params;
     }
 
 }

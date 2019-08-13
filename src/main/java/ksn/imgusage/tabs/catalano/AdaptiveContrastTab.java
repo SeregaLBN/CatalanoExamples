@@ -13,7 +13,7 @@ import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.ITabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/AdaptiveContrastEnhancement.java'>Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change</a> */
-public class AdaptiveContrastTab extends CatalanoFilterTab {
+public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.Params> {
 
     public static final String TAB_NAME = AdaptiveContrastEnhancement.class.getSimpleName();
     public static final String TAB_DESCRIPTION = "Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change";
@@ -51,7 +51,7 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
         @Override
         public String toString() {
             return String.format(Locale.US,
-                    "winSize=%d, k1=%.2f, k2=%.2f, minGain=%.2f, maxGain=%.2f",
+                    "{ winSize=%d, k1=%.2f, k2=%.2f, minGain=%.2f, maxGain=%.2f }",
                     winSize,
                     k1,
                     k1,
@@ -61,11 +61,11 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
     }
     private final Params params;
 
-    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source) {
+    public AdaptiveContrastTab(ITabHandler tabHandler, ITab<?> source) {
         this(tabHandler, source, new Params(20, 0.3, 0.6, 0.1, 1));
     }
 
-    public AdaptiveContrastTab(ITabHandler tabHandler, ITab source, Params params) {
+    public AdaptiveContrastTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source, true);
         this.params = params;
 
@@ -143,8 +143,8 @@ public class AdaptiveContrastTab extends CatalanoFilterTab {
     }
 
     @Override
-    public void printParams() {
-        logger.info("params={{}}", params);
+    public Params getParams() {
+        return params;
     }
 
 }

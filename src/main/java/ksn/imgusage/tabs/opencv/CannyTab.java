@@ -2,6 +2,7 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
+import java.util.Locale;
 
 import javax.swing.*;
 
@@ -12,9 +13,10 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 
 /** <a href='https://docs.opencv.org/3.4.2/dd/d1a/group__imgproc__feature.html#ga04723e007ed888ddf11d9ba04e2232de'>Finds edges in an image using the Canny algorithm</a> */
-public class CannyTab extends OpencvFilterTab {
+public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
 
     public static final String TAB_NAME = "Canny";
     public static final String TAB_DESCRIPTION = "Finds edges in an image using the Canny algorithm";
@@ -24,21 +26,32 @@ public class CannyTab extends OpencvFilterTab {
     private static final int    MIN_APERTURE_SIZE =   3;
     private static final int    MAX_APERTURE_SIZE =   7;
 
-    private final SliderDoubleModel modelThreshold1;
-    private final SliderDoubleModel modelThreshold2;
-    private final SliderIntModel    modelApertureSize;
-    private       boolean           l2gradient;
-
-    public CannyTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, 3, 3, 5, true);
+    public static class Params implements ITabParams {
+        public double threshold1;
+        public double threshold2;
+        public int apertureSize;
+        public boolean l2gradient;
+        public Params(double threshold1, double threshold2, int apertureSize, boolean l2gradient) {
+            this.threshold1 = threshold1;
+            this.threshold2 = threshold2;
+            this.apertureSize = onlyOdd(apertureSize, MIN_APERTURE_SIZE);
+            this.l2gradient = l2gradient;
+        }
+        @Override
+        public String toString() {
+            return String.format(Locale.US, "{ threshold1=%.2f, threshold2=%.2f, apertureSize=%d, l2gradient=%b }", threshold1, threshold2, apertureSize, l2gradient);
+        }
     }
 
-    public CannyTab(ITabHandler tabHandler, ITab source, double threshold1, double threshold2, int apertureSize, boolean l2gradient) {
+    private final Params params;
+
+    public CannyTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, new Params(3, 3, 5, true));
+    }
+
+    public CannyTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source);
-        this.modelThreshold1   = new SliderDoubleModel(threshold1, 0, MIN_THRESHOLD, MAX_THRESHOLD);
-        this.modelThreshold2   = new SliderDoubleModel(threshold2, 0, MIN_THRESHOLD, MAX_THRESHOLD);
-        this.modelApertureSize = new    SliderIntModel(onlyOdd(apertureSize, MIN_APERTURE_SIZE), 0, MIN_APERTURE_SIZE, MAX_APERTURE_SIZE);
-        this.l2gradient = l2gradient;
+        this.params = params;
 
         makeTab();
     }
@@ -55,15 +68,19 @@ public class CannyTab extends OpencvFilterTab {
         Imgproc.Canny(
             imageMat, // src
             dst,
-            modelThreshold1.getValue(),
-            modelThreshold2.getValue(),
-            modelApertureSize.getValue(),
-            l2gradient);
+            params.threshold1,
+            params.threshold2,
+            params.apertureSize,
+            params.l2gradient);
         imageMat = dst;
     }
 
     @Override
     protected void makeOptions(Box box4Options) {
+        SliderDoubleModel modelThreshold1   = new SliderDoubleModel(params.threshold1, 0, MIN_THRESHOLD, MAX_THRESHOLD);
+        SliderDoubleModel modelThreshold2   = new SliderDoubleModel(params.threshold2, 0, MIN_THRESHOLD, MAX_THRESHOLD);
+        SliderIntModel    modelApertureSize = new    SliderIntModel(params.apertureSize, 0, MIN_APERTURE_SIZE, MAX_APERTURE_SIZE);
+
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
         box4Sliders.add(makeSliderVert(modelThreshold1, "Threshold1", "First threshold for the hysteresis procedure"));
@@ -75,11 +92,11 @@ public class CannyTab extends OpencvFilterTab {
 
         Box box4L2gradient = Box.createVerticalBox();
         box4L2gradient.setBorder(BorderFactory.createTitledBorder(""));
-        JCheckBox checkBoxL2gradient = new JCheckBox("L2 gradient", this.l2gradient);
+        JCheckBox checkBoxL2gradient = new JCheckBox("L2 gradient", params.l2gradient);
         checkBoxL2gradient.setToolTipText("a flag, indicating whether a more accurate L2 norm =√‾((dI/dx)^2+(dI/dy)^2) should be used to calculate the image gradient magnitude ( L2gradient=true ), or whether the default L1 norm =|dI/dx|+|dI/dy| is enough ( L2gradient=false ). ");
         checkBoxL2gradient.addItemListener(ev -> {
-            this.l2gradient = (ev.getStateChange() == ItemEvent.SELECTED);
-            logger.trace("L2 gradient is {}", (this.l2gradient ? "checked" : "unchecked"));
+            params.l2gradient = (ev.getStateChange() == ItemEvent.SELECTED);
+            logger.trace("L2 gradient is {}", (params.l2gradient ? "checked" : "unchecked"));
             resetImage();
         });
         box4L2gradient.add(checkBoxL2gradient);
@@ -94,20 +111,21 @@ public class CannyTab extends OpencvFilterTab {
 
         modelThreshold1.getWrapped().addChangeListener(ev -> {
             logger.trace("modelThreshold1: value={}", modelThreshold1.getFormatedText());
+            params.threshold1 = modelThreshold1.getValue();
             resetImage();
         });
         modelThreshold2.getWrapped().addChangeListener(ev -> {
             logger.trace("modelThreshold2: value={}", modelThreshold2.getFormatedText());
+            params.threshold2 = modelThreshold2.getValue();
             resetImage();
         });
 
-        int[] prevValues = { modelApertureSize.getValue() };
         modelApertureSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelApertureSize: value={}", modelApertureSize.getFormatedText());
             int val = modelApertureSize.getValue();
-            int valValid = onlyOdd(val, prevValues[0]);
+            int valValid = onlyOdd(val, params.apertureSize);
             if (val == valValid) {
-                prevValues[0] = valValid;
+                params.apertureSize = valValid;
                 resetImage();
             } else {
                 SwingUtilities.invokeLater(() -> modelApertureSize.setValue(valValid));
@@ -124,12 +142,8 @@ public class CannyTab extends OpencvFilterTab {
     }
 
     @Override
-    public void printParams() {
-        logger.info("threshold1={}, threshold2={}, apertureSize={}, l2gradient={}",
-                modelThreshold1  .getFormatedText(),
-                modelThreshold2  .getFormatedText(),
-                modelApertureSize.getFormatedText(),
-                l2gradient);
+    public Params getParams() {
+        return params;
     }
 
 }

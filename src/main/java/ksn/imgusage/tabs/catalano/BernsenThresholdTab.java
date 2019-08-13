@@ -1,5 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.util.Locale;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 
@@ -8,9 +10,10 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BernsenThreshold.java'>Bernsen Threshold</a> */
-public class BernsenThresholdTab extends CatalanoFilterTab {
+public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.Params> {
 
     public static final String TAB_NAME = BernsenThreshold.class.getSimpleName();
     public static final String TAB_DESCRIPTION = "The method uses a user-provided contrast threshold";
@@ -20,17 +23,25 @@ public class BernsenThresholdTab extends CatalanoFilterTab {
     private static final double MIN_CONTRAST_THRESHOLD = 0;
     private static final double MAX_CONTRAST_THRESHOLD = 300;
 
-    private final SliderIntModel    modelRadius;
-    private final SliderDoubleModel modelContrastThreshold;
-
-    public BernsenThresholdTab(ITabHandler tabHandler, ITab source) {
-        this(tabHandler, source, 15, 15);
+    public static class Params implements ITabParams {
+        public int radius;
+        public double contrastThreshold;
+        public Params(int radius, double contrastThreshold) { this.radius = radius; this.contrastThreshold = contrastThreshold; }
+        @Override
+        public String toString() {
+            return String.format(Locale.US, "{ radius=%d, contrastThreshold=%.2f }", radius, contrastThreshold);
+        }
     }
 
-    public BernsenThresholdTab(ITabHandler tabHandler, ITab source, int radius, double contrastThreshold) {
+    private final Params params;
+
+    public BernsenThresholdTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, new Params(15, 15));
+    }
+
+    public BernsenThresholdTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source, true);
-        this.modelRadius            = new SliderIntModel   (radius           , 0, MIN_RADIUS            , MAX_RADIUS);
-        this.modelContrastThreshold = new SliderDoubleModel(contrastThreshold, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
+        this.params = params;
 
         makeTab();
     }
@@ -40,12 +51,15 @@ public class BernsenThresholdTab extends CatalanoFilterTab {
 
     @Override
     protected void applyCatalanoFilter() {
-        new BernsenThreshold(modelRadius.getValue(), modelContrastThreshold.getValue())
+        new BernsenThreshold(params.radius, params.contrastThreshold)
             .applyInPlace(imageFBmp);
     }
 
     @Override
     protected void makeOptions(Box box4Options) {
+        SliderIntModel    modelRadius            = new SliderIntModel   (params.radius           , 0, MIN_RADIUS            , MAX_RADIUS);
+        SliderDoubleModel modelContrastThreshold = new SliderDoubleModel(params.contrastThreshold, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
+
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
 
@@ -59,19 +73,19 @@ public class BernsenThresholdTab extends CatalanoFilterTab {
 
         modelRadius.getWrapped().addChangeListener(ev -> {
             logger.trace("modelRadius: value={}", modelRadius.getFormatedText());
+            params.radius = modelRadius.getValue();
             resetImage();
         });
         modelContrastThreshold.getWrapped().addChangeListener(ev -> {
             logger.trace("modelContrastThreshold: value={}", modelContrastThreshold.getFormatedText());
+            params.contrastThreshold = modelContrastThreshold.getValue();
             resetImage();
         });
     }
 
     @Override
-    public void printParams() {
-        logger.info("radius={}, contrastThreshold={}",
-            modelRadius           .getFormatedText(),
-            modelContrastThreshold.getFormatedText());
+    public Params getParams() {
+        return params;
     }
 
 }

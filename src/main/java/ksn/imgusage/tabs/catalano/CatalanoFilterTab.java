@@ -6,8 +6,9 @@ import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.tabs.BaseTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 
-public abstract class CatalanoFilterTab extends BaseTab {
+public abstract class CatalanoFilterTab<TTabParams extends ITabParams> extends BaseTab<TTabParams>  {
 
     public static final String TAB_PREFIX = "Catalano:";
 
@@ -16,14 +17,14 @@ public abstract class CatalanoFilterTab extends BaseTab {
     /** filtered image of the current tab */
     protected FastBitmap imageFBmp;
 
-    protected CatalanoFilterTab(ITabHandler tabHandler, ITab source, boolean onlyGray) {
+    protected CatalanoFilterTab(ITabHandler tabHandler, ITab<?> source, boolean onlyGray) {
         super(tabHandler, source);
         this.onlyGray = onlyGray;
     }
 
     protected FastBitmap getSourceFastBitmap() {
         if (source instanceof CatalanoFilterTab) {
-            return ((CatalanoFilterTab)source).imageFBmp;
+            return ((CatalanoFilterTab<?>)source).imageFBmp;
         } else {
             BufferedImage src = source.getImage();
             if (src == null)
