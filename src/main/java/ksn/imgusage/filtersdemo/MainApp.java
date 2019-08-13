@@ -198,9 +198,13 @@ public class MainApp {
         if (i >= tabs.size())
             return;
 
-        BufferedImage image = tabs.get(i).getImage();
+        ITab tab = tabs.get(i);
+        BufferedImage image = tab.getImage();
         if (image == null)
             return;
+
+        if (i == 0)
+            image = ((FirstTab)tab).getPreviewImage();
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -305,33 +309,34 @@ public class MainApp {
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g = img.createGraphics();
+        try {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, w, h);
+            g.setColor(Color.WHITE);
+            int border = 10;
+            g.fillRect(border, border, w-2*border, h-2*border);
 
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, w, h);
-        g.setColor(Color.WHITE);
-        int border = 10;
-        g.fillRect(border, border, w-2*border, h-2*border);
+            g.setColor(Color.ORANGE);
+            g.fillOval(20, 20, 40, 40);
 
-        g.setColor(Color.ORANGE);
-        g.fillOval(20, 20, 40, 40);
+            g.setColor(Color.BLACK);
+            Path2D.Double triangleShape = new Path2D.Double();
+            triangleShape.moveTo( 20, h - 20);
+            triangleShape.lineTo( 50, h - 20 - 30);
+            triangleShape.lineTo(100, h - 20);
+            triangleShape.closePath();
+            g.fill(triangleShape);
 
-        g.setColor(Color.BLACK);
-        Path2D.Double triangleShape = new Path2D.Double();
-        triangleShape.moveTo( 20, h - 20);
-        triangleShape.lineTo( 50, h - 20 - 30);
-        triangleShape.lineTo(100, h - 20);
-        triangleShape.closePath();
-        g.fill(triangleShape);
-
-        g.setColor(Color.DARK_GRAY);
-        triangleShape = new Path2D.Double();
-        triangleShape.moveTo(w - 80, h - 20);
-        triangleShape.lineTo(w - 40, h - 20 - 70);
-        triangleShape.lineTo(w - 20, h - 20);
-        triangleShape.closePath();
-        g.fill(triangleShape);
-
-        g.dispose();
+            g.setColor(Color.DARK_GRAY);
+            triangleShape = new Path2D.Double();
+            triangleShape.moveTo(w - 80, h - 20);
+            triangleShape.lineTo(w - 40, h - 20 - 70);
+            triangleShape.lineTo(w - 20, h - 20);
+            triangleShape.closePath();
+            g.fill(triangleShape);
+        } finally {
+            g.dispose();
+        }
 
         frame.setIconImage(img);
     }
