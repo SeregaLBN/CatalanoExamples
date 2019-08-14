@@ -9,6 +9,9 @@ import java.nio.file.Paths;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.Padding;
@@ -20,6 +23,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
 
     public static class Params implements ITabParams {
         /** source image */
+        @JsonIgnore
         public File    imageFile;
         public boolean useGray;
         public boolean useScale;
@@ -46,6 +50,20 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
             this.boundOfRoi         = boundOfRoi;
         }
 
+        @JsonProperty("imageFile")
+        public String getImagePath() {
+            if (imageFile == null)
+                return null;
+            return imageFile.getPath();
+        }
+        @JsonProperty("imageFile")
+        public void setImagePath(String imagePath) {
+            if (imagePath == null)
+                this.imageFile = null;
+            else
+                this.imageFile = Paths.get(imagePath).toFile();
+        }
+
         @Override
         public String toString() {
             return String.format(
@@ -59,7 +77,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         }
     }
 
-    public static final File DEFAULT_IMAGE = Paths.get("./exampleImages", "VolodHill.jpg").toFile();
+    public static final File DEFAULT_IMAGE = Paths.get("exampleImages", "VolodHill.jpg").toFile();
 
     public static final String TAB_NAME      = "Original";
     public static final String TAB_FULL_NAME = "FirstTab";
@@ -75,7 +93,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
 
     private BufferedImage sourceImage;
     private BufferedImage previewImage;
-    private File latestImageDir;
+    private File latestImageDir = DEFAULT_IMAGE.getParentFile();
     private final Params params;
     private final SliderIntModel modelSizeW;
     private final SliderIntModel modelSizeH;
@@ -113,6 +131,10 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     @Override
     protected BufferedImage getSourceImage() {
         return sourceImage;
+    }
+
+    public File getLatestImageDir() {
+        return latestImageDir;
     }
 
     public boolean isScale() {
@@ -278,7 +300,10 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
 
             params.imageFile = imageFile;
             latestImageDir = imageFile.getParentFile();
-            resetImage();
+            if (image == null)
+                repaintImage();
+            else
+                resetImage();
             return true;
         } catch (IOException ex) {
             logger.error("Can`t read image", ex);

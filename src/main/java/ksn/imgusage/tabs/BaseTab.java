@@ -22,7 +22,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected final ITabHandler tabHandler;
     protected ITab<?> source;
     protected BufferedImage image;
-    private Runnable imagePanelInvalidate;
+    private Runnable imagePanelRepaint;
     private Timer timer;
 
     protected BaseTab(ITabHandler tabHandler, ITab<?> source) {
@@ -75,13 +75,14 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
         logger.trace("> resetImage: reset...");
         image = null;
-        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300,
-            () -> {
-                logger.trace("  resetImage: invalidate panel");
-                if (imagePanelInvalidate != null)
-                    imagePanelInvalidate.run();
-                SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
-            }, logger);
+        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::repaintImage, logger);
+    }
+
+    protected void repaintImage() {
+        logger.trace("  repaintImage: repaint panel");
+        if (imagePanelRepaint != null)
+            imagePanelRepaint.run();
+        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
     }
 
     @Override
@@ -162,7 +163,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         imagePanel.setMinimumSize(new Dimension(150, 200));
         imagePanel.setPreferredSize(new Dimension(700, 400));
 
-        imagePanelInvalidate = imagePanel::repaint;
+        imagePanelRepaint = imagePanel::repaint;
         return imagePanel;
     }
 

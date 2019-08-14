@@ -363,12 +363,8 @@ public class MainApp {
     }
 
     private void onSavePipeline() {
-        File imgFile = ((FirstTab)tabs.get(0)).getParams().imageFile;
-        if (imgFile == null)
-            return;
-
-        File jsonFile = new File(imgFile.getAbsolutePath() + ".json");
-        jsonFile = UiHelper.saveFiltersPipelineFile(frame, jsonFile);
+        File latestDir = ((FirstTab)tabs.get(0)).getLatestImageDir();
+        File jsonFile = UiHelper.saveFiltersPipelineFile(frame, latestDir);
         if (jsonFile == null)
             return; // aborted
 
@@ -400,12 +396,8 @@ public class MainApp {
     }
 
     private void onLoadPipeline() {
-        File imgFile = ((FirstTab)tabs.get(0)).getParams().imageFile;
-        if (imgFile == null)
-            return;
-
-        File jsonFile = new File(imgFile.getAbsolutePath() + ".json");
-        jsonFile = UiHelper.loadFiltersPipelineFile(frame, jsonFile);
+        File latestDir = ((FirstTab)tabs.get(0)).getLatestImageDir();
+        File jsonFile = UiHelper.loadFiltersPipelineFile(frame, latestDir);
         if (jsonFile == null)
             return; // aborted
         if (!jsonFile.exists()) {
