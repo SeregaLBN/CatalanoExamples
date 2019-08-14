@@ -28,6 +28,7 @@ import ksn.imgusage.utils.OpenCvHelper;
 public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
 
     public static final String TAB_NAME = "FindContours";
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Finds contours in a binary image";
 
     private static final int MIN_MIN_LIMIT_CONTOUR_SIZE =    0;
@@ -48,6 +49,9 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
         public EDrawMethod                 drawMethod;
         public Size                        minLimitContours;
         public int                         maxContourArea;
+
+        public Params() {}
+
         public Params(CvRetrievalModes mode, CvContourApproximationModes method,
                 EDrawMethod drawMethod, Size minLimitContours,
                 int maxContourArea)
@@ -87,6 +91,8 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

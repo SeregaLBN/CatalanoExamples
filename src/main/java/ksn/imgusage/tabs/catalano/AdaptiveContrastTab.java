@@ -17,6 +17,7 @@ import ksn.imgusage.tabs.ITabParams;
 public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.Params> {
 
     public static final String TAB_NAME = AdaptiveContrastEnhancement.class.getSimpleName();
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change";
 
     private static final int    MIN_WINDOW_SIZE =   1; // Size of window (should be an odd number).
@@ -34,6 +35,8 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.P
         public double k2;
         public double minGain;
         public double maxGain;
+
+        public Params() {}
 
         public Params(
             int    winSize,
@@ -75,6 +78,8 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.P
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

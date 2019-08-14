@@ -7,6 +7,8 @@ public class Padding {
     public int right;
     public int bottom;
 
+    public Padding() {}
+
     public Padding(int left, int top, int right, int bottom) {
         this.left   = left;
         this.top    = top;

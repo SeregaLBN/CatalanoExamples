@@ -15,6 +15,7 @@ import ksn.imgusage.tabs.ITabParams;
 public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.Params> {
 
     public static final String TAB_NAME = ArtifactsRemoval.class.getSimpleName();
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Remove artifacts caused by uneven lightning";
 
     private static final int MIN_WINDOW_SIZE = 1;
@@ -22,7 +23,11 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.P
 
     public static class Params implements ITabParams {
         public int windowSize;
+
+        public Params() {}
+
         public Params(int windowSize) { this.windowSize = windowSize; }
+
         @Override
         public String toString() {
             return "{ windowSize=" + windowSize + " }";
@@ -44,6 +49,8 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.P
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

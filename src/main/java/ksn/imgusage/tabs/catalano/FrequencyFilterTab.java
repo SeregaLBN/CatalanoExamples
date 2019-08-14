@@ -16,6 +16,7 @@ import ksn.imgusage.tabs.ITabParams;
 public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Params> {
 
     public static final String TAB_NAME = FrequencyFilter.class.getSimpleName();
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Filtering of frequencies outside of specified range in complex Fourier transformed image";
 
     private static final int MIN = 0;
@@ -23,7 +24,14 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Par
 
     public static class Params implements ITabParams {
         public int min, max;
-        public Params(int min, int max) { this.min = min; this.max = max; }
+
+        public Params() {}
+
+        public Params(int min, int max) {
+            this.min = min;
+            this.max = max;
+        }
+
         @Override
         public String toString() { return "{ min=" + min + ", max=" + max + " }"; }
     }
@@ -43,6 +51,8 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Par
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

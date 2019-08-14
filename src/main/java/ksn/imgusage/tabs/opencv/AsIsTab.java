@@ -16,11 +16,16 @@ import ksn.imgusage.utils.OpenCvHelper;
 public class AsIsTab extends OpencvFilterTab<AsIsTab.Params> {
 
     public static final String TAB_NAME = "AsIs";
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "As is";
 
     public static class Params implements ITabParams {
         public boolean useGray;
+
+        public Params() {}
+
         public Params(boolean useGray) { this.useGray = useGray; }
+
         @Override
         public String toString() { return "{ useGray=" + useGray + " }"; }
     }
@@ -40,6 +45,8 @@ public class AsIsTab extends OpencvFilterTab<AsIsTab.Params> {
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

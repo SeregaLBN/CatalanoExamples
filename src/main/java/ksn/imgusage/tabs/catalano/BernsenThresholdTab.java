@@ -17,6 +17,7 @@ import ksn.imgusage.tabs.ITabParams;
 public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.Params> {
 
     public static final String TAB_NAME = BernsenThreshold.class.getSimpleName();
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "The method uses a user-provided contrast threshold";
 
     private static final int    MIN_RADIUS = 0;
@@ -27,7 +28,11 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.P
     public static class Params implements ITabParams {
         public int radius;
         public double contrastThreshold;
+
+        public Params() {}
+
         public Params(int radius, double contrastThreshold) { this.radius = radius; this.contrastThreshold = contrastThreshold; }
+
         @Override
         public String toString() {
             return String.format(Locale.US, "{ radius=%d, contrastThreshold=%.2f }", radius, contrastThreshold);
@@ -49,6 +54,8 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.P
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

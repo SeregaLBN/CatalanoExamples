@@ -9,6 +9,8 @@ public interface ITab<TTabParams extends ITabParams> {
     void updateSource(ITab<?> newSource);
     void resetImage();
 
+    String getTabName();
+    String getTabFullName();
     TTabParams getParams();
 
 }

@@ -22,6 +22,7 @@ import ksn.imgusage.type.Size;
 public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTab.Params> {
 
     public static final String TAB_NAME = "GaussianBlur";
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Blurs an image using a Gaussian filter";
 
     private static final int MIN_KSIZE    =   0; // Gaussian kernel size. ksize.width and ksize.height can differ but they both must be positive and odd. Or,
@@ -37,6 +38,9 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTab.Params> {
         public double        sigmaX;
         public double        sigmaY;
         public CvBorderTypes borderType;
+
+        public Params() {}
+
         public Params(Size kernelSize, double sigmaX, double sigmaY, CvBorderTypes borderType) {
             kernelSize.width  = onlyZeroOrOdd(kernelSize.width , MIN_KSIZE);
             kernelSize.height = onlyZeroOrOdd(kernelSize.height, MIN_KSIZE);
@@ -66,6 +70,8 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTab.Params> {
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

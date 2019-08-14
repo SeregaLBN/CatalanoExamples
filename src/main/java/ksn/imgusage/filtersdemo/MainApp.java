@@ -9,16 +9,15 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -26,10 +25,13 @@ import javax.swing.event.ChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import Catalano.Imaging.Filters.Rotate;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.tabs.opencv.MorphologyExTab.EMatSource;
@@ -147,22 +149,34 @@ public class MainApp {
 
     private void onAddNewFilter() {
         logger.trace("onAddNewFilter");
-        String filterTabName = new SelectFilterDialog(frame).getFilterTabName();
-        if (filterTabName == null)
-            return;
+        String filterTabFullName = new SelectFilterDialog(frame).getFilterTabFullName();
+        if (filterTabFullName != null)
+            addTabByFilterFullName(filterTabFullName);
+    }
 
-        Class<? extends ITab<?>> tabClass = Stream.of(MapFilterToTab.getOpencvTabClass  (filterTabName),
-                                                   MapFilterToTab.getCatalanoTabClass(filterTabName))
-            .filter(Objects::nonNull)
-            .findAny()
-            .orElse(null);
+    private void addTabByFilterFullName(String filterTabFullName) {
+        Class<? extends ITab<?>> tabClass = MapFilterToTab.getTabClass(filterTabFullName);
         if (tabClass == null)
-            logger.error("Not supported filter {}", filterTabName);
+            logger.error("Not supported filter {}", filterTabFullName);
         else
             try {
                 Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class);
                 ITab<?> lastTab = tabs.get(tabs.size() - 1);
                 tabs.add(ctor.newInstance(getTabHandler(), lastTab));
+            } catch (Exception ex) {
+                logger.error(ex.toString());
+            }
+    }
+
+    private void addTabByFilterFullName(String filterTabFullName, ITabParams params) {
+        Class<? extends ITab<?>> tabClass = MapFilterToTab.getTabClass(filterTabFullName);
+        if (tabClass == null)
+            logger.error("Not supported filter {}", filterTabFullName);
+        else
+            try {
+                Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class, params.getClass());
+                ITab<?> lastTab = tabs.get(tabs.size() - 1);
+                tabs.add(ctor.newInstance(getTabHandler(), lastTab, params));
             } catch (Exception ex) {
                 logger.error(ex.toString());
             }
@@ -265,13 +279,13 @@ public class MainApp {
           //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, new         AsIsTab.Params(false)),
             prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, new GaussianBlurTab.Params(new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT)),
             prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, new MorphologyExTab.Params(CvMorphTypes.MORPH_CLOSE, EMatSource.STRUCTURING_ELEMENT,
-                                                                                                    new MorphologyExTab.CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
-                                                                                                    new MorphologyExTab.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, new Size(7, 7), -1,-1))),
+                                                                                                  new MorphologyExTab.CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
+                                                                                                  new MorphologyExTab.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, new Size(7, 7), -1,-1))),
             prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, new    ThresholdTab.Params(150, 350, CvThresholdTypes.THRESH_TRUNC, false, false)),
             prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, new        CannyTab.Params(5, 5, 3, false)),
             prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, new FindContoursTab.Params(CvRetrievalModes.RETR_EXTERNAL,
-                                                                                                    CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
-                                                                                                    FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000))
+                                                                                                  CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
+                                                                                                  FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000))
         );
         for (UnaryOperator<ITab<?>> fTab : nextTabs) {
             ITab<?> next = fTab.apply(prevTab);
@@ -355,8 +369,8 @@ public class MainApp {
         for (int i = 0; i < tabs.size(); ++i) {
             PipelineItem item = new PipelineItem();
             item.pos = i;
-            item.tabClass = tabs.get(i).getClass();
-            item.params   = tabs.get(i).getParams();
+            item.tabName = tabs.get(i).getTabFullName();
+            item.params  = tabs.get(i).getParams();
             pipeline.add(item);
         }
 
@@ -379,9 +393,29 @@ public class MainApp {
     }
 
     private void onLoadPipeline() {
-        // TODO Auto-generated method stub
+        File imgFile = ((FirstTab)tabs.get(0)).getParams().imageFile;
+        if (imgFile == null)
+            return;
 
-    }
+        File jsonFile = new File(imgFile.getAbsolutePath() + ".json");
+        jsonFile = UiHelper.loadFiltersPipelineFile(frame, jsonFile);
+        if (jsonFile == null)
+            return; // aborted
+        if (!jsonFile.exists()) {
+            logger.error("File not found: {}", jsonFile);
+            return;
+        }
+
+        List<PipelineItem> pipeline;
+        try (FileInputStream fis = new FileInputStream(jsonFile)) {
+            pipeline = JsonHelper.fromJson(fis, new TypeReference<List<PipelineItem>>() {});
+            logger.info("Pipeline loaded from file {}", jsonFile);
+        } catch (Exception ex) {
+            logger.error("Can`t read file '{}': {}", jsonFile, ex);
+            onError("Can`t read file '" + jsonFile + "': " + ex, frame);
+            return;
+        }
+}
 
     public static void main(String[] args) {
         try {

@@ -17,6 +17,7 @@ import ksn.imgusage.tabs.ITabParams;
 public class RotateTab extends CatalanoFilterTab<RotateTab.Params> {
 
     public static final String TAB_NAME = Rotate.class.getSimpleName();
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Rotate image";
 
     private static final double MIN =   0;
@@ -26,7 +27,15 @@ public class RotateTab extends CatalanoFilterTab<RotateTab.Params> {
         public double angle;
         public boolean keepSize;
         public Rotate.Algorithm algorithm;
-        public Params(double angle, boolean keepSize, Rotate.Algorithm algorithm) { this.angle = angle; this.keepSize = keepSize; this.algorithm = algorithm; }
+
+        public Params() {}
+
+        public Params(double angle, boolean keepSize, Rotate.Algorithm algorithm) {
+            this.angle = angle;
+            this.keepSize = keepSize;
+            this.algorithm = algorithm;
+        }
+
         @Override
         public String toString() {
             return String.format(Locale.US,
@@ -52,6 +61,8 @@ public class RotateTab extends CatalanoFilterTab<RotateTab.Params> {
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

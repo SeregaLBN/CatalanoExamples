@@ -15,6 +15,7 @@ import ksn.imgusage.tabs.ITabParams;
 public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrectionTab.Params> {
 
     public static final String TAB_NAME = BrightnessCorrection.class.getSimpleName();
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Brightness adjusting in RGB color space";
 
     private static final int MIN = -255;
@@ -22,7 +23,11 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
 
     public static class Params implements ITabParams {
         public int adjust;
+
+        public Params() {}
+
         public Params(int adjustValue) { this.adjust = adjustValue; }
+
         @Override
         public String toString() { return "{ adjust=" + adjust + " }"; }
     }
@@ -42,6 +47,8 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

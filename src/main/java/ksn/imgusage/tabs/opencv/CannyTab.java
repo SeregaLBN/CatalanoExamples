@@ -20,6 +20,7 @@ import ksn.imgusage.tabs.ITabParams;
 public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
 
     public static final String TAB_NAME = "Canny";
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Finds edges in an image using the Canny algorithm";
 
     private static final double MIN_THRESHOLD     =   0;
@@ -32,6 +33,9 @@ public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
         public double threshold2;
         public int apertureSize;
         public boolean l2gradient;
+
+        public Params() {}
+
         public Params(double threshold1, double threshold2, int apertureSize, boolean l2gradient) {
             this.threshold1 = threshold1;
             this.threshold2 = threshold2;
@@ -59,6 +63,8 @@ public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

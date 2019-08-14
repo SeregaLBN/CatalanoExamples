@@ -27,6 +27,7 @@ import ksn.imgusage.type.Size;
 public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
 
     public static final String TAB_NAME = "MorphologyEx";
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Performs advanced morphological transformations";
 
     private static final int MIN_ROWS = 1;
@@ -65,6 +66,8 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
         public double scalarVal2;
         public double scalarVal3;
 
+        public CtorParams() {}
+
         public CtorParams(int rows, int cols, CvArrayType type, double scalarVal0, double scalarVal1, double scalarVal2, double scalarVal3) {
             this.rows = rows;
             this.cols = cols;
@@ -93,6 +96,8 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
         public int anchorX;
         public int anchorY;
 
+        public StructuringElementParams() {}
+
         public StructuringElementParams(CvMorphShapes shape, Size kernelSize, int anchorX, int anchorY) {
             this.shape      = shape;
             this.kernelSize = kernelSize;
@@ -115,6 +120,8 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
         public EMatSource               kernelSource;
         public CtorParams               kernel1;
         public StructuringElementParams kernel2;
+
+        public Params() {}
 
         public Params(CvMorphTypes morphologicalOperation,
                       EMatSource               kernelSource,
@@ -157,6 +164,8 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

@@ -22,6 +22,7 @@ import ksn.imgusage.tabs.opencv.type.CvThresholdTypes;
 public class ThresholdTab extends OpencvFilterTab<ThresholdTab.Params> {
 
     public static final String TAB_NAME = "Threshold";
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Applies a fixed-level threshold to each array element";
 
     private static final double MIN_THRESH =   0;
@@ -35,6 +36,9 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTab.Params> {
         public CvThresholdTypes  threshType;
         public boolean           useOtsuMask;
         public boolean           useTriangleMask;
+
+        public Params() {}
+
         public Params(double thresh, double maxval, CvThresholdTypes threshType, boolean useOtsuMask, boolean useTriangleMask) {
             switch (threshType) {
             case THRESH_BINARY    :
@@ -84,6 +88,8 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTab.Params> {
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

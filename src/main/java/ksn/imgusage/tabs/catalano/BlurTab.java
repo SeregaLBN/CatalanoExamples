@@ -14,15 +14,26 @@ import ksn.imgusage.tabs.ITabParams;
 public class BlurTab extends CatalanoFilterTab<ITabParams> {
 
     public static final String TAB_NAME = Blur.class.getSimpleName();
+    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "Blur filter";
 
+    public static class Params implements ITabParams {
+        // none
+    }
+
     public BlurTab(ITabHandler tabHandler, ITab<?> source) {
+        this(tabHandler, source, null);
+    }
+
+    public BlurTab(ITabHandler tabHandler, ITab<?> source, Params params) {
         super(tabHandler, source, false);
         makeTab();
     }
 
     @Override
     public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

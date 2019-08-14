@@ -23,7 +23,7 @@ public class SelectFilterDialog {
         this.owner = owner;
     }
 
-    public String getFilterTabName() {
+    public String getFilterTabFullName() {
         logger.trace("getFilterTabName");
 
         JDialog dlg = new JDialog(owner, "Select filter...", true);
@@ -59,14 +59,14 @@ public class SelectFilterDialog {
 
 
         JButton btnOk = new JButton("Ok");
-        String[] filterTabName = { null };
+        String[] filterTabFullName = { null };
         btnOk.addActionListener(ev -> {
             dlg.dispose();
 
             ButtonModel bm = radioGroup.getSelection();
             if (bm == null)
                 return;
-            filterTabName[0] = bm.getActionCommand();
+            filterTabFullName[0] = bm.getActionCommand();
         });
 
         Box boxCenter = Box.createVerticalBox();
@@ -81,7 +81,7 @@ public class SelectFilterDialog {
         dlg.setLocationRelativeTo(owner);
         dlg.setVisible(true);
 
-        return filterTabName[0];
+        return filterTabFullName[0];
     }
 
 }

@@ -30,8 +30,6 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         this.source = source;
     }
 
-    public abstract String getTabName();
-
     protected BufferedImage getSourceImage() {
         if (source == null)
             return null;

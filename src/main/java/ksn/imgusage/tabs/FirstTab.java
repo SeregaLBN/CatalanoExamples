@@ -28,6 +28,8 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         /** padding of Region Of Interest */
         public Padding boundOfRoi;
 
+        public Params() {}
+
         public Params(
             File    imageFile,
             boolean useGray,
@@ -58,6 +60,9 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     }
 
     public static final File DEFAULT_IMAGE = Paths.get("./exampleImages", "1024px-VolodimirHillAndDnieper.jpg").toFile();
+
+    public static final String TAB_NAME      = "Original";
+    public static final String TAB_FULL_NAME = "FirstTab";
 
     private static final int MIN_IMAGE_WIDTH  = 10;
     private static final int MIN_IMAGE_HEIGHT = 10;
@@ -101,7 +106,9 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     }
 
     @Override
-    public String getTabName() { return "Original"; }
+    public String getTabName() { return TAB_NAME; }
+    @Override
+    public String getTabFullName() { return TAB_FULL_NAME; }
 
     @Override
     protected BufferedImage getSourceImage() {
