@@ -1,7 +1,5 @@
 package ksn.imgusage.utils;
 
-import java.awt.Component;
-import java.awt.Dimension;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -16,25 +14,6 @@ import org.slf4j.Logger;
 
 public final class UiHelper {
     private UiHelper() {}
-
-    public static void makeSameWidth(Component[] components) {
-        int maxSizePos = findMaximumPreferredWidthPosition(components);
-        int maxWidth = components[maxSizePos].getPreferredSize().width;
-
-        for (Component component : components) {
-            Dimension dim;
-            dim = component.getPreferredSize(); dim.width = maxWidth; component.setPreferredSize(dim);
-            dim = component.getMinimumSize  (); dim.width = maxWidth; component.setMinimumSize  (dim);
-            dim = component.getMaximumSize  (); dim.width = maxWidth; component.setMaximumSize  (dim);
-        }
-    }
-    private static int findMaximumPreferredWidthPosition(Component[] array) {
-        int pos = 0;
-        for (int i=1; i<array.length; i++)
-            if (array[i].getPreferredSize().width > array[pos].getPreferredSize().width)
-                pos = i;
-        return pos;
-    }
 
     public static File selectImageFile(File oldFile) {
         JFileChooser fileChooser = new JFileChooser();

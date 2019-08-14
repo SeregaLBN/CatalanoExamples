@@ -22,7 +22,6 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected final ITabHandler tabHandler;
     protected ITab<?> source;
     protected BufferedImage image;
-    protected boolean addRemoveFilterButton = true;
     private Runnable imagePanelInvalidate;
     private Timer timer;
 
@@ -93,6 +92,28 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         resetImage();
     }
 
+    protected final JButton makeButtonAddFilter() {
+        JButton btnAddFilter = new JButton("Add filter");
+        btnAddFilter.addActionListener(ev -> tabHandler.onAddNewFilter());
+        return btnAddFilter;
+    }
+    protected final JButton makeButtonRemoveFilter() {
+        JButton btnRemoveFilter = new JButton("Remove filter");
+        btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(this));
+        return btnRemoveFilter;
+    }
+
+    protected Component makeButtonsDownPanel() {
+        Box box4Buttons = Box.createHorizontalBox();
+        box4Buttons.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+
+        box4Buttons.add(makeButtonAddFilter());
+        box4Buttons.add(Box.createHorizontalStrut(6));
+        box4Buttons.add(makeButtonRemoveFilter());
+
+        return box4Buttons;
+    }
+
     protected final void makeTab() {
         JPanel imagePanel = buildImagePanel(tabHandler);
         JPanel leftPanel = new JPanel();
@@ -103,32 +124,9 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                 makeOptions(box4Options);
             }
 
-            Box boxBottom = Box.createHorizontalBox();
-            { // fill boxBottomLeft
-                boxBottom.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
-
-                JButton btnAddFilter = new JButton("Add filter");
-                btnAddFilter.addActionListener(ev -> tabHandler.onAddNewFilter());
-                boxBottom.add(btnAddFilter);
-
-                boxBottom.add(Box.createHorizontalStrut(6));
-
-                if (addRemoveFilterButton) {
-                    JButton btnRemoveFilter = new JButton("Remove filter");
-                    btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(this));
-                    boxBottom.add(btnRemoveFilter);
-//                    UiHelper.makeSameWidth(new Component[] { btnAddFilter, btnRemoveFilter });
-                } else {
-                    JButton btnCancel = new JButton("Cancel");
-                    btnCancel.addActionListener(ev -> tabHandler.onCancel());
-                    boxBottom.add(btnCancel);
-//                    UiHelper.makeSameWidth(new Component[] { btnAddFilter, btnCancel });
-                }
-            }
-
             leftPanel.setLayout(new BorderLayout());
             leftPanel.add(box4Options, BorderLayout.CENTER);
-            leftPanel.add(boxBottom, BorderLayout.SOUTH);
+            leftPanel.add(makeButtonsDownPanel(), BorderLayout.SOUTH);
             leftPanel.setMinimumSize(new Dimension(WIDTH_LEFT_PANEL, 200));
             leftPanel.setPreferredSize(new Dimension(WIDTH_LEFT_PANEL, -1));
         }

@@ -84,7 +84,6 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     }
     public FirstTab(ITabHandler tabHandler, Params params) {
         super(tabHandler, null);
-        this.addRemoveFilterButton = false;
         if (params.keepToSize.width < MIN_IMAGE_WIDTH)
             params.keepToSize.width = MAX_IMAGE_WIDTH;
         if (params.keepToSize.height < MIN_IMAGE_HEIGHT)
@@ -280,6 +279,24 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         }
     }
 
+    protected final JButton makeButtonCancel() {
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener(ev -> tabHandler.onCancel());
+        return btnCancel;
+    }
+
+    @Override
+    protected Component makeButtonsDownPanel() {
+        Box box4Buttons = Box.createHorizontalBox();
+        box4Buttons.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+
+        box4Buttons.add(makeButtonAddFilter());
+        box4Buttons.add(Box.createHorizontalStrut(6));
+        box4Buttons.add(makeButtonCancel());
+
+        return box4Buttons;
+    }
+
     @Override
     protected void makeOptions(Box box4Options) {
         JButton btnLoadImage = new JButton("Load image...");
@@ -358,8 +375,6 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         box4Options.add(panelImageSize);
         box4Options.add(Box.createVerticalStrut(2));
         box4Options.add(boxOfRoi);
-
-        UiHelper.makeSameWidth(new Component[] { btnLoadImage, btnAsGray, btnScale });
 
         onCheckKeepAspectRationByWidth();
 
