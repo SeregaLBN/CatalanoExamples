@@ -1,5 +1,6 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.util.Locale;
 
@@ -61,7 +62,10 @@ public class RotateTab extends CatalanoFilterTab<RotateTab.Params> {
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderDoubleModel modelAngle = new SliderDoubleModel(params.angle, 0, MIN, MAX);
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
@@ -109,6 +113,8 @@ public class RotateTab extends CatalanoFilterTab<RotateTab.Params> {
             params.angle = modelAngle.getValue();
             resetImage();
         });
+
+        return box4Options;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.awt.Component;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 
@@ -55,7 +57,10 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Par
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderIntModel modelMin = new SliderIntModel(params.min, 0, MIN, MAX);
         SliderIntModel modelMax = new SliderIntModel(params.max, 0, MIN, MAX);
 
@@ -84,6 +89,8 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Par
                 modelMin.setValue(params.max);
             resetImage();
         });
+
+        return box4Options;
     }
 
     @Override

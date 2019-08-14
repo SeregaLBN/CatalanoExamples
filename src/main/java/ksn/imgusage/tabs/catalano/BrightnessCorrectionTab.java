@@ -1,5 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.awt.Component;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 
@@ -48,7 +50,10 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderIntModel modelAdjust = new SliderIntModel(params.adjust, 0, MIN, MAX);
 
         Box boxOptions = Box.createHorizontalBox();
@@ -65,6 +70,8 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
             params.adjust = modelAdjust.getValue();
             resetImage();
         });
+
+        return box4Options;
     }
 
     @Override

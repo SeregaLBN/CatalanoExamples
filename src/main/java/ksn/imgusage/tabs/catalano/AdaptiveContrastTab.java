@@ -1,5 +1,6 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.awt.Component;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
@@ -87,7 +88,10 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.P
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderIntModel    modelWinSize = new SliderIntModel   (params.winSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
         SliderDoubleModel modelK1      = new SliderDoubleModel(params.k1     , 0, MIN_K1         , MAX_K1);
         SliderDoubleModel modelK2      = new SliderDoubleModel(params.k2     , 0, MIN_K2         , MAX_K2);
@@ -140,6 +144,8 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.P
                 modelMinGain.setValue(params.maxGain);
             resetImage();
         });
+
+        return box4Options;
     }
 
     @Override

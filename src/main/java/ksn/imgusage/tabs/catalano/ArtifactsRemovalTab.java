@@ -1,5 +1,7 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.awt.Component;
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 
@@ -50,7 +52,10 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.P
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderIntModel modelWinSize = new SliderIntModel(params.windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
 
         Box boxOptions = Box.createHorizontalBox();
@@ -67,6 +72,8 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.P
             params.windowSize = modelWinSize.getValue();
             resetImage();
         });
+
+        return box4Options;
     }
 
     @Override

@@ -103,7 +103,11 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return btnRemoveFilter;
     }
 
-    protected Component makeButtonsDownPanel() {
+    protected Component makeUpButtons() {
+        return null;
+    }
+    protected abstract Component makeOptions();
+    protected Component makeDownButtons() {
         Box box4Buttons = Box.createHorizontalBox();
         box4Buttons.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
 
@@ -118,24 +122,25 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         JPanel imagePanel = buildImagePanel(tabHandler);
         JPanel leftPanel = new JPanel();
         { // fill leftPanel
-            Box box4Options = Box.createVerticalBox();
-            { // fill box4Options
-                box4Options.setBorder(BorderFactory.createTitledBorder(""));
-                makeOptions(box4Options);
-            }
-
             leftPanel.setLayout(new BorderLayout());
-            leftPanel.add(box4Options, BorderLayout.CENTER);
-            leftPanel.add(makeButtonsDownPanel(), BorderLayout.SOUTH);
-            leftPanel.setMinimumSize(new Dimension(WIDTH_LEFT_PANEL, 200));
+
+            Component upButtons = makeUpButtons();
+            if (upButtons != null)
+                leftPanel.add(upButtons    , BorderLayout.NORTH);
+            leftPanel.add(makeOptions()    , BorderLayout.CENTER);
+            leftPanel.add(makeDownButtons(), BorderLayout.SOUTH);
+
+            leftPanel.setMinimumSize  (new Dimension(WIDTH_LEFT_PANEL, 200));
             leftPanel.setPreferredSize(new Dimension(WIDTH_LEFT_PANEL, -1));
         }
 
         { // make root tab panel
             JPanel panel = new JPanel();
             panel.setLayout(new BorderLayout());
+
             panel.add(imagePanel, BorderLayout.CENTER);
-            panel.add(leftPanel, BorderLayout.EAST);
+            panel.add(leftPanel , BorderLayout.EAST);
+
             JTabbedPane tabPane = tabHandler.getTabPanel();
             tabPane.addTab(getTabName(), panel);
             tabPane.setSelectedIndex(tabPane.getTabCount() - 1);
@@ -162,8 +167,6 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         imagePanelInvalidate = imagePanel::repaint;
         return imagePanel;
     }
-
-    protected abstract void makeOptions(Box box4Options);
 
     protected static Container makeSliderVert(ISliderModel<?> model, String title, String tip) {
         JLabel labTitle = new JLabel(title);

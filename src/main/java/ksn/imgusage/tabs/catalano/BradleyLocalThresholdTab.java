@@ -1,5 +1,6 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.awt.Component;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
@@ -67,7 +68,10 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab<BradleyLocalThre
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderIntModel    modelWindowSize          = new SliderIntModel   (params.windowSize         , 0, MIN_WINDOW_SIZE          , MAX_WINDOW_SIZE);
         SliderDoubleModel modelPixelBrightnessDiff = new SliderDoubleModel(params.pixelBrightnessDiff, 0, MIN_PIXEL_BRIGHTNESS_DIFF, MAX_PIXEL_BRIGHTNESS_DIFF);
 
@@ -92,6 +96,8 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab<BradleyLocalThre
             params.pixelBrightnessDiff = modelPixelBrightnessDiff.getValue();
             resetImage();
         });
+
+        return box4Options;
     }
 
     @Override

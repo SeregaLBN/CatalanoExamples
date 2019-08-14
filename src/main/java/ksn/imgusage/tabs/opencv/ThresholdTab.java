@@ -98,7 +98,10 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTab.Params> {
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderDoubleModel modelThresh = new SliderDoubleModel(params.thresh, 0, MIN_THRESH, MAX_THRESH);
         SliderDoubleModel modelMaxVal = new SliderDoubleModel(params.maxVal, 0, MIN_MAXVAL, MAX_MAXVAL);
 
@@ -210,6 +213,8 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTab.Params> {
             params.maxVal = modelMaxVal.getValue();
             resetImage();
         });
+
+        return box4Options;
     }
 
     @Override

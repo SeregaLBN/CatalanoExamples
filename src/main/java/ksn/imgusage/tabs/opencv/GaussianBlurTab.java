@@ -1,5 +1,6 @@
 package ksn.imgusage.tabs.opencv;
 
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -85,7 +86,10 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTab.Params> {
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderIntModel modelKernelSizeW = new    SliderIntModel(params.kernelSize.width , 0, MIN_KSIZE, MAX_KSIZE);
         SliderIntModel modelKernelSizeH = new    SliderIntModel(params.kernelSize.height, 0, MIN_KSIZE, MAX_KSIZE);
         SliderDoubleModel modelSigmaX   = new SliderDoubleModel(params.sigmaX, 0, MIN_SIGMA, MAX_SIGMA);
@@ -183,6 +187,8 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTab.Params> {
             params.sigmaY = modelSigmaY.getValue();
             resetImage();
         });
+
+        return box4Options;
     }
 
     private static int onlyZeroOrOdd(int value, int prevValue) {

@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.util.Locale;
 
@@ -76,7 +77,10 @@ public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderDoubleModel modelThreshold1   = new SliderDoubleModel(params.threshold1, 0, MIN_THRESHOLD, MAX_THRESHOLD);
         SliderDoubleModel modelThreshold2   = new SliderDoubleModel(params.threshold2, 0, MIN_THRESHOLD, MAX_THRESHOLD);
         SliderIntModel    modelApertureSize = new    SliderIntModel(params.apertureSize, 0, MIN_APERTURE_SIZE, MAX_APERTURE_SIZE);
@@ -131,6 +135,8 @@ public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
                 SwingUtilities.invokeLater(() -> modelApertureSize.setValue(valValid));
             }
         });
+
+        return box4Options;
     }
 
     private static int onlyOdd(int value, int prevValue) {

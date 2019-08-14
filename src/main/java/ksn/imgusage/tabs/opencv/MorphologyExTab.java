@@ -204,7 +204,10 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
         panel.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
@@ -285,6 +288,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
         }
 
         box4Options.add(panel);
+        return box4Options;
     }
 
     private void makeKernel1(JPanel panelCreateParams) {

@@ -1,5 +1,6 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.awt.Component;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
@@ -56,7 +57,10 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.P
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderIntModel    modelRadius            = new SliderIntModel   (params.radius           , 0, MIN_RADIUS            , MAX_RADIUS);
         SliderDoubleModel modelContrastThreshold = new SliderDoubleModel(params.contrastThreshold, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
 
@@ -81,6 +85,8 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.P
             params.contrastThreshold = modelContrastThreshold.getValue();
             resetImage();
         });
+
+        return box4Options;
     }
 
     @Override

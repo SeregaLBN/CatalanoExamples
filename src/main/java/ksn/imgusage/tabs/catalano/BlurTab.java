@@ -1,5 +1,8 @@
 package ksn.imgusage.tabs.catalano;
 
+import java.awt.Component;
+
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 
 import Catalano.Imaging.Filters.Blur;
@@ -27,8 +30,13 @@ public class BlurTab extends CatalanoFilterTab<ITabParams> {
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
-        // none
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
+        // none..
+
+        return box4Options;
     }
 
     @Override

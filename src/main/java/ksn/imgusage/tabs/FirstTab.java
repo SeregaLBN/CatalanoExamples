@@ -279,14 +279,65 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         }
     }
 
-    protected final JButton makeButtonCancel() {
+    private final JButton makeButtonCancel() {
         JButton btnCancel = new JButton("Cancel");
         btnCancel.addActionListener(ev -> tabHandler.onCancel());
         return btnCancel;
     }
 
+    private final JButton makeButtonLoadImage() {
+        JButton btnLoadImage = new JButton("Load image...");
+        btnLoadImage.addActionListener(ev -> {
+            logger.trace("onSelectImage");
+
+            File file = UiHelper.selectImageFile(latestImageDir);
+            if (!readImageFile(file))
+                return;
+
+            resetImage();
+        });
+        if (sourceImage == null)
+            SwingUtilities.invokeLater(btnLoadImage::doClick);
+
+        return btnLoadImage;
+    }
+
+    private final JCheckBox makeButtonUseGray() {
+        JCheckBox btnUseGray = new JCheckBox("Gray", params.useGray);
+        btnUseGray.addActionListener(ev -> {
+            params.useGray  = btnUseGray.isSelected();
+            resetImage();
+        });
+
+        return btnUseGray;
+    }
+
+    private final JCheckBox makeButtonUseScale() {
+        JCheckBox btnScale = new JCheckBox("Scale", params.useScale);
+        btnScale.addActionListener(ev -> {
+            params.useScale = btnScale.isSelected();
+            resetImage();
+        });
+
+        return btnScale;
+    }
+
     @Override
-    protected Component makeButtonsDownPanel() {
+    protected Component makeUpButtons() {
+        Box box4Buttons = Box.createVerticalBox();
+        box4Buttons.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+
+        box4Buttons.add(makeButtonLoadImage());
+        box4Buttons.add(Box.createVerticalStrut(2));
+        box4Buttons.add(makeButtonUseGray());
+        box4Buttons.add(Box.createVerticalStrut(2));
+        box4Buttons.add(makeButtonUseScale());
+
+        return box4Buttons;
+    }
+
+    @Override
+    protected Component makeDownButtons() {
         Box box4Buttons = Box.createHorizontalBox();
         box4Buttons.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
 
@@ -298,34 +349,9 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
-        JButton btnLoadImage = new JButton("Load image...");
-        btnLoadImage.addActionListener(ev -> {
-            logger.trace("onSelectImage");
-
-            File file = UiHelper.selectImageFile(latestImageDir);
-            if (!readImageFile(file))
-                return;
-
-            resetImage();
-        });
-        btnLoadImage.setAlignmentX(Component.LEFT_ALIGNMENT);
-        if (sourceImage == null)
-            SwingUtilities.invokeLater(btnLoadImage::doClick);
-
-        JCheckBox btnAsGray = new JCheckBox("Gray", params.useGray);
-        btnAsGray.addActionListener(ev -> {
-            params.useGray  = btnAsGray.isSelected();
-            resetImage();
-        });
-        btnAsGray.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        JCheckBox btnScale = new JCheckBox("Scale", params.useScale);
-        btnScale.addActionListener(ev -> {
-            params.useScale = btnScale.isSelected();
-            resetImage();
-        });
-        btnScale.setAlignmentX(Component.LEFT_ALIGNMENT);
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
         JPanel panelImageSize = new JPanel();
         {
@@ -366,12 +392,6 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
             boxOfRoi.add(Box.createHorizontalStrut(8));
         }
 
-        box4Options.add(btnLoadImage);
-        box4Options.add(Box.createVerticalStrut(6));
-        box4Options.add(btnAsGray);
-        box4Options.add(Box.createVerticalStrut(2));
-        box4Options.add(btnScale);
-        box4Options.add(Box.createVerticalStrut(2));
         box4Options.add(panelImageSize);
         box4Options.add(Box.createVerticalStrut(2));
         box4Options.add(boxOfRoi);
@@ -419,6 +439,8 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
                 SwingUtilities.invokeLater(() -> modelPadTop.setValue(sourceImage.getHeight() - 1 - modelPadBottom.getValue()) );
             resetImage();
         });
+
+        return box4Options;
     }
 
     private boolean lockCheckKeepAspectRation;

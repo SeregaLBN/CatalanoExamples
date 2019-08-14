@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -178,7 +179,10 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
     }
 
     @Override
-    protected void makeOptions(Box box4Options) {
+    protected Component makeOptions() {
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
         SliderIntModel modelMinLimitContoursW = new SliderIntModel(params.minLimitContours.width , 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
         SliderIntModel modelMinLimitContoursH = new SliderIntModel(params.minLimitContours.height, 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
         SliderIntModel modelMaxContourArea    = new SliderIntModel(params.maxContourArea, 0, MIN_MAX_CONTOUR_AREA, MAX_MAX_CONTOUR_AREA);
@@ -294,6 +298,8 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
             params.maxContourArea = modelMaxContourArea.getValue();
             resetImage();
         });
+
+        return box4Options;
     }
 
     private Box boxDrawContoursParams;
