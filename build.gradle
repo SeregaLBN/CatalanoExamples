@@ -45,6 +45,7 @@ jar {
 dependencies {
     compile 'org.slf4j:slf4j-simple:1.7.26'
     compile 'org.openpnp:opencv:3.4.2-1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.9.3'
 
     if (project.file('./libs/Catalano.Core.jar' ).exists())
         compile name:       'Catalano.Core'

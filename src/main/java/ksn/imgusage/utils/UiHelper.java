@@ -66,12 +66,12 @@ public final class UiHelper {
         return null;
     }
 
-    public static File saveFiltersPipelineFile(Component parent, File currentDir) {
+    public static File saveFiltersPipelineFile(Component parent, File defaultFileName) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.addChoosableFileFilter(new FiltersPipelineFilter());
         fileChooser.setAcceptAllFileFilterUsed(false);
-        if (currentDir != null)
-            fileChooser.setCurrentDirectory(currentDir);
+        if (defaultFileName != null)
+            fileChooser.setCurrentDirectory(defaultFileName);
 
         int option = fileChooser.showSaveDialog(parent);
         if (option == JFileChooser.APPROVE_OPTION)

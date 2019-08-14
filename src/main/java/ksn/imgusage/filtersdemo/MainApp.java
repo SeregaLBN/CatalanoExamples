@@ -8,7 +8,10 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.Constructor;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +37,7 @@ import ksn.imgusage.tabs.opencv.type.*;
 import ksn.imgusage.type.Padding;
 import ksn.imgusage.type.PipelineItem;
 import ksn.imgusage.type.Size;
+import ksn.imgusage.utils.JsonHelper;
 import ksn.imgusage.utils.MapFilterToTab;
 import ksn.imgusage.utils.SelectFilterDialog;
 import ksn.imgusage.utils.UiHelper;
@@ -135,7 +139,7 @@ public class MainApp {
             @Override public void onRemoveFilter(ITab<?> tab)                          {        MainApp.this.onRemoveFilter(tab); }
             @Override public void onCancel()                                           {        MainApp.this.onCancel(); }
             @Override public void onImagePanelPaint(JPanel imagePanel, Graphics2D g)   {        MainApp.this.onImagePanelPaint(imagePanel, g); }
-            @Override public void onError(String message, ITab<?> tab, Component from) {        MainApp.this.onErrorInTab(message, tab, from); }
+            @Override public void onError(String message, ITab<?> tab, Component from) {        MainApp.this.onError(message, from); }
             @Override public void onSavePipeline()                                     {        MainApp.this.onSavePipeline(); }
             @Override public void onLoadPipeline()                                     {        MainApp.this.onLoadPipeline(); }
         };
@@ -277,14 +281,13 @@ public class MainApp {
         return prevTab;
     }
 
-    private void onErrorInTab(String message, ITab<?> tab, Component from) {
+    private void onError(String message, Component from) {
         if (from == null)
             from = frame.getRootPane();
 
         if (errorWindow == null) {
             JLabel errorLabel = new JLabel(message);
-            Window topLevelWin = SwingUtilities.getWindowAncestor(from);
-            errorWindow = new JWindow(topLevelWin);
+            errorWindow = new JWindow(frame);
             JPanel contentPane = (JPanel) errorWindow.getContentPane();
             contentPane.add(errorLabel);
             contentPane.setBackground(new Color(0xFA, 0xC5, 0xAF));
@@ -338,6 +341,16 @@ public class MainApp {
     }
 
     private void onSavePipeline() {
+        File imgFile = ((FirstTab)tabs.get(0)).getParams().imageFile;
+        if (imgFile == null)
+            return;
+
+        File jsonFile = new File(imgFile.getAbsolutePath() + ".json");
+        if (jsonFile.exists())
+            jsonFile = UiHelper.saveFiltersPipelineFile(frame, jsonFile);
+        if (jsonFile == null)
+            return; // aborted
+
         List<PipelineItem> pipeline = new ArrayList<>(tabs.size());
         for (int i = 0; i < tabs.size(); ++i) {
             PipelineItem item = new PipelineItem();
@@ -347,6 +360,22 @@ public class MainApp {
             pipeline.add(item);
         }
 
+        String json;
+        try {
+            json = JsonHelper.toJson(pipeline, true);
+        } catch (Exception ex) {
+            logger.error("Can`t convert to JSON: {}", ex);
+            onError("Can`t convert to JSON: " + ex, frame);
+            return;
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(jsonFile)) {
+            fos.write(json.getBytes(StandardCharsets.UTF_8));
+            logger.info("Pipeline saved to file {}", jsonFile);
+        } catch (Exception ex) {
+            logger.error("Can`t save file '{}': {}", jsonFile, ex);
+            onError("Can`t save file '" + jsonFile + "': " + ex, frame);
+        }
     }
 
     private void onLoadPipeline() {

@@ -88,10 +88,10 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
     /** for {@link EMatSource#STRUCTURING_ELEMENT} */
     public static class StructuringElementParams {
 
-        private CvMorphShapes shape;
-        private Size kernelSize;
-        private int anchorX;
-        private int anchorY;
+        public CvMorphShapes shape;
+        public Size kernelSize;
+        public int anchorX;
+        public int anchorY;
 
         public StructuringElementParams(CvMorphShapes shape, Size kernelSize, int anchorX, int anchorY) {
             this.shape      = shape;
