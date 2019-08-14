@@ -279,6 +279,20 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         }
     }
 
+    private final JButton makeButtonLoadPipeline() {
+        JButton btnLoad = new JButton("Load...");
+        btnLoad.setToolTipText("Load image pipeline tabs");
+        btnLoad.addActionListener(ev -> tabHandler.onLoadPipeline());
+        return btnLoad;
+    }
+
+    private final JButton makeButtonSavePipeline() {
+        JButton btnSave = new JButton("Save...");
+        btnSave.setToolTipText("Save current pipeline tabs for selected image");
+        btnSave.addActionListener(ev -> tabHandler.onSavePipeline());
+        return btnSave;
+    }
+
     private final JButton makeButtonCancel() {
         JButton btnCancel = new JButton("Cancel");
         btnCancel.addActionListener(ev -> tabHandler.onCancel());
@@ -290,7 +304,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         btnLoadImage.addActionListener(ev -> {
             logger.trace("onSelectImage");
 
-            File file = UiHelper.selectImageFile(latestImageDir);
+            File file = UiHelper.selectImageFile(btnLoadImage, latestImageDir);
             if (!readImageFile(file))
                 return;
 
@@ -338,12 +352,22 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
 
     @Override
     protected Component makeDownButtons() {
-        Box box4Buttons = Box.createHorizontalBox();
-        box4Buttons.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
+        Box boxUpButtons = Box.createHorizontalBox();
+        boxUpButtons.add(makeButtonLoadPipeline());
+        boxUpButtons.add(Box.createHorizontalStrut(6));
+        boxUpButtons.add(makeButtonSavePipeline());
 
-        box4Buttons.add(makeButtonAddFilter());
-        box4Buttons.add(Box.createHorizontalStrut(6));
-        box4Buttons.add(makeButtonCancel());
+        Box boxDownButtons = Box.createHorizontalBox();
+        boxDownButtons.add(makeButtonAddFilter());
+        boxDownButtons.add(Box.createHorizontalStrut(6));
+        boxDownButtons.add(makeButtonCancel());
+
+        Box box4Buttons = Box.createVerticalBox();
+        box4Buttons.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
+
+        box4Buttons.add(boxUpButtons);
+        box4Buttons.add(Box.createVerticalStrut(2));
+        box4Buttons.add(boxDownButtons);
 
         return box4Buttons;
     }

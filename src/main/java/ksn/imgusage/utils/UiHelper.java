@@ -1,5 +1,6 @@
 package ksn.imgusage.utils;
 
+import java.awt.Component;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -15,14 +16,14 @@ import org.slf4j.Logger;
 public final class UiHelper {
     private UiHelper() {}
 
-    public static File selectImageFile(File oldFile) {
+    public static File selectImageFile(Component parent, File currentDir) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.addChoosableFileFilter(new ImageFilter());
         fileChooser.setAcceptAllFileFilterUsed(false);
-        if (oldFile != null)
-            fileChooser.setCurrentDirectory(oldFile);
+        if (currentDir != null)
+            fileChooser.setCurrentDirectory(currentDir);
 
-        int option = fileChooser.showOpenDialog(null);
+        int option = fileChooser.showOpenDialog(parent);
         if (option == JFileChooser.APPROVE_OPTION)
             return fileChooser.getSelectedFile();
 
@@ -47,6 +48,54 @@ public final class UiHelper {
         @Override
         public String getDescription() {
             return "Image Only";
+        }
+    }
+
+
+    public static File loadFiltersPipelineFile(Component parent, File currentDir) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.addChoosableFileFilter(new FiltersPipelineFilter());
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        if (currentDir != null)
+            fileChooser.setCurrentDirectory(currentDir);
+
+        int option = fileChooser.showOpenDialog(parent);
+        if (option == JFileChooser.APPROVE_OPTION)
+            return fileChooser.getSelectedFile();
+
+        return null;
+    }
+
+    public static File saveFiltersPipelineFile(Component parent, File currentDir) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.addChoosableFileFilter(new FiltersPipelineFilter());
+        fileChooser.setAcceptAllFileFilterUsed(false);
+        if (currentDir != null)
+            fileChooser.setCurrentDirectory(currentDir);
+
+        int option = fileChooser.showSaveDialog(parent);
+        if (option == JFileChooser.APPROVE_OPTION)
+            return fileChooser.getSelectedFile();
+
+        return null;
+    }
+
+    private static class FiltersPipelineFilter extends FileFilter {
+        @Override
+        public boolean accept(File file) {
+            if (file.isDirectory())
+                return true;
+            String fileName = file.getName();
+            int pos = fileName.lastIndexOf('.');
+            if (pos < 0)
+                return false;
+            String ext = fileName.substring(pos + 1);
+            return ext.equalsIgnoreCase("json");
+        }
+
+        @Override
+        public String getDescription() {
+            return "JSON";
         }
     }
 

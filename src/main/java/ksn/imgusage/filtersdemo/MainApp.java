@@ -32,8 +32,11 @@ import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.tabs.opencv.MorphologyExTab.EMatSource;
 import ksn.imgusage.tabs.opencv.type.*;
 import ksn.imgusage.type.Padding;
+import ksn.imgusage.type.PipelineItem;
 import ksn.imgusage.type.Size;
-import ksn.imgusage.utils.*;
+import ksn.imgusage.utils.MapFilterToTab;
+import ksn.imgusage.utils.SelectFilterDialog;
+import ksn.imgusage.utils.UiHelper;
 
 public class MainApp {
 
@@ -126,21 +129,15 @@ public class MainApp {
 
     private ITabHandler getTabHandler() {
         return new ITabHandler() {
-            @Override
-            public JTabbedPane getTabPanel()                                 { return MainApp.this.getTabPanel(); }
-            @Override
-            public void onImageChanged(ITab<?> tab)                          { MainApp.this.onImageChanged(tab); }
-            @Override
-            public void onAddNewFilter()                                     { MainApp.this.onAddNewFilter(); }
-            @Override
-            public void onRemoveFilter(ITab<?> tab)                          { MainApp.this.onRemoveFilter(tab); }
-            @Override
-            public void onCancel()                                           { MainApp.this.onCancel(); }
-            @Override
-            public void onImagePanelPaint(JPanel imagePanel, Graphics2D g)   { MainApp.this.onImagePanelPaint(imagePanel, g); }
-            @Override
-            public void onError(String message, ITab<?> tab, Component from) { MainApp.this.onErrorInTab(message, tab, from);
-            }
+            @Override public JTabbedPane getTabPanel()                                 { return MainApp.this.getTabPanel(); }
+            @Override public void onImageChanged(ITab<?> tab)                          {        MainApp.this.onImageChanged(tab); }
+            @Override public void onAddNewFilter()                                     {        MainApp.this.onAddNewFilter(); }
+            @Override public void onRemoveFilter(ITab<?> tab)                          {        MainApp.this.onRemoveFilter(tab); }
+            @Override public void onCancel()                                           {        MainApp.this.onCancel(); }
+            @Override public void onImagePanelPaint(JPanel imagePanel, Graphics2D g)   {        MainApp.this.onImagePanelPaint(imagePanel, g); }
+            @Override public void onError(String message, ITab<?> tab, Component from) {        MainApp.this.onErrorInTab(message, tab, from); }
+            @Override public void onSavePipeline()                                     {        MainApp.this.onSavePipeline(); }
+            @Override public void onLoadPipeline()                                     {        MainApp.this.onLoadPipeline(); }
         };
     }
 
@@ -338,6 +335,23 @@ public class MainApp {
         }
 
         frame.setIconImage(img);
+    }
+
+    private void onSavePipeline() {
+        List<PipelineItem> pipeline = new ArrayList<>(tabs.size());
+        for (int i = 0; i < tabs.size(); ++i) {
+            PipelineItem item = new PipelineItem();
+            item.pos = i;
+            item.tabClass = tabs.get(i).getClass();
+            item.params   = tabs.get(i).getParams();
+            pipeline.add(item);
+        }
+
+    }
+
+    private void onLoadPipeline() {
+        // TODO Auto-generated method stub
+
     }
 
     public static void main(String[] args) {
