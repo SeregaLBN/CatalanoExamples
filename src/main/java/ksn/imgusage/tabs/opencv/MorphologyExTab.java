@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.util.Locale;
-import java.util.function.BiConsumer;
 
 import javax.swing.*;
 
@@ -14,13 +13,14 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.ISliderModel;
+import ksn.imgusage.model.SliderDoubleModel;
+import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
-import ksn.imgusage.tabs.opencv.type.IMatter;
 import ksn.imgusage.utils.Size;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f'>Performs advanced morphological transformations</a> */
@@ -137,8 +137,8 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
         }
     }
 
-    private JPanel panelKernel1; // for this.kernel1
-    private JPanel panelKernel2; // for this.kernel2
+    private JPanel panelKernel1; // for params.kernel1
+    private JPanel panelKernel2; // for params.kernel2
     private final Params params;
 
     public MorphologyExTab(ITabHandler tabHandler, ITab<?> source) {
@@ -212,12 +212,12 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
         {
             JComboBox<CvMorphTypes> comboBoxMorphOper = new JComboBox<>(CvMorphTypes.values());
             comboBoxMorphOper.setBorder(BorderFactory.createTitledBorder("Morphological operation"));
-            comboBoxMorphOper.setSelectedItem(morphologicalOperation);
+            comboBoxMorphOper.setSelectedItem(params.morphologicalOperation);
             comboBoxMorphOper.setAlignmentX(Component.LEFT_ALIGNMENT);
             comboBoxMorphOper.setToolTipText("Type of a morphological operation");
             comboBoxMorphOper.addActionListener(ev -> {
-                morphologicalOperation = (CvMorphTypes)comboBoxMorphOper.getSelectedItem();
-                logger.trace("Morphological operation changed to {}", this.morphologicalOperation);
+                params.morphologicalOperation = (CvMorphTypes)comboBoxMorphOper.getSelectedItem();
+                logger.trace("Morphological operation changed to {}", params.morphologicalOperation);
                 resetImage();
             });
             panel.add(comboBoxMorphOper, BorderLayout.NORTH);
@@ -239,12 +239,12 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
                 Box boxMatter = Box.createVerticalBox();
                 ButtonGroup radioGroup = new ButtonGroup();
 
-                JRadioButton radioBtn1 = new JRadioButton(IMatter.CtorParams.NAME, kernel instanceof IMatter.CtorParams);
+                JRadioButton radioBtn1 = new JRadioButton("Mat::new", params.kernelSource == EMatSource.CTOR);
                 radioBtn1.setToolTipText("The Kernel created directly through the constructor");
                 radioBtn1.addItemListener(ev -> {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        this.kernel = kernel1;
-                        logger.trace("Kernel type changed to {}", this.kernel.getClass().getSimpleName());
+                        params.kernelSource = EMatSource.CTOR;
+                        logger.trace("Kernel type changed to {}", params.kernelSource);
                         makeKernel1(panelCreateParams);
                         panelCreateParams.revalidate();
                         resetImage();
@@ -253,12 +253,12 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
                 boxMatter.add(radioBtn1);
                 radioGroup.add(radioBtn1);
 
-                JRadioButton radioBtn2 = new JRadioButton(IMatter.StructuringElementParams.NAME, kernel instanceof IMatter.StructuringElementParams);
+                JRadioButton radioBtn2 = new JRadioButton("Imgproc.getStructuringElement", params.kernelSource == EMatSource.STRUCTURING_ELEMENT);
                 radioBtn2.setToolTipText("The Kernel created using getStructuringElement.");
                 radioBtn2.addItemListener(ev -> {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        this.kernel = kernel2;
-                        logger.trace("Kernel type changed to {}", this.kernel.getClass().getSimpleName());
+                        params.kernelSource = EMatSource.STRUCTURING_ELEMENT;
+                        logger.trace("Kernel type changed to {}", params.kernelSource);
                         makeKernel2(panelCreateParams);
                         panelCreateParams.revalidate();
                         resetImage();
@@ -267,10 +267,10 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
                 boxMatter.add(radioBtn2);
                 radioGroup.add(radioBtn2);
 
-                if (kernel instanceof IMatter.CtorParams)
+                if (params.kernelSource == EMatSource.CTOR)
                     makeKernel1(panelCreateParams);
                 else
-                if (kernel instanceof IMatter.StructuringElementParams)
+                if (params.kernelSource == EMatSource.STRUCTURING_ELEMENT)
                     makeKernel2(panelCreateParams);
                 else
                     logger.error("Unknown kernel type! Support him!");
@@ -296,13 +296,20 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
             return;
         }
 
+        SliderIntModel    modelRows       = new SliderIntModel   (params.kernel1.rows, 0, MIN_ROWS, MAX_ROWS);
+        SliderIntModel    modelCols       = new SliderIntModel   (params.kernel1.cols, 0, MIN_COLS, MAX_COLS);
+        SliderDoubleModel modelScalarVal0 = new SliderDoubleModel(params.kernel1.scalarVal0, 0, MIN_SCALAR_VECTOR, MAX_SCALAR_VECTOR);
+        SliderDoubleModel modelScalarVal1 = new SliderDoubleModel(params.kernel1.scalarVal1, 0, MIN_SCALAR_VECTOR, MAX_SCALAR_VECTOR);
+        SliderDoubleModel modelScalarVal2 = new SliderDoubleModel(params.kernel1.scalarVal2, 0, MIN_SCALAR_VECTOR, MAX_SCALAR_VECTOR);
+        SliderDoubleModel modelScalarVal3 = new SliderDoubleModel(params.kernel1.scalarVal3, 0, MIN_SCALAR_VECTOR, MAX_SCALAR_VECTOR);
+
         Box boxKernelSize = Box.createHorizontalBox();
         boxKernelSize.setBorder(BorderFactory.createTitledBorder("Size"));
         boxKernelSize.setToolTipText("2D array size");
         boxKernelSize.add(Box.createHorizontalGlue());
-        boxKernelSize.add(makeSliderVert(kernel1.getModelRows(), "Rows", "Kernel size Width / number of rows"));
+        boxKernelSize.add(makeSliderVert(modelRows, "Rows", "Kernel size Width / number of rows"));
         boxKernelSize.add(Box.createHorizontalStrut(2));
-        boxKernelSize.add(makeSliderVert(kernel1.getModelCols(), "Cols", "Kernel size Height / number of columns"));
+        boxKernelSize.add(makeSliderVert(modelCols, "Cols", "Kernel size Height / number of columns"));
         boxKernelSize.add(Box.createHorizontalGlue());
 
         Box boxScalar = Box.createHorizontalBox();
@@ -310,21 +317,22 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
         boxScalar.setToolTipText("An optional value to initialize each matrix element with");
 
         boxScalar.add(Box.createHorizontalGlue());
-        boxScalar.add(makeSliderVert(kernel1.getModelScalarVal0(), "v0", null));
+        boxScalar.add(makeSliderVert(modelScalarVal0, "v0", null));
         boxScalar.add(Box.createHorizontalStrut(0));
-        boxScalar.add(makeSliderVert(kernel1.getModelScalarVal1(), "v1", null));
+        boxScalar.add(makeSliderVert(modelScalarVal1, "v1", null));
         boxScalar.add(Box.createHorizontalStrut(0));
-        boxScalar.add(makeSliderVert(kernel1.getModelScalarVal2(), "v2", null));
+        boxScalar.add(makeSliderVert(modelScalarVal2, "v2", null));
         boxScalar.add(Box.createHorizontalStrut(0));
-        boxScalar.add(makeSliderVert(kernel1.getModelScalarVal3(), "v3", null));
+        boxScalar.add(makeSliderVert(modelScalarVal3, "v3", null));
         boxScalar.add(Box.createHorizontalGlue());
 
         Box box4ArrayType = Box.createHorizontalBox();
         box4ArrayType.setBorder(BorderFactory.createTitledBorder("Array type"));
         JComboBox<CvArrayType> comboArrayType = new JComboBox<>(CvArrayType.values());
-        comboArrayType.setSelectedItem(kernel1.getType());
+        comboArrayType.setSelectedItem(params.kernel1.type);
         comboArrayType.addActionListener(ev -> {
-            kernel1.setType((CvArrayType)comboArrayType.getSelectedItem());
+            params.kernel1.type = (CvArrayType)comboArrayType.getSelectedItem();
+            logger.trace("kernel1 array type changed to {}", params.kernel1.type);
             resetImage();
         });
         box4ArrayType.add(comboArrayType);
@@ -338,23 +346,25 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
 
         panelKernel1 = new JPanel();
         panelKernel1.setLayout(new BorderLayout());
-        panelKernel1.setBorder(BorderFactory.createTitledBorder(IMatter.CtorParams.NAME));
+        panelKernel1.setBorder(BorderFactory.createTitledBorder("Mat::new"));
         panelKernel1.add(box4Sliders, BorderLayout.CENTER);
         panelKernel1.add(box4ArrayType, BorderLayout.SOUTH);
         panelCreateParams.add(panelKernel1);
 
+        addModelK1ChangeListener("kernel1.modelRows"      , modelRows      , () -> params.kernel1.rows       = modelRows      .getValue());
+        addModelK1ChangeListener("kernel1.modelCols"      , modelCols      , () -> params.kernel1.cols       = modelCols      .getValue());
+        addModelK1ChangeListener("kernel1.modelScalarVal0", modelScalarVal0, () -> params.kernel1.scalarVal0 = modelScalarVal0.getValue());
+        addModelK1ChangeListener("kernel1.modelScalarVal1", modelScalarVal1, () -> params.kernel1.scalarVal1 = modelScalarVal1.getValue());
+        addModelK1ChangeListener("kernel1.modelScalarVal2", modelScalarVal2, () -> params.kernel1.scalarVal2 = modelScalarVal2.getValue());
+        addModelK1ChangeListener("kernel1.modelScalarVal3", modelScalarVal3, () -> params.kernel1.scalarVal3 = modelScalarVal3.getValue());
+    }
 
-        BiConsumer<String, ISliderModel<?>> modelListener = (name, model) ->
-            model.getWrapped().addChangeListener(ev -> {
-                logger.trace("{}: value={}", name, model.getFormatedText());
-                resetImage();
-            });
-        modelListener.accept("kernel1ModelRows"      , kernel1.getModelRows());
-        modelListener.accept("kernel1ModelCols"      , kernel1.getModelCols());
-        modelListener.accept("kernel1ModelScalarVal0", kernel1.getModelScalarVal0());
-        modelListener.accept("kernel1ModelScalarVal1", kernel1.getModelScalarVal1());
-        modelListener.accept("kernel1ModelScalarVal2", kernel1.getModelScalarVal2());
-        modelListener.accept("kernel1ModelScalarVal3", kernel1.getModelScalarVal3());
+    private void addModelK1ChangeListener(String name, ISliderModel<? extends Number> model, Runnable applyValueParams) {
+        model.getWrapped().addChangeListener(ev -> {
+            logger.trace("{}: value={}", name, model.getFormatedText());
+            applyValueParams.run();
+            resetImage();
+        });
     }
 
     private void makeKernel2(JPanel panelCreateParams) {
@@ -366,17 +376,22 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
             return;
         }
 
+        SliderIntModel modelKernelSizeW = new SliderIntModel(params.kernel2.kernelSize.width, 0, MIN_KERNEL_SIZE, MAX_KERNEL_SIZE);
+        SliderIntModel modelKernelSizeH = new SliderIntModel(params.kernel2.kernelSize.height, 0, MIN_KERNEL_SIZE, MAX_KERNEL_SIZE);
+        SliderIntModel modelAnchorX     = new SliderIntModel(params.kernel2.anchorX, 0, MIN_ANCHOR, MAX_ANCHOR);
+        SliderIntModel modelAnchorY     = new SliderIntModel(params.kernel2.anchorY, 0, MIN_ANCHOR, MAX_ANCHOR);
+
         Box box4Shapes = Box.createHorizontalBox();
         box4Shapes.setBorder(BorderFactory.createTitledBorder("Shape"));
         Box box4Borders1 = Box.createVerticalBox();
         box4Borders1.setToolTipText("Shape of the structuring element");
         ButtonGroup radioGroup = new ButtonGroup();
         for (CvMorphShapes shape : CvMorphShapes.values()) {
-            JRadioButton radioBtnAlg = new JRadioButton(shape.name(), shape == this.kernel2.getShape());
+            JRadioButton radioBtnAlg = new JRadioButton(shape.name(), shape == params.kernel2.shape);
             radioBtnAlg.setToolTipText("Shape of the structuring element");
             radioBtnAlg.addItemListener(ev -> {
                 if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    this.kernel2.setShape(shape);
+                    params.kernel2.shape = shape;
                     logger.trace("Shape param changed to {}", shape);
                     resetImage();
                 }
@@ -392,18 +407,18 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
         boxKernelSize.setBorder(BorderFactory.createTitledBorder("Kernel size"));
         boxKernelSize.setToolTipText("Size of the structuring element");
         boxKernelSize.add(Box.createHorizontalGlue());
-        boxKernelSize.add(makeSliderVert(kernel2.getModelKernelSizeW(), "Width", "Kernel size Width"));
+        boxKernelSize.add(makeSliderVert(modelKernelSizeW, "Width", "Kernel size Width"));
         boxKernelSize.add(Box.createHorizontalStrut(2));
-        boxKernelSize.add(makeSliderVert(kernel2.getModelKernelSizeH(), "Height", "Kernel size Height"));
+        boxKernelSize.add(makeSliderVert(modelKernelSizeH, "Height", "Kernel size Height"));
         boxKernelSize.add(Box.createHorizontalGlue());
 
         Box boxAnchor = Box.createHorizontalBox();
         boxAnchor.setBorder(BorderFactory.createTitledBorder("Anchor"));
         boxAnchor.setToolTipText("Anchor position within the element. The default value (−1,−1) means that the anchor is at the center. Note that only the shape of a cross-shaped element depends on the anchor position. In other cases the anchor just regulates how much the result of the morphological operation is shifted.");
         boxAnchor.add(Box.createHorizontalGlue());
-        boxAnchor.add(makeSliderVert(kernel2.getModelAnchorX(), "X", "X direction"));
+        boxAnchor.add(makeSliderVert(modelAnchorX, "X", "X direction"));
         boxAnchor.add(Box.createHorizontalStrut(2));
-        boxAnchor.add(makeSliderVert(kernel2.getModelAnchorY(), "Y", "Y direction"));
+        boxAnchor.add(makeSliderVert(modelAnchorY, "Y", "Y direction"));
         boxAnchor.add(Box.createHorizontalGlue());
 
         Box box4Sliders = Box.createHorizontalBox();
@@ -415,35 +430,39 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {
 
         panelKernel2 = new JPanel();
         panelKernel2.setLayout(new BorderLayout());
-        panelKernel2.setBorder(BorderFactory.createTitledBorder(IMatter.StructuringElementParams.NAME));
+        panelKernel2.setBorder(BorderFactory.createTitledBorder("Imgproc.getStructuringElement"));
         panelKernel2.add(box4Shapes , BorderLayout.NORTH);
         panelKernel2.add(box4Sliders, BorderLayout.CENTER);
         panelCreateParams.add(panelKernel2);
 
-        addModelChangeListener("kernel2ModelKernelSizeW", kernel2.getModelKernelSizeW(),  true, kernel2.getModelAnchorX());
-        addModelChangeListener("kernel2ModelKernelSizeH", kernel2.getModelKernelSizeH(),  true, kernel2.getModelAnchorY());
-        addModelChangeListener("kernel2ModelAnchorX"    , kernel2.getModelAnchorX()    , false, kernel2.getModelKernelSizeW());
-        addModelChangeListener("kernel2ModelAnchorY"    , kernel2.getModelAnchorY()    , false, kernel2.getModelKernelSizeH());
+        addModelK2ChangeListener("kernel2.modelKernelSizeW", modelKernelSizeW,  true, modelAnchorX    , () -> params.kernel2.kernelSize.width  = modelKernelSizeW.getValue());
+        addModelK2ChangeListener("kernel2.modelKernelSizeH", modelKernelSizeH,  true, modelAnchorY    , () -> params.kernel2.kernelSize.height = modelKernelSizeH.getValue());
+        addModelK2ChangeListener("kernel2.modelAnchorX"    , modelAnchorX    , false, modelKernelSizeW, () -> params.kernel2.anchorX           = modelAnchorX    .getValue());
+        addModelK2ChangeListener("kernel2.modelAnchorY"    , modelAnchorY    , false, modelKernelSizeH, () -> params.kernel2.anchorY           = modelAnchorY    .getValue());
     }
 
-    private void addModelChangeListener(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck) {
+    private void addModelK2ChangeListener(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams) {
         model.getWrapped().addChangeListener(ev -> {
             logger.trace("{}: value={}", name, model.getFormatedText());
             Integer val = model.getValue();
             if (checkMax) {
                 if (val <= modelToCheck.getValue())
                     modelToCheck.setValue(val - 1);
+                else
+                    applyValueParams.run();
             } else {
                 if (val >= modelToCheck.getValue())
                     modelToCheck.setValue(val + 1);
+                else
+                    applyValueParams.run();
             }
             resetImage();
         });
     }
 
     @Override
-    public void printParams() {
-        logger.info("morphologicalOperation={}, kernel={}", morphologicalOperation, kernel);
+    public Params getParams() {
+        return params;
     }
 
 }

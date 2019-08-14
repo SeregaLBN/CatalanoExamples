@@ -29,6 +29,7 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.*;
+import ksn.imgusage.tabs.opencv.MorphologyExTab.EMatSource;
 import ksn.imgusage.tabs.opencv.type.*;
 import ksn.imgusage.utils.*;
 
@@ -111,7 +112,7 @@ public class MainApp {
     private void onClose() {
         frame.dispose();
         logger.warn("Good bay!\n\n");
-        tabs.forEach(tab -> logger.info("{}.params={{}}", tab.getClass().getName(), tab.getParams()));
+        tabs.forEach(tab -> logger.info("{}.params={}", tab.getClass().getName(), tab.getParams()));
     }
 
     private void onImageChanged(ITab<?> tab) {
@@ -227,8 +228,8 @@ public class MainApp {
         if (firstTab.getImage() != null) {
             ITab<?> prevTab = firstTab;
 
-          prevTab = examplePipelineCatalanoFilters(prevTab);
-//            prevTab = examplePipelineOpenCvFilters  (prevTab);
+          //prevTab = examplePipelineCatalanoFilters(prevTab);
+            prevTab = examplePipelineOpenCvFilters  (prevTab);
         }
 
         frame.pack();
@@ -260,10 +261,14 @@ public class MainApp {
         List<UnaryOperator<ITab<?>>> nextTabs = Arrays.asList(
           //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, new         AsIsTab.Params(false)),
             prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, new GaussianBlurTab.Params(new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT)),
-            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, CvMorphTypes.MORPH_CLOSE, new IMatter.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, 7,7, -1,-1)),
-            prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, 150, 350, CvThresholdTypes.THRESH_TRUNC, false, false),
+            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, new MorphologyExTab.Params(CvMorphTypes.MORPH_CLOSE, EMatSource.STRUCTURING_ELEMENT,
+                                                                                                    new MorphologyExTab.CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
+                                                                                                    new MorphologyExTab.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, new Size(7, 7), -1,-1))),
+            prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, new    ThresholdTab.Params(150, 350, CvThresholdTypes.THRESH_TRUNC, false, false)),
             prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, new        CannyTab.Params(5, 5, 3, false)),
-            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, new FindContoursTab.Params(CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE, FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000))
+            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, new FindContoursTab.Params(CvRetrievalModes.RETR_EXTERNAL,
+                                                                                                    CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
+                                                                                                    FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000))
         );
         for (UnaryOperator<ITab<?>> fTab : nextTabs) {
             ITab<?> next = fTab.apply(prevTab);
