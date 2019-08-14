@@ -174,9 +174,15 @@ public class MainApp {
             logger.error("Not supported filter {}", filterTabFullName);
         else
             try {
-                Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class, params.getClass());
-                ITab<?> lastTab = tabs.get(tabs.size() - 1);
-                tabs.add(ctor.newInstance(getTabHandler(), lastTab, params));
+                if (tabs.isEmpty()) {
+                    // only for FirstTab
+                    Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, params.getClass());
+                    tabs.add(ctor.newInstance(getTabHandler(), params));
+                } else {
+                    Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class, params.getClass());
+                    ITab<?> lastTab = tabs.get(tabs.size() - 1);
+                    tabs.add(ctor.newInstance(getTabHandler(), lastTab, params));
+                }
             } catch (Exception ex) {
                 logger.error(ex.toString());
             }
@@ -189,9 +195,11 @@ public class MainApp {
         tabPane.removeTabAt(pos);
         tabs.remove(tab);
         for (int i = pos; i < tabs.size(); ++i) {
-            ITab<?> prev = tabs.get(i-1);
-            ITab<?> curr = tabs.get(i);
-            curr.updateSource(prev);
+            if (i != 0) {
+                ITab<?> prev = tabs.get(i-1);
+                ITab<?> curr = tabs.get(i);
+                curr.updateSource(prev);
+            }
         }
     }
 
@@ -415,7 +423,21 @@ public class MainApp {
             onError("Can`t read file '" + jsonFile + "': " + ex, frame);
             return;
         }
-}
+
+        // remove all
+        do {
+            onRemoveFilter(tabs.get(0));
+        } while(!tabs.isEmpty());
+
+        pipeline.sort((p1, p2) -> {
+            if (p1.pos > p2.pos) return  1;
+            if (p1.pos < p2.pos) return -1;
+            return 0;
+        });
+
+        for (PipelineItem item : pipeline)
+            addTabByFilterFullName(item.tabName, item.params);
+    }
 
     public static void main(String[] args) {
         try {
