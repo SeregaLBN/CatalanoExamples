@@ -15,7 +15,7 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
-import ksn.imgusage.utils.Size;
+import ksn.imgusage.type.Size;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1'>Blurs an image using a Gaussian filter</a> */
 public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTab.Params> {

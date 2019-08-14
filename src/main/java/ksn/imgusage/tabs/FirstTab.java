@@ -11,9 +11,9 @@ import javax.swing.*;
 
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.model.SliderIntModel;
+import ksn.imgusage.type.Padding;
+import ksn.imgusage.type.Size;
 import ksn.imgusage.utils.ImgHelper;
-import ksn.imgusage.utils.Padding;
-import ksn.imgusage.utils.Size;
 import ksn.imgusage.utils.UiHelper;
 
 public class FirstTab extends BaseTab<FirstTab.Params> {

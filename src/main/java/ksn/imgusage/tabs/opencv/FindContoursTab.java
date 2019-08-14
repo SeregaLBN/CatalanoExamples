@@ -20,8 +20,8 @@ import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvContourApproximationModes;
 import ksn.imgusage.tabs.opencv.type.CvRetrievalModes;
+import ksn.imgusage.type.Size;
 import ksn.imgusage.utils.OpenCvHelper;
-import ksn.imgusage.utils.Size;
 
 /** <a href='https://docs.opencv.org/3.4.2/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a'>Finds contours in a binary image</a> */
 public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {

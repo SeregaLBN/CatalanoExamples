@@ -21,7 +21,7 @@ import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
-import ksn.imgusage.utils.Size;
+import ksn.imgusage.type.Size;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f'>Performs advanced morphological transformations</a> */
 public class MorphologyExTab extends OpencvFilterTab<MorphologyExTab.Params> {

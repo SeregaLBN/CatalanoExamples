@@ -31,6 +31,8 @@ import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.tabs.opencv.MorphologyExTab.EMatSource;
 import ksn.imgusage.tabs.opencv.type.*;
+import ksn.imgusage.type.Padding;
+import ksn.imgusage.type.Size;
 import ksn.imgusage.utils.*;
 
 public class MainApp {

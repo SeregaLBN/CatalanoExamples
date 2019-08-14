@@ -1,4 +1,4 @@
-package ksn.imgusage.utils;
+package ksn.imgusage.type;
 
 public class Padding {
 
