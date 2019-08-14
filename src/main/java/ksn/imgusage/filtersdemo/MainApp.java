@@ -368,8 +368,7 @@ public class MainApp {
             return;
 
         File jsonFile = new File(imgFile.getAbsolutePath() + ".json");
-        if (jsonFile.exists())
-            jsonFile = UiHelper.saveFiltersPipelineFile(frame, jsonFile);
+        jsonFile = UiHelper.saveFiltersPipelineFile(frame, jsonFile);
         if (jsonFile == null)
             return; // aborted
 

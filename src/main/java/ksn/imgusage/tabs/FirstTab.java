@@ -59,7 +59,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         }
     }
 
-    public static final File DEFAULT_IMAGE = Paths.get("./exampleImages", "1024px-VolodimirHillAndDnieper.jpg").toFile();
+    public static final File DEFAULT_IMAGE = Paths.get("./exampleImages", "VolodHill.jpg").toFile();
 
     public static final String TAB_NAME      = "Original";
     public static final String TAB_FULL_NAME = "FirstTab";
@@ -476,6 +476,9 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
 
     private boolean lockCheckKeepAspectRation;
     private void onCheckKeepAspectRationByWidth() {
+        if (sourceImage == null)
+            return;
+
         if (lockCheckKeepAspectRation)
             return;
         lockCheckKeepAspectRation = true;
@@ -495,6 +498,9 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     }
 
     private void onCheckKeepAspectRationByHeight() {
+        if (sourceImage == null)
+            return;
+
         if (lockCheckKeepAspectRation)
             return;
         lockCheckKeepAspectRation = true;

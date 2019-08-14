@@ -190,7 +190,7 @@ task downloadExampleImage() {
         // https://commons.wikimedia.org/wiki/File:%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0,_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG
         downloadByUrl(
             new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG/1024px-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG'),
-            project.file('./exampleImages/1024px-VolodimirHillAndDnieper.jpg'),
+            project.file('./exampleImages/VolodHill.jpg'),
             false)
     }
 }
