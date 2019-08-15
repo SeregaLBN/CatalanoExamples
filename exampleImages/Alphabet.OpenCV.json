@@ -1,0 +1,89 @@
+[ {
+  "tabName" : "FirstTab",
+  "pos" : 0,
+  "params" : {
+    "useGray" : true,
+    "useScale" : true,
+    "keepToSize" : {
+      "width" : 900,
+      "height" : 493
+    },
+    "useKeepAspectRatio" : true,
+    "boundOfRoi" : {
+      "left" : 0,
+      "top" : 0,
+      "right" : 0,
+      "bottom" : 0
+    },
+    "imageFile" : "Alphabet.eng.jpg"
+  }
+}, {
+  "tabName" : "OpenCV:GaussianBlur",
+  "pos" : 1,
+  "params" : {
+    "kernelSize" : {
+      "width" : 5,
+      "height" : 5
+    },
+    "sigmaX" : 15.0,
+    "sigmaY" : 15.0,
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:MorphologyEx",
+  "pos" : 2,
+  "params" : {
+    "morphologicalOperation" : "MORPH_CLOSE",
+    "kernelSource" : "STRUCTURING_ELEMENT",
+    "kernel1" : {
+      "rows" : 1,
+      "cols" : 1,
+      "type" : "CV_8UC1",
+      "scalarVal0" : 1.0,
+      "scalarVal1" : 0.0,
+      "scalarVal2" : 0.0,
+      "scalarVal3" : 0.0
+    },
+    "kernel2" : {
+      "shape" : "MORPH_ELLIPSE",
+      "kernelSize" : {
+        "width" : 5,
+        "height" : 5
+      },
+      "anchorX" : -1,
+      "anchorY" : -1
+    }
+  }
+}, {
+  "tabName" : "OpenCV:Threshold",
+  "pos" : 3,
+  "params" : {
+    "thresh" : 228.94,
+    "maxVal" : 281.25,
+    "threshType" : "THRESH_BINARY",
+    "useOtsuMask" : true,
+    "useTriangleMask" : false
+  }
+}, {
+  "tabName" : "OpenCV:Canny",
+  "pos" : 4,
+  "params" : {
+    "threshold1" : 5.0,
+    "threshold2" : 5.0,
+    "apertureSize" : 3,
+    "l2gradient" : false
+  }
+}, {
+  "tabName" : "OpenCV:FindContours",
+  "pos" : 5,
+  "params" : {
+    "mode" : "RETR_EXTERNAL",
+    "method" : "CHAIN_APPROX_SIMPLE",
+    "drawMethod" : "EXTERNAL_RECT",
+    "minLimitContours" : {
+      "width" : 10,
+      "height" : 35
+    },
+    "maxContourArea" : 1000
+  }
+} ]
