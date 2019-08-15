@@ -3,6 +3,7 @@ package ksn.imgusage.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ public class UnitTest {
         File base = new File("/var/data");
         File relative = SelectFilterDialog.getRelativePath(path, base);
         logger.info("relative={}", relative);
-        assertEquals("stuff/xyz.dat", relative.toString());
+        assertEquals(u("stuff/xyz.dat"), relative.toString());
 
 
         path = new File("/proj/java/ImageFilterExamples/exampleImages/image.jpg");
@@ -50,21 +51,25 @@ public class UnitTest {
         base = new File("/path/dir2/image.pipeline.json").getParentFile();
         relative = SelectFilterDialog.getRelativePath(path, base);
         logger.info("relative={}", relative);
-        assertEquals("../dir1/image.jpg", relative.toString());
+        assertEquals(u("../dir1/image.jpg"), relative.toString());
 
 
         path = new File("path/dir1/image.jpg");
         base = new File("path/dir2/image.pipeline.json").getParentFile();
         relative = SelectFilterDialog.getRelativePath(path, base);
         logger.info("relative={}", relative);
-        assertEquals("../dir1/image.jpg", relative.toString());
+        assertEquals(u("../dir1/image.jpg"), relative.toString());
 
 
         path = new File("dir1/image.jpg");
         base = new File("dir2/image.pipeline.json").getParentFile();
         relative = SelectFilterDialog.getRelativePath(path, base);
         logger.info("relative={}", relative);
-        assertEquals("../dir1/image.jpg", relative.toString());
+        assertEquals(u("../dir1/image.jpg"), relative.toString());
     }
 
+    private static String u(String path) {
+        return path.replace("/", File.separator);
+    }
+    
 }
