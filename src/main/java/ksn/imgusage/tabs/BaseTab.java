@@ -70,15 +70,14 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     public void resetImage() {
         if (image == null) {
             logger.trace("> resetImage: already reseted");
-            return;
+        } else {
+            logger.trace("> resetImage: reset...");
+            image = null;
         }
-
-        logger.trace("> resetImage: reset...");
-        image = null;
         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::repaintImage, logger);
     }
 
-    protected void repaintImage() {
+    private void repaintImage() {
         logger.trace("  repaintImage: repaint panel");
         if (imagePanelRepaint != null)
             imagePanelRepaint.run();
@@ -155,6 +154,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
+                logger.trace("ImagePanel.paintComponent");
                 tabHandler.onImagePanelPaint(tmp[0], (Graphics2D)g);
             }
         };

@@ -2,7 +2,6 @@
   "tabName" : "FirstTab",
   "pos" : 0,
   "params" : {
-    "imageFile" : "./VolodHill.jpg",
     "useGray" : false,
     "useScale" : true,
     "keepToSize" : {
@@ -15,7 +14,8 @@
       "top" : 0,
       "right" : 0,
       "bottom" : 0
-    }
+    },
+    "imageFile" : "VolodHill.jpg"
   }
 }, {
   "tabName" : "OpenCV:GaussianBlur",

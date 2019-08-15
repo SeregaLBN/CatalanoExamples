@@ -26,10 +26,23 @@ sourceSets {
             srcDir 'src/main/java'
         }
     }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+        resources {
+            srcDir 'src/test/resources'
+        }
+    }
 }
 
+test {
+    useJUnitPlatform()
+}
+
+
 mainClassName = 'ksn.imgusage.filtersdemo.MainApp'
-version = '0.0.2'
+version = '0.1.1'
 
 jar {
     manifest {
@@ -55,6 +68,9 @@ dependencies {
         compile name:       'Catalano.IO'
     if (project.file('./libs/Catalano.Image.jar').exists())
         compile name:       'Catalano.Image'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
+    testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.5.1'
 }
 
 

@@ -13,11 +13,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.UnaryOperator;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -27,18 +26,12 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
-import Catalano.Imaging.Filters.Rotate;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.catalano.*;
-import ksn.imgusage.tabs.opencv.*;
-import ksn.imgusage.tabs.opencv.MorphologyExTab.EMatSource;
-import ksn.imgusage.tabs.opencv.type.*;
-import ksn.imgusage.type.Padding;
+import ksn.imgusage.tabs.opencv.InitLib;
 import ksn.imgusage.type.PipelineItem;
-import ksn.imgusage.type.Size;
 import ksn.imgusage.utils.JsonHelper;
 import ksn.imgusage.utils.MapFilterToTab;
 import ksn.imgusage.utils.SelectFilterDialog;
@@ -57,12 +50,12 @@ public class MainApp {
 
     private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
     private static final String DEFAULT_CAPTION = "Demonstration of image filters";
+    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "VolodHill.OpenCV.json").toAbsolutePath().toFile();
 
     private final JFrame frame;
     private JTabbedPane tabPane;
     private BooleanSupplier isScale;
     private List<ITab<?>> tabs = new ArrayList<>();
-    private boolean useExamplePipeline = true;
     private JWindow errorWindow;
     private Timer timer;
 
@@ -71,13 +64,13 @@ public class MainApp {
         makeLogo();
         initialize();
 
-        // DEBUG
-        if (useExamplePipeline)
-            examplePipeline();
+        // DEBUG: use example pipeline
+        SwingUtilities.invokeLater(() -> loadPipeline(DEFAULT_PIPELINE));
     }
 
     private void initialize() {
         /**/
+        // exit by Esc
         Object keyBind = "CloseFrame";
         frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), keyBind);
         frame.getRootPane().getActionMap().put(keyBind, new AbstractAction() {
@@ -103,11 +96,9 @@ public class MainApp {
         tabPane.setBorder(BorderFactory.createEmptyBorder(8,8,2,8));
         tabPane.addChangeListener(this::onTabChanged);
 
-        if (!useExamplePipeline) {
-            FirstTab tab = new FirstTab(getTabHandler());
-            isScale = tab::isScale;
-            tabs.add(tab);
-        }
+        FirstTab tab = new FirstTab(getTabHandler());
+        isScale = tab::isScale;
+        tabs.add(tab);
 
         frame.getContentPane().add(tabPane, BorderLayout.CENTER);
     }
@@ -245,64 +236,6 @@ public class MainApp {
         logger.trace("onTabChanged");
     }
 
-    private void examplePipeline() {
-        FirstTab firstTab = new FirstTab(getTabHandler(), new FirstTab.Params(FirstTab.DEFAULT_IMAGE, false, true, new Size(300, 200), true, new Padding(0,0,0,0)));
-        isScale = firstTab::isScale;
-        tabs.add(firstTab);
-
-        if (firstTab.getImage() != null) {
-            ITab<?> prevTab = firstTab;
-
-          //prevTab = examplePipelineCatalanoFilters(prevTab);
-            prevTab = examplePipelineOpenCvFilters  (prevTab);
-        }
-
-        frame.pack();
-    }
-
-    private ITab<?> examplePipelineCatalanoFilters(ITab<?> prevTab) {
-        List<UnaryOperator<ITab<?>>> nextTabs = Arrays.asList(
-            // supported full colors
-            prevTab2 -> new  BrightnessCorrectionTab(getTabHandler(), prevTab2, new  BrightnessCorrectionTab.Params(1)),
-            prevTab2 -> new                  BlurTab(getTabHandler(), prevTab2),
-            prevTab2 -> new                RotateTab(getTabHandler(), prevTab2, new                RotateTab.Params(0.01, true, Rotate.Algorithm.BICUBIC)),
-
-            // only grayscale
-            prevTab2 -> new       FrequencyFilterTab(getTabHandler(), prevTab2, new       FrequencyFilterTab.Params(0, 200)),
-            prevTab2 -> new      AdaptiveContrastTab(getTabHandler(), prevTab2, new      AdaptiveContrastTab.Params(4, 0.84, 0.02, 2.4, 4.93)),
-            prevTab2 -> new      BernsenThresholdTab(getTabHandler(), prevTab2, new      BernsenThresholdTab.Params(6, 30)),
-            prevTab2 -> new BradleyLocalThresholdTab(getTabHandler(), prevTab2, new BradleyLocalThresholdTab.Params(10, 70)),
-            prevTab2 -> new      ArtifactsRemovalTab(getTabHandler(), prevTab2, new      ArtifactsRemovalTab.Params(9))
-        );
-        for (UnaryOperator<ITab<?>> fTab : nextTabs) {
-            ITab<?> next = fTab.apply(prevTab);
-            tabs.add(next);
-            prevTab = next;
-        }
-        return prevTab;
-    }
-
-    private ITab<?> examplePipelineOpenCvFilters(ITab<?> prevTab) {
-        List<UnaryOperator<ITab<?>>> nextTabs = Arrays.asList(
-          //prevTab2 -> new         AsIsTab(getTabHandler(), prevTab2, new         AsIsTab.Params(false)),
-            prevTab2 -> new GaussianBlurTab(getTabHandler(), prevTab2, new GaussianBlurTab.Params(new Size(5, 5), 15, 15, CvBorderTypes.BORDER_DEFAULT)),
-            prevTab2 -> new MorphologyExTab(getTabHandler(), prevTab2, new MorphologyExTab.Params(CvMorphTypes.MORPH_CLOSE, EMatSource.STRUCTURING_ELEMENT,
-                                                                                                  new MorphologyExTab.CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
-                                                                                                  new MorphologyExTab.StructuringElementParams(CvMorphShapes.MORPH_ELLIPSE, new Size(7, 7), -1,-1))),
-            prevTab2 -> new    ThresholdTab(getTabHandler(), prevTab2, new    ThresholdTab.Params(150, 350, CvThresholdTypes.THRESH_TRUNC, false, false)),
-            prevTab2 -> new        CannyTab(getTabHandler(), prevTab2, new        CannyTab.Params(5, 5, 3, false)),
-            prevTab2 -> new FindContoursTab(getTabHandler(), prevTab2, new FindContoursTab.Params(CvRetrievalModes.RETR_EXTERNAL,
-                                                                                                  CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
-                                                                                                  FindContoursTab.EDrawMethod.EXTERNAL_RECT, new Size(15,15), 1000))
-        );
-        for (UnaryOperator<ITab<?>> fTab : nextTabs) {
-            ITab<?> next = fTab.apply(prevTab);
-            tabs.add(next);
-            prevTab = next;
-        }
-        return prevTab;
-    }
-
     private void onError(String message, Component from) {
         if (from == null)
             from = frame.getRootPane();
@@ -377,6 +310,12 @@ public class MainApp {
             pipeline.add(item);
         }
 
+        // cast absolute image-file path to relative from json-pipeline-file
+        FirstTab.Params firstParams = (FirstTab.Params)pipeline.get(0).params;
+        File tmp = firstParams.imageFile;
+        firstParams.imageFile = SelectFilterDialog.getRelativePath(firstParams.imageFile, jsonFile.getParentFile());
+
+
         String json;
         try {
             json = JsonHelper.toJson(pipeline, true);
@@ -392,6 +331,8 @@ public class MainApp {
         } catch (Exception ex) {
             logger.error("Can`t save file '{}': {}", jsonFile, ex);
             onError("Can`t save file '" + jsonFile + "': " + ex, frame);
+        } finally {
+            firstParams.imageFile = tmp;
         }
     }
 
@@ -400,6 +341,10 @@ public class MainApp {
         File jsonFile = UiHelper.loadFiltersPipelineFile(frame, latestDir);
         if (jsonFile == null)
             return; // aborted
+        loadPipeline(jsonFile);
+    }
+
+    private void loadPipeline(File jsonFile) {
         if (!jsonFile.exists()) {
             logger.error("File not found: {}", jsonFile);
             return;
@@ -410,10 +355,14 @@ public class MainApp {
             pipeline = JsonHelper.fromJson(fis, new TypeReference<List<PipelineItem>>() {});
             logger.info("Pipeline loaded from file {}", jsonFile);
         } catch (Exception ex) {
-            logger.error("Can`t read file '{}': {}", jsonFile, ex);
-            onError("Can`t read file '" + jsonFile + "': " + ex, frame);
+            logger.error("Can`t convert to JSON from file {}: {}", jsonFile, ex);
+            onError("Can`t convert to JSON from file '" + jsonFile + "' : " + ex, frame);
             return;
         }
+
+        // restore full path from relative
+        FirstTab.Params firstParams = (FirstTab.Params)pipeline.get(0).params;
+        firstParams.imageFile = jsonFile.toPath().getParent().resolve(firstParams.imageFile.toPath()).toFile();
 
         // remove all
         do {

@@ -77,7 +77,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         }
     }
 
-    public static final File DEFAULT_IMAGE = Paths.get("exampleImages", "VolodHill.jpg").toFile();
+    public static final File DEFAULT_IMAGE = Paths.get("exampleImages", "VolodHill.jpg").toAbsolutePath().toFile();
 
     public static final String TAB_NAME      = "Original";
     public static final String TAB_FULL_NAME = "FirstTab";
@@ -288,6 +288,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         try {
             if (!imageFile.exists()) {
                 logger.warn("File not found: {}", imageFile);
+                tabHandler.onError("File not found: " + imageFile, this, null);
                 return false;
             }
             sourceImage = ImageIO.read(imageFile);
@@ -300,10 +301,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
 
             params.imageFile = imageFile;
             latestImageDir = imageFile.getParentFile();
-            if (image == null)
-                repaintImage();
-            else
-                resetImage();
+            resetImage();
             return true;
         } catch (IOException ex) {
             logger.error("Can`t read image", ex);
@@ -312,14 +310,14 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     }
 
     private final JButton makeButtonLoadPipeline() {
-        JButton btnLoad = new JButton("Load...");
+        JButton btnLoad = new JButton("Load filters...");
         btnLoad.setToolTipText("Load image pipeline tabs");
         btnLoad.addActionListener(ev -> tabHandler.onLoadPipeline());
         return btnLoad;
     }
 
     private final JButton makeButtonSavePipeline() {
-        JButton btnSave = new JButton("Save...");
+        JButton btnSave = new JButton("Save filters...");
         btnSave.setToolTipText("Save current pipeline tabs for selected image");
         btnSave.addActionListener(ev -> tabHandler.onSavePipeline());
         return btnSave;

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import javax.swing.*;
 
@@ -57,7 +58,6 @@ public class SelectFilterDialog {
             radioGroup.add(radioFilter);
         });
 
-
         JButton btnOk = new JButton("Ok");
         String[] filterTabFullName = { null };
         btnOk.addActionListener(ev -> {
@@ -82,6 +82,11 @@ public class SelectFilterDialog {
         dlg.setVisible(true);
 
         return filterTabFullName[0];
+    }
+
+    /** construct a relative path in Java from two absolute paths */
+    public static File getRelativePath(File from, File basePath) {
+        return basePath.toPath().relativize(from.toPath()).toFile();
     }
 
 }

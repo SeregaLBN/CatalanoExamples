@@ -95,7 +95,7 @@ public final class UiHelper {
 
         @Override
         public String getDescription() {
-            return "JSON";
+            return "Pipeline filters (*.json)";
         }
     }
 
