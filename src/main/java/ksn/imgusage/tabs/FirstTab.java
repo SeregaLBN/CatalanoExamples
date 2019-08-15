@@ -95,12 +95,6 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     private BufferedImage previewImage;
     private File latestImageDir = DEFAULT_IMAGE.getParentFile();
     private final Params params;
-    private final SliderIntModel modelSizeW;
-    private final SliderIntModel modelSizeH;
-    private final SliderIntModel modelPadLeft;
-    private final SliderIntModel modelPadRight;
-    private final SliderIntModel modelPadTop;
-    private final SliderIntModel modelPadBottom;
 
     public FirstTab(ITabHandler tabHandler) {
         this(tabHandler, new Params(DEFAULT_IMAGE, false, true, new Size(-1, -1), true, new Padding(0,0,0,0)));
@@ -112,12 +106,6 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         if (params.keepToSize.height < MIN_IMAGE_HEIGHT)
             params.keepToSize.height = MAX_IMAGE_HEIGHT;
         this.params = params;
-        this.modelSizeW = new SliderIntModel(params.keepToSize.width, 0, MIN_IMAGE_WIDTH , MAX_IMAGE_WIDTH);
-        this.modelSizeH = new SliderIntModel(params.keepToSize.height, 0, MIN_IMAGE_HEIGHT, MAX_IMAGE_HEIGHT);
-        this.modelPadLeft   = new SliderIntModel(params.boundOfRoi.left  , 0, 0, MAX_IMAGE_WIDTH);
-        this.modelPadRight  = new SliderIntModel(params.boundOfRoi.right , 0, 0, MAX_IMAGE_WIDTH);
-        this.modelPadTop    = new SliderIntModel(params.boundOfRoi.top   , 0, 0, MAX_IMAGE_HEIGHT);
-        this.modelPadBottom = new SliderIntModel(params.boundOfRoi.bottom, 0, 0, MAX_IMAGE_HEIGHT);
 
         readImageFile(params.imageFile);
         makeTab();
@@ -281,6 +269,8 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         throw new UnsupportedOperationException("Illegal call");
     }
 
+    private Runnable applyMaxSizeLimits;
+
     private boolean readImageFile(File imageFile) {
         if (imageFile == null)
             return false;
@@ -292,12 +282,11 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
                 return false;
             }
             sourceImage = ImageIO.read(imageFile);
-            modelSizeW.setMaximum(sourceImage.getWidth());
-            modelSizeH.setMaximum(sourceImage.getHeight());
-            modelPadLeft  .setMaximum(sourceImage.getWidth()  - 1);
-            modelPadRight .setMaximum(sourceImage.getWidth()  - 1);
-            modelPadTop   .setMaximum(sourceImage.getHeight() - 1);
-            modelPadBottom.setMaximum(sourceImage.getHeight() - 1);
+            if (applyMaxSizeLimits != null) {
+                lockCheckKeepAspectRation = true;
+                applyMaxSizeLimits.run();
+                lockCheckKeepAspectRation = false;
+            }
 
             params.imageFile = imageFile;
             latestImageDir = imageFile.getParentFile();
@@ -404,6 +393,33 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
 
     @Override
     protected Component makeOptions() {
+        SliderIntModel modelSizeW = new SliderIntModel(params.keepToSize.width, 0, MIN_IMAGE_WIDTH , MAX_IMAGE_WIDTH);
+        SliderIntModel modelSizeH = new SliderIntModel(params.keepToSize.height, 0, MIN_IMAGE_HEIGHT, MAX_IMAGE_HEIGHT);
+        SliderIntModel modelPadLeft   = new SliderIntModel(params.boundOfRoi.left  , 0, 0, MAX_IMAGE_WIDTH);
+        SliderIntModel modelPadRight  = new SliderIntModel(params.boundOfRoi.right , 0, 0, MAX_IMAGE_WIDTH);
+        SliderIntModel modelPadTop    = new SliderIntModel(params.boundOfRoi.top   , 0, 0, MAX_IMAGE_HEIGHT);
+        SliderIntModel modelPadBottom = new SliderIntModel(params.boundOfRoi.bottom, 0, 0, MAX_IMAGE_HEIGHT);
+
+        applyMaxSizeLimits = () -> {
+            if (sourceImage == null)
+                return;
+            modelSizeW.setMaximum(sourceImage.getWidth());
+            modelSizeH.setMaximum(sourceImage.getHeight());
+            modelPadLeft  .setMaximum(sourceImage.getWidth()  - 1);
+            modelPadRight .setMaximum(sourceImage.getWidth()  - 1);
+            modelPadTop   .setMaximum(sourceImage.getHeight() - 1);
+            modelPadBottom.setMaximum(sourceImage.getHeight() - 1);
+
+            params.keepToSize.width  = Math.min(params.keepToSize.width , modelSizeW    .getMaximum());
+            params.keepToSize.height = Math.min(params.keepToSize.height, modelSizeH    .getMaximum());
+            params.boundOfRoi.left   = Math.min(params.boundOfRoi.left  , modelPadLeft  .getMaximum());
+            params.boundOfRoi.right  = Math.min(params.boundOfRoi.right , modelPadRight .getMaximum());
+            params.boundOfRoi.top    = Math.min(params.boundOfRoi.top   , modelPadTop   .getMaximum());
+            params.boundOfRoi.bottom = Math.min(params.boundOfRoi.bottom, modelPadBottom.getMaximum());
+        };
+        applyMaxSizeLimits.run();
+
+
         Box box4Options = Box.createVerticalBox();
         box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
@@ -422,7 +438,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
             JCheckBox btnKeepAspectRatio = new JCheckBox("Keep aspect ratio", params.useKeepAspectRatio);
             btnKeepAspectRatio.addActionListener(ev -> {
                 params.useKeepAspectRatio = btnKeepAspectRatio.isSelected();
-                onCheckKeepAspectRationByWidth();
+                onCheckKeepAspectRationByWidth(modelSizeH);
                 resetImage();
             });
 
@@ -450,18 +466,18 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         box4Options.add(Box.createVerticalStrut(2));
         box4Options.add(boxOfRoi);
 
-        onCheckKeepAspectRationByWidth();
+        onCheckKeepAspectRationByWidth(modelSizeH);
 
         modelSizeW.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSizeW: value={}", modelSizeW.getFormatedText());
             params.keepToSize.width = modelSizeW.getValue();
-            onCheckKeepAspectRationByWidth();
+            onCheckKeepAspectRationByWidth(modelSizeH);
             resetImage();
         });
         modelSizeH.getWrapped().addChangeListener(ev -> {
             logger.trace("modelSizeH: value={}", modelSizeH.getFormatedText());
             params.keepToSize.height = modelSizeH.getValue();
-            onCheckKeepAspectRationByHeight();
+            onCheckKeepAspectRationByHeight(modelSizeW);
             resetImage();
         });
 
@@ -498,7 +514,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
     }
 
     private boolean lockCheckKeepAspectRation;
-    private void onCheckKeepAspectRationByWidth() {
+    private void onCheckKeepAspectRationByWidth(SliderIntModel modelSizeH) {
         if (sourceImage == null)
             return;
 
@@ -520,7 +536,7 @@ public class FirstTab extends BaseTab<FirstTab.Params> {
         }
     }
 
-    private void onCheckKeepAspectRationByHeight() {
+    private void onCheckKeepAspectRationByHeight(SliderIntModel modelSizeW) {
         if (sourceImage == null)
             return;
 

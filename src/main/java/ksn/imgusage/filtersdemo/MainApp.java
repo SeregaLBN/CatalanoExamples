@@ -250,8 +250,10 @@ public class MainApp {
             errorWindow.pack();
         }
 
-        Point loc = from.getLocationOnScreen();
-        errorWindow.setLocation(loc.x + 20, loc.y + 30);
+        if (from.isShowing()) {
+            Point loc = from.getLocationOnScreen();
+            errorWindow.setLocation(loc.x + 20, loc.y + 30);
+        }
         errorWindow.setVisible(true);
 
         UiHelper.debounceExecutor(() -> timer, t -> timer = t, 5000, () -> errorWindow.setVisible(false), logger);
