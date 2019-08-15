@@ -41,7 +41,7 @@ public class SelectFilterDialog {
         boxCatalanoFilters.setBorder(BorderFactory.createTitledBorder("Catalano filters"));
         ButtonGroup radioGroup = new ButtonGroup();
 
-        MapFilterToTab.getAllCatalanoTabsDescr().forEach(tab -> {
+        MapperFilter.getAllCatalanoTabsDescr().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
             radioFilter.setActionCommand(CatalanoFilterTab.TAB_PREFIX + tab.filterName);
             boxCatalanoFilters.add(radioFilter);
@@ -51,7 +51,7 @@ public class SelectFilterDialog {
         Box boxOpenCvFilters = Box.createVerticalBox();
         boxOpenCvFilters.setBorder(BorderFactory.createTitledBorder("OpenCV filters"));
 
-        MapFilterToTab.getAllOpencvTabsDescr().forEach(tab -> {
+        MapperFilter.getAllOpencvTabsDescr().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterName + ": " + tab.description);
             radioFilter.setActionCommand(OpencvFilterTab.TAB_PREFIX + tab.filterName);
             boxOpenCvFilters.add(radioFilter);

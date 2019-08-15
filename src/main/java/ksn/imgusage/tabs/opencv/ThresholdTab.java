@@ -12,8 +12,6 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderDoubleModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.opencv.type.CvThresholdTypes;
 import ksn.imgusage.type.dto.opencv.ThresholdTabParams;
 
@@ -29,17 +27,15 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
     private static final double MIN_MAXVAL =   0;
     private static final double MAX_MAXVAL = 500;
 
-    private final ThresholdTabParams params;
+    private ThresholdTabParams params;
 
-    public ThresholdTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new ThresholdTabParams(100, 250, CvThresholdTypes.THRESH_BINARY, false, false));
-    }
-
-    public ThresholdTab(ITabHandler tabHandler, ITab<?> source, ThresholdTabParams params) {
-        super(tabHandler, source);
+    @Override
+    public Component makeTab(ThresholdTabParams params) {
+        if (params == null)
+            params = new ThresholdTabParams(100, 250, CvThresholdTypes.THRESH_BINARY, false, false);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

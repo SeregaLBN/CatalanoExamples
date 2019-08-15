@@ -8,8 +8,6 @@ import javax.swing.Box;
 import Catalano.Imaging.Filters.FourierTransform;
 import Catalano.Imaging.Filters.FrequencyFilter;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.catalano.FrequencyFilterTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/FrequencyFilter.java'>Filtering of frequencies outside of specified range in complex Fourier transformed image</a> */
@@ -22,17 +20,19 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTabPara
     private static final int MIN = 0;
     private static final int MAX = 1024;
 
-    private final FrequencyFilterTabParams params;
+    private FrequencyFilterTabParams params;
 
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new FrequencyFilterTabParams(0, 100));
+    public FrequencyFilterTab() {
+        super(true);
     }
 
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab<?> source, FrequencyFilterTabParams params) {
-        super(tabHandler, source, true);
+    @Override
+    public Component makeTab(FrequencyFilterTabParams params) {
+        if (params == null)
+            params = new FrequencyFilterTabParams(0, 100);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

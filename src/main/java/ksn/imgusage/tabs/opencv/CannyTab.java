@@ -11,8 +11,6 @@ import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.opencv.CannyTabParams;
 
 /** <a href='https://docs.opencv.org/3.4.2/dd/d1a/group__imgproc__feature.html#ga04723e007ed888ddf11d9ba04e2232de'>Finds edges in an image using the Canny algorithm</a> */
@@ -27,17 +25,15 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
     public  static final int    MIN_APERTURE_SIZE =   3;
     private static final int    MAX_APERTURE_SIZE =   7;
 
-    private final CannyTabParams params;
+    private CannyTabParams params;
 
-    public CannyTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new CannyTabParams(3, 3, 5, true));
-    }
-
-    public CannyTab(ITabHandler tabHandler, ITab<?> source, CannyTabParams params) {
-        super(tabHandler, source);
+    @Override
+    public Component makeTab(CannyTabParams params) {
+        if (params == null)
+            params = new CannyTabParams(3, 3, 5, true);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

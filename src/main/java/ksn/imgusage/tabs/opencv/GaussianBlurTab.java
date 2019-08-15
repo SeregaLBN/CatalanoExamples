@@ -11,8 +11,6 @@ import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
 import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.opencv.GaussianBlurTabParams;
@@ -32,17 +30,15 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
                                                  //  respectively (see getGaussianKernel() for details); to fully control the result regardless of possible future
                                                  //  modifications of all this semantics, it is recommended to specify all of ksize, sigmaX, and sigmaY.
 
-    private final GaussianBlurTabParams params;
+    private GaussianBlurTabParams params;
 
-    public GaussianBlurTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new GaussianBlurTabParams(new Size(7, 0), 25, 25, CvBorderTypes.BORDER_DEFAULT));
-    }
-
-    public GaussianBlurTab(ITabHandler tabHandler, ITab<?> source, GaussianBlurTabParams params) {
-        super(tabHandler, source);
+    @Override
+    public Component makeTab(GaussianBlurTabParams params) {
+        if (params == null)
+            params = new GaussianBlurTabParams(new Size(7, 0), 25, 25, CvBorderTypes.BORDER_DEFAULT);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

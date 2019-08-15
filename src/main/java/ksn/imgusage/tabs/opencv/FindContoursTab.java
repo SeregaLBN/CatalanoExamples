@@ -15,8 +15,6 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvContourApproximationModes;
 import ksn.imgusage.tabs.opencv.type.CvRetrievalModes;
@@ -37,20 +35,17 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     private static final int MIN_MAX_CONTOUR_AREA =    0;
     private static final int MAX_MAX_CONTOUR_AREA = 10000;
 
-    private final FindContoursTabParams params;
+    private FindContoursTabParams params;
 
-    public FindContoursTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new FindContoursTabParams(
-             CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
-             EFindContoursDrawMethod.EXTERNAL_RECT, new Size(10, 10),
-             100));
-    }
-
-    public FindContoursTab(ITabHandler tabHandler, ITab<?> source, FindContoursTabParams params) {
-        super(tabHandler, source);
+    @Override
+    public Component makeTab(FindContoursTabParams params) {
+        if (params == null)
+            params = new FindContoursTabParams(CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
+                                               EFindContoursDrawMethod.EXTERNAL_RECT, new Size(10, 10),
+                                               100);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

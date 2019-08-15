@@ -12,8 +12,8 @@ import ksn.imgusage.type.dto.FirstTabParams;
 import ksn.imgusage.type.dto.catalano.*;
 import ksn.imgusage.type.dto.opencv.*;
 
-public final class MapFilterToTab {
-    private MapFilterToTab() {}
+public final class MapperFilter {
+    private MapperFilter() {}
 
     public static class FilterTabs {
         public final String filterName;

@@ -8,8 +8,6 @@ import javax.swing.Box;
 import Catalano.Imaging.Filters.BernsenThreshold;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.catalano.BernsenThresholdTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BernsenThreshold.java'>Bernsen Threshold</a> */
@@ -24,17 +22,19 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTabPa
     private static final double MIN_CONTRAST_THRESHOLD = 0;
     private static final double MAX_CONTRAST_THRESHOLD = 300;
 
-    private final BernsenThresholdTabParams params;
+    private BernsenThresholdTabParams params;
 
-    public BernsenThresholdTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new BernsenThresholdTabParams(15, 15));
+    public BernsenThresholdTab() {
+        super(true);
     }
 
-    public BernsenThresholdTab(ITabHandler tabHandler, ITab<?> source, BernsenThresholdTabParams params) {
-        super(tabHandler, source, true);
+    @Override
+    public Component makeTab(BernsenThresholdTabParams params) {
+        if (params == null)
+            params = new BernsenThresholdTabParams(15, 15);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

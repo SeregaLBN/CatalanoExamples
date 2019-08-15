@@ -7,8 +7,6 @@ import javax.swing.Box;
 
 import Catalano.Imaging.Filters.ArtifactsRemoval;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.catalano.ArtifactsRemovalTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/ArtifactsRemoval.java'>Remove artifacts caused by uneven lightning</a> */
@@ -21,17 +19,19 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTabPa
     private static final int MIN_WINDOW_SIZE = 1;
     private static final int MAX_WINDOW_SIZE = 201;
 
-    private final ArtifactsRemovalTabParams params;
+    private ArtifactsRemovalTabParams params;
 
-    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new ArtifactsRemovalTabParams(15));
+    public ArtifactsRemovalTab() {
+        super(true);
     }
 
-    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab<?> source, ArtifactsRemovalTabParams params) {
-        super(tabHandler, source, true);
+    @Override
+    public Component makeTab(ArtifactsRemovalTabParams params) {
+        if (params == null)
+           params = new ArtifactsRemovalTabParams(15);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

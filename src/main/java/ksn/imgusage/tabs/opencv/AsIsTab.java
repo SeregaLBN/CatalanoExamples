@@ -6,8 +6,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.opencv.AsIsTabParams;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
@@ -21,15 +19,13 @@ public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
 
     private AsIsTabParams params;
 
-    public AsIsTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new AsIsTabParams(false));
-    }
-
-    public AsIsTab(ITabHandler tabHandler, ITab<?> source, AsIsTabParams params) {
-        super(tabHandler, source);
+    @Override
+    public Component makeTab(AsIsTabParams params) {
+        if (params == null)
+            params = new AsIsTabParams(false);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

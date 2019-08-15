@@ -8,8 +8,6 @@ import javax.swing.Box;
 import Catalano.Imaging.Filters.AdaptiveContrastEnhancement;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.catalano.AdaptiveContrastTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/AdaptiveContrastEnhancement.java'>Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change</a> */
@@ -28,17 +26,19 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTabPa
     private static final double MIN_GAIN        =   0; // The minimum gain factor
     private static final double MAX_GAIN        =  20; // The maximum gain factor
 
-    private final AdaptiveContrastTabParams params;
+    private AdaptiveContrastTabParams params;
 
-    public AdaptiveContrastTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new AdaptiveContrastTabParams(20, 0.3, 0.6, 0.1, 1));
+    public AdaptiveContrastTab() {
+        super(true);
     }
 
-    public AdaptiveContrastTab(ITabHandler tabHandler, ITab<?> source, AdaptiveContrastTabParams params) {
-        super(tabHandler, source, true);
+    @Override
+    public Component makeTab(AdaptiveContrastTabParams params) {
+        if (params == null)
+           params = new AdaptiveContrastTabParams(20, 0.3, 0.6, 0.1, 1);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

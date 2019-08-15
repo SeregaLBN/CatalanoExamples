@@ -99,11 +99,11 @@ public final class UiHelper {
         }
     }
 
-    public static void debounceExecutor(Supplier<Timer> getterTimer, Consumer<Timer> setterTimer, int debounceTimer, Runnable executor, Logger logger) {
+    public static void debounceExecutor(Supplier<Timer> getterTimer, Consumer<Timer> setterTimer, int debounceTime, Runnable executor, Logger logger) {
         Timer timer = getterTimer.get();
         if (timer == null) {
             Timer[] wrapper = { null };
-            wrapper[0] = timer = new Timer(debounceTimer, ev -> {
+            wrapper[0] = timer = new Timer(debounceTime, ev -> {
                 wrapper[0].stop();
                 logger.trace("debounce: call executor...");
                 executor.run();

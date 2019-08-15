@@ -7,8 +7,6 @@ import javax.swing.Box;
 
 import Catalano.Imaging.Filters.BrightnessCorrection;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.catalano.BrightnessCorrectionTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BrightnessCorrection.java'>Brightness adjusting in RGB color space</a> */
@@ -21,17 +19,19 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
     private static final int MIN = -255;
     private static final int MAX =  255;
 
-    private final BrightnessCorrectionTabParams params;
+    private BrightnessCorrectionTabParams params;
 
-    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new BrightnessCorrectionTabParams(100));
+    public BrightnessCorrectionTab() {
+        super(false);
     }
 
-    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab<?> source, BrightnessCorrectionTabParams params) {
-        super(tabHandler, source, false);
+    @Override
+    public Component makeTab(BrightnessCorrectionTabParams params) {
+        if (params == null)
+            params = new BrightnessCorrectionTabParams(100);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

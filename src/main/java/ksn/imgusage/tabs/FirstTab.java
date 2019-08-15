@@ -37,13 +37,13 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private BufferedImage sourceImage;
     private BufferedImage previewImage;
     private File latestImageDir = DEFAULT_IMAGE.getParentFile();
-    private final FirstTabParams params;
+    private FirstTabParams params;
 
-    public FirstTab(ITabHandler tabHandler) {
-        this(tabHandler, new FirstTabParams(DEFAULT_IMAGE, false, true, new Size(-1, -1), true, new Padding(0,0,0,0)));
-    }
-    public FirstTab(ITabHandler tabHandler, FirstTabParams params) {
-        super(tabHandler, null);
+    @Override
+    public Component makeTab(FirstTabParams params) {
+        if (params == null)
+            params = new FirstTabParams(DEFAULT_IMAGE, false, true, new Size(-1, -1), true, new Padding(0,0,0,0));
+
         if (params.keepToSize.width < MIN_IMAGE_WIDTH)
             params.keepToSize.width = MAX_IMAGE_WIDTH;
         if (params.keepToSize.height < MIN_IMAGE_HEIGHT)
@@ -51,7 +51,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         this.params = params;
 
         readImageFile(params.imageFile);
-        makeTab();
+        return makeTab();
     }
 
     @Override

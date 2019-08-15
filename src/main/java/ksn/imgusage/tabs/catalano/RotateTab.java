@@ -8,8 +8,6 @@ import javax.swing.*;
 import Catalano.Imaging.Filters.Rotate;
 import Catalano.Imaging.Filters.Rotate.Algorithm;
 import ksn.imgusage.model.SliderDoubleModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.catalano.RotateTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/Rotate.java'>Rotate image</a> */
@@ -22,17 +20,19 @@ public class RotateTab extends CatalanoFilterTab<RotateTabParams> {
     private static final double MIN =   0;
     private static final double MAX = 360;
 
-    private final RotateTabParams params;
+    private RotateTabParams params;
 
-    public RotateTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new RotateTabParams(0, true, Algorithm.BICUBIC));
+    public RotateTab() {
+        super(false);
     }
 
-    public RotateTab(ITabHandler tabHandler, ITab<?> source, RotateTabParams params) {
-        super(tabHandler, source, false);
+    @Override
+    public Component makeTab(RotateTabParams params) {
+        if (params == null)
+            params = new RotateTabParams(0, true, Algorithm.BICUBIC);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

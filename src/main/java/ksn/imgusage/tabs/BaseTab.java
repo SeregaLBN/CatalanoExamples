@@ -20,13 +20,14 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected static final int WIDTH_LEFT_PANEL = 250;
 
-    protected final ITabHandler tabHandler;
+    protected ITabHandler tabHandler;
     protected ITab<?> source;
     protected BufferedImage image;
     private Runnable imagePanelRepaint;
     private Timer timer;
 
-    protected BaseTab(ITabHandler tabHandler, ITab<?> source) {
+    @Override
+    public void init(ITabHandler tabHandler, ITab<?> source) {
         this.tabHandler = tabHandler;
         this.source = source;
     }
@@ -47,7 +48,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         if (src == null)
             return null;
 
-        JFrame frame = (JFrame)SwingUtilities.getWindowAncestor(tabHandler.getTabPanel());
+        JFrame frame = tabHandler.getFrame();
         try {
             frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -117,7 +118,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return box4Buttons;
     }
 
-    protected final void makeTab() {
+    protected final Component makeTab() {
         JPanel imagePanel = buildImagePanel(tabHandler);
         JPanel leftPanel = new JPanel();
         { // fill leftPanel
@@ -133,18 +134,14 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             leftPanel.setPreferredSize(new Dimension(WIDTH_LEFT_PANEL, -1));
         }
 
-        { // make root tab panel
-            JPanel panel = new JPanel();
-            panel.setLayout(new BorderLayout());
+        // make root tab panel
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
 
-            panel.add(imagePanel, BorderLayout.CENTER);
-            panel.add(leftPanel , BorderLayout.EAST);
+        panel.add(imagePanel, BorderLayout.CENTER);
+        panel.add(leftPanel , BorderLayout.EAST);
 
-            JTabbedPane tabPane = tabHandler.getTabPanel();
-            tabPane.addTab(getTabName(), panel);
-            tabPane.setSelectedIndex(tabPane.getTabCount() - 1);
-            SwingUtilities.invokeLater(tabPane::requestFocus);
-        }
+        return panel;
     }
 
     private JPanel buildImagePanel(ITabHandler tabHandler) {

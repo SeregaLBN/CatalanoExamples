@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import ksn.imgusage.utils.JsonHelper;
-import ksn.imgusage.utils.MapFilterToTab;
+import ksn.imgusage.utils.MapperFilter;
 
 public class PipelineItemDeserializer extends StdDeserializer<PipelineItem> {
 
@@ -29,7 +29,7 @@ public class PipelineItemDeserializer extends StdDeserializer<PipelineItem> {
         JsonNode node = jp.getCodec().readTree(jp);
         res.tabName = node.get(PipelineItem.KEY_TAB_NAME).textValue();
         res.pos     = node.get(PipelineItem.KEY_POS).numberValue().intValue();
-        res.params  = JsonHelper.fromJson(node.get(PipelineItem.KEY_PARAMS), MapFilterToTab.getTabParamsClass(res.tabName));
+        res.params  = JsonHelper.fromJson(node.get(PipelineItem.KEY_PARAMS), MapperFilter.getTabParamsClass(res.tabName));
 
         return res;
     }

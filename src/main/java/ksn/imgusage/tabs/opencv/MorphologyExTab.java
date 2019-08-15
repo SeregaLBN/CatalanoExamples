@@ -14,8 +14,6 @@ import org.opencv.imgproc.Imgproc;
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
@@ -44,23 +42,20 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
     private static final int MIN_ANCHOR      =  -1;
     private static final int MAX_ANCHOR      = MAX_KERNEL_SIZE;
 
-
     private JPanel panelKernel1; // for params.kernel1
     private JPanel panelKernel2; // for params.kernel2
-    private final MorphologyExTabParams params;
+    private MorphologyExTabParams params;
 
-    public MorphologyExTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new MorphologyExTabParams(CvMorphTypes.MORPH_GRADIENT,
-                                            EMatSource.STRUCTURING_ELEMENT,
-                                            new CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
-                                            new StructuringElementParams(CvMorphShapes.MORPH_RECT, new Size(10, 10), -1,-1)));
-    }
-
-    public MorphologyExTab(ITabHandler tabHandler, ITab<?> source, MorphologyExTabParams params) {
-        super(tabHandler, source);
+    @Override
+    public Component makeTab(MorphologyExTabParams params) {
+        if (params == null)
+            params = new MorphologyExTabParams(CvMorphTypes.MORPH_GRADIENT,
+                                               EMatSource.STRUCTURING_ELEMENT,
+                                               new CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
+                                               new StructuringElementParams(CvMorphShapes.MORPH_RECT, new Size(10, 10), -1,-1));
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override

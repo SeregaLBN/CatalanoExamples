@@ -34,7 +34,7 @@ import ksn.imgusage.tabs.opencv.InitLib;
 import ksn.imgusage.type.PipelineItem;
 import ksn.imgusage.type.dto.FirstTabParams;
 import ksn.imgusage.utils.JsonHelper;
-import ksn.imgusage.utils.MapFilterToTab;
+import ksn.imgusage.utils.MapperFilter;
 import ksn.imgusage.utils.SelectFilterDialog;
 import ksn.imgusage.utils.UiHelper;
 
@@ -97,15 +97,23 @@ public class MainApp {
         tabPane.setBorder(BorderFactory.createEmptyBorder(8,8,2,8));
         tabPane.addChangeListener(this::onTabChanged);
 
-        FirstTab tab = new FirstTab(getTabHandler());
+        FirstTab tab = new FirstTab();
         isScale = tab::isScale;
-        tabs.add(tab);
+        addTab(tab, null);
 
         frame.getContentPane().add(tabPane, BorderLayout.CENTER);
     }
 
-    private JTabbedPane getTabPanel() {
-        return tabPane;
+    private <TTabParams extends ITabParams> void addTab(ITab<TTabParams> newTab, TTabParams tabParams) {
+        ITab<?> prev = null;
+        int i = tabPane.getSelectedIndex();
+        if (i >= 0)
+            prev = tabs.get(i);
+        newTab.init(getTabHandler(), prev);
+        tabPane.addTab(newTab.getTabName(), newTab.makeTab(tabParams));
+        tabPane.setSelectedIndex(i + 1);
+        SwingUtilities.invokeLater(tabPane::requestFocus);
+        tabs.add(newTab);
     }
 
     private void onCancel() {
@@ -127,7 +135,7 @@ public class MainApp {
 
     private ITabHandler getTabHandler() {
         return new ITabHandler() {
-            @Override public JTabbedPane getTabPanel()                                 { return MainApp.this.getTabPanel(); }
+            @Override public JFrame getFrame()                                         { return MainApp.this.frame; }
             @Override public void onImageChanged(ITab<?> tab)                          {        MainApp.this.onImageChanged(tab); }
             @Override public void onAddNewFilter()                                     {        MainApp.this.onAddNewFilter(); }
             @Override public void onRemoveFilter(ITab<?> tab)                          {        MainApp.this.onRemoveFilter(tab); }
@@ -143,38 +151,18 @@ public class MainApp {
         logger.trace("onAddNewFilter");
         String filterTabFullName = new SelectFilterDialog(frame).getFilterTabFullName();
         if (filterTabFullName != null)
-            addTabByFilterFullName(filterTabFullName);
-    }
-
-    private void addTabByFilterFullName(String filterTabFullName) {
-        Class<? extends ITab<?>> tabClass = MapFilterToTab.getTabClass(filterTabFullName);
-        if (tabClass == null)
-            logger.error("Not supported filter {}", filterTabFullName);
-        else
-            try {
-                Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class);
-                ITab<?> lastTab = tabs.get(tabs.size() - 1);
-                tabs.add(ctor.newInstance(getTabHandler(), lastTab));
-            } catch (Exception ex) {
-                logger.error(ex.toString());
-            }
+            addTabByFilterFullName(filterTabFullName, null);
     }
 
     private void addTabByFilterFullName(String filterTabFullName, ITabParams params) {
-        Class<? extends ITab<?>> tabClass = MapFilterToTab.getTabClass(filterTabFullName);
+        Class<? extends ITab<?>> tabClass = MapperFilter.getTabClass(filterTabFullName);
         if (tabClass == null)
             logger.error("Not supported filter {}", filterTabFullName);
         else
             try {
-                if (tabs.isEmpty()) {
-                    // only for FirstTab
-                    Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, params.getClass());
-                    tabs.add(ctor.newInstance(getTabHandler(), params));
-                } else {
-                    Constructor<? extends ITab<?>> ctor = tabClass.getConstructor(ITabHandler.class, ITab.class, params.getClass());
-                    ITab<?> lastTab = tabs.get(tabs.size() - 1);
-                    tabs.add(ctor.newInstance(getTabHandler(), lastTab, params));
-                }
+                Constructor<? extends ITab<?>> ctor = tabClass.getConstructor();
+                ITab<?> lastTab = tabs.get(tabs.size() - 1);
+                addTab(ctor.newInstance(), params);
             } catch (Exception ex) {
                 logger.error(ex.toString());
             }

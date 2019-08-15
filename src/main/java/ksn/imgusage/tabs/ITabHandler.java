@@ -3,12 +3,12 @@ package ksn.imgusage.tabs;
 import java.awt.Component;
 import java.awt.Graphics2D;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 public interface ITabHandler {
 
-    JTabbedPane getTabPanel();
+    JFrame getFrame();
 
     void onImageChanged(ITab<?> tab);
     void onCancel();

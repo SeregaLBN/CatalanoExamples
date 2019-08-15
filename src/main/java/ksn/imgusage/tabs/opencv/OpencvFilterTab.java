@@ -5,8 +5,6 @@ import java.awt.image.BufferedImage;
 import org.opencv.core.Mat;
 
 import ksn.imgusage.tabs.BaseTab;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.utils.ImgHelper;
 
@@ -19,10 +17,6 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
 
     /** filtered image of the current tab */
     protected Mat imageMat;
-
-    protected OpencvFilterTab(ITabHandler tabHandler, ITab<?> source) {
-        super(tabHandler, source);
-    }
 
     protected Mat getSourceMat() {
         if (source instanceof OpencvFilterTab) {

@@ -8,8 +8,6 @@ import javax.swing.Box;
 import Catalano.Imaging.Filters.BradleyLocalThreshold;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.type.dto.catalano.BradleyLocalThresholdTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BradleyLocalThreshold.java'>Adaptive thresholding using the integral image</a> */
@@ -24,18 +22,19 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab<BradleyLocalThre
     private static final double MIN_PIXEL_BRIGHTNESS_DIFF =    0;
     private static final double MAX_PIXEL_BRIGHTNESS_DIFF =  300;
 
-    private final BradleyLocalThresholdTabParams params;
+    private BradleyLocalThresholdTabParams params;
 
-
-    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new BradleyLocalThresholdTabParams(41, 0.15));
+    public BradleyLocalThresholdTab() {
+        super(true);
     }
 
-    public BradleyLocalThresholdTab(ITabHandler tabHandler, ITab<?> source, BradleyLocalThresholdTabParams params) {
-        super(tabHandler, source, true);
+    @Override
+    public Component makeTab(BradleyLocalThresholdTabParams params) {
+        if (params == null)
+            params = new BradleyLocalThresholdTabParams(41, 0.15);
         this.params = params;
 
-        makeTab();
+        return makeTab();
     }
 
     @Override
