@@ -1,7 +1,6 @@
 package ksn.imgusage.tabs.catalano;
 
 import java.awt.Component;
-import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -11,10 +10,10 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.dto.catalano.BernsenThresholdTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BernsenThreshold.java'>Bernsen Threshold</a> */
-public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.Params> {
+public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTabParams> {
 
     public static final String TAB_NAME = BernsenThreshold.class.getSimpleName();
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -25,27 +24,13 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.P
     private static final double MIN_CONTRAST_THRESHOLD = 0;
     private static final double MAX_CONTRAST_THRESHOLD = 300;
 
-    public static class Params implements ITabParams {
-        public int radius;
-        public double contrastThreshold;
-
-        public Params() {}
-
-        public Params(int radius, double contrastThreshold) { this.radius = radius; this.contrastThreshold = contrastThreshold; }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "{ radius=%d, contrastThreshold=%.2f }", radius, contrastThreshold);
-        }
-    }
-
-    private final Params params;
+    private final BernsenThresholdTabParams params;
 
     public BernsenThresholdTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(15, 15));
+        this(tabHandler, source, new BernsenThresholdTabParams(15, 15));
     }
 
-    public BernsenThresholdTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public BernsenThresholdTab(ITabHandler tabHandler, ITab<?> source, BernsenThresholdTabParams params) {
         super(tabHandler, source, true);
         this.params = params;
 
@@ -97,7 +82,7 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTab.P
     }
 
     @Override
-    public Params getParams() {
+    public BernsenThresholdTabParams getParams() {
         return params;
     }
 

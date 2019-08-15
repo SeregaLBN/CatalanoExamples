@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ItemEvent;
-import java.util.Locale;
 import java.util.stream.Stream;
 
 import javax.swing.*;
@@ -15,11 +14,11 @@ import org.opencv.imgproc.Imgproc;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.type.CvThresholdTypes;
+import ksn.imgusage.type.dto.opencv.ThresholdTabParams;
 
 /** <a href='https://docs.opencv.org/3.4.2/d7/d1b/group__imgproc__misc.html#gae8a4a146d1ca78c626a53577199e9c57'>Applies a fixed-level threshold to each array element</a> */
-public class ThresholdTab extends OpencvFilterTab<ThresholdTab.Params> {
+public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
 
     public static final String TAB_NAME = "Threshold";
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -30,56 +29,13 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTab.Params> {
     private static final double MIN_MAXVAL =   0;
     private static final double MAX_MAXVAL = 500;
 
-    public static class Params implements ITabParams {
-        public double            thresh;
-        public double            maxVal;
-        public CvThresholdTypes  threshType;
-        public boolean           useOtsuMask;
-        public boolean           useTriangleMask;
-
-        public Params() {}
-
-        public Params(double thresh, double maxval, CvThresholdTypes threshType, boolean useOtsuMask, boolean useTriangleMask) {
-            switch (threshType) {
-            case THRESH_BINARY    :
-            case THRESH_BINARY_INV:
-            case THRESH_TRUNC     :
-            case THRESH_TOZERO    :
-            case THRESH_TOZERO_INV:
-                // Ok
-                break;
-
-            case THRESH_OTSU:
-            case THRESH_TRIANGLE:
-            case THRESH_MASK:
-            default:
-                throw new IllegalArgumentException("Unsupported threshType=" + threshType);
-            }
-
-            this.thresh          = thresh;
-            this.maxVal          = maxval;
-            this.threshType      = threshType;
-            this.useOtsuMask     = useOtsuMask;
-            this.useTriangleMask = useTriangleMask;
-        }
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "{ threshX=%.2f, maxVal=%.2f, threshType=%s, useOtsuMask=%b, useTriangleMask=%b }",
-                    thresh,
-                    maxVal,
-                    threshType.name(),
-                    useOtsuMask,
-                    useTriangleMask);
-        }
-    }
-
-    private final Params params;
+    private final ThresholdTabParams params;
 
     public ThresholdTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(100, 250, CvThresholdTypes.THRESH_BINARY, false, false));
+        this(tabHandler, source, new ThresholdTabParams(100, 250, CvThresholdTypes.THRESH_BINARY, false, false));
     }
 
-    public ThresholdTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public ThresholdTab(ITabHandler tabHandler, ITab<?> source, ThresholdTabParams params) {
         super(tabHandler, source);
         this.params = params;
 
@@ -224,7 +180,7 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTab.Params> {
     }
 
     @Override
-    public Params getParams() {
+    public ThresholdTabParams getParams() {
         return params;
     }
 

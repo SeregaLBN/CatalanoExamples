@@ -9,10 +9,10 @@ import Catalano.Imaging.Filters.ArtifactsRemoval;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.dto.catalano.ArtifactsRemovalTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/ArtifactsRemoval.java'>Remove artifacts caused by uneven lightning</a> */
-public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.Params> {
+public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTabParams> {
 
     public static final String TAB_NAME = ArtifactsRemoval.class.getSimpleName();
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -21,26 +21,13 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.P
     private static final int MIN_WINDOW_SIZE = 1;
     private static final int MAX_WINDOW_SIZE = 201;
 
-    public static class Params implements ITabParams {
-        public int windowSize;
-
-        public Params() {}
-
-        public Params(int windowSize) { this.windowSize = windowSize; }
-
-        @Override
-        public String toString() {
-            return "{ windowSize=" + windowSize + " }";
-        }
-    }
-
-    private final Params params;
+    private final ArtifactsRemovalTabParams params;
 
     public ArtifactsRemovalTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(15));
+        this(tabHandler, source, new ArtifactsRemovalTabParams(15));
     }
 
-    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public ArtifactsRemovalTab(ITabHandler tabHandler, ITab<?> source, ArtifactsRemovalTabParams params) {
         super(tabHandler, source, true);
         this.params = params;
 
@@ -84,7 +71,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTab.P
     }
 
     @Override
-    public Params getParams() {
+    public ArtifactsRemovalTabParams getParams() {
         return params;
     }
 

@@ -14,6 +14,7 @@ import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.UiHelper;
 
+/** Abstract tab. Contains common methods / shared logic. */
 public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTabParams> {
 
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());

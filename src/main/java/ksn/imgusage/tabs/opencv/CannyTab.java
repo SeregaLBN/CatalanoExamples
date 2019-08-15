@@ -3,7 +3,6 @@ package ksn.imgusage.tabs.opencv;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
-import java.util.Locale;
 
 import javax.swing.*;
 
@@ -14,10 +13,10 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.dto.opencv.CannyTabParams;
 
 /** <a href='https://docs.opencv.org/3.4.2/dd/d1a/group__imgproc__feature.html#ga04723e007ed888ddf11d9ba04e2232de'>Finds edges in an image using the Canny algorithm</a> */
-public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
+public class CannyTab extends OpencvFilterTab<CannyTabParams> {
 
     public static final String TAB_NAME = "Canny";
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -25,36 +24,16 @@ public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
 
     private static final double MIN_THRESHOLD     =   0;
     private static final double MAX_THRESHOLD     = 999;
-    private static final int    MIN_APERTURE_SIZE =   3;
+    public  static final int    MIN_APERTURE_SIZE =   3;
     private static final int    MAX_APERTURE_SIZE =   7;
 
-    public static class Params implements ITabParams {
-        public double threshold1;
-        public double threshold2;
-        public int apertureSize;
-        public boolean l2gradient;
-
-        public Params() {}
-
-        public Params(double threshold1, double threshold2, int apertureSize, boolean l2gradient) {
-            this.threshold1 = threshold1;
-            this.threshold2 = threshold2;
-            this.apertureSize = onlyOdd(apertureSize, MIN_APERTURE_SIZE);
-            this.l2gradient = l2gradient;
-        }
-        @Override
-        public String toString() {
-            return String.format(Locale.US, "{ threshold1=%.2f, threshold2=%.2f, apertureSize=%d, l2gradient=%b }", threshold1, threshold2, apertureSize, l2gradient);
-        }
-    }
-
-    private final Params params;
+    private final CannyTabParams params;
 
     public CannyTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(3, 3, 5, true));
+        this(tabHandler, source, new CannyTabParams(3, 3, 5, true));
     }
 
-    public CannyTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public CannyTab(ITabHandler tabHandler, ITab<?> source, CannyTabParams params) {
         super(tabHandler, source);
         this.params = params;
 
@@ -133,7 +112,7 @@ public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
         modelApertureSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelApertureSize: value={}", modelApertureSize.getFormatedText());
             int val = modelApertureSize.getValue();
-            int valValid = onlyOdd(val, params.apertureSize);
+            int valValid = CannyTabParams.onlyOdd(val, params.apertureSize);
             if (val == valValid) {
                 params.apertureSize = valValid;
                 resetImage();
@@ -145,16 +124,8 @@ public class CannyTab extends OpencvFilterTab<CannyTab.Params> {
         return box4Options;
     }
 
-    private static int onlyOdd(int value, int prevValue) {
-        if ((value & 1) == 0)
-            return ((value - 1) == prevValue)
-                ? value + 1
-                : value - 1;
-        return value;
-    }
-
     @Override
-    public Params getParams() {
+    public CannyTabParams getParams() {
         return params;
     }
 

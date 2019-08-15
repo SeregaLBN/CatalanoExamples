@@ -2,7 +2,6 @@ package ksn.imgusage.tabs.catalano;
 
 import java.awt.Component;
 import java.awt.event.ItemEvent;
-import java.util.Locale;
 
 import javax.swing.*;
 
@@ -11,10 +10,10 @@ import Catalano.Imaging.Filters.Rotate.Algorithm;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.dto.catalano.RotateTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/Rotate.java'>Rotate image</a> */
-public class RotateTab extends CatalanoFilterTab<RotateTab.Params> {
+public class RotateTab extends CatalanoFilterTab<RotateTabParams> {
 
     public static final String TAB_NAME = Rotate.class.getSimpleName();
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -23,36 +22,13 @@ public class RotateTab extends CatalanoFilterTab<RotateTab.Params> {
     private static final double MIN =   0;
     private static final double MAX = 360;
 
-    public static class Params implements ITabParams {
-        public double angle;
-        public boolean keepSize;
-        public Rotate.Algorithm algorithm;
-
-        public Params() {}
-
-        public Params(double angle, boolean keepSize, Rotate.Algorithm algorithm) {
-            this.angle = angle;
-            this.keepSize = keepSize;
-            this.algorithm = algorithm;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US,
-                    "{ angle=%.2f, keepSize=%b, algorithm=%s }",
-                    angle,
-                    keepSize,
-                    algorithm.name());
-        }
-    }
-
-    private final Params params;
+    private final RotateTabParams params;
 
     public RotateTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(0, true, Algorithm.BICUBIC));
+        this(tabHandler, source, new RotateTabParams(0, true, Algorithm.BICUBIC));
     }
 
-    public RotateTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public RotateTab(ITabHandler tabHandler, ITab<?> source, RotateTabParams params) {
         super(tabHandler, source, false);
         this.params = params;
 
@@ -129,7 +105,7 @@ public class RotateTab extends CatalanoFilterTab<RotateTab.Params> {
     }
 
     @Override
-    public Params getParams() {
+    public RotateTabParams getParams() {
         return params;
     }
 

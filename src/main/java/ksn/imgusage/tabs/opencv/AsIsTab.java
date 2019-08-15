@@ -8,35 +8,24 @@ import javax.swing.JCheckBox;
 
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.dto.opencv.AsIsTabParams;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 
 /** for testing internal classes {@link ImgHelper} {@link OpenCvHelper} */
-public class AsIsTab extends OpencvFilterTab<AsIsTab.Params> {
+public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
 
     public static final String TAB_NAME = "AsIs";
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
     public static final String TAB_DESCRIPTION = "As is";
 
-    public static class Params implements ITabParams {
-        public boolean useGray;
-
-        public Params() {}
-
-        public Params(boolean useGray) { this.useGray = useGray; }
-
-        @Override
-        public String toString() { return "{ useGray=" + useGray + " }"; }
-    }
-
-    private Params params;
+    private AsIsTabParams params;
 
     public AsIsTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(false));
+        this(tabHandler, source, new AsIsTabParams(false));
     }
 
-    public AsIsTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public AsIsTab(ITabHandler tabHandler, ITab<?> source, AsIsTabParams params) {
         super(tabHandler, source);
         this.params = params;
 
@@ -74,7 +63,7 @@ public class AsIsTab extends OpencvFilterTab<AsIsTab.Params> {
     }
 
     @Override
-    public Params getParams() {
+    public AsIsTabParams getParams() {
         return params;
     }
 

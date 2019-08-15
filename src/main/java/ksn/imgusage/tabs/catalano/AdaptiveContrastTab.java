@@ -1,7 +1,6 @@
 package ksn.imgusage.tabs.catalano;
 
 import java.awt.Component;
-import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -11,10 +10,10 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.dto.catalano.AdaptiveContrastTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/AdaptiveContrastEnhancement.java'>Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change</a> */
-public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.Params> {
+public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTabParams> {
 
     public static final String TAB_NAME = AdaptiveContrastEnhancement.class.getSimpleName();
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -29,47 +28,13 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.P
     private static final double MIN_GAIN        =   0; // The minimum gain factor
     private static final double MAX_GAIN        =  20; // The maximum gain factor
 
-    public static class Params implements ITabParams {
-        public int    winSize;
-        public double k1;
-        public double k2;
-        public double minGain;
-        public double maxGain;
-
-        public Params() {}
-
-        public Params(
-            int    winSize,
-            double k1,
-            double k2,
-            double minGain,
-            double maxGain)
-        {
-            this.winSize = winSize;
-            this.k1      = k1;
-            this.k2      = k2;
-            this.minGain = minGain;
-            this.maxGain = maxGain;
-        }
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US,
-                    "{ winSize=%d, k1=%.2f, k2=%.2f, minGain=%.2f, maxGain=%.2f }",
-                    winSize,
-                    k1,
-                    k1,
-                    minGain,
-                    maxGain);
-        }
-    }
-    private final Params params;
+    private final AdaptiveContrastTabParams params;
 
     public AdaptiveContrastTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(20, 0.3, 0.6, 0.1, 1));
+        this(tabHandler, source, new AdaptiveContrastTabParams(20, 0.3, 0.6, 0.1, 1));
     }
 
-    public AdaptiveContrastTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public AdaptiveContrastTab(ITabHandler tabHandler, ITab<?> source, AdaptiveContrastTabParams params) {
         super(tabHandler, source, true);
         this.params = params;
 
@@ -154,7 +119,7 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTab.P
     }
 
     @Override
-    public Params getParams() {
+    public AdaptiveContrastTabParams getParams() {
         return params;
     }
 

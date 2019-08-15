@@ -8,6 +8,9 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.opencv.*;
+import ksn.imgusage.type.dto.FirstTabParams;
+import ksn.imgusage.type.dto.catalano.*;
+import ksn.imgusage.type.dto.opencv.*;
 
 public final class MapFilterToTab {
     private MapFilterToTab() {}
@@ -111,42 +114,42 @@ public final class MapFilterToTab {
         switch (filterTabFullName) {
 
         case       FirstTab.TAB_FULL_NAME:
-            return FirstTab.Params.class;
+            return FirstTabParams.class;
 
         // OpenCV
         // alphabetical sort
         case               AsIsTab.TAB_FULL_NAME:
-            return         AsIsTab.Params.class;
+            return         AsIsTabParams.class;
         case              CannyTab.TAB_FULL_NAME:
-            return        CannyTab.Params.class;
+            return        CannyTabParams.class;
         case       FindContoursTab.TAB_FULL_NAME:
-            return FindContoursTab.Params.class;
+            return FindContoursTabParams.class;
         case       GaussianBlurTab.TAB_FULL_NAME:
-            return GaussianBlurTab.Params.class;
+            return GaussianBlurTabParams.class;
         case       MorphologyExTab.TAB_FULL_NAME:
-            return MorphologyExTab.Params.class;
+            return MorphologyExTabParams.class;
         case          ThresholdTab.TAB_FULL_NAME:
-            return    ThresholdTab.Params.class;
+            return    ThresholdTabParams.class;
         default:
 
             // Catalano-Framework
             // alphabetical sort
             if (filterTabFullName.equals(     AdaptiveContrastTab.TAB_FULL_NAME))
-                return                        AdaptiveContrastTab.Params.class;
+                return                        AdaptiveContrastTabParams.class;
             if (filterTabFullName.equals(     ArtifactsRemovalTab.TAB_FULL_NAME))
-                return                        ArtifactsRemovalTab.Params.class;
+                return                        ArtifactsRemovalTabParams.class;
             if (filterTabFullName.equals(     BernsenThresholdTab.TAB_FULL_NAME))
-                return                        BernsenThresholdTab.Params.class;
+                return                        BernsenThresholdTabParams.class;
             if (filterTabFullName.equals(                 BlurTab.TAB_FULL_NAME))
-                return                                    BlurTab.Params.class;
+                return                                    BlurTabParams.class;
             if (filterTabFullName.equals(BradleyLocalThresholdTab.TAB_FULL_NAME))
-                return                   BradleyLocalThresholdTab.Params.class;
+                return                   BradleyLocalThresholdTabParams.class;
             if (filterTabFullName.equals( BrightnessCorrectionTab.TAB_FULL_NAME))
-                return                    BrightnessCorrectionTab.Params.class;
+                return                    BrightnessCorrectionTabParams.class;
             if (filterTabFullName.equals(      FrequencyFilterTab.TAB_FULL_NAME))
-                return                         FrequencyFilterTab.Params.class;
+                return                         FrequencyFilterTabParams.class;
             if (filterTabFullName.equals(               RotateTab.TAB_FULL_NAME))
-                return                                  RotateTab.Params.class;
+                return                                  RotateTabParams.class;
 
             return null;
         }

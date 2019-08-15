@@ -32,6 +32,7 @@ import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.InitLib;
 import ksn.imgusage.type.PipelineItem;
+import ksn.imgusage.type.dto.FirstTabParams;
 import ksn.imgusage.utils.JsonHelper;
 import ksn.imgusage.utils.MapFilterToTab;
 import ksn.imgusage.utils.SelectFilterDialog;
@@ -313,7 +314,7 @@ public class MainApp {
         }
 
         // cast absolute image-file path to relative from json-pipeline-file
-        FirstTab.Params firstParams = (FirstTab.Params)pipeline.get(0).params;
+        FirstTabParams firstParams = (FirstTabParams)pipeline.get(0).params;
         File tmp = firstParams.imageFile;
         firstParams.imageFile = SelectFilterDialog.getRelativePath(firstParams.imageFile, jsonFile.getParentFile());
 
@@ -363,7 +364,7 @@ public class MainApp {
         }
 
         // restore full path from relative
-        FirstTab.Params firstParams = (FirstTab.Params)pipeline.get(0).params;
+        FirstTabParams firstParams = (FirstTabParams)pipeline.get(0).params;
         firstParams.imageFile = jsonFile.toPath().getParent().resolve(firstParams.imageFile.toPath()).toFile();
 
         // remove all

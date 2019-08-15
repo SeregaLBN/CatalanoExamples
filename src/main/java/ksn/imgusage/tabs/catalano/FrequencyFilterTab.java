@@ -10,10 +10,10 @@ import Catalano.Imaging.Filters.FrequencyFilter;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.dto.catalano.FrequencyFilterTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/FrequencyFilter.java'>Filtering of frequencies outside of specified range in complex Fourier transformed image</a> */
-public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Params> {
+public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTabParams> {
 
     public static final String TAB_NAME = FrequencyFilter.class.getSimpleName();
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -22,27 +22,13 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Par
     private static final int MIN = 0;
     private static final int MAX = 1024;
 
-    public static class Params implements ITabParams {
-        public int min, max;
-
-        public Params() {}
-
-        public Params(int min, int max) {
-            this.min = min;
-            this.max = max;
-        }
-
-        @Override
-        public String toString() { return "{ min=" + min + ", max=" + max + " }"; }
-    }
-
-    private final Params params;
+    private final FrequencyFilterTabParams params;
 
     public FrequencyFilterTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(0, 100));
+        this(tabHandler, source, new FrequencyFilterTabParams(0, 100));
     }
 
-    public FrequencyFilterTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public FrequencyFilterTab(ITabHandler tabHandler, ITab<?> source, FrequencyFilterTabParams params) {
         super(tabHandler, source, true);
         this.params = params;
 
@@ -104,7 +90,7 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTab.Par
     }
 
     @Override
-    public Params getParams() {
+    public FrequencyFilterTabParams getParams() {
         return params;
     }
 

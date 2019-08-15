@@ -9,10 +9,10 @@ import Catalano.Imaging.Filters.BrightnessCorrection;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.dto.catalano.BrightnessCorrectionTabParams;
 
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BrightnessCorrection.java'>Brightness adjusting in RGB color space</a> */
-public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrectionTab.Params> {
+public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrectionTabParams> {
 
     public static final String TAB_NAME = BrightnessCorrection.class.getSimpleName();
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -21,24 +21,13 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
     private static final int MIN = -255;
     private static final int MAX =  255;
 
-    public static class Params implements ITabParams {
-        public int adjust;
-
-        public Params() {}
-
-        public Params(int adjustValue) { this.adjust = adjustValue; }
-
-        @Override
-        public String toString() { return "{ adjust=" + adjust + " }"; }
-    }
-
-    private final Params params;
+    private final BrightnessCorrectionTabParams params;
 
     public BrightnessCorrectionTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(100));
+        this(tabHandler, source, new BrightnessCorrectionTabParams(100));
     }
 
-    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public BrightnessCorrectionTab(ITabHandler tabHandler, ITab<?> source, BrightnessCorrectionTabParams params) {
         super(tabHandler, source, false);
         this.params = params;
 
@@ -82,7 +71,7 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
     }
 
     @Override
-    public Params getParams() {
+    public BrightnessCorrectionTabParams getParams() {
         return params;
     }
 

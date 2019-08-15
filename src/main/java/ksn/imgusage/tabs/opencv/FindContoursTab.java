@@ -17,15 +17,16 @@ import org.opencv.imgproc.Imgproc;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
-import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvContourApproximationModes;
 import ksn.imgusage.tabs.opencv.type.CvRetrievalModes;
 import ksn.imgusage.type.Size;
+import ksn.imgusage.type.dto.opencv.EFindContoursDrawMethod;
+import ksn.imgusage.type.dto.opencv.FindContoursTabParams;
 import ksn.imgusage.utils.OpenCvHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a'>Finds contours in a binary image</a> */
-public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
+public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
     public static final String TAB_NAME = "FindContours";
     public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
@@ -36,53 +37,16 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
     private static final int MIN_MAX_CONTOUR_AREA =    0;
     private static final int MAX_MAX_CONTOUR_AREA = 10000;
 
-    public enum EDrawMethod {
-        /** to display the contours using <a href='https://docs.opencv.org/3.4.2/d6/d6e/group__imgproc__draw.html#ga746c0625f1781f1ffc9056259103edbc'>drawContours()</a> method. */
-        DRAW_CONTOURS,
-        /** draw external rectangle of contours region */
-        EXTERNAL_RECT
-    }
-
-    public static class Params implements ITabParams {
-        public CvRetrievalModes            mode;
-        public CvContourApproximationModes method;
-        public EDrawMethod                 drawMethod;
-        public Size                        minLimitContours;
-        public int                         maxContourArea;
-
-        public Params() {}
-
-        public Params(CvRetrievalModes mode, CvContourApproximationModes method,
-                EDrawMethod drawMethod, Size minLimitContours,
-                int maxContourArea)
-        {
-            this.mode   = mode;
-            this.method = method;
-            this.drawMethod = drawMethod;
-            this.minLimitContours = minLimitContours;
-            this.maxContourArea   = maxContourArea;
-        }
-        @Override
-        public String toString() {
-            return "{ mode=" + mode
-                    + ", method=" + method
-                    + ", drawMethod=" + drawMethod
-                    + ", minLimitContours=" + minLimitContours
-                    + ", maxContourArea=" + maxContourArea
-                    + " }";
-        }
-    }
-
-    private final Params params;
+    private final FindContoursTabParams params;
 
     public FindContoursTab(ITabHandler tabHandler, ITab<?> source) {
-        this(tabHandler, source, new Params(
+        this(tabHandler, source, new FindContoursTabParams(
              CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
-             EDrawMethod.EXTERNAL_RECT, new Size(10, 10),
+             EFindContoursDrawMethod.EXTERNAL_RECT, new Size(10, 10),
              100));
     }
 
-    public FindContoursTab(ITabHandler tabHandler, ITab<?> source, Params params) {
+    public FindContoursTab(ITabHandler tabHandler, ITab<?> source, FindContoursTabParams params) {
         super(tabHandler, source);
         this.params = params;
 
@@ -242,11 +206,11 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
                 boxSelectDrawMethod.setToolTipText("How to draw contours?");
                 ButtonGroup radioGroup = new ButtonGroup();
 
-                JRadioButton radioBtn1 = new JRadioButton(EDrawMethod.DRAW_CONTOURS.name(), params.drawMethod == EDrawMethod.DRAW_CONTOURS);
+                JRadioButton radioBtn1 = new JRadioButton(EFindContoursDrawMethod.DRAW_CONTOURS.name(), params.drawMethod == EFindContoursDrawMethod.DRAW_CONTOURS);
                 radioBtn1.setToolTipText("to display the contours using <p>drawContours()</p> method");
                 radioBtn1.addItemListener(ev -> {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.drawMethod = EDrawMethod.DRAW_CONTOURS;
+                        params.drawMethod = EFindContoursDrawMethod.DRAW_CONTOURS;
                         logger.trace("params.drawMethod changed to {}", params.drawMethod);
                         makeDrawContoursParams(panelCustomParams, modelMaxContourArea);
                         panelCustomParams.revalidate();
@@ -256,11 +220,11 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
                 boxSelectDrawMethod.add(radioBtn1);
                 radioGroup.add(radioBtn1);
 
-                JRadioButton radioBtn2 = new JRadioButton(EDrawMethod.EXTERNAL_RECT.name(), params.drawMethod == EDrawMethod.EXTERNAL_RECT);
+                JRadioButton radioBtn2 = new JRadioButton(EFindContoursDrawMethod.EXTERNAL_RECT.name(), params.drawMethod == EFindContoursDrawMethod.EXTERNAL_RECT);
                 radioBtn2.setToolTipText("draw external rectangle of contours region");
                 radioBtn2.addItemListener(ev -> {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.drawMethod = EDrawMethod.EXTERNAL_RECT;
+                        params.drawMethod = EFindContoursDrawMethod.EXTERNAL_RECT;
                         logger.trace("params.drawMethod changed to {}", params.drawMethod);
                         makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH);
                         panelCustomParams.revalidate();
@@ -350,7 +314,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTab.Params> {
     }
 
     @Override
-    public Params getParams() {
+    public FindContoursTabParams getParams() {
         return params;
     }
 
