@@ -287,7 +287,7 @@ public class MainApp {
     }
 
     private void onSavePipeline() {
-        File latestDir = ((FirstTab)tabs.get(0)).getLatestImageDir();
+        File latestDir = getFirstTab().getLatestImageDir();
         File jsonFile = UiHelper.saveFiltersPipelineFile(frame, latestDir);
         if (jsonFile == null)
             return; // aborted
@@ -328,7 +328,7 @@ public class MainApp {
     }
 
     private void onLoadPipeline() {
-        File latestDir = ((FirstTab)tabs.get(0)).getLatestImageDir();
+        File latestDir = getFirstTab().getLatestImageDir();
         File jsonFile = UiHelper.loadFiltersPipelineFile(frame, latestDir);
         if (jsonFile == null)
             return; // aborted
@@ -355,19 +355,32 @@ public class MainApp {
         FirstTabParams firstParams = (FirstTabParams)pipeline.get(0).params;
         firstParams.imageFile = jsonFile.toPath().getParent().resolve(firstParams.imageFile.toPath()).toFile();
 
-        // remove all
-        do {
-            onRemoveFilter(tabs.get(0));
-        } while(!tabs.isEmpty());
-
         pipeline.sort((p1, p2) -> {
             if (p1.pos > p2.pos) return  1;
             if (p1.pos < p2.pos) return -1;
             return 0;
         });
 
+        if (!FirstTab.TAB_NAME.equals(pipeline.get(0).tabName)) {
+            logger.error("FirstTab mus be instanceof {}", FirstTab.class.getName());
+            onError("FirstTab mus be instanceof " + FirstTab.class.getName(), frame);
+        }
+
+        // remove all
+        do {
+            onRemoveFilter(tabs.get(0));
+        } while(!tabs.isEmpty());
+
         for (PipelineItem item : pipeline)
             addTabByFilterFullName(item.tabName, item.params);
+
+        isScale = getFirstTab()::isScale;
+    }
+
+    private FirstTab getFirstTab() {
+        if (tabs.isEmpty())
+            return null;
+        return (FirstTab)tabs.get(0);
     }
 
     public static void main(String[] args) {
