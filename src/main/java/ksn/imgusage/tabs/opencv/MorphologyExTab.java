@@ -14,14 +14,14 @@ import org.opencv.imgproc.Imgproc;
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.opencv.type.CvArrayType;
-import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
-import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
 import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.opencv.CtorParams;
 import ksn.imgusage.type.dto.opencv.EMatSource;
 import ksn.imgusage.type.dto.opencv.MorphologyExTabParams;
 import ksn.imgusage.type.dto.opencv.StructuringElementParams;
+import ksn.imgusage.type.opencv.CvArrayType;
+import ksn.imgusage.type.opencv.CvMorphShapes;
+import ksn.imgusage.type.opencv.CvMorphTypes;
 
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f'>Performs advanced morphological transformations</a> */
 public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {

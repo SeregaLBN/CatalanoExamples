@@ -111,6 +111,7 @@ public class MainApp {
             prev = tabs.get(i);
         newTab.init(getTabHandler(), prev);
         tabPane.addTab(newTab.getTitle(), newTab.makeTab(tabParams));
+      //tabPane.insertTab(newTab.getTitle(), null, newTab.makeTab(tabParams), null, i + 1);
         tabPane.setSelectedIndex(i + 1);
         SwingUtilities.invokeLater(tabPane::requestFocus);
         tabs.add(newTab);

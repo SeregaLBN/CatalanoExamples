@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.ThresholdTab;
-import ksn.imgusage.tabs.opencv.type.CvThresholdTypes;
+import ksn.imgusage.type.opencv.CvThresholdTypes;
 
 /** Init parameters for {@link ThresholdTab} */
 public class ThresholdTabParams implements ITabParams {

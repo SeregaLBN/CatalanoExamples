@@ -2,7 +2,7 @@ package ksn.imgusage.type.dto.opencv;
 
 import java.util.Locale;
 
-import ksn.imgusage.tabs.opencv.type.CvArrayType;
+import ksn.imgusage.type.opencv.CvArrayType;
 
 /** for {@link EMatSource#CTOR} */
 public class CtorParams {

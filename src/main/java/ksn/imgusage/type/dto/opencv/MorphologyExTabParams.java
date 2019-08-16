@@ -4,7 +4,7 @@ import java.util.Locale;
 
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.MorphologyExTab;
-import ksn.imgusage.tabs.opencv.type.CvMorphTypes;
+import ksn.imgusage.type.opencv.CvMorphTypes;
 
 /** Init parameters for {@link MorphologyExTab} */
 public class MorphologyExTabParams implements ITabParams {

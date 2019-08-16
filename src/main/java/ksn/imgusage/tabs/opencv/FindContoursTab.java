@@ -15,13 +15,13 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.tabs.opencv.type.CvArrayType;
-import ksn.imgusage.tabs.opencv.type.CvContourApproximationModes;
-import ksn.imgusage.tabs.opencv.type.CvLineType;
-import ksn.imgusage.tabs.opencv.type.CvRetrievalModes;
 import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.opencv.EFindContoursDrawMethod;
 import ksn.imgusage.type.dto.opencv.FindContoursTabParams;
+import ksn.imgusage.type.opencv.CvArrayType;
+import ksn.imgusage.type.opencv.CvContourApproximationModes;
+import ksn.imgusage.type.opencv.CvLineType;
+import ksn.imgusage.type.opencv.CvRetrievalModes;
 import ksn.imgusage.utils.OpenCvHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a'>Finds contours in a binary image</a> */

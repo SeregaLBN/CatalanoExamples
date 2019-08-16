@@ -12,8 +12,8 @@ import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderDoubleModel;
-import ksn.imgusage.tabs.opencv.type.CvThresholdTypes;
 import ksn.imgusage.type.dto.opencv.ThresholdTabParams;
+import ksn.imgusage.type.opencv.CvThresholdTypes;
 
 /** <a href='https://docs.opencv.org/3.4.2/d7/d1b/group__imgproc__misc.html#gae8a4a146d1ca78c626a53577199e9c57'>Applies a fixed-level threshold to each array element</a> */
 public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {

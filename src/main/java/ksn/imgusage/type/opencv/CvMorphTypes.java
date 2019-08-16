@@ -1,4 +1,4 @@
-package ksn.imgusage.tabs.opencv.type;
+package ksn.imgusage.type.opencv;
 
 import org.opencv.imgproc.Imgproc;
 

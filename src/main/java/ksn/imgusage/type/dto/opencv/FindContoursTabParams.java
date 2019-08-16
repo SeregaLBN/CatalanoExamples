@@ -2,9 +2,9 @@ package ksn.imgusage.type.dto.opencv;
 
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.FindContoursTab;
-import ksn.imgusage.tabs.opencv.type.CvContourApproximationModes;
-import ksn.imgusage.tabs.opencv.type.CvRetrievalModes;
 import ksn.imgusage.type.Size;
+import ksn.imgusage.type.opencv.CvContourApproximationModes;
+import ksn.imgusage.type.opencv.CvRetrievalModes;
 
 /** Init parameters for {@link FindContoursTab} */
 public class FindContoursTabParams implements ITabParams {

@@ -1,4 +1,4 @@
-package ksn.imgusage.tabs.opencv.type;
+package ksn.imgusage.type.opencv;
 
 /** @see <a href='https://docs.opencv.org/3.4.2/d2/de8/group__core__array.html#ga209f2f4869e304c82d07739337eae7c5'>Various border types, image boundaries are denoted with `|`</a> */
 public enum CvBorderTypes {

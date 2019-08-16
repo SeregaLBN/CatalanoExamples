@@ -4,8 +4,8 @@ import java.util.Locale;
 
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.GaussianBlurTab;
-import ksn.imgusage.tabs.opencv.type.CvBorderTypes;
 import ksn.imgusage.type.Size;
+import ksn.imgusage.type.opencv.CvBorderTypes;
 
 /** Init parameters for {@link GaussianBlurTab} */
 public class GaussianBlurTabParams implements ITabParams {

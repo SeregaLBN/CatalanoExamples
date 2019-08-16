@@ -2,8 +2,8 @@ package ksn.imgusage.type.dto.opencv;
 
 import java.util.Locale;
 
-import ksn.imgusage.tabs.opencv.type.CvMorphShapes;
 import ksn.imgusage.type.Size;
+import ksn.imgusage.type.opencv.CvMorphShapes;
 
 /** for {@link EMatSource#STRUCTURING_ELEMENT} */
 public class StructuringElementParams {
