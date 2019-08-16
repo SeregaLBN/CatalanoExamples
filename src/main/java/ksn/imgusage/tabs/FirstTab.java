@@ -33,6 +33,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private static final Color COLOR_RIGHT  = Color.GREEN;
     private static final Color COLOR_TOP    = Color.BLUE;
     private static final Color COLOR_BOTTOM = Color.ORANGE;
+    private static final int MAX_ZOOM_KOEF = 2;
 
     private BufferedImage sourceImage;
     private BufferedImage previewImage;
@@ -346,12 +347,12 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         applyMaxSizeLimits = () -> {
             if (sourceImage == null)
                 return;
-            modelSizeW.setMaximum(sourceImage.getWidth());
-            modelSizeH.setMaximum(sourceImage.getHeight());
-            modelPadLeft  .setMaximum(sourceImage.getWidth()  - 1);
-            modelPadRight .setMaximum(sourceImage.getWidth()  - 1);
-            modelPadTop   .setMaximum(sourceImage.getHeight() - 1);
-            modelPadBottom.setMaximum(sourceImage.getHeight() - 1);
+            modelSizeW.setMaximum(sourceImage.getWidth()  * MAX_ZOOM_KOEF);
+            modelSizeH.setMaximum(sourceImage.getHeight() * MAX_ZOOM_KOEF);
+            modelPadLeft  .setMaximum(sourceImage.getWidth()  * MAX_ZOOM_KOEF - 1);
+            modelPadRight .setMaximum(sourceImage.getWidth()  * MAX_ZOOM_KOEF - 1);
+            modelPadTop   .setMaximum(sourceImage.getHeight() * MAX_ZOOM_KOEF - 1);
+            modelPadBottom.setMaximum(sourceImage.getHeight() * MAX_ZOOM_KOEF - 1);
 
             params.keepToSize.width  = Math.min(params.keepToSize.width , modelSizeW    .getMaximum());
             params.keepToSize.height = Math.min(params.keepToSize.height, modelSizeH    .getMaximum());
@@ -378,15 +379,30 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             box4ImageSize.add(makeSliderVert(modelSizeH, "Height", "Image width"));
             box4ImageSize.add(Box.createHorizontalGlue());
 
+            Box box4ImageSize2 = Box.createHorizontalBox();
             JCheckBox btnKeepAspectRatio = new JCheckBox("Keep aspect ratio", params.useKeepAspectRatio);
             btnKeepAspectRatio.addActionListener(ev -> {
                 params.useKeepAspectRatio = btnKeepAspectRatio.isSelected();
                 onCheckKeepAspectRationByWidth(modelSizeH);
                 resetImage();
             });
+            JButton btnOrigSize = new JButton(" • ");
+            btnOrigSize.setToolTipText("Reset to original size");
+            btnOrigSize.addActionListener(ev -> {
+                if (sourceImage == null)
+                    return;
+                modelSizeW.setValue(sourceImage.getWidth());
+                modelSizeH.setValue(sourceImage.getHeight());
+                resetImage();
+            });
+            box4ImageSize2.add(Box.createHorizontalStrut(2));
+            box4ImageSize2.add(btnKeepAspectRatio);
+            box4ImageSize2.add(Box.createHorizontalGlue());
+            box4ImageSize2.add(btnOrigSize);
+            box4ImageSize2.add(Box.createHorizontalStrut(2));
 
-            panelImageSize.add(box4ImageSize     , BorderLayout.CENTER);
-            panelImageSize.add(btnKeepAspectRatio, BorderLayout.SOUTH);
+            panelImageSize.add(box4ImageSize , BorderLayout.CENTER);
+            panelImageSize.add(box4ImageSize2, BorderLayout.SOUTH);
         }
 
         Box boxOfRoi = Box.createHorizontalBox();
