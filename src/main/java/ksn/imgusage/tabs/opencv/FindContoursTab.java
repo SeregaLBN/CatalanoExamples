@@ -17,6 +17,7 @@ import org.opencv.imgproc.Imgproc;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.opencv.type.CvArrayType;
 import ksn.imgusage.tabs.opencv.type.CvContourApproximationModes;
+import ksn.imgusage.tabs.opencv.type.CvLineType;
 import ksn.imgusage.tabs.opencv.type.CvRetrievalModes;
 import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.opencv.EFindContoursDrawMethod;
@@ -42,7 +43,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
         if (params == null)
             params = new FindContoursTabParams(CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
                                                EFindContoursDrawMethod.EXTERNAL_RECT, new Size(10, 10),
-                                               100);
+                                               100, true);
         this.params = params;
 
         return makeTab();
@@ -88,12 +89,14 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                     MatOfPoint contour = contours.get(i);
                     double area = Math.abs(Imgproc.contourArea(contour));
                     if (area > params.maxContourArea) {
-                        Imgproc.drawContours(//contours, contourList, i, new Scalar(r.nextInt(255), r.nextInt(255), r.nextInt(255)), -1);
-                                imageMat, // Mat image
-                                contours, // List<MatOfPoint> contours
-                                i,        // int contourIdx
-                                green,    // Scalar color
-                                1         // int thickness
+                        Imgproc.drawContours(
+                                imageMat,           // Mat image
+                                contours,           // List<MatOfPoint> contours
+                                i,                  // int contourIdx
+                                green,              // Scalar color
+                                params.fillContour  // int thickness
+                                    ? CvLineType.FILLED.getVal()
+                                    : 1
                             );
                     }
                 }
@@ -117,15 +120,17 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                 /**/
 
                 Imgproc.drawContours(
-                    imageMat,        // Mat image
-                    contours2,       // List<MatOfPoint> contours
-                    -1,              // int contourIdx
-                    green,           // Scalar color
-                    1,               // int thickness
-                    Imgproc.LINE_AA, // int lineType
-                    hierarchy,       // Mat hierarchy
-                    3,               // int maxLevel
-                    offset           // Point offset
+                    imageMat,                        // Mat image
+                    contours2,                       // List<MatOfPoint> contours
+                    -1,                              // int contourIdx
+                    green,                           // Scalar color
+                    params.fillContour               // int thickness
+                        ? CvLineType.FILLED.getVal()
+                        : 1,
+                    CvLineType.LINE_AA.getVal(),     // int lineType
+                    hierarchy,                       // Mat hierarchy
+                    3,                               // int maxLevel
+                    offset                           // Point offset
                 );
             }
             break;
@@ -274,12 +279,21 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
         if (boxDrawContoursParams == null) {
             boxDrawContoursParams = Box.createHorizontalBox();
-            boxDrawContoursParams.setBorder(BorderFactory.createTitledBorder("..."));
+            boxDrawContoursParams.setBorder(BorderFactory.createTitledBorder("Outlines or filled contours"));
+
+            JCheckBox boxFilled = new JCheckBox("Fill", params.fillContour);
+            boxFilled.addItemListener(ev -> {
+                params.fillContour = (ev.getStateChange() == ItemEvent.SELECTED);
+                logger.trace("params.fillContour is {}", (params.fillContour ? "checked" : "unchecked"));
+                resetImage();
+            });
 
             boxDrawContoursParams.add(Box.createHorizontalGlue());
             boxDrawContoursParams.add(makeSliderVert(modelMaxContourArea, "Area", "Max show contour area"));
+            boxDrawContoursParams.add(Box.createHorizontalStrut(2));
+            boxDrawContoursParams.add(boxFilled);
             boxDrawContoursParams.add(Box.createHorizontalGlue());
-}
+        }
         boxDrawContoursParams.setVisible(true);
 
         panelCustomParams.setBorder(BorderFactory.createTitledBorder("Method drawContours() options"));

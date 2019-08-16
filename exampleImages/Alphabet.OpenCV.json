@@ -84,6 +84,7 @@
       "width" : 10,
       "height" : 35
     },
-    "maxContourArea" : 1000
+    "maxContourArea" : 300,
+    "fillContour" : true
   }
 } ]

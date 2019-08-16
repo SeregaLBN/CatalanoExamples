@@ -51,7 +51,7 @@ public class MainApp {
 
     private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
     private static final String DEFAULT_CAPTION = "Demonstration of image filters";
-    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "VolodHill.OpenCV.json").toAbsolutePath().toFile();
+    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Alphabet.OpenCV.json").toAbsolutePath().toFile();
 
     private final JFrame frame;
     private JTabbedPane tabPane;
