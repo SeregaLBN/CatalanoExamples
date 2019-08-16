@@ -48,7 +48,11 @@ jar {
     manifest {
         attributes 'Main-Class' : mainClassName,
                    'Title'      : 'Demonstration of the use of image filters - Java SWING desktop application',
-                   'Description': 'Examples of usage Catalano-Framework: https://github.com/DiegoCatalano/Catalano-Framework',
+                   'Description': 'Examples of usage: \n' +
+                                  ' * OpenCV: \n' +
+                                  '   https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html \n' +
+                                  ' * Catalano-Framework: \n' +
+                                  '   https://github.com/DiegoCatalano/Catalano-Framework',
                    'Version'    : version,
                    'Vendor'     : 'SeregaLBN',
                    'Build-Date' : new Date().format("yyyy-MM-dd'T 'HH:mm:ss.SSSZZ")
