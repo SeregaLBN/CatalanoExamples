@@ -98,7 +98,7 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
 
         Box box4Borders = makeBox4Border(
                 b -> (b != CvBorderTypes.BORDER_TRANSPARENT) // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
-                  && (b != CvBorderTypes.BORDER_DEFAULT),    // dublicate, getterBorderType, setterBorderType, resetImage, tooltip, logger)
+                  && (b != CvBorderTypes.BORDER_DEFAULT),    // dublicate
                 () -> params.borderType,
                 bt -> params.borderType = bt,
                 this::resetImage,

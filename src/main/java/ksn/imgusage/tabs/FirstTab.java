@@ -113,8 +113,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         double koefY = hDst / (double)hSrc;
 
         BufferedImage tmp = new BufferedImage(
-            (int)((wSrc - left - right) * koefX),
-            (int)((hSrc - top - bottom) * koefY),
+            Math.max(1, (int)((wSrc - left - right) * koefX)),
+            Math.max(1, (int)((hSrc - top - bottom) * koefY)),
             image.getType());
         Graphics2D g = tmp.createGraphics();
         try {
@@ -218,30 +218,29 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
     private Runnable applyMaxSizeLimits;
 
-    private boolean readImageFile(File imageFile) {
+    private void readImageFile(File imageFile) {
         if (imageFile == null)
-            return false;
+            return;
 
         try {
             if (!imageFile.exists()) {
                 logger.warn("File not found: {}", imageFile);
                 tabHandler.onError("File not found: " + imageFile, this, null);
-                return false;
+                return;
             }
             sourceImage = ImageIO.read(imageFile);
-            if (applyMaxSizeLimits != null) {
-                lockCheckKeepAspectRation = true;
-                applyMaxSizeLimits.run();
-                lockCheckKeepAspectRation = false;
-            }
 
             params.imageFile = imageFile;
             latestImageDir = imageFile.getParentFile();
+
+            if (applyMaxSizeLimits != null)
+                applyMaxSizeLimits.run();
+            if (onCheckKeepAspectRationByWidth != null)
+                onCheckKeepAspectRationByWidth.run();
+
             resetImage();
-            return true;
         } catch (IOException ex) {
             logger.error("Can`t read image", ex);
-            return false;
         }
     }
 
@@ -271,11 +270,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             logger.trace("onSelectImage");
 
             File file = UiHelper.chooseFileToLoadImage(btnLoadImage, latestImageDir);
-            if (!readImageFile(file))
-                return;
-
-            onCheckKeepAspectRationByWidth.run();
-            resetImage();
+            readImageFile(file);
         });
         if (sourceImage == null)
             SwingUtilities.invokeLater(btnLoadImage::doClick);
@@ -397,10 +392,10 @@ public class FirstTab extends BaseTab<FirstTabParams> {
                 return;
             modelSizeW.setMaximum(sourceImage.getWidth()  * MAX_ZOOM_KOEF);
             modelSizeH.setMaximum(sourceImage.getHeight() * MAX_ZOOM_KOEF);
-            modelPadLeft  .setMaximum(sourceImage.getWidth()  * MAX_ZOOM_KOEF - 1);
-            modelPadRight .setMaximum(sourceImage.getWidth()  * MAX_ZOOM_KOEF - 1);
-            modelPadTop   .setMaximum(sourceImage.getHeight() * MAX_ZOOM_KOEF - 1);
-            modelPadBottom.setMaximum(sourceImage.getHeight() * MAX_ZOOM_KOEF - 1);
+            modelPadLeft  .setMaximum(sourceImage.getWidth()  - 1);
+            modelPadRight .setMaximum(sourceImage.getWidth()  - 1);
+            modelPadTop   .setMaximum(sourceImage.getHeight() - 1);
+            modelPadBottom.setMaximum(sourceImage.getHeight() - 1);
 
             params.keepToSize.width  = Math.min(params.keepToSize.width , modelSizeW    .getMaximum());
             params.keepToSize.height = Math.min(params.keepToSize.height, modelSizeH    .getMaximum());
@@ -409,7 +404,6 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             params.boundOfRoi.top    = Math.min(params.boundOfRoi.top   , modelPadTop   .getMaximum());
             params.boundOfRoi.bottom = Math.min(params.boundOfRoi.bottom, modelPadBottom.getMaximum());
         };
-        applyMaxSizeLimits.run();
 
 
         Box box4Options = Box.createVerticalBox();
@@ -473,6 +467,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         box4Options.add(Box.createVerticalStrut(2));
         box4Options.add(boxOfRoi);
 
+        applyMaxSizeLimits.run();
         onCheckKeepAspectRationByWidth.run();
 
         modelSizeW.getWrapped().addChangeListener(ev -> {

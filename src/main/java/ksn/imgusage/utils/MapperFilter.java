@@ -50,6 +50,8 @@ public final class MapperFilter {
         return Arrays.<FilterTabs>asList( // alphabetical sort
             new FilterTabs(        AsIsTab.TAB_TITLE,
                                    AsIsTab.TAB_DESCRIPTION),
+            new FilterTabs(   BilateralTab.TAB_TITLE,
+                              BilateralTab.TAB_DESCRIPTION),
             new FilterTabs(       CannyTab.TAB_TITLE,
                                   CannyTab.TAB_DESCRIPTION),
             new FilterTabs(FindContoursTab.TAB_TITLE,
@@ -75,6 +77,8 @@ public final class MapperFilter {
         // alphabetical sort
         case               AsIsTab.TAB_NAME:
             return         AsIsTab.class;
+        case          BilateralTab.TAB_NAME:
+            return    BilateralTab.class;
         case              CannyTab.TAB_NAME:
             return        CannyTab.class;
         case       FindContoursTab.TAB_NAME:
@@ -121,6 +125,8 @@ public final class MapperFilter {
         // alphabetical sort
         case               AsIsTab.TAB_NAME:
             return         AsIsTabParams.class;
+        case          BilateralTab.TAB_NAME:
+            return    BilateralTabParams.class;
         case              CannyTab.TAB_NAME:
             return        CannyTabParams.class;
         case       FindContoursTab.TAB_NAME:
