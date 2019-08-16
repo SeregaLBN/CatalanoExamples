@@ -154,14 +154,14 @@ public class MainApp {
             addTabByFilterFullName(filterTabFullName, null);
     }
 
-    private void addTabByFilterFullName(String filterTabFullName, ITabParams params) {
+    private <TTabParams extends ITabParams> void addTabByFilterFullName(String filterTabFullName, TTabParams params) {
         Class<? extends ITab<?>> tabClass = MapperFilter.getTabClass(filterTabFullName);
         if (tabClass == null)
             logger.error("Not supported filter {}", filterTabFullName);
         else
             try {
-                Constructor<? extends ITab<?>> ctor = tabClass.getConstructor();
-                ITab<?> lastTab = tabs.get(tabs.size() - 1);
+                @SuppressWarnings("unchecked")
+                Constructor<? extends ITab<TTabParams>> ctor = (Constructor<? extends ITab<TTabParams>>)tabClass.getConstructor();
                 addTab(ctor.newInstance(), params);
             } catch (Exception ex) {
                 logger.error(ex.toString());
