@@ -13,8 +13,8 @@ import ksn.imgusage.utils.OpenCvHelper;
 /** for testing internal classes {@link ImgHelper} {@link OpenCvHelper} */
 public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
 
-    public static final String TAB_NAME = "AsIs";
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = "AsIs";
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "As is";
 
     private AsIsTabParams params;
@@ -29,9 +29,9 @@ public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyOpencvFilter() {

@@ -26,8 +26,8 @@ import ksn.imgusage.utils.OpenCvHelper;
 /** <a href='https://docs.opencv.org/3.4.2/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a'>Finds contours in a binary image</a> */
 public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
-    public static final String TAB_NAME = "FindContours";
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = "FindContours";
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Finds contours in a binary image";
 
     private static final int MIN_MIN_LIMIT_CONTOUR_SIZE =    0;
@@ -49,9 +49,9 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyOpencvFilter() {
@@ -181,7 +181,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                 boxMethod.add(comboBoxMeethod);
             }
 
-            boxFindContoursOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+            boxFindContoursOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
             boxFindContoursOptions.add(boxMode);
             boxFindContoursOptions.add(Box.createVerticalStrut(2));
             boxFindContoursOptions.add(boxMethod);

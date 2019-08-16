@@ -12,8 +12,8 @@ import ksn.imgusage.type.dto.catalano.ArtifactsRemovalTabParams;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/ArtifactsRemoval.java'>Remove artifacts caused by uneven lightning</a> */
 public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTabParams> {
 
-    public static final String TAB_NAME = ArtifactsRemoval.class.getSimpleName();
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = ArtifactsRemoval.class.getSimpleName();
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Remove artifacts caused by uneven lightning";
 
     private static final int MIN_WINDOW_SIZE = 1;
@@ -35,9 +35,9 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTabPa
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {
@@ -53,7 +53,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTabPa
         SliderIntModel modelWinSize = new SliderIntModel(params.windowSize, 0, MIN_WINDOW_SIZE, MAX_WINDOW_SIZE);
 
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
 
         boxOptions.add(Box.createHorizontalGlue());
         boxOptions.add(makeSliderVert(modelWinSize, "WinSize", "Size of window"));

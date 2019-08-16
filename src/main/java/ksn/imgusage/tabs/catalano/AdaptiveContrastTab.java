@@ -13,8 +13,8 @@ import ksn.imgusage.type.dto.catalano.AdaptiveContrastTabParams;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/AdaptiveContrastEnhancement.java'>Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change</a> */
 public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTabParams> {
 
-    public static final String TAB_NAME = AdaptiveContrastEnhancement.class.getSimpleName();
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = AdaptiveContrastEnhancement.class.getSimpleName();
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Adaptive Contrast Enhancement is modification of the gray level values based on some criterion that adjusts its parameters as local image characteristics change";
 
     private static final int    MIN_WINDOW_SIZE =   1; // Size of window (should be an odd number).
@@ -42,9 +42,9 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTabPa
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {
@@ -69,7 +69,7 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTabPa
         SliderDoubleModel modelMaxGain = new SliderDoubleModel(params.maxGain, 0, MIN_GAIN       , MAX_GAIN);
 
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
 
         boxOptions.add(Box.createHorizontalGlue());
         boxOptions.add(makeSliderVert(modelWinSize, "WinSize", "Size of window"));

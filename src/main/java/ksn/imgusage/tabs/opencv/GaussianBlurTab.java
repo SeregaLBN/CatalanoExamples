@@ -18,8 +18,8 @@ import ksn.imgusage.type.dto.opencv.GaussianBlurTabParams;
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1'>Blurs an image using a Gaussian filter</a> */
 public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
 
-    public static final String TAB_NAME = "GaussianBlur";
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = "GaussianBlur";
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Blurs an image using a Gaussian filter";
 
     public  static final int MIN_KSIZE    =   0; // Gaussian kernel size. ksize.width and ksize.height can differ but they both must be positive and odd. Or,
@@ -42,9 +42,9 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyOpencvFilter() {
@@ -126,7 +126,7 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
         box4Sliders.add(Box.createHorizontalGlue());
 
         Box boxOptions = Box.createVerticalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(box4Sliders);
         boxOptions.add(Box.createVerticalStrut(2));

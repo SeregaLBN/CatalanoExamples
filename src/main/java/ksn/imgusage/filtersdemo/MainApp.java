@@ -110,7 +110,7 @@ public class MainApp {
         if (i >= 0)
             prev = tabs.get(i);
         newTab.init(getTabHandler(), prev);
-        tabPane.addTab(newTab.getTabName(), newTab.makeTab(tabParams));
+        tabPane.addTab(newTab.getTitle(), newTab.makeTab(tabParams));
         tabPane.setSelectedIndex(i + 1);
         SwingUtilities.invokeLater(tabPane::requestFocus);
         tabs.add(newTab);
@@ -296,7 +296,7 @@ public class MainApp {
         for (int i = 0; i < tabs.size(); ++i) {
             PipelineItem item = new PipelineItem();
             item.pos = i;
-            item.tabName = tabs.get(i).getTabFullName();
+            item.tabName = tabs.get(i).getName();
             item.params  = tabs.get(i).getParams();
             pipeline.add(item);
         }

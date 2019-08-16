@@ -13,8 +13,8 @@ import ksn.imgusage.type.dto.catalano.BernsenThresholdTabParams;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BernsenThreshold.java'>Bernsen Threshold</a> */
 public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTabParams> {
 
-    public static final String TAB_NAME = BernsenThreshold.class.getSimpleName();
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = BernsenThreshold.class.getSimpleName();
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "The method uses a user-provided contrast threshold";
 
     private static final int    MIN_RADIUS = 0;
@@ -38,9 +38,9 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTabPa
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {
@@ -57,7 +57,7 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTabPa
         SliderDoubleModel modelContrastThreshold = new SliderDoubleModel(params.contrastThreshold, 0, MIN_CONTRAST_THRESHOLD, MAX_CONTRAST_THRESHOLD);
 
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
 
         boxOptions.add(Box.createHorizontalGlue());
         boxOptions.add(makeSliderVert(modelRadius, "Radius", "Radius"));

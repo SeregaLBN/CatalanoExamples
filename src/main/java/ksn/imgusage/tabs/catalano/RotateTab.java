@@ -13,8 +13,8 @@ import ksn.imgusage.type.dto.catalano.RotateTabParams;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/Rotate.java'>Rotate image</a> */
 public class RotateTab extends CatalanoFilterTab<RotateTabParams> {
 
-    public static final String TAB_NAME = Rotate.class.getSimpleName();
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = Rotate.class.getSimpleName();
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Rotate image";
 
     private static final double MIN =   0;
@@ -36,9 +36,9 @@ public class RotateTab extends CatalanoFilterTab<RotateTabParams> {
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {
@@ -55,7 +55,7 @@ public class RotateTab extends CatalanoFilterTab<RotateTabParams> {
 
         SliderDoubleModel modelAngle = new SliderDoubleModel(params.angle, 0, MIN, MAX);
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
 
         Box box2 = Box.createVerticalBox();
         box2.setBorder(BorderFactory.createTitledBorder(""));

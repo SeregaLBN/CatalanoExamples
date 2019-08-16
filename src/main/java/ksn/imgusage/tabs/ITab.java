@@ -7,13 +7,13 @@ public interface ITab<TTabParams extends ITabParams> {
 
     void init(ITabHandler tabHandler, ITab<?> source) ;
     Component makeTab(TTabParams params);
+    TTabParams getParams();
 
     BufferedImage getImage();
-    void updateSource(ITab<?> newSource);
     void resetImage();
+    void updateSource(ITab<?> newSource);
 
-    String getTabName();
-    String getTabFullName();
-    TTabParams getParams();
+    String getTitle();
+    String getName();
 
 }

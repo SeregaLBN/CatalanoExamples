@@ -11,8 +11,8 @@ import ksn.imgusage.type.dto.catalano.BlurTabParams;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/Blur.java'>Blur filter</a> */
 public class BlurTab extends CatalanoFilterTab<BlurTabParams> {
 
-    public static final String TAB_NAME = Blur.class.getSimpleName();
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = Blur.class.getSimpleName();
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Blur filter";
 
     public BlurTab() {
@@ -25,9 +25,9 @@ public class BlurTab extends CatalanoFilterTab<BlurTabParams> {
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {

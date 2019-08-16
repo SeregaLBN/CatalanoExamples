@@ -26,8 +26,8 @@ import ksn.imgusage.type.dto.opencv.StructuringElementParams;
 /** <a href='https://docs.opencv.org/3.4.2/d4/d86/group__imgproc__filter.html#ga67493776e3ad1a3df63883829375201f'>Performs advanced morphological transformations</a> */
 public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
 
-    public static final String TAB_NAME = "MorphologyEx";
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = "MorphologyEx";
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Performs advanced morphological transformations";
 
     private static final int MIN_ROWS = 1;
@@ -59,9 +59,9 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyOpencvFilter() {
@@ -115,7 +115,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
 
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+        panel.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
 
         {
             JComboBox<CvMorphTypes> comboBoxMorphOper = new JComboBox<>(CvMorphTypes.values());

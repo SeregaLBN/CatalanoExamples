@@ -12,8 +12,8 @@ import ksn.imgusage.type.dto.catalano.BrightnessCorrectionTabParams;
 /** <a href='https://github.com/DiegoCatalano/Catalano-Framework/blob/master/Catalano.Image/src/Catalano/Imaging/Filters/BrightnessCorrection.java'>Brightness adjusting in RGB color space</a> */
 public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrectionTabParams> {
 
-    public static final String TAB_NAME = BrightnessCorrection.class.getSimpleName();
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = BrightnessCorrection.class.getSimpleName();
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Brightness adjusting in RGB color space";
 
     private static final int MIN = -255;
@@ -35,9 +35,9 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyCatalanoFilter() {
@@ -53,7 +53,7 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
         SliderIntModel modelAdjust = new SliderIntModel(params.adjust, 0, MIN, MAX);
 
         Box boxOptions = Box.createHorizontalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+        boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
 
         boxOptions.add(Box.createHorizontalGlue());
         boxOptions.add(makeSliderVert(modelAdjust, "Adjust", "Brightness adjust value"));

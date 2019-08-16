@@ -16,8 +16,8 @@ import ksn.imgusage.type.dto.opencv.CannyTabParams;
 /** <a href='https://docs.opencv.org/3.4.2/dd/d1a/group__imgproc__feature.html#ga04723e007ed888ddf11d9ba04e2232de'>Finds edges in an image using the Canny algorithm</a> */
 public class CannyTab extends OpencvFilterTab<CannyTabParams> {
 
-    public static final String TAB_NAME = "Canny";
-    public static final String TAB_FULL_NAME = TAB_PREFIX + TAB_NAME;
+    public static final String TAB_TITLE = "Canny";
+    public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Finds edges in an image using the Canny algorithm";
 
     private static final double MIN_THRESHOLD     =   0;
@@ -37,9 +37,9 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
     }
 
     @Override
-    public String getTabName() { return TAB_NAME; }
+    public String getTitle() { return TAB_TITLE; }
     @Override
-    public String getTabFullName() { return TAB_FULL_NAME; }
+    public String getName() { return TAB_NAME; }
 
     @Override
     protected void applyOpencvFilter() {
@@ -88,7 +88,7 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
 
         JPanel panelOptions = new JPanel();
         panelOptions.setLayout(new BorderLayout());
-        panelOptions.setBorder(BorderFactory.createTitledBorder(getTabName() + " options"));
+        panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
         panelOptions.add(box4Sliders   , BorderLayout.CENTER);
         panelOptions.add(box4L2gradient, BorderLayout.SOUTH);
 
