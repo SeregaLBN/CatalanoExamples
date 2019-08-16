@@ -136,6 +136,7 @@ public class MainApp {
     private ITabHandler getTabHandler() {
         return new ITabHandler() {
             @Override public JFrame getFrame()                                         { return MainApp.this.frame; }
+            @Override public File   getCurrentDir()                                    { return MainApp.this.getFirstTab().getLatestImageDir(); }
             @Override public void onImageChanged(ITab<?> tab)                          {        MainApp.this.onImageChanged(tab); }
             @Override public void onAddNewFilter()                                     {        MainApp.this.onAddNewFilter(); }
             @Override public void onRemoveFilter(ITab<?> tab)                          {        MainApp.this.onRemoveFilter(tab); }
@@ -288,9 +289,10 @@ public class MainApp {
 
     private void onSavePipeline() {
         File latestDir = getFirstTab().getLatestImageDir();
-        File jsonFile = UiHelper.saveFiltersPipelineFile(frame, latestDir);
+        File jsonFile = UiHelper.chooseFileToSavePipeline(frame, latestDir);
         if (jsonFile == null)
             return; // aborted
+        jsonFile = SelectFilterDialog.checkExtension(jsonFile, ".json");
 
         List<PipelineItem> pipeline = new ArrayList<>(tabs.size());
         for (int i = 0; i < tabs.size(); ++i) {
@@ -329,7 +331,7 @@ public class MainApp {
 
     private void onLoadPipeline() {
         File latestDir = getFirstTab().getLatestImageDir();
-        File jsonFile = UiHelper.loadFiltersPipelineFile(frame, latestDir);
+        File jsonFile = UiHelper.chooseFileToLoadPipeline(frame, latestDir);
         if (jsonFile == null)
             return; // aborted
         loadPipeline(jsonFile);
@@ -378,8 +380,6 @@ public class MainApp {
     }
 
     private FirstTab getFirstTab() {
-        if (tabs.isEmpty())
-            return null;
         return (FirstTab)tabs.get(0);
     }
 

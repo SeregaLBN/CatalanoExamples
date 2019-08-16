@@ -2,6 +2,7 @@ package ksn.imgusage.tabs;
 
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.io.File;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -9,6 +10,7 @@ import javax.swing.JPanel;
 public interface ITabHandler {
 
     JFrame getFrame();
+    File getCurrentDir();
 
     void onImageChanged(ITab<?> tab);
     void onCancel();

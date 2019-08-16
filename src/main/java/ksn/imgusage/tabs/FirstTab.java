@@ -267,7 +267,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         btnLoadImage.addActionListener(ev -> {
             logger.trace("onSelectImage");
 
-            File file = UiHelper.selectImageFile(btnLoadImage, latestImageDir);
+            File file = UiHelper.chooseFileToLoadImage(btnLoadImage, latestImageDir);
             if (!readImageFile(file))
                 return;
 

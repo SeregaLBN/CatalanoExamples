@@ -89,4 +89,12 @@ public class SelectFilterDialog {
         return basePath.toPath().relativize(from.toPath()).toFile();
     }
 
+    public static File checkExtension(File file, String mustBeExtension) {
+        String name = file.getName();
+        int pos = name.lastIndexOf('.');
+        if ((pos < 0) || !name.substring(pos).equalsIgnoreCase(mustBeExtension))
+            file = new File(file.getAbsolutePath() + mustBeExtension);
+        return file;
+    }
+
 }

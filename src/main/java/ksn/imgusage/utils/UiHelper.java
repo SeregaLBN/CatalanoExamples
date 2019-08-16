@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 public final class UiHelper {
     private UiHelper() {}
 
-    public static File selectImageFile(Component parent, File currentDir) {
+    private static File chooseFileToLoad(Component parent, File currentDir, FileFilter filter) {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.addChoosableFileFilter(new ImageFilter());
+        fileChooser.addChoosableFileFilter(filter);
         fileChooser.setAcceptAllFileFilterUsed(false);
         if (currentDir != null)
             fileChooser.setCurrentDirectory(currentDir);
@@ -30,45 +30,9 @@ public final class UiHelper {
         return null;
     }
 
-    private static class ImageFilter extends FileFilter {
-        private static final List<String> ALL = Arrays.asList("jpeg", "jpg", "gif", "tiff", "tif", "png");
-
-        @Override
-        public boolean accept(File file) {
-            if (file.isDirectory())
-                return true;
-            String fileName = file.getName();
-            int pos = fileName.lastIndexOf('.');
-            if (pos < 0)
-                return false;
-            String ext = fileName.substring(pos + 1);
-            return ALL.stream().anyMatch(ext::equalsIgnoreCase);
-        }
-
-        @Override
-        public String getDescription() {
-            return "Image Only";
-        }
-    }
-
-
-    public static File loadFiltersPipelineFile(Component parent, File currentDir) {
+    private static File chooseFileToSave(Component parent, File currentDir, FileFilter filter) {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.addChoosableFileFilter(new FiltersPipelineFilter());
-        fileChooser.setAcceptAllFileFilterUsed(false);
-        if (currentDir != null)
-            fileChooser.setCurrentDirectory(currentDir);
-
-        int option = fileChooser.showOpenDialog(parent);
-        if (option == JFileChooser.APPROVE_OPTION)
-            return fileChooser.getSelectedFile();
-
-        return null;
-    }
-
-    public static File saveFiltersPipelineFile(Component parent, File currentDir) {
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.addChoosableFileFilter(new FiltersPipelineFilter());
+        fileChooser.addChoosableFileFilter(filter);
         fileChooser.setAcceptAllFileFilterUsed(false);
         if (currentDir != null)
             fileChooser.setCurrentDirectory(currentDir);
@@ -80,7 +44,32 @@ public final class UiHelper {
         return null;
     }
 
-    private static class FiltersPipelineFilter extends FileFilter {
+    public static File chooseFileToLoadImage(Component parent, File currentDir) {
+        return chooseFileToLoad(parent, currentDir, new ImageFilter());
+    }
+
+    public static File chooseFileToSavePngImage(Component parent, File currentDir) {
+        return chooseFileToSave(parent, currentDir, new ImageOnlyPngFilter());
+    }
+
+    public static File chooseFileToLoadPipeline(Component parent, File currentDir) {
+        return chooseFileToLoad(parent, currentDir, new PipelineFilter());
+    }
+
+    public static File chooseFileToSavePipeline(Component parent, File currentDir) {
+        return chooseFileToSave(parent, currentDir, new PipelineFilter());
+    }
+
+    private static class InternalFilter extends FileFilter {
+
+        private final List<String> extensions;
+        private final String description;
+
+        protected InternalFilter(List<String> extensions, String description) {
+            this.extensions = extensions;
+            this.description = description;
+        }
+
         @Override
         public boolean accept(File file) {
             if (file.isDirectory())
@@ -90,12 +79,28 @@ public final class UiHelper {
             if (pos < 0)
                 return false;
             String ext = fileName.substring(pos + 1);
-            return ext.equalsIgnoreCase("json");
+            return extensions.stream().anyMatch(ext::equalsIgnoreCase);
         }
 
         @Override
         public String getDescription() {
-            return "Pipeline filters (*.json)";
+            return description;
+        }
+    }
+
+    private static class ImageFilter extends InternalFilter {
+        public ImageFilter() {
+            super(Arrays.asList("jpeg", "jpg", "gif", "tiff", "tif", "png"), "Image Only");
+        }
+    }
+    private static class PipelineFilter extends InternalFilter {
+        public PipelineFilter() {
+            super(Arrays.asList("json"),  "Pipeline filters (*.json)");
+        }
+    }
+    private static class ImageOnlyPngFilter extends InternalFilter {
+        public ImageOnlyPngFilter() {
+            super(Arrays.asList("png"), "PNG Only");
         }
     }
 

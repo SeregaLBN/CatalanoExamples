@@ -2,7 +2,9 @@ package ksn.imgusage.tabs;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.utils.ImgHelper;
+import ksn.imgusage.utils.SelectFilterDialog;
 import ksn.imgusage.utils.UiHelper;
 
 /** Abstract tab. Contains common methods / shared logic. */
@@ -102,6 +105,26 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(this));
         return btnRemoveFilter;
     }
+    protected final JButton makeButtonSaveImage() {
+        JButton btn = new JButton("Save to png...");
+        btn.addActionListener(ev -> {
+            File file = UiHelper.chooseFileToSavePngImage(btn, tabHandler.getCurrentDir());
+            if (file == null)
+                return; // canceled
+            file = SelectFilterDialog.checkExtension(file, ".png");
+            try {
+                boolean succ = ImageIO.write(image, "png", file);
+                if (succ)
+                    logger.info("Image saved to PNG file {}", file);
+                else
+                    logger.warn("Can`t save image to PNG file {}", file);
+            } catch (Exception ex) {
+                logger.error("Can`t save image to PNG file: {}", ex);
+                tabHandler.onError("Can`t save image to PNG file: " + ex, this, btn);
+            }
+        });
+        return btn;
+    }
 
     protected Component makeUpButtons() {
         return null;
@@ -112,8 +135,10 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         box4Buttons.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
 
         box4Buttons.add(makeButtonAddFilter());
-        box4Buttons.add(Box.createHorizontalStrut(6));
+        box4Buttons.add(Box.createHorizontalStrut(3));
         box4Buttons.add(makeButtonRemoveFilter());
+        box4Buttons.add(Box.createHorizontalGlue());
+        box4Buttons.add(makeButtonSaveImage());
 
         return box4Buttons;
     }
