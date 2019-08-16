@@ -212,10 +212,17 @@ task downloadExampleImage() {
             new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG/1024px-%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80%D1%81%D1%8C%D0%BA%D0%B0_%D0%B3%D1%96%D1%80%D0%BA%D0%B0%2C_%D0%92%D0%BE%D0%BB%D0%BE%D0%B4%D0%B8%D0%BC%D0%B8%D1%80_%D1%82%D0%B0_%D0%94%D0%BD%D1%96%D0%BF%D1%80%D0%BE.JPG'),
             project.file('./exampleImages/VolodHill.jpg'),
             false)
+
         // https://commons.wikimedia.org/wiki/File:Alphabet_board.jpg
         downloadByUrl(
             new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/7/70/Alphabet_board.jpg'),
             project.file('./exampleImages/Alphabet.eng.jpg'),
+            false)
+
+        // https://en.m.wikipedia.org/wiki/File:Similar-geometric-shapes.svg
+        downloadByUrl(
+            new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Similar-geometric-shapes.svg/1024px-Similar-geometric-shapes.svg.png'),
+            project.file('./exampleImages/Shapes.png'),
             false)
     }
 }
