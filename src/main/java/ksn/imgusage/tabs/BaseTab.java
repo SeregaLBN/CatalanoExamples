@@ -21,7 +21,7 @@ import ksn.imgusage.utils.UiHelper;
 public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTabParams> {
 
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-    protected static final int WIDTH_LEFT_PANEL = 250;
+    protected static final int WIDTH_LEFT_PANEL = 300;
 
     protected ITabHandler tabHandler;
     protected ITab<?> source;
@@ -96,7 +96,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     }
 
     protected final JButton makeButtonAddFilter() {
-        JButton btnAddFilter = new JButton("Add filter");
+        JButton btnAddFilter = new JButton("Add filter...");
         btnAddFilter.addActionListener(ev -> tabHandler.onAddNewFilter());
         return btnAddFilter;
     }

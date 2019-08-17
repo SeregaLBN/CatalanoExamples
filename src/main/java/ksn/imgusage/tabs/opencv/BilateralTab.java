@@ -24,10 +24,10 @@ public class BilateralTab extends OpencvFilterTab<BilateralTabParams> {
 
     public  static final int MIN_DIAMETER =  -1;
     private static final int MAX_DIAMETER = 200;
-    private static final double MIN_SIGMA_COLOR = -200;
-    private static final double MAX_SIGMA_COLOR = 200;
-    private static final double MIN_SIGMA_SPACE = -200;
-    private static final double MAX_SIGMA_SPACE = 200;
+    private static final double MIN_SIGMA_COLOR = 0;
+    private static final double MAX_SIGMA_COLOR = 700;
+    private static final double MIN_SIGMA_SPACE = 0;
+    private static final double MAX_SIGMA_SPACE = 500;
 
     private BilateralTabParams params;
 
