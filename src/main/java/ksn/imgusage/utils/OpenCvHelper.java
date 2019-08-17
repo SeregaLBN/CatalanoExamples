@@ -210,4 +210,22 @@ public final class OpenCvHelper {
         }
     }
 
+    public static Mat to3Channel(Mat from) {
+        switch (from.channels()) {
+        case 1: {
+                Mat to = new Mat(from.size(), CvType.CV_8UC3);
+                Imgproc.cvtColor(from, to, Imgproc.COLOR_GRAY2RGB);
+                return to;
+            }
+        case 3: return from;
+        case 4: {
+                Mat to = new Mat(from.height(), from.width(), CvType.CV_8UC3);
+                Imgproc.cvtColor(from, to, Imgproc.COLOR_RGBA2RGB);
+                return to;
+            }
+        default:
+            throw new RuntimeException("Unsupported");
+        }
+    }
+
 }

@@ -45,4 +45,12 @@ public enum CvArrayType {
         return val;
     }
 
+    public static CvArrayType fromValue(int val) {
+        for (CvArrayType arrType : CvArrayType.values())
+            if (arrType.getVal() == val)
+                return arrType;
+
+        throw new IllegalArgumentException("Illegal argumet value=" + val);
+    }
+
 }
