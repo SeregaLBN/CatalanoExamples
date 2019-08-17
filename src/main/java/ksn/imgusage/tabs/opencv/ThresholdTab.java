@@ -14,6 +14,7 @@ import org.opencv.imgproc.Imgproc;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.type.dto.opencv.ThresholdTabParams;
 import ksn.imgusage.type.opencv.CvThresholdTypes;
+import ksn.imgusage.utils.OpenCvHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d7/d1b/group__imgproc__misc.html#gae8a4a146d1ca78c626a53577199e9c57'>Applies a fixed-level threshold to each array element</a> */
 public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
@@ -45,6 +46,11 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
 
     @Override
     protected void applyOpencvFilter() {
+        if (params.useOtsuMask || params.useTriangleMask) {
+            // Note
+            // Currently, the Otsu's and Triangle methods are implemented only for 8-bit single-channel images.
+            imageMat = OpenCvHelper.toGray(imageMat);
+        }
         Mat dst = new Mat();
         Imgproc.threshold(
             imageMat, // src

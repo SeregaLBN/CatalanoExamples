@@ -15,12 +15,15 @@ public class BlurTab extends CatalanoFilterTab<BlurTabParams> {
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Blur filter";
 
+    private BlurTabParams params;
+
     public BlurTab() {
         super(false);
     }
 
     @Override
     public Component makeTab(BlurTabParams params) {
+        this.params = params;
         return makeTab();
     }
 
@@ -46,7 +49,7 @@ public class BlurTab extends CatalanoFilterTab<BlurTabParams> {
 
     @Override
     public BlurTabParams getParams() {
-        return null;
+        return params;
     }
 
 }

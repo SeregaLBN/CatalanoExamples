@@ -245,14 +245,14 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     }
 
     private final JButton makeButtonLoadPipeline() {
-        JButton btnLoad = new JButton("Load pipline...");
+        JButton btnLoad = new JButton("Load pipeline...");
         btnLoad.setToolTipText("Load image pipeline tabs");
         btnLoad.addActionListener(ev -> tabHandler.onLoadPipeline());
         return btnLoad;
     }
 
     private final JButton makeButtonSavePipeline() {
-        JButton btnSave = new JButton("Save pipline...");
+        JButton btnSave = new JButton("Save pipeline...");
         btnSave.setToolTipText("Save current pipeline tabs for selected image");
         btnSave.addActionListener(ev -> tabHandler.onSavePipeline());
         return btnSave;
