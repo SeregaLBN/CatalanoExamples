@@ -6,13 +6,7 @@ import ksn.imgusage.tabs.catalano.ArtifactsRemovalTab;
 /** Init parameters for {@link ArtifactsRemovalTab} */
 public class ArtifactsRemovalTabParams implements ITabParams {
 
-    public int windowSize;
-
-    public ArtifactsRemovalTabParams() {}
-
-    public ArtifactsRemovalTabParams(int windowSize) {
-        this.windowSize = windowSize;
-    }
+    public int windowSize = 15;
 
     @Override
     public String toString() {

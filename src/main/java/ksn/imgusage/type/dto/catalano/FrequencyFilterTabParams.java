@@ -6,15 +6,8 @@ import ksn.imgusage.tabs.catalano.FrequencyFilterTab;
 /** Init parameters for {@link FrequencyFilterTab} */
 public class FrequencyFilterTabParams implements ITabParams {
 
-    public int min;
-    public int max;
-
-    public FrequencyFilterTabParams() {}
-
-    public FrequencyFilterTabParams(int min, int max) {
-        this.min = min;
-        this.max = max;
-    }
+    public int min =   0;
+    public int max = 100;
 
     @Override
     public String toString() { return "{ min=" + min + ", max=" + max + " }"; }

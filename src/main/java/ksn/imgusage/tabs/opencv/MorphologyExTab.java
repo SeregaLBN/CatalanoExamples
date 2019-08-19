@@ -14,12 +14,8 @@ import org.slf4j.Logger;
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.type.Point;
-import ksn.imgusage.type.Size;
-import ksn.imgusage.type.dto.opencv.CtorParams;
 import ksn.imgusage.type.dto.opencv.EMatSource;
 import ksn.imgusage.type.dto.opencv.MorphologyExTabParams;
-import ksn.imgusage.type.dto.opencv.StructuringElementParams;
 import ksn.imgusage.type.opencv.CvArrayType;
 import ksn.imgusage.type.opencv.CvMorphShapes;
 import ksn.imgusage.type.opencv.CvMorphTypes;
@@ -50,10 +46,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
     @Override
     public Component makeTab(MorphologyExTabParams params) {
         if (params == null)
-            params = new MorphologyExTabParams(CvMorphTypes.MORPH_GRADIENT,
-                                               EMatSource.STRUCTURING_ELEMENT,
-                                               new CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
-                                               new StructuringElementParams(CvMorphShapes.MORPH_RECT, new Size(10, 10), new Point(-1,-1)));
+            params = new MorphologyExTabParams();
         this.params = params;
 
         return makeTab();

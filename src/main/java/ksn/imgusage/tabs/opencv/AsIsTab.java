@@ -22,7 +22,7 @@ public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
     @Override
     public Component makeTab(AsIsTabParams params) {
         if (params == null)
-            params = new AsIsTabParams(false);
+            params = new AsIsTabParams();
         this.params = params;
 
         return makeTab();

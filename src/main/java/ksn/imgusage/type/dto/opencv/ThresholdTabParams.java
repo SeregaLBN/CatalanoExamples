@@ -9,22 +9,23 @@ import ksn.imgusage.type.opencv.CvThresholdTypes;
 /** Init parameters for {@link ThresholdTab} */
 public class ThresholdTabParams implements ITabParams {
 
-    public double            thresh;
-    public double            maxVal;
-    public CvThresholdTypes  threshType;
-    public boolean           useOtsuMask;
-    public boolean           useTriangleMask;
+    public  double            thresh          = 100;
+    public  double            maxVal          = 250;
+    private CvThresholdTypes  threshType      = CvThresholdTypes.THRESH_BINARY;
+    public  boolean           useOtsuMask     = false;
+    public  boolean           useTriangleMask = false;
 
-    public ThresholdTabParams() {}
-
-    public ThresholdTabParams(double thresh, double maxval, CvThresholdTypes threshType, boolean useOtsuMask, boolean useTriangleMask) {
+    public CvThresholdTypes getThreshType() {
+        return threshType;
+    }
+    public void setThreshType(CvThresholdTypes threshType) {
         switch (threshType) {
         case THRESH_BINARY    :
         case THRESH_BINARY_INV:
         case THRESH_TRUNC     :
         case THRESH_TOZERO    :
         case THRESH_TOZERO_INV:
-            // Ok
+            this.threshType = threshType;
             break;
 
         case THRESH_OTSU:
@@ -33,12 +34,6 @@ public class ThresholdTabParams implements ITabParams {
         default:
             throw new IllegalArgumentException("Unsupported threshType=" + threshType);
         }
-
-        this.thresh          = thresh;
-        this.maxVal          = maxval;
-        this.threshType      = threshType;
-        this.useOtsuMask     = useOtsuMask;
-        this.useTriangleMask = useTriangleMask;
     }
 
     @Override

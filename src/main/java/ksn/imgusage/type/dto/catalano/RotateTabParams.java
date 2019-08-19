@@ -3,23 +3,16 @@ package ksn.imgusage.type.dto.catalano;
 import java.util.Locale;
 
 import Catalano.Imaging.Filters.Rotate;
+import Catalano.Imaging.Filters.Rotate.Algorithm;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.catalano.RotateTab;
 
 /** Init parameters for {@link RotateTab} */
 public class RotateTabParams implements ITabParams {
 
-    public double angle;
-    public boolean keepSize;
-    public Rotate.Algorithm algorithm;
-
-    public RotateTabParams() {}
-
-    public RotateTabParams(double angle, boolean keepSize, Rotate.Algorithm algorithm) {
-        this.angle = angle;
-        this.keepSize = keepSize;
-        this.algorithm = algorithm;
-    }
+    public double           angle     = 0;
+    public boolean          keepSize  = true;
+    public Rotate.Algorithm algorithm = Algorithm.BICUBIC;
 
     @Override
     public String toString() {

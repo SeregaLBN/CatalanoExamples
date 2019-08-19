@@ -11,21 +11,11 @@ import ksn.imgusage.type.opencv.CvBorderTypes;
 /** Init parameters for {@link BoxTab} */
 public class BoxTabParams implements ITabParams {
 
-    public int           ddepth;
-    public Size          kernelSize;
-    public Point         anchor;
-    public boolean       normalize;
-    public CvBorderTypes borderType;
-
-    public BoxTabParams() {}
-
-    public BoxTabParams(int ddepth, Size kernelSize, Point anchor, boolean normalize, CvBorderTypes borderType) {
-        this.ddepth     = ddepth;
-        this.kernelSize = kernelSize;
-        this.anchor     = anchor;
-        this.normalize  = normalize;
-        this.borderType = borderType;
-    }
+    public int           ddepth     = -1;
+    public Size          kernelSize = new Size(5, 5);
+    public Point         anchor     = new Point(-1, -1);
+    public boolean       normalize  = true;
+    public CvBorderTypes borderType = CvBorderTypes.BORDER_DEFAULT;
 
     @Override
     public String toString() {

@@ -9,35 +9,20 @@ import ksn.imgusage.type.opencv.CvRetrievalModes;
 /** Init parameters for {@link FindContoursTab} */
 public class FindContoursTabParams implements ITabParams {
 
-    public CvRetrievalModes            mode;
+    public CvRetrievalModes            mode             = CvRetrievalModes.RETR_EXTERNAL;
 
-    public CvContourApproximationModes method;
+    public CvContourApproximationModes method           = CvContourApproximationModes.CHAIN_APPROX_SIMPLE;
 
-    public EFindContoursDrawMethod     drawMethod;
+    public EFindContoursDrawMethod     drawMethod       = EFindContoursDrawMethod.EXTERNAL_RECT;
 
     /** usage only for {@link EFindContoursDrawMethod#EXTERNAL_RECT} */
-    public Size                        minLimitContours;
+    public Size                        minLimitContours = new Size(10, 10);
 
     /** usage only for {@link EFindContoursDrawMethod#DRAW_CONTOURS} */
-    public int                         maxContourArea;
+    public int                         maxContourArea   = 100;
 
     /** usage only for {@link EFindContoursDrawMethod#DRAW_CONTOURS} */
-    public boolean                     fillContour;
-
-    public FindContoursTabParams() {}
-
-    public FindContoursTabParams(
-        CvRetrievalModes mode, CvContourApproximationModes method,
-        EFindContoursDrawMethod drawMethod, Size minLimitContours,
-        int maxContourArea, boolean fillContour)
-    {
-        this.mode   = mode;
-        this.method = method;
-        this.drawMethod = drawMethod;
-        this.minLimitContours = minLimitContours;
-        this.maxContourArea   = maxContourArea;
-        this.fillContour = fillContour;
-    }
+    public boolean                     fillContour      = true;
 
     @Override
     public String toString() {

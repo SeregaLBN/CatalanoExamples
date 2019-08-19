@@ -8,27 +8,11 @@ import ksn.imgusage.tabs.catalano.AdaptiveContrastTab;
 /** Init parameters for {@link AdaptiveContrastTab} */
 public class AdaptiveContrastTabParams implements ITabParams {
 
-    public int    winSize;
-    public double k1;
-    public double k2;
-    public double minGain;
-    public double maxGain;
-
-    public AdaptiveContrastTabParams() {}
-
-    public AdaptiveContrastTabParams(
-        int    winSize,
-        double k1,
-        double k2,
-        double minGain,
-        double maxGain)
-    {
-        this.winSize = winSize;
-        this.k1      = k1;
-        this.k2      = k2;
-        this.minGain = minGain;
-        this.maxGain = maxGain;
-    }
+    public int    winSize = 20;
+    public double k1      = 0.3;
+    public double k2      = 0.6;
+    public double minGain = 0.1;
+    public double maxGain = 1;
 
     @Override
     public String toString() {

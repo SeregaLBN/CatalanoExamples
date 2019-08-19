@@ -31,7 +31,7 @@ public class BradleyLocalThresholdTab extends CatalanoFilterTab<BradleyLocalThre
     @Override
     public Component makeTab(BradleyLocalThresholdTabParams params) {
         if (params == null)
-            params = new BradleyLocalThresholdTabParams(41, 0.15);
+            params = new BradleyLocalThresholdTabParams();
         this.params = params;
 
         return makeTab();

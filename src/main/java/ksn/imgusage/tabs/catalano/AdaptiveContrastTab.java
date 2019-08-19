@@ -35,7 +35,7 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTabPa
     @Override
     public Component makeTab(AdaptiveContrastTabParams params) {
         if (params == null)
-           params = new AdaptiveContrastTabParams(20, 0.3, 0.6, 0.1, 1);
+           params = new AdaptiveContrastTabParams();
         this.params = params;
 
         return makeTab();

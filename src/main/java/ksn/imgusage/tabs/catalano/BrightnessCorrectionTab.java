@@ -28,7 +28,7 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
     @Override
     public Component makeTab(BrightnessCorrectionTabParams params) {
         if (params == null)
-            params = new BrightnessCorrectionTabParams(100);
+            params = new BrightnessCorrectionTabParams();
         this.params = params;
 
         return makeTab();

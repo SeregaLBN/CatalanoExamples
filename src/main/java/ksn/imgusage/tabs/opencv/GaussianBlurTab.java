@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.opencv.GaussianBlurTabParams;
 import ksn.imgusage.type.opencv.CvBorderTypes;
 
@@ -39,7 +38,7 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
     @Override
     public Component makeTab(GaussianBlurTabParams params) {
         if (params == null)
-            params = new GaussianBlurTabParams(new Size(7, 0), 25, 25, CvBorderTypes.BORDER_DEFAULT);
+            params = new GaussianBlurTabParams();
         this.params = params;
 
         return makeTab();

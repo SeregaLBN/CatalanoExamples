@@ -29,7 +29,7 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTabPara
     @Override
     public Component makeTab(FrequencyFilterTabParams params) {
         if (params == null)
-            params = new FrequencyFilterTabParams(0, 100);
+            params = new FrequencyFilterTabParams();
         this.params = params;
 
         return makeTab();

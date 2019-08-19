@@ -34,7 +34,7 @@ public class BilateralTab extends OpencvFilterTab<BilateralTabParams> {
     @Override
     public Component makeTab(BilateralTabParams params) {
         if (params == null)
-            params = new BilateralTabParams(2, 25, 25, CvBorderTypes.BORDER_DEFAULT);
+            params = new BilateralTabParams();
         this.params = params;
 
         return makeTab();

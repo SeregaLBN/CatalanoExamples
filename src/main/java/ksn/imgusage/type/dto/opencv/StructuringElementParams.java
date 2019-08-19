@@ -9,17 +9,9 @@ import ksn.imgusage.type.opencv.CvMorphShapes;
 /** for {@link EMatSource#STRUCTURING_ELEMENT} */
 public class StructuringElementParams {
 
-    public CvMorphShapes shape;
-    public Size          kernelSize;
-    public Point         anchor;
-
-    public StructuringElementParams() {}
-
-    public StructuringElementParams(CvMorphShapes shape, Size kernelSize, Point anchor) {
-        this.shape      = shape;
-        this.kernelSize = kernelSize;
-        this.anchor     = anchor;
-    }
+    public CvMorphShapes shape      = CvMorphShapes.MORPH_RECT;
+    public Size          kernelSize = new Size(10, 10);
+    public Point         anchor     = new Point(-1,-1);
 
     @Override
     public String toString() {

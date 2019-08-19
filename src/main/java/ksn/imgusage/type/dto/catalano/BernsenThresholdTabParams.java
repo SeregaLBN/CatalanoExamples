@@ -8,15 +8,8 @@ import ksn.imgusage.tabs.catalano.BernsenThresholdTab;
 /** Init parameters for {@link BernsenThresholdTab} */
 public class BernsenThresholdTabParams implements ITabParams {
 
-    public int    radius;
-    public double contrastThreshold;
-
-    public BernsenThresholdTabParams() {}
-
-    public BernsenThresholdTabParams(int radius, double contrastThreshold) {
-        this.radius = radius;
-        this.contrastThreshold = contrastThreshold;
-    }
+    public int    radius            = 15;
+    public double contrastThreshold = 15;
 
     @Override
     public String toString() {

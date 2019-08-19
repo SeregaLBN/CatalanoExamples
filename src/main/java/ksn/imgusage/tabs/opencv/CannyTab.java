@@ -30,7 +30,7 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
     @Override
     public Component makeTab(CannyTabParams params) {
         if (params == null)
-            params = new CannyTabParams(3, 3, 5, true);
+            params = new CannyTabParams();
         this.params = params;
 
         return makeTab();

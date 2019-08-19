@@ -8,18 +8,8 @@ import ksn.imgusage.tabs.catalano.BradleyLocalThresholdTab;
 /** Init parameters for {@link BradleyLocalThresholdTab} */
 public class BradleyLocalThresholdTabParams implements ITabParams {
 
-    public int    windowSize;
-    public double pixelBrightnessDiff;
-
-    public BradleyLocalThresholdTabParams() {}
-
-    public BradleyLocalThresholdTabParams(
-        int    windowSize,
-        double pixelBrightnessDiff)
-    {
-        this.windowSize          = windowSize;
-        this.pixelBrightnessDiff = pixelBrightnessDiff;
-    }
+    public int    windowSize          = 41;
+    public double pixelBrightnessDiff = 0.15;
 
     @Override
     public String toString() {

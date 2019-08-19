@@ -8,19 +8,10 @@ import ksn.imgusage.tabs.opencv.CannyTab;
 /** Init parameters for {@link CannyTab} */
 public class CannyTabParams implements ITabParams {
 
-    public double  threshold1;
-    public double  threshold2;
-    public int     apertureSize;
-    public boolean l2gradient;
-
-    public CannyTabParams() {}
-
-    public CannyTabParams(double threshold1, double threshold2, int apertureSize, boolean l2gradient) {
-        this.threshold1 = threshold1;
-        this.threshold2 = threshold2;
-        this.apertureSize = onlyOdd(apertureSize, CannyTab.MIN_APERTURE_SIZE);
-        this.l2gradient = l2gradient;
-    }
+    public double  threshold1   = 3;
+    public double  threshold2   = 3;
+    public int     apertureSize = 5;
+    public boolean l2gradient   = true;
 
     @Override
     public String toString() {

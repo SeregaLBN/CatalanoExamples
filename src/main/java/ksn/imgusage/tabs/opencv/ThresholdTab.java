@@ -33,7 +33,7 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
     @Override
     public Component makeTab(ThresholdTabParams params) {
         if (params == null)
-            params = new ThresholdTabParams(100, 250, CvThresholdTypes.THRESH_BINARY, false, false);
+            params = new ThresholdTabParams();
         this.params = params;
 
         return makeTab();
@@ -57,7 +57,7 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
             dst,
             params.thresh,
             params.maxVal,
-            params.threshType.getVal(params.useOtsuMask, params.useTriangleMask));
+            params.getThreshType().getVal(params.useOtsuMask, params.useTriangleMask));
         imageMat = dst;
     }
 
@@ -74,8 +74,8 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
 
         Runnable applyThresholdingType = () -> {
             // maximum value to use with the THRESH_BINARY and THRESH_BINARY_INV thresholding types.
-            boolean enabled1 = (params.threshType == CvThresholdTypes.THRESH_BINARY) ||
-                               (params.threshType == CvThresholdTypes.THRESH_BINARY_INV);
+            boolean enabled1 = (params.getThreshType() == CvThresholdTypes.THRESH_BINARY) ||
+                               (params.getThreshType() == CvThresholdTypes.THRESH_BINARY_INV);
 
             // Also, the special values THRESH_OTSU or THRESH_TRIANGLE may be combined with one of the above values.
             // In these cases, the function determines the optimal threshold value using the Otsu's or Triangle algorithm and uses it instead of the specified thresh.
@@ -99,11 +99,11 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
                 .filter(b -> b.getVal() < CvThresholdTypes.THRESH_MASK.getVal())
                 .forEach(thresholdingType ->
             {
-                JRadioButton radioBtnThresh = new JRadioButton(thresholdingType.name(), thresholdingType == params.threshType);
+                JRadioButton radioBtnThresh = new JRadioButton(thresholdingType.name(), thresholdingType == params.getThreshType());
                 radioBtnThresh.setToolTipText("Type of the threshold operation");
                 radioBtnThresh.addItemListener(ev -> {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.threshType = thresholdingType;
+                        params.setThreshType(thresholdingType);
                         logger.trace("Thresholding type changed to {}", thresholdingType);
                         applyThresholdingType.run();
                         resetImage();

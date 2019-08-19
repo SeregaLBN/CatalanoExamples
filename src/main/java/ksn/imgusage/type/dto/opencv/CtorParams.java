@@ -7,25 +7,13 @@ import ksn.imgusage.type.opencv.CvArrayType;
 /** for {@link EMatSource#CTOR} */
 public class CtorParams {
 
-    public int         rows;
-    public int         cols;
-    public CvArrayType type;
-    public double scalarVal0;
-    public double scalarVal1;
-    public double scalarVal2;
-    public double scalarVal3;
-
-    public CtorParams() {}
-
-    public CtorParams(int rows, int cols, CvArrayType type, double scalarVal0, double scalarVal1, double scalarVal2, double scalarVal3) {
-        this.rows = rows;
-        this.cols = cols;
-        this.type = type;
-        this.scalarVal0 = scalarVal0;
-        this.scalarVal1 = scalarVal1;
-        this.scalarVal2 = scalarVal2;
-        this.scalarVal3 = scalarVal3;
-    }
+    public int         rows  = 1;
+    public int         cols  = 1;
+    public CvArrayType type  = CvArrayType.CV_8UC1;
+    public double scalarVal0 = 1;
+    public double scalarVal1 = 0;
+    public double scalarVal2 = 0;
+    public double scalarVal3 = 0;
 
     @Override
     public String toString() {

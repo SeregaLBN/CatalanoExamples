@@ -31,7 +31,7 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTabPa
     @Override
     public Component makeTab(BernsenThresholdTabParams params) {
         if (params == null)
-            params = new BernsenThresholdTabParams(15, 15);
+            params = new BernsenThresholdTabParams();
         this.params = params;
 
         return makeTab();

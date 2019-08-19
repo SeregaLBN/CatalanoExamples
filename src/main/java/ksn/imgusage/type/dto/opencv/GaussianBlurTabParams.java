@@ -10,21 +10,10 @@ import ksn.imgusage.type.opencv.CvBorderTypes;
 /** Init parameters for {@link GaussianBlurTab} */
 public class GaussianBlurTabParams implements ITabParams {
 
-    public Size          kernelSize;
-    public double        sigmaX;
-    public double        sigmaY;
-    public CvBorderTypes borderType;
-
-    public GaussianBlurTabParams() {}
-
-    public GaussianBlurTabParams(Size kernelSize, double sigmaX, double sigmaY, CvBorderTypes borderType) {
-        kernelSize.width  = onlyZeroOrOdd(kernelSize.width , GaussianBlurTab.MIN_KSIZE);
-        kernelSize.height = onlyZeroOrOdd(kernelSize.height, GaussianBlurTab.MIN_KSIZE);
-        this.kernelSize = kernelSize;
-        this.sigmaX     = sigmaX;
-        this.sigmaY     = sigmaY;
-        this.borderType = borderType;
-    }
+    public Size          kernelSize = new Size(7, 0);
+    public double        sigmaX     = 25;
+    public double        sigmaY     = 25;
+    public CvBorderTypes borderType = CvBorderTypes.BORDER_DEFAULT;
 
     @Override
     public String toString() {

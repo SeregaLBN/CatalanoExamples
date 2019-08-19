@@ -8,19 +8,10 @@ import ksn.imgusage.type.opencv.CvBorderTypes;
 /** Init parameters for {@link BirateralTab} */
 public class BilateralTabParams implements ITabParams {
 
-    public int           diameter;
-    public double        sigmaColor;
-    public double        sigmaSpace;
-    public CvBorderTypes borderType;
-
-    public BilateralTabParams() {}
-
-    public BilateralTabParams(int diameter, double sigmaColor, double sigmaSpace, CvBorderTypes borderType) {
-        this.diameter   = diameter;
-        this.sigmaColor = sigmaColor;
-        this.sigmaSpace = sigmaSpace;
-        this.borderType = borderType;
-    }
+    public int           diameter   = 2;
+    public double        sigmaColor = 25;
+    public double        sigmaSpace = 25;
+    public CvBorderTypes borderType = CvBorderTypes.BORDER_DEFAULT;
 
     @Override
     public String toString() {

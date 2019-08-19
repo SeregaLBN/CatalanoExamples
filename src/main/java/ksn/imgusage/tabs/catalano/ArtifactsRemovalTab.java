@@ -28,7 +28,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTabPa
     @Override
     public Component makeTab(ArtifactsRemovalTabParams params) {
         if (params == null)
-           params = new ArtifactsRemovalTabParams(15);
+           params = new ArtifactsRemovalTabParams();
         this.params = params;
 
         return makeTab();

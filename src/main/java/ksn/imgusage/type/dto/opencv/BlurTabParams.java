@@ -11,17 +11,9 @@ import ksn.imgusage.type.opencv.CvBorderTypes;
 /** Init parameters for {@link BlurTab} */
 public class BlurTabParams implements ITabParams {
 
-    public Size          kernelSize;
-    public Point         anchor;
-    public CvBorderTypes borderType;
-
-    public BlurTabParams() {}
-
-    public BlurTabParams(Size kernelSize, Point anchor, CvBorderTypes borderType) {
-        this.kernelSize = kernelSize;
-        this.anchor     = anchor;
-        this.borderType = borderType;
-    }
+    public Size          kernelSize = new Size(5, 5);
+    public Point         anchor     = new Point(-1, -1);
+    public CvBorderTypes borderType = CvBorderTypes.BORDER_DEFAULT;
 
     @Override
     public String toString() {

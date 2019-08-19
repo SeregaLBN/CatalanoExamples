@@ -10,8 +10,6 @@ import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.type.Point;
-import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.opencv.BlurTabParams;
 import ksn.imgusage.type.opencv.CvBorderTypes;
 
@@ -32,7 +30,7 @@ public class BlurTab extends OpencvFilterTab<BlurTabParams> {
     @Override
     public Component makeTab(BlurTabParams params) {
         if (params == null)
-            params = new BlurTabParams(new Size(5, 5), new Point(-1, -1), CvBorderTypes.BORDER_DEFAULT);
+            params = new BlurTabParams();
         this.params = params;
 
         return makeTab();

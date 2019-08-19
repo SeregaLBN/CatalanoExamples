@@ -6,7 +6,6 @@ import java.awt.event.ItemEvent;
 import javax.swing.*;
 
 import Catalano.Imaging.Filters.Rotate;
-import Catalano.Imaging.Filters.Rotate.Algorithm;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.type.dto.catalano.RotateTabParams;
 
@@ -29,7 +28,7 @@ public class RotateTab extends CatalanoFilterTab<RotateTabParams> {
     @Override
     public Component makeTab(RotateTabParams params) {
         if (params == null)
-            params = new RotateTabParams(0, true, Algorithm.BICUBIC);
+            params = new RotateTabParams();
         this.params = params;
 
         return makeTab();

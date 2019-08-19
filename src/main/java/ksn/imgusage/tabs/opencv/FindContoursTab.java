@@ -15,7 +15,6 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.opencv.EFindContoursDrawMethod;
 import ksn.imgusage.type.dto.opencv.FindContoursTabParams;
 import ksn.imgusage.type.opencv.CvArrayType;
@@ -41,9 +40,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     @Override
     public Component makeTab(FindContoursTabParams params) {
         if (params == null)
-            params = new FindContoursTabParams(CvRetrievalModes.RETR_EXTERNAL, CvContourApproximationModes.CHAIN_APPROX_SIMPLE,
-                                               EFindContoursDrawMethod.EXTERNAL_RECT, new Size(10, 10),
-                                               100, true);
+            params = new FindContoursTabParams();
         this.params = params;
 
         return makeTab();
