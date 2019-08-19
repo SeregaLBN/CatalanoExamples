@@ -2,7 +2,6 @@ package ksn.imgusage.utils;
 
 import java.awt.BorderLayout;
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
@@ -28,14 +27,7 @@ public class SelectFilterDialog {
         logger.trace("getFilterTabName");
 
         JDialog dlg = new JDialog(owner, "Select filter...", true);
-
-        Object keyBind = "CloseDialog";
-        dlg.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), keyBind);
-        dlg.getRootPane().getActionMap().put(keyBind, new AbstractAction() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public void actionPerformed(ActionEvent e) { dlg.dispose(); }
-        });
+        UiHelper.bindKey(dlg.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), dlg::dispose);
 
         Box boxCatalanoFilters = Box.createVerticalBox();
         boxCatalanoFilters.setBorder(BorderFactory.createTitledBorder("Catalano filters"));

@@ -1,7 +1,7 @@
 package ksn.imgusage.filtersdemo;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -71,16 +71,9 @@ public class MainApp {
     }
 
     private void initialize() {
-        /**/
         // exit by Esc
-        Object keyBind = "CloseFrame";
-        frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), keyBind);
-        frame.getRootPane().getActionMap().put(keyBind, new AbstractAction() {
-            private static final long serialVersionUID = 1L;
-            @Override
-            public void actionPerformed(ActionEvent e) { MainApp.this.onClose(); }
-        });
-        /**/
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), this::onClose);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK, false), this::removeCurrentFilter);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -185,6 +178,13 @@ public class MainApp {
             } catch (Exception ex) {
                 logger.error(ex.toString());
             }
+    }
+
+    private void removeCurrentFilter() {
+        int i = tabPane.getSelectedIndex();
+        if (i < 1)
+            return;
+        onRemoveFilter(tabs.get(i));
     }
 
     private void onRemoveFilter(ITab<?> tab) {

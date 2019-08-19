@@ -1,14 +1,15 @@
 package ksn.imgusage.utils;
 
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.swing.JFileChooser;
-import javax.swing.Timer;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 
 import org.slf4j.Logger;
@@ -120,6 +121,16 @@ public final class UiHelper {
             timer.restart();
         else
             timer.start();
+    }
+
+    public static void bindKey(JRootPane rootPane, KeyStroke keyCombo, Runnable action) {
+        Object keyBind = UUID.randomUUID();
+        rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyCombo, keyBind);
+        rootPane.getActionMap().put(keyBind, new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public void actionPerformed(ActionEvent e) { action.run(); }
+        });
     }
 
 }
