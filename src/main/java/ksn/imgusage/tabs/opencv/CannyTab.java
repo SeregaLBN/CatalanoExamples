@@ -78,7 +78,7 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
         Box box4L2gradient = Box.createVerticalBox();
         box4L2gradient.setBorder(BorderFactory.createTitledBorder(""));
         JCheckBox checkBoxL2gradient = new JCheckBox("L2 gradient", params.l2gradient);
-        checkBoxL2gradient.setToolTipText("a flag, indicating whether a more accurate L2 norm =√‾((dI/dx)^2+(dI/dy)^2) should be used to calculate the image gradient magnitude ( L2gradient=true ), or whether the default L1 norm =|dI/dx|+|dI/dy| is enough ( L2gradient=false ). ");
+        checkBoxL2gradient.setToolTipText("A flag, indicating whether a more accurate L2 norm =√‾((dI/dx)^2+(dI/dy)^2) should be used to calculate the image gradient magnitude ( L2gradient=true ), or whether the default L1 norm =|dI/dx|+|dI/dy| is enough ( L2gradient=false )");
         checkBoxL2gradient.addItemListener(ev -> {
             params.l2gradient = (ev.getStateChange() == ItemEvent.SELECTED);
             logger.trace("L2 gradient is {}", (params.l2gradient ? "checked" : "unchecked"));

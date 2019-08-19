@@ -52,10 +52,12 @@ public final class MapperFilter {
         return Arrays.<FilterTabs>asList( // alphabetical sort
             new FilterTabs(                         AsIsTab.TAB_TITLE,
                                                     AsIsTab.TAB_DESCRIPTION),
-            new FilterTabs(ksn.imgusage.tabs.opencv.BlurTab.TAB_TITLE,
-                           ksn.imgusage.tabs.opencv.BlurTab.TAB_DESCRIPTION),
             new FilterTabs(                    BilateralTab.TAB_TITLE,
                                                BilateralTab.TAB_DESCRIPTION),
+            new FilterTabs(ksn.imgusage.tabs.opencv.BlurTab.TAB_TITLE,
+                           ksn.imgusage.tabs.opencv.BlurTab.TAB_DESCRIPTION),
+            new FilterTabs(                          BoxTab.TAB_TITLE,
+                                                     BoxTab.TAB_DESCRIPTION),
             new FilterTabs(                        CannyTab.TAB_TITLE,
                                                    CannyTab.TAB_DESCRIPTION),
             new FilterTabs(                 FindContoursTab.TAB_TITLE,
@@ -83,10 +85,12 @@ public final class MapperFilter {
         // alphabetical sort
         case                                AsIsTab.TAB_NAME:
             return                          AsIsTab.class;
-        case       ksn.imgusage.tabs.opencv.BlurTab.TAB_NAME:
-            return ksn.imgusage.tabs.opencv.BlurTab.class;
         case                           BilateralTab.TAB_NAME:
             return                     BilateralTab.class;
+        case       ksn.imgusage.tabs.opencv.BlurTab.TAB_NAME:
+            return ksn.imgusage.tabs.opencv.BlurTab.class;
+        case                                 BoxTab.TAB_NAME:
+            return                           BoxTab.class;
         case                               CannyTab.TAB_NAME:
             return                         CannyTab.class;
         case                        FindContoursTab.TAB_NAME:
@@ -135,10 +139,12 @@ public final class MapperFilter {
         // alphabetical sort
         case                                    AsIsTab.TAB_NAME:
             return                              AsIsTabParams.class;
-        case       ksn.imgusage.tabs.    opencv.BlurTab.TAB_NAME:
-            return ksn.imgusage.type.dto.opencv.BlurTabParams.class;
         case                               BilateralTab.TAB_NAME:
             return                         BilateralTabParams.class;
+        case       ksn.imgusage.tabs.    opencv.BlurTab.TAB_NAME:
+            return ksn.imgusage.type.dto.opencv.BlurTabParams.class;
+        case                                     BoxTab.TAB_NAME:
+            return                               BoxTabParams.class;
         case                                   CannyTab.TAB_NAME:
             return                             CannyTabParams.class;
         case                            FindContoursTab.TAB_NAME:
