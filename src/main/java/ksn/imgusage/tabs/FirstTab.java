@@ -20,10 +20,11 @@ import ksn.imgusage.utils.UiHelper;
 /** The first tab to select an image to work with. */
 public class FirstTab extends BaseTab<FirstTabParams> {
 
-    public static final File DEFAULT_IMAGE = Paths.get("exampleImages", "Volod~Hill.jpg").toAbsolutePath().toFile();
+    public static final File DEFAULT_IMAGE = Paths.get("exampleImages", "VolodHill.jpg").toAbsolutePath().toFile();
 
     public static final String TAB_TITLE = "Original";
     public static final String TAB_NAME  = "FirstTab";
+    public static final String TAB_DESCRIPTION = "The first tab to select an image to work with";
 
     private static final int MIN_IMAGE_WIDTH  = 10;
     private static final int MIN_IMAGE_HEIGHT = 10;
@@ -63,6 +64,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     public String getTitle() { return TAB_TITLE; }
     @Override
     public String getName() { return TAB_NAME; }
+    @Override
+    public String getDescription() { return TAB_DESCRIPTION; }
 
     @Override
     protected BufferedImage getSourceImage() {

@@ -16,5 +16,6 @@ public interface ITab<TTabParams extends ITabParams> {
 
     String getTitle();
     String getName();
+    String getDescription();
 
 }

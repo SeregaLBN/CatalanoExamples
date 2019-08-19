@@ -41,6 +41,8 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTabPa
     public String getTitle() { return TAB_TITLE; }
     @Override
     public String getName() { return TAB_NAME; }
+    @Override
+    public String getDescription() { return TAB_DESCRIPTION; }
 
     @Override
     protected void applyCatalanoFilter() {

@@ -51,7 +51,7 @@ public class MainApp {
 
     private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
     private static final String DEFAULT_CAPTION = "Demonstration of image filters";
-    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Alpha~bet.OpenCV.json").toAbsolutePath().toFile();
+    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Alphabet.OpenCV.json").toAbsolutePath().toFile();
 
     private final JFrame frame;
     private JTabbedPane tabPane;
@@ -106,16 +106,23 @@ public class MainApp {
 
     private <TTabParams extends ITabParams> void addTab(ITab<TTabParams> newTab, TTabParams tabParams) {
         ITab<?> prev = null;
-        int i = tabPane.getSelectedIndex();
+        final int i = tabPane.getSelectedIndex();
         if (i >= 0)
             prev = tabs.get(i);
+        final int newPos = i + 1;
         newTab.setHandler(getTabHandler());
-        newTab.setSource(prev);
-        tabPane.addTab(newTab.getTitle(), newTab.makeTab(tabParams));
-      //tabPane.insertTab(newTab.getTitle(), null, newTab.makeTab(tabParams), null, i + 1);
-        tabPane.setSelectedIndex(i + 1);
+
+        tabPane.insertTab(newTab.getTitle(), null, newTab.makeTab(tabParams), newTab.getDescription(), newPos);
+        tabs.add(newPos, newTab);
+
+        for (int j = newPos; j < tabs.size(); ++j) {
+            ITab<?> curr = tabs.get(j);
+            curr.setSource(prev);
+            prev = curr;
+        }
+
+        tabPane.setSelectedIndex(newPos);
         SwingUtilities.invokeLater(tabPane::requestFocus);
-        tabs.add(newTab);
     }
 
     private void onCancel() {
