@@ -97,7 +97,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         JPanel panelOptions = new JPanel();
         panelOptions.setLayout(new BorderLayout());
         panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
-        panelOptions.add(box4Sliders   , BorderLayout.CENTER);
+        panelOptions.add(box4Sliders, BorderLayout.CENTER);
 
         box4Options.add(panelOptions);
 

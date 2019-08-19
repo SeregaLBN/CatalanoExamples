@@ -30,6 +30,7 @@ import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.tabs.opencv.AddWeightedTab;
 import ksn.imgusage.tabs.opencv.InitLib;
 import ksn.imgusage.type.PipelineItem;
 import ksn.imgusage.type.dto.FirstTabParams;
@@ -111,6 +112,14 @@ public class MainApp {
             prev = tabs.get(i);
         final int newPos = i + 1;
         newTab.setHandler(getTabHandler());
+
+        if (newTab instanceof AddWeightedTab) {
+            if (i < 1) {
+                onError("Can`t use AddWeighted operation: TWO previous tabs are be used!", null);
+                return;
+            }
+            ((AddWeightedTab)newTab).setSource2(tabs.get(i - 1));
+        }
 
         tabPane.insertTab(newTab.getTitle(), null, newTab.makeTab(tabParams), newTab.getDescription(), newPos);
         tabs.add(newPos, newTab);
