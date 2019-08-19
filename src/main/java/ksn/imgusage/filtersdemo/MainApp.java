@@ -51,7 +51,7 @@ public class MainApp {
 
     private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
     private static final String DEFAULT_CAPTION = "Demonstration of image filters";
-    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Alphabet.OpenCV.json").toAbsolutePath().toFile();
+    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Alpha~bet.OpenCV.json").toAbsolutePath().toFile();
 
     private final JFrame frame;
     private JTabbedPane tabPane;
@@ -109,7 +109,8 @@ public class MainApp {
         int i = tabPane.getSelectedIndex();
         if (i >= 0)
             prev = tabs.get(i);
-        newTab.init(getTabHandler(), prev);
+        newTab.setHandler(getTabHandler());
+        newTab.setSource(prev);
         tabPane.addTab(newTab.getTitle(), newTab.makeTab(tabParams));
       //tabPane.insertTab(newTab.getTitle(), null, newTab.makeTab(tabParams), null, i + 1);
         tabPane.setSelectedIndex(i + 1);
@@ -180,7 +181,7 @@ public class MainApp {
             if (i != 0) {
                 ITab<?> prev = tabs.get(i-1);
                 ITab<?> curr = tabs.get(i);
-                curr.updateSource(prev);
+                curr.setSource(prev);
             }
         }
     }

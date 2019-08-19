@@ -30,9 +30,14 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     private Timer timer;
 
     @Override
-    public void init(ITabHandler tabHandler, ITab<?> source) {
+    public void setHandler(ITabHandler tabHandler) {
         this.tabHandler = tabHandler;
-        this.source = source;
+    }
+
+    @Override
+    public void setSource(ITab<?> newSource) {
+        this.source = newSource;
+        resetImage();
     }
 
     protected BufferedImage getSourceImage() {
@@ -87,12 +92,6 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         if (imagePanelRepaint != null)
             imagePanelRepaint.run();
         SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
-    }
-
-    @Override
-    public void updateSource(ITab<?> newSource) {
-        this.source = newSource;
-        resetImage();
     }
 
     protected final JButton makeButtonAddFilter() {

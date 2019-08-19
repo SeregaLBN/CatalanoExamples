@@ -20,7 +20,7 @@ import ksn.imgusage.utils.UiHelper;
 /** The first tab to select an image to work with. */
 public class FirstTab extends BaseTab<FirstTabParams> {
 
-    public static final File DEFAULT_IMAGE = Paths.get("exampleImages", "VolodHill.jpg").toAbsolutePath().toFile();
+    public static final File DEFAULT_IMAGE = Paths.get("exampleImages", "Volod~Hill.jpg").toAbsolutePath().toFile();
 
     public static final String TAB_TITLE = "Original";
     public static final String TAB_NAME  = "FirstTab";
@@ -42,6 +42,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private boolean lockCheckKeepAspectRation;
     private Runnable  onCheckKeepAspectRationByWidth;
     private Runnable  onCheckKeepAspectRationByHeight;
+    private Runnable applyMaxSizeLimits;
 
     @Override
     public Component makeTab(FirstTabParams params) {
@@ -210,13 +211,6 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
         return previewImage;
     }
-
-    @Override
-    public void updateSource(ITab<?> newSource) {
-        throw new UnsupportedOperationException("Illegal call");
-    }
-
-    private Runnable applyMaxSizeLimits;
 
     private void readImageFile(File imageFile) {
         if (imageFile == null)
