@@ -1,0 +1,127 @@
+[ {
+  "tabName" : "FirstTab",
+  "pos" : 0,
+  "params" : {
+    "useGray" : true,
+    "useScale" : true,
+    "keepToSize" : {
+      "width" : 500,
+      "height" : 375
+    },
+    "useKeepAspectRatio" : true,
+    "boundOfRoi" : {
+      "left" : 0,
+      "top" : 0,
+      "right" : 0,
+      "bottom" : 0
+    },
+    "imageFile" : "IMG_20190816_135747.jpg"
+  }
+}, {
+  "tabName" : "OpenCV:GaussianBlur",
+  "pos" : 1,
+  "params" : {
+    "kernelSize" : {
+      "width" : 0,
+      "height" : 0
+    },
+    "sigmaX" : 5.0,
+    "sigmaY" : 5.0,
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:AddWeighted",
+  "pos" : 2,
+  "params" : {
+    "alpha" : -2.0,
+    "beta" : 3.0,
+    "gamma" : 0.0,
+    "dtype" : -1
+  }
+}, {
+  "tabName" : "OpenCV:GaussianBlur",
+  "pos" : 3,
+  "params" : {
+    "kernelSize" : {
+      "width" : 0,
+      "height" : 0
+    },
+    "sigmaX" : 5.0,
+    "sigmaY" : 5.0,
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:AddWeighted",
+  "pos" : 4,
+  "params" : {
+    "alpha" : -2.0,
+    "beta" : 3.0,
+    "gamma" : 0.0,
+    "dtype" : -1
+  }
+}, {
+  "tabName" : "OpenCV:MorphologyEx",
+  "pos" : 5,
+  "params" : {
+    "morphologicalOperation" : "MORPH_ERODE",
+    "kernelSource" : "STRUCTURING_ELEMENT",
+    "kernel1" : {
+      "rows" : 1,
+      "cols" : 1,
+      "type" : "CV_8UC1",
+      "scalarVal0" : 1.0,
+      "scalarVal1" : 0.0,
+      "scalarVal2" : 0.0,
+      "scalarVal3" : 0.0
+    },
+    "kernel2" : {
+      "shape" : "MORPH_ELLIPSE",
+      "kernelSize" : {
+        "width" : 2,
+        "height" : 2
+      },
+      "anchor" : {
+        "x" : -1,
+        "y" : -1
+      }
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "iterations" : 2
+  }
+}, {
+  "tabName" : "OpenCV:Threshold",
+  "pos" : 6,
+  "params" : {
+    "thresh" : 228.94,
+    "maxVal" : 281.25,
+    "threshType" : "THRESH_BINARY",
+    "useOtsuMask" : true,
+    "useTriangleMask" : false
+  }
+}, {
+  "tabName" : "OpenCV:Canny",
+  "pos" : 7,
+  "params" : {
+    "threshold1" : 5.0,
+    "threshold2" : 5.0,
+    "apertureSize" : 3,
+    "l2gradient" : false
+  }
+}, {
+  "tabName" : "OpenCV:FindContours",
+  "pos" : 8,
+  "params" : {
+    "mode" : "RETR_LIST",
+    "method" : "CHAIN_APPROX_SIMPLE",
+    "drawMethod" : "EXTERNAL_RECT",
+    "minLimitContours" : {
+      "width" : 300,
+      "height" : 200
+    },
+    "maxContourArea" : 0,
+    "fillContour" : false
+  }
+} ]
