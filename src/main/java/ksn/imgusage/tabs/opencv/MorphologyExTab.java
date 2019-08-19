@@ -7,6 +7,7 @@ import java.awt.event.ItemEvent;
 import javax.swing.*;
 
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
@@ -38,6 +39,9 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
     private static final int MAX_KERNEL_SIZE = 999;
     private static final int MIN_ANCHOR      =  -1;
     private static final int MAX_ANCHOR      = MAX_KERNEL_SIZE;
+
+    private static final int MIN_ITERATION =  1;
+    private static final int MAX_ITERATION = 99;
 
     private JPanel panelKernel1; // for params.kernel1
     private JPanel panelKernel2; // for params.kernel2
@@ -98,7 +102,10 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
             imageMat, // src
             dst,
             params.morphologicalOperation.getVal(),
-            kernel);
+            kernel,
+            new Point(params.anchor.x,
+                      params.anchor.y),
+            params.iterations);
         imageMat = dst;
     }
 
@@ -106,6 +113,8 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
     protected Component makeOptions() {
         Box box4Options = Box.createVerticalBox();
         box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
+        SliderIntModel modelIterations = new SliderIntModel(params.iterations, 0, MIN_ITERATION, MAX_ITERATION);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout());
@@ -181,10 +190,17 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
 
                 panelKernel.add(panelCreateMethod, BorderLayout.NORTH);
                 panelKernel.add(panelCreateParams, BorderLayout.CENTER);
+                panelKernel.add(makeEditBox(modelIterations, "Iterations", "Number of times erosion and dilation are applied"), BorderLayout.SOUTH);
             }
 
             panel.add(panelKernel, BorderLayout.CENTER);
         }
+
+        modelIterations.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelIterations: value={}", modelIterations.getFormatedText());
+            params.iterations = modelIterations.getValue();
+            resetImage();
+        });
 
         box4Options.add(panel);
         return box4Options;
