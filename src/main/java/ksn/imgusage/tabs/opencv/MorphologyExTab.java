@@ -7,13 +7,14 @@ import java.awt.event.ItemEvent;
 import javax.swing.*;
 
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
 
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
+import ksn.imgusage.type.Point;
 import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.opencv.CtorParams;
 import ksn.imgusage.type.dto.opencv.EMatSource;
@@ -52,7 +53,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
             params = new MorphologyExTabParams(CvMorphTypes.MORPH_GRADIENT,
                                                EMatSource.STRUCTURING_ELEMENT,
                                                new CtorParams(1,1, CvArrayType.CV_8UC1, 1,0,0,0),
-                                               new StructuringElementParams(CvMorphShapes.MORPH_RECT, new Size(10, 10), -1,-1));
+                                               new StructuringElementParams(CvMorphShapes.MORPH_RECT, new Size(10, 10), new Point(-1,-1)));
         this.params = params;
 
         return makeTab();
@@ -89,9 +90,9 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
                 new org.opencv.core.Size(
                     params.kernel2.kernelSize.width,
                     params.kernel2.kernelSize.height),
-                new Point(
-                    params.kernel2.anchorX,
-                    params.kernel2.anchorY)
+                new org.opencv.core.Point(
+                    params.kernel2.anchor.x,
+                    params.kernel2.anchor.y)
             );
             break;
         default:
@@ -287,8 +288,8 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
 
         SliderIntModel modelKernelSizeW = new SliderIntModel(params.kernel2.kernelSize.width, 0, MIN_KERNEL_SIZE, MAX_KERNEL_SIZE);
         SliderIntModel modelKernelSizeH = new SliderIntModel(params.kernel2.kernelSize.height, 0, MIN_KERNEL_SIZE, MAX_KERNEL_SIZE);
-        SliderIntModel modelAnchorX     = new SliderIntModel(params.kernel2.anchorX, 0, MIN_ANCHOR, MAX_ANCHOR);
-        SliderIntModel modelAnchorY     = new SliderIntModel(params.kernel2.anchorY, 0, MIN_ANCHOR, MAX_ANCHOR);
+        SliderIntModel modelAnchorX     = new SliderIntModel(params.kernel2.anchor.x, 0, MIN_ANCHOR, MAX_ANCHOR);
+        SliderIntModel modelAnchorY     = new SliderIntModel(params.kernel2.anchor.y, 0, MIN_ANCHOR, MAX_ANCHOR);
 
         Box box4Shapes = Box.createHorizontalBox();
         box4Shapes.setBorder(BorderFactory.createTitledBorder("Shape"));
@@ -346,11 +347,14 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
 
         addModelK2ChangeListener("kernel2.modelKernelSizeW", modelKernelSizeW,  true, modelAnchorX    , () -> params.kernel2.kernelSize.width  = modelKernelSizeW.getValue());
         addModelK2ChangeListener("kernel2.modelKernelSizeH", modelKernelSizeH,  true, modelAnchorY    , () -> params.kernel2.kernelSize.height = modelKernelSizeH.getValue());
-        addModelK2ChangeListener("kernel2.modelAnchorX"    , modelAnchorX    , false, modelKernelSizeW, () -> params.kernel2.anchorX           = modelAnchorX    .getValue());
-        addModelK2ChangeListener("kernel2.modelAnchorY"    , modelAnchorY    , false, modelKernelSizeH, () -> params.kernel2.anchorY           = modelAnchorY    .getValue());
+        addModelK2ChangeListener("kernel2.modelAnchorX"    , modelAnchorX    , false, modelKernelSizeW, () -> params.kernel2.anchor.x          = modelAnchorX    .getValue());
+        addModelK2ChangeListener("kernel2.modelAnchorY"    , modelAnchorY    , false, modelKernelSizeH, () -> params.kernel2.anchor.y          = modelAnchorY    .getValue());
     }
 
     private void addModelK2ChangeListener(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams) {
+        addModelK2ChangeListener(name, model, checkMax, modelToCheck, applyValueParams, logger, this::resetImage);
+    }
+    static void addModelK2ChangeListener(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams, Logger logger, Runnable resetImage) {
         model.getWrapped().addChangeListener(ev -> {
             logger.trace("{}: value={}", name, model.getFormatedText());
             Integer val = model.getValue();
@@ -365,7 +369,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
                 else
                     applyValueParams.run();
             }
-            resetImage();
+            resetImage.run();
         });
     }
 

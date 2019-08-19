@@ -50,8 +50,7 @@
         "width" : 7,
         "height" : 7
       },
-      "anchorX" : -1,
-      "anchorY" : -1
+      "anchor" : { "x": -1, "y" : -1 }
     }
   }
 }, {

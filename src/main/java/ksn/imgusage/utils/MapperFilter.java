@@ -7,9 +7,11 @@ import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.catalano.*;
+import ksn.imgusage.tabs.catalano.BlurTab;
 import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.type.dto.FirstTabParams;
 import ksn.imgusage.type.dto.catalano.*;
+import ksn.imgusage.type.dto.catalano.BlurTabParams;
 import ksn.imgusage.type.dto.opencv.*;
 
 public final class MapperFilter {
@@ -48,22 +50,24 @@ public final class MapperFilter {
 
     public static List<FilterTabs> getAllOpencvTabsDescr() {
         return Arrays.<FilterTabs>asList( // alphabetical sort
-            new FilterTabs(        AsIsTab.TAB_TITLE,
-                                   AsIsTab.TAB_DESCRIPTION),
-            new FilterTabs(   BilateralTab.TAB_TITLE,
-                              BilateralTab.TAB_DESCRIPTION),
-            new FilterTabs(       CannyTab.TAB_TITLE,
-                                  CannyTab.TAB_DESCRIPTION),
-            new FilterTabs(FindContoursTab.TAB_TITLE,
-                           FindContoursTab.TAB_DESCRIPTION),
-            new FilterTabs(GaussianBlurTab.TAB_TITLE,
-                           GaussianBlurTab.TAB_DESCRIPTION),
-            new FilterTabs(MorphologyExTab.TAB_TITLE,
-                           MorphologyExTab.TAB_DESCRIPTION),
-            new FilterTabs(   ThresholdTab.TAB_TITLE,
-                              ThresholdTab.TAB_DESCRIPTION),
-            new FilterTabs(   WatershedTab.TAB_TITLE,
-                              WatershedTab.TAB_DESCRIPTION)
+            new FilterTabs(                         AsIsTab.TAB_TITLE,
+                                                    AsIsTab.TAB_DESCRIPTION),
+            new FilterTabs(ksn.imgusage.tabs.opencv.BlurTab.TAB_TITLE,
+                           ksn.imgusage.tabs.opencv.BlurTab.TAB_DESCRIPTION),
+            new FilterTabs(                    BilateralTab.TAB_TITLE,
+                                               BilateralTab.TAB_DESCRIPTION),
+            new FilterTabs(                        CannyTab.TAB_TITLE,
+                                                   CannyTab.TAB_DESCRIPTION),
+            new FilterTabs(                 FindContoursTab.TAB_TITLE,
+                                            FindContoursTab.TAB_DESCRIPTION),
+            new FilterTabs(                 GaussianBlurTab.TAB_TITLE,
+                                            GaussianBlurTab.TAB_DESCRIPTION),
+            new FilterTabs(                 MorphologyExTab.TAB_TITLE,
+                                            MorphologyExTab.TAB_DESCRIPTION),
+            new FilterTabs(                    ThresholdTab.TAB_TITLE,
+                                               ThresholdTab.TAB_DESCRIPTION),
+            new FilterTabs(                    WatershedTab.TAB_TITLE,
+                                               WatershedTab.TAB_DESCRIPTION)
         );
     }
 
@@ -77,22 +81,24 @@ public final class MapperFilter {
 
         // OpenCV
         // alphabetical sort
-        case               AsIsTab.TAB_NAME:
-            return         AsIsTab.class;
-        case          BilateralTab.TAB_NAME:
-            return    BilateralTab.class;
-        case              CannyTab.TAB_NAME:
-            return        CannyTab.class;
-        case       FindContoursTab.TAB_NAME:
-            return FindContoursTab.class;
-        case       GaussianBlurTab.TAB_NAME:
-            return GaussianBlurTab.class;
-        case       MorphologyExTab.TAB_NAME:
-            return MorphologyExTab.class;
-        case          ThresholdTab.TAB_NAME:
-            return    ThresholdTab.class;
-        case          WatershedTab.TAB_NAME:
-            return    WatershedTab.class;
+        case                                AsIsTab.TAB_NAME:
+            return                          AsIsTab.class;
+        case       ksn.imgusage.tabs.opencv.BlurTab.TAB_NAME:
+            return ksn.imgusage.tabs.opencv.BlurTab.class;
+        case                           BilateralTab.TAB_NAME:
+            return                     BilateralTab.class;
+        case                               CannyTab.TAB_NAME:
+            return                         CannyTab.class;
+        case                        FindContoursTab.TAB_NAME:
+            return                  FindContoursTab.class;
+        case                        GaussianBlurTab.TAB_NAME:
+            return                  GaussianBlurTab.class;
+        case                        MorphologyExTab.TAB_NAME:
+            return                  MorphologyExTab.class;
+        case                           ThresholdTab.TAB_NAME:
+            return                     ThresholdTab.class;
+        case                           WatershedTab.TAB_NAME:
+            return                     WatershedTab.class;
         default:
 
             // Catalano-Framework
@@ -127,22 +133,24 @@ public final class MapperFilter {
 
         // OpenCV
         // alphabetical sort
-        case               AsIsTab.TAB_NAME:
-            return         AsIsTabParams.class;
-        case          BilateralTab.TAB_NAME:
-            return    BilateralTabParams.class;
-        case              CannyTab.TAB_NAME:
-            return        CannyTabParams.class;
-        case       FindContoursTab.TAB_NAME:
-            return FindContoursTabParams.class;
-        case       GaussianBlurTab.TAB_NAME:
-            return GaussianBlurTabParams.class;
-        case       MorphologyExTab.TAB_NAME:
-            return MorphologyExTabParams.class;
-        case          ThresholdTab.TAB_NAME:
-            return    ThresholdTabParams.class;
-        case          WatershedTab.TAB_NAME:
-            return    WatershedTabParams.class;
+        case                                    AsIsTab.TAB_NAME:
+            return                              AsIsTabParams.class;
+        case       ksn.imgusage.tabs.    opencv.BlurTab.TAB_NAME:
+            return ksn.imgusage.type.dto.opencv.BlurTabParams.class;
+        case                               BilateralTab.TAB_NAME:
+            return                         BilateralTabParams.class;
+        case                                   CannyTab.TAB_NAME:
+            return                             CannyTabParams.class;
+        case                            FindContoursTab.TAB_NAME:
+            return                      FindContoursTabParams.class;
+        case                            GaussianBlurTab.TAB_NAME:
+            return                      GaussianBlurTabParams.class;
+        case                            MorphologyExTab.TAB_NAME:
+            return                      MorphologyExTabParams.class;
+        case                               ThresholdTab.TAB_NAME:
+            return                         ThresholdTabParams.class;
+        case                               WatershedTab.TAB_NAME:
+            return                         WatershedTabParams.class;
         default:
 
             // Catalano-Framework
