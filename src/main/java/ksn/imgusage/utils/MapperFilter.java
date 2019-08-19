@@ -60,6 +60,8 @@ public final class MapperFilter {
                                                      BoxTab.TAB_DESCRIPTION),
             new FilterTabs(                        CannyTab.TAB_TITLE,
                                                    CannyTab.TAB_DESCRIPTION),
+            new FilterTabs(        ContrastAndBrightnessTab.TAB_TITLE,
+                                   ContrastAndBrightnessTab.TAB_DESCRIPTION),
             new FilterTabs(                 FindContoursTab.TAB_TITLE,
                                             FindContoursTab.TAB_DESCRIPTION),
             new FilterTabs(                 GaussianBlurTab.TAB_TITLE,
@@ -93,6 +95,8 @@ public final class MapperFilter {
             return                           BoxTab.class;
         case                               CannyTab.TAB_NAME:
             return                         CannyTab.class;
+        case               ContrastAndBrightnessTab.TAB_NAME:
+            return         ContrastAndBrightnessTab.class;
         case                        FindContoursTab.TAB_NAME:
             return                  FindContoursTab.class;
         case                        GaussianBlurTab.TAB_NAME:
@@ -147,6 +151,8 @@ public final class MapperFilter {
             return                               BoxTabParams.class;
         case                                   CannyTab.TAB_NAME:
             return                             CannyTabParams.class;
+        case                   ContrastAndBrightnessTab.TAB_NAME:
+            return             ContrastAndBrightnessTabParams.class;
         case                            FindContoursTab.TAB_NAME:
             return                      FindContoursTabParams.class;
         case                            GaussianBlurTab.TAB_NAME:
