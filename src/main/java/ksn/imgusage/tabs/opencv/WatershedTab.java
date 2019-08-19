@@ -100,7 +100,7 @@ public class WatershedTab extends OpencvFilterTab<WatershedTabParams> {
             colorTab[i] = rgb;
         }
 
-        Mat markers = new Mat(imageMat.size(), CvType.CV_32S, Scalar.all(255));
+        Mat markers = new Mat(imageMat.size(), CvType.CV_32S, Scalar.all(0));
         Scalar green = new Scalar(0, 255, 0);
         Imgproc.drawContours(markers,            // Mat image
                              contours,           // List<MatOfPoint> contours
@@ -141,14 +141,10 @@ public class WatershedTab extends OpencvFilterTab<WatershedTabParams> {
             }
         }
 
-
         // wshed = wshed*0.5 + imgGray*0.5;
-//        wshed = wshed.mul(wshed, 0.5);
-//        imgGray.mul(imgGray, 0.5);
-//        Imgproc.accumulate(wshed, imgGray);
-
-        imageMat = wshed;
-
+        Mat dst = new Mat();
+        Core.addWeighted(wshed, 0.5, imgGray, 0.5, 0, dst);
+        imageMat = dst;
     }
 
     @Override
