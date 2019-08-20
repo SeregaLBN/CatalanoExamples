@@ -224,6 +224,12 @@ task downloadExampleImage() {
             new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Similar-geometric-shapes.svg/1024px-Similar-geometric-shapes.svg.png'),
             project.file('./exampleImages/Shapes.png'),
             false)
+
+        // https://en.wikipedia.org/wiki/File:Lenna_(test_image).png
+        downloadByUrl(
+            new java.net.URL('https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
+            project.file('./exampleImages/Lena.png'),
+            false)
     }
 }
 

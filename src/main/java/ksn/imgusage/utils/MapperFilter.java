@@ -72,6 +72,8 @@ public final class MapperFilter {
                                             MorphologyExTab.TAB_DESCRIPTION),
             new FilterTabs(                    ThresholdTab.TAB_TITLE,
                                                ThresholdTab.TAB_DESCRIPTION),
+            new FilterTabs(                   WarpAffineTab.TAB_TITLE,
+                                              WarpAffineTab.TAB_DESCRIPTION),
             new FilterTabs(                    WatershedTab.TAB_TITLE,
                                                WatershedTab.TAB_DESCRIPTION)
         );
@@ -109,6 +111,8 @@ public final class MapperFilter {
             return                  MorphologyExTab.class;
         case                           ThresholdTab.TAB_NAME:
             return                     ThresholdTab.class;
+        case                          WarpAffineTab.TAB_NAME:
+            return                    WarpAffineTab.class;
         case                           WatershedTab.TAB_NAME:
             return                     WatershedTab.class;
         default:
@@ -167,6 +171,8 @@ public final class MapperFilter {
             return                      MorphologyExTabParams.class;
         case                               ThresholdTab.TAB_NAME:
             return                         ThresholdTabParams.class;
+        case                              WarpAffineTab.TAB_NAME:
+            return                        WarpAffineTabParams.class;
         case                               WatershedTab.TAB_NAME:
             return                         WatershedTabParams.class;
         default:

@@ -1,9 +1,9 @@
 package ksn.imgusage.type.dto.opencv;
 
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.catalano.BlurTab;
+import ksn.imgusage.tabs.opencv.WatershedTab;
 
-/** Init parameters for {@link BlurTab} */
+/** Init parameters for {@link WatershedTab} */
 public class WatershedTabParams implements ITabParams {
 
     public enum EShowSteps {

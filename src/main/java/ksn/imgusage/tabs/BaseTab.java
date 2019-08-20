@@ -200,9 +200,11 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
         JSlider slider = new JSlider(JSlider.VERTICAL);
         slider.setModel(model.getWrapped());
-        slider  .setToolTipText(tip);
-        txtValue.setToolTipText(tip);
-        labTitle.setToolTipText(tip);
+        if (tip != null) {
+            slider  .setToolTipText(tip);
+            txtValue.setToolTipText(tip);
+            labTitle.setToolTipText(tip);
+        }
 
         Box boxColumn = Box.createVerticalBox();
         boxColumn.setBorder(BorderFactory.createTitledBorder(""));
