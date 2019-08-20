@@ -72,6 +72,10 @@ public class MainApp {
 
     private void initialize() {
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0                        , false), this::onClose); // exit by Esc
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_PLUS  , 0                        , false), this::onAddNewFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, 0                        , false), this::onAddNewFilter);
+      //UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_MINUS , 0                        , false), this::onRemoveCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0                        , false), this::onRemoveCurrentFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_W     , InputEvent.CTRL_DOWN_MASK, false), this::onRemoveCurrentFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_L     , 0                        , false), this::onLoadPipeline);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_O     , InputEvent.CTRL_DOWN_MASK, false), this::onSelectImage);

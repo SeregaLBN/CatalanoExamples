@@ -24,7 +24,6 @@ import org.opencv.imgproc.Imgproc;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.dto.opencv.EFindContoursDrawMethod;
 import ksn.imgusage.type.dto.opencv.FindContoursTabParams;
-import ksn.imgusage.type.opencv.CvArrayType;
 import ksn.imgusage.type.opencv.CvContourApproximationModes;
 import ksn.imgusage.type.opencv.CvLineType;
 import ksn.imgusage.type.opencv.CvRetrievalModes;
@@ -65,25 +64,19 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
     @Override
     protected void applyOpencvFilter() {
-//        if (this.modelMinLimitContoursW.getMaximum() != imageMat.width())
-//            SwingUtilities.invokeLater(() -> this.modelMinLimitContoursW.setMaximum(imageMat.width()) );
-//        if (this.modelMinLimitContoursH.getMaximum() != imageMat.height())
-//            SwingUtilities.invokeLater(() -> this.modelMinLimitContoursH.setMaximum(imageMat.height()) );
-
         // cast to gray image
-        if (imageMat.type() != CvArrayType.CV_8UC1.getVal())
-            imageMat = OpenCvHelper.toGray(imageMat);
+        imageMat = OpenCvHelper.toGray(imageMat);
 
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(
-            imageMat, // src
-            contours, // out
-            hierarchy, // dst
+            imageMat,  // src
+            contours,  // out1
+            hierarchy, // out2
             params.mode.getVal(),
             params.method.getVal());
 
-        { // cast to color image
+        { // restore color image
             Mat mat = new Mat();
             Imgproc.cvtColor(imageMat, mat, Imgproc.COLOR_GRAY2RGB);
             imageMat = mat;

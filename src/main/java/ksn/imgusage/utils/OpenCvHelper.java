@@ -18,6 +18,8 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ksn.imgusage.type.opencv.CvDepthType;
+
 public final class OpenCvHelper {
     private OpenCvHelper() {}
 
@@ -195,37 +197,51 @@ public final class OpenCvHelper {
     public static Mat toGray(Mat from) {
         switch (from.channels()) {
         case 1: return from;
-        case 3: {
-                Mat to = new Mat(from.height(), from.width(), CvType.CV_8UC1);
-                Imgproc.cvtColor(from, to, Imgproc.COLOR_RGB2GRAY);
-                return to;
+        case 3:
+            switch (CvDepthType.fromValue(from.depth())) {
+            case CV_8U: {
+                    Mat to = new Mat(from.height(), from.width(), CvType.CV_8UC1);
+                    Imgproc.cvtColor(from, to, Imgproc.COLOR_RGB2GRAY);
+                    return to;
+                }
+            default:
+                break;
             }
-        case 4: {
+        case 4:
+            if (from.depth() == CvDepthType.CV_8U.getVal()) {
                 Mat to = new Mat(from.height(), from.width(), CvType.CV_8UC1);
                 Imgproc.cvtColor(from, to, Imgproc.COLOR_RGBA2GRAY);
                 return to;
+            } else {
+                break;
             }
         default:
-            throw new RuntimeException("Unsupported");
         }
+        throw new RuntimeException("TODO: OpenCvHelper.toGray: support me. Source=" + from);
     }
 
     public static Mat to3Channel(Mat from) {
         switch (from.channels()) {
-        case 1: {
+        case 1:
+            if (from.depth() == CvDepthType.CV_8U.getVal()) {
                 Mat to = new Mat(from.size(), CvType.CV_8UC3);
                 Imgproc.cvtColor(from, to, Imgproc.COLOR_GRAY2RGB);
                 return to;
+            } else {
+                break;
             }
         case 3: return from;
-        case 4: {
+        case 4:
+            if (from.depth() == CvDepthType.CV_8U.getVal()) {
                 Mat to = new Mat(from.height(), from.width(), CvType.CV_8UC3);
                 Imgproc.cvtColor(from, to, Imgproc.COLOR_RGBA2RGB);
                 return to;
+            } else {
+                break;
             }
         default:
-            throw new RuntimeException("Unsupported");
         }
+        throw new RuntimeException("TODO: OpenCvHelper.to3Channel: support me. Source=" + from);
     }
 
 }

@@ -1,19 +1,23 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
+import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButton;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.type.dto.opencv.WatershedTabParams;
-import ksn.imgusage.type.opencv.CvDepthType;
+import ksn.imgusage.type.dto.opencv.WatershedTabParams.EShowSteps;
 import ksn.imgusage.type.opencv.CvLineType;
 import ksn.imgusage.utils.OpenCvHelper;
 
@@ -28,6 +32,8 @@ public class WatershedTab extends OpencvFilterTab<WatershedTabParams> {
 
     @Override
     public Component makeTab(WatershedTabParams params) {
+        if (params == null)
+            params = new WatershedTabParams();
         this.params = params;
         return makeTab();
     }
@@ -41,120 +47,124 @@ public class WatershedTab extends OpencvFilterTab<WatershedTabParams> {
 
     @Override
     protected void applyOpencvFilter() {
-        /*
-         1. Mat img - прочитали файл картинки
-         2. Mat markerMask - создали её серую копию
-         3. Mat imgGray - создали из серой копии цветную
-         4. вызвали findContours для markerMask
-         5. Mat markers - создали чёрный (CV_32S)
-         6. drawContours - на markers рисую все контуры (случ цветом?)
-         7. colorTab - содлал лист случ светов, размерность - кол-во контуров
-         8. watershed(img, markers);
-         9. Mat wshed(markers.size(), CV_8UC3);
-        10. прохожу по всем маркерам (из markers)
-            и для каждого валидного - беру цвет из colorTab
-        11. wshed = wshed*0.5 + imgGray*0.5;
-         */
-
-
         // cast to gray image
-        Mat markerMask = OpenCvHelper.toGray(imageMat);
-        Mat imgGray = new Mat();
-        Imgproc.cvtColor(markerMask, imgGray, Imgproc.COLOR_GRAY2BGR);
+        Mat imageGray = OpenCvHelper.toGray(imageMat);
 
         List<MatOfPoint> contours = new ArrayList<>();
         Mat hierarchy = new Mat();
         Imgproc.findContours(
-            markerMask, // src
-            contours, // out
-            hierarchy, // dst
+            imageGray, // src
+            contours , // out1
+            hierarchy, // out2
             Imgproc.RETR_CCOMP,
             Imgproc.CHAIN_APPROX_SIMPLE);
 
-        if (!true) {
-            Mat markers = new Mat(imageMat.size(), CvType.CV_32S, Scalar.all(255));
-            int compCount = 0;
-            int intMax = +2147483647; // C lang INT_MAX
-            Point offset = new Point();
-            for (int idx = 0; idx >= 0; compCount++) {
-                Imgproc.drawContours(markers, contours, idx, Scalar.all(compCount + 1), -1, 8, hierarchy, intMax, offset);
-                // idx = hierarchy[idx][0],
-                int[] data = { 0, 0, 0, 0 };
-                int readed = hierarchy.get(idx, 0, data);
-                if (readed < 1)
-                    idx = -1;
-                else
-                    idx = data[0];
-            }
-            logger.trace("compCount={}", compCount);
+        if (contours.isEmpty()) {
+            logger.warn("No any contours found!");
             return;
-
         }
 
-        int compCount = contours.size();
+        final int compCount = contours.size();
+        Mat markers = new Mat(imageMat.size(), CvType.CV_32SC1, Scalar.all(0));
+        for (int idx = 0; idx < compCount; ++idx)
+            Imgproc.drawContours(
+                    markers,                         // Mat image
+                    contours,                        // List<MatOfPoint> contours
+                    idx,                             // int contourIdx
+                    Scalar.all(idx + 1),             // Scalar color
+                    CvLineType.FILLED.getVal(),      // int thickness
+                    CvLineType.LINE_8.getVal(),      // int lineType
+                    hierarchy,                       // Mat hierarchy
+                    +2147483647,                     // int maxLevel
+                    new Point());                    // Point offset
+
+        if (params.showStep == EShowSteps.STEP1_CONTOURS) {
+            imageMat = markers;
+            return;
+        }
+
+        ///////////////////////////////////////////////////////////////
+
+        imageMat = OpenCvHelper.to3Channel(imageMat);
+        Imgproc.watershed(
+            imageMat, // Input 8-bit 3-channel image.
+            markers   // Input/output 32-bit single-channel image (map) of markers. It should have the same size as image .
+        );
+
+        if (params.showStep == EShowSteps.STEP2_WATERSHED) {
+            imageMat = markers;
+            return;
+        }
+
+        ///////////////////////////////////////////////////////////////
+
         Random rnd = ThreadLocalRandom.current();
-        byte[][] colorTab = new byte[compCount][];
+        byte[][] colors = new byte[compCount][];
         for (int i = 0; i < compCount; ++i) {
             byte[] rgb = new byte[3];
             rnd.nextBytes(rgb);
-            colorTab[i] = rgb;
+            colors[i] = rgb;
         }
 
-        Mat markers = new Mat(imageMat.size(), CvType.CV_32S, Scalar.all(0));
-        Scalar green = new Scalar(0, 255, 0);
-        Imgproc.drawContours(markers,            // Mat image
-                             contours,           // List<MatOfPoint> contours
-                             -1,                 // int contourIdx
-                             green,              // Scalar color
-                             true               // int thickness
-                                 ? CvLineType.FILLED.getVal()
-                                 : 1,
-                             CvLineType.LINE_AA.getVal(),     // int lineType
-                             hierarchy,                       // Mat hierarchy
-                             3,                               // int maxLevel
-                             new Point()                      // Point offset
-                         );
-
-        Imgproc.watershed(
-            OpenCvHelper.to3Channel(imageMat), // src  // Input 8-bit 3-channel image.
-            markers);
-
         Mat wshed = new Mat(markers.size(), CvType.CV_8UC3);
-        logger.trace("wshed depth={}", CvDepthType.fromValue(CvType.depth(wshed.type())));
-
-        // paint the watershed image
         byte[] clrWhite = new byte[] { (byte)0xFF, (byte)0xFF, (byte)0xFF };
         byte[] clrBlack = new byte[] { (byte)0x00, (byte)0x00, (byte)0x00 };
-        for (int i=0; i < markers.rows(); ++i) {
+        // paint the watershed image
+        for (int i = 0; i < markers.rows(); i++) {
             for (int j=0; j < markers.cols(); ++j) {
                 int[] data = { 0 };
-                int offset = markers.get(i, j, data);
-                if (offset < 1)
+                int readed = markers.get(i, j, data);
+                if (readed < 1) {
+                    logger.error("hmmm...");
                     continue;
+                }
                 int index = data[0];
                 if (index == -1)
                     wshed.put(i, j, clrWhite);
                 else if (index <= 0 || index > compCount)
                     wshed.put(i, j, clrBlack);
                 else
-                    wshed.put(i, j, colorTab[index - 1]);
+                    wshed.put(i, j, colors[index - 1]);
             }
         }
 
+        if (params.showStep == EShowSteps.STEP3_COLORIZED) {
+            imageMat = wshed;
+            return;
+        }
+
+        ///////////////////////////////////////////////////////////////
+
         // wshed = wshed*0.5 + imgGray*0.5;
         Mat dst = new Mat();
-        Core.addWeighted(wshed, 0.5, imgGray, 0.5, 0, dst);
+        Core.addWeighted(wshed, 0.5, OpenCvHelper.to3Channel(imageGray), 0.5, 0, dst);
         imageMat = dst;
     }
 
     @Override
     protected Component makeOptions() {
-        Box box4Options = Box.createVerticalBox();
-        box4Options.setBorder(BorderFactory.createTitledBorder(""));
-
-        // none..
-
-        return box4Options;
+        Box box4Steps = Box.createHorizontalBox();
+        box4Steps.setBorder(BorderFactory.createTitledBorder("Visualization steps"));
+        Box box4Steps1 = Box.createVerticalBox();
+        ButtonGroup radioGroup = new ButtonGroup();
+        Stream.of(EShowSteps.values())
+            .forEach(step ->
+        {
+            JRadioButton radioBtnAlg = new JRadioButton(step.name(), params.showStep == step);
+            radioBtnAlg.addItemListener(ev -> {
+                if (ev.getStateChange() == ItemEvent.SELECTED) {
+                    params.showStep = step;
+                    logger.trace("params.showStep type changed to {}", step);
+                    resetImage();
+                }
+            });
+            box4Steps1.add(radioBtnAlg);
+            radioGroup.add(radioBtnAlg);
+        });
+        box4Steps.add(Box.createHorizontalGlue());
+        box4Steps.add(box4Steps1);
+        box4Steps.add(Box.createHorizontalGlue());
+        return box4Steps;
     }
 
     @Override

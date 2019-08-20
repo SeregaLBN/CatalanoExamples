@@ -6,6 +6,18 @@ import ksn.imgusage.tabs.catalano.BlurTab;
 /** Init parameters for {@link BlurTab} */
 public class WatershedTabParams implements ITabParams {
 
-    // none
+    public enum EShowSteps {
+        STEP1_CONTOURS,
+        STEP2_WATERSHED,
+        STEP3_COLORIZED,
+        STEP4_COMBINE_TO_ORIGINAL
+    }
+
+    public EShowSteps showStep = EShowSteps.STEP4_COMBINE_TO_ORIGINAL;
+
+    @Override
+    public String toString() {
+        return "{ showStep=" + showStep + " }";
+    }
 
 }

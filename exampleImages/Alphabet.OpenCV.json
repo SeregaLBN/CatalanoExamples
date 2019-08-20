@@ -50,8 +50,16 @@
         "width" : 5,
         "height" : 5
       },
-      "anchor" : { "x": -1, "y" : -1 }
-    }
+      "anchor" : {
+        "x" : -1,
+        "y" : -1
+      }
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "iterations" : 1
   }
 }, {
   "tabName" : "OpenCV:Threshold",
@@ -84,6 +92,15 @@
       "height" : 35
     },
     "maxContourArea" : 300,
-    "fillContour" : true
+    "contourIdx" : -1,
+    "fillContour" : true,
+    "maxLevel" : 100,
+    "randomColors" : false
+  }
+}, {
+  "tabName" : "OpenCV:Watershed",
+  "pos" : 6,
+  "params" : {
+    "showStep" : "STEP4_COMBINE_TO_ORIGINAL"
   }
 } ]
