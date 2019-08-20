@@ -4,6 +4,7 @@ import java.awt.Component;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JTabbedPane;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -57,12 +58,23 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
             params.transfMatrix.m23
         };
         int checkVal = mt.put(0, 0, mtx);
+        assert checkVal == 6;
         Imgproc.warpAffine(imageMat, dst, mt, new Size(params.dsize.width, params.dsize.height));
         imageMat = dst;
     }
 
     @Override
     protected Component makeOptions() {
+        JTabbedPane tabPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabPane.setBorder(BorderFactory.createEmptyBorder(8,8,2,8));
+
+        tabPane.addTab(getTitle() + " options", null, makeWarpAffineOptions(), "The function warpAffine transforms the source image using the specified matrix: dst(x,y)=src(M11x+M12y+M13,M21x+M22y+M23)");
+        tabPane.addTab("Rotate", null, makeRotateOptions(), "The function warpAffine transforms the source image using the specified matrix: dst(x,y)=src(M11x+M12y+M13,M21x+M22y+M23)");
+
+        return tabPane;
+    }
+
+    private Component makeWarpAffineOptions() {
         Box box4Options = Box.createVerticalBox();
         box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
@@ -93,6 +105,14 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
         boxM2.add(makeSliderVert(modelM23, "m23", null));
         boxM2.add(Box.createHorizontalGlue());
 
+        Box box4MSliders = Box.createVerticalBox();
+        box4MSliders.setBorder(BorderFactory.createTitledBorder("2×3 transformation matrix"));
+      //box4MSliders.add(Box.createVerticalGlue());
+        box4MSliders.add(boxM1);
+      //box4MSliders.add(Box.createVerticalStrut(2));
+        box4MSliders.add(boxM2);
+      //box4MSliders.add(Box.createVerticalGlue());
+
         Box boxSize = Box.createHorizontalBox();
         boxSize.setBorder(BorderFactory.createTitledBorder("dsize"));
         boxSize.setToolTipText("size of the output image");
@@ -102,19 +122,11 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
         boxSize.add(makeSliderVert(modelSizeH, "Height", "Size Height"));
         boxSize.add(Box.createHorizontalGlue());
 
-        Box box4MSliders = Box.createVerticalBox();
-        box4MSliders.add(Box.createVerticalGlue());
-        box4MSliders.add(boxSize);
-      //box4MSliders.add(Box.createVerticalStrut(2));
-        box4MSliders.add(boxM1);
-        box4MSliders.add(Box.createVerticalGlue());
-
         Box boxOptions = Box.createVerticalBox();
-        boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(box4MSliders);
         boxOptions.add(Box.createVerticalStrut(2));
-        boxOptions.add(box4Borders);
+        boxOptions.add(boxSize);
         boxOptions.add(Box.createVerticalStrut(2));
         box4Options.add(boxOptions);
 
@@ -158,6 +170,13 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
             params.dsize.height = modelSizeH.getValue();
             resetImage();
         });
+
+        return box4Options;
+    }
+
+    /** <a href='https://docs.opencv.org/3.4.2/da/d54/group__imgproc__transform.html#gafbbc470ce83812914a70abfb604f4326'>Calculates an affine matrix of 2D rotation</a> */
+    private Component makeRotateOptions() {
+        Box box4Options = Box.createVerticalBox();
 
         return box4Options;
     }

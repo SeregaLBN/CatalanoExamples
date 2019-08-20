@@ -11,12 +11,12 @@ public class WarpAffineTabParams implements ITabParams {
 
     /** 2×3 transformation matrix */
     public static class TransformationMatrix {
-        public double m11;
-        public double m12;
-        public double m13;
-        public double m21;
-        public double m22;
-        public double m23;
+        public double m11 = 1;
+        public double m12 = 0;
+        public double m13 = 0;
+        public double m21 = 0;
+        public double m22 = 1;
+        public double m23 = 0;
 
         @Override
         public String toString() {
@@ -30,7 +30,7 @@ public class WarpAffineTabParams implements ITabParams {
     public TransformationMatrix transfMatrix = new TransformationMatrix();
 
     /** size of the output image */
-    public Size                 dsize = new Size(200, 150);
+    public Size                 dsize = new Size(0, 0);
 
     @Override
     public String toString() {
