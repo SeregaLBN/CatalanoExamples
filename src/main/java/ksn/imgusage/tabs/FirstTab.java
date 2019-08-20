@@ -215,6 +215,13 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         return previewImage;
     }
 
+    public void onSelectImage() {
+        logger.trace("onSelectImage");
+
+        File file = UiHelper.chooseFileToLoadImage(JOptionPane.getRootFrame(), latestImageDir);
+        readImageFile(file);
+    }
+
     private void readImageFile(File imageFile) {
         if (imageFile == null)
             return;
@@ -263,12 +270,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
     private final JButton makeButtonLoadImage() {
         JButton btnLoadImage = new JButton("Load image...");
-        btnLoadImage.addActionListener(ev -> {
-            logger.trace("onSelectImage");
-
-            File file = UiHelper.chooseFileToLoadImage(btnLoadImage, latestImageDir);
-            readImageFile(file);
-        });
+        btnLoadImage.addActionListener(ev -> onSelectImage());
         if (sourceImage == null)
             SwingUtilities.invokeLater(btnLoadImage::doClick);
 

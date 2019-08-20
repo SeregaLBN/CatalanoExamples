@@ -71,9 +71,10 @@ public class MainApp {
     }
 
     private void initialize() {
-        // exit by Esc
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), this::onClose);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK, false), this::removeCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0                        , false), this::onClose); // exit by Esc
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_W     , InputEvent.CTRL_DOWN_MASK, false), this::onRemoveCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_L     , 0                        , false), this::onLoadPipeline);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_O     , InputEvent.CTRL_DOWN_MASK, false), this::onSelectImage);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -180,7 +181,7 @@ public class MainApp {
             }
     }
 
-    private void removeCurrentFilter() {
+    private void onRemoveCurrentFilter() {
         int i = tabPane.getSelectedIndex();
         if (i < 1)
             return;
@@ -353,6 +354,10 @@ public class MainApp {
         if (jsonFile == null)
             return; // aborted
         loadPipeline(jsonFile);
+    }
+
+    private void onSelectImage() {
+        getFirstTab().onSelectImage();
     }
 
     private void loadPipeline(File jsonFile) {
