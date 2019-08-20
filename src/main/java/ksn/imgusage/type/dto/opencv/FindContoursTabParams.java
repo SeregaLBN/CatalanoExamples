@@ -22,7 +22,15 @@ public class FindContoursTabParams implements ITabParams {
     public int                         maxContourArea   = 100;
 
     /** usage only for {@link EFindContoursDrawMethod#DRAW_CONTOURS} */
+    public int                         contourIdx       = -1;
+
+    /** usage only for {@link EFindContoursDrawMethod#DRAW_CONTOURS} */
     public boolean                     fillContour      = true;
+
+    /** usage only for {@link EFindContoursDrawMethod#DRAW_CONTOURS} */
+    public int                         maxLevel         = 100;
+
+    public boolean                     randomColors     = false;
 
     @Override
     public String toString() {
@@ -31,7 +39,10 @@ public class FindContoursTabParams implements ITabParams {
             + ", drawMethod=" + drawMethod
             + ", minLimitContours=" + minLimitContours
             + ", maxContourArea=" + maxContourArea
+            + ", contourIdx=" + contourIdx
             + ", fillContour=" + fillContour
+            + ", maxLevel=" + maxLevel
+            + ", randomColors=" + randomColors
             + " }";
     }
 

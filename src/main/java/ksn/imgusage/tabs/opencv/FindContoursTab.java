@@ -4,7 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.IntConsumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.swing.*;
 
@@ -36,6 +43,9 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     private static final int MAX_MAX_CONTOUR_AREA = 10000;
 
     private FindContoursTabParams params;
+    private Box boxDrawContoursParams;
+    private Box boxExteranlRectParams;
+    private IntConsumer setMaxContourIdx;
 
     @Override
     public Component makeTab(FindContoursTabParams params) {
@@ -79,59 +89,109 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             imageMat = mat;
         }
 
+        if (contours.isEmpty()) {
+            logger.warn("No any contours found!");
+            return;
+        }
+
+
+        { // !!! recheck params !!!
+            if (params.contourIdx >= contours.size())
+                params.contourIdx = contours.size() - 1;
+            setMaxContourIdx.accept(contours.size() - 1);
+        }
+
+
         Scalar green = new Scalar(0, 255, 0);
-        final Point offset = new Point();
+        Random rnd = ThreadLocalRandom.current();
+        Supplier<Scalar> getColor = () -> params.randomColors
+                ? new Scalar(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256))
+                : green;
+
         switch (params.drawMethod) {
         case DRAW_CONTOURS:
+            final Point offset = new Point();
+
+            List<Integer> ids;
             if (params.maxContourArea > 0) {
-                for (int i = 0; i < contours.size(); i++) {
-                    MatOfPoint contour = contours.get(i);
+                ids = new ArrayList<>();
+                List<Integer> tmpList = ids;
+                IntConsumer check = idx -> {
+                    MatOfPoint contour = contours.get(idx);
                     double area = Math.abs(Imgproc.contourArea(contour));
-                    if (area > params.maxContourArea) {
-                        Imgproc.drawContours(
-                                imageMat,           // Mat image
-                                contours,           // List<MatOfPoint> contours
-                                i,                  // int contourIdx
-                                green,              // Scalar color
-                                params.fillContour  // int thickness
-                                    ? CvLineType.FILLED.getVal()
-                                    : 1
-                            );
-                    }
-                }
-
-            } else {
-
-                List<MatOfPoint> contours2;
-                //if (true) {
-                    contours2 = contours;
-                /** /
+                    if (area > params.maxContourArea)
+                        tmpList.add(idx);
+                };
+                if (params.contourIdx < 0) {
+                    for (int i = 0; i < contours.size(); i++)
+                        check.accept(i);
                 } else {
-                    contours2 = new ArrayList<>(contours.size());
-                    for (int k = 0; k < contours.size(); k++ ) {
-                        MatOfPoint2f in = new MatOfPoint2f(contours.get(k).toArray());
-                        MatOfPoint2f out = new MatOfPoint2f();
-                        Imgproc.approxPolyDP(in, out, 3, true);
-                        MatOfPoint out2 = new MatOfPoint(out.toArray());
-                        contours2.add(out2);
-                    }
+                    check.accept(params.contourIdx);
                 }
-                /**/
-
-                Imgproc.drawContours(
-                    imageMat,                        // Mat image
-                    contours2,                       // List<MatOfPoint> contours
-                    -1,                              // int contourIdx
-                    green,                           // Scalar color
-                    params.fillContour               // int thickness
-                        ? CvLineType.FILLED.getVal()
-                        : 1,
-                    CvLineType.LINE_AA.getVal(),     // int lineType
-                    hierarchy,                       // Mat hierarchy
-                    3,                               // int maxLevel
-                    offset                           // Point offset
-                );
+            } else {
+                if (params.contourIdx < 0) {
+                    if (params.randomColors)
+                        ids = IntStream.range(0, contours.size()).boxed().collect(Collectors.toList());
+                    else
+                        ids = Arrays.asList(params.contourIdx);
+                } else {
+                    ids = Arrays.asList(params.contourIdx);
+                }
             }
+
+            if (ids.isEmpty()) {
+                logger.warn("All contours are filtered!");
+                return;
+            }
+
+            for (int idx : ids)
+                Imgproc.drawContours(
+                        imageMat,                        // Mat image
+                        contours,                        // List<MatOfPoint> contours
+                        idx,                             // int contourIdx
+                        getColor.get(),                  // Scalar color
+                        params.fillContour               // int thickness
+                            ? CvLineType.FILLED.getVal()
+                            : 1,
+                        CvLineType.LINE_AA.getVal(),     // int lineType
+                        hierarchy,                       // Mat hierarchy
+                        params.maxLevel,                 // int maxLevel
+                        offset);                         // Point offset
+
+            /** /
+            if (false) {
+                // example of loop by hierarchy
+
+                // iterate through all the top-level contours,
+                // draw each connected component with its own random color
+                int maxLevel = +2147483647; // C lang INT_MAX
+                int[] tmp = new int[ hierarchy.channels() ];
+                boolean isTraceEnabeld = logger.isTraceEnabled();
+                for (int idx = 0; idx >= 0;) {
+                    Scalar color = new Scalar(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+                    Imgproc.drawContours(
+                            imageMat,                   // Mat image
+                            contours,                   // List<MatOfPoint> contours
+                            idx,                        // int contourIdx
+                            color,                      // Scalar color
+                            params.fillContour          // int thickness
+                                ? CvLineType.FILLED.getVal()
+                                : 1,
+                            CvLineType.LINE_AA.getVal(),// int lineType
+                            hierarchy,                  // Mat hierarchy
+                            maxLevel,                   // int maxLevel
+                            offset);                    // Point offset
+
+                    // idx = hierarchy[idx][0]; // where     vector<Vec4i> hierarchy; // C++
+                    int readed = hierarchy.get(0, idx, tmp);
+                    if (readed < 1)
+                        break;
+                    if (isTraceEnabeld)
+                        logger.trace("hierarchy.get(0, {}) = {}", idx, tmp);
+                    idx = tmp[0];
+                }
+            }
+            /**/
             break;
         case EXTERNAL_RECT:
             contours.stream()
@@ -140,7 +200,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                 .forEach(rc -> Imgproc.rectangle(imageMat,
                                                  new Point(rc.x, rc.y),
                                                  new Point(rc.x + rc.width, rc.y + rc.height),
-                                                 green, 1));
+                                                 getColor.get(), 1));
             break;
         default:
             logger.error("Unknown this.drawMethod={}! Support him!", params.drawMethod);
@@ -155,6 +215,13 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
         SliderIntModel modelMinLimitContoursW = new SliderIntModel(params.minLimitContours.width , 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
         SliderIntModel modelMinLimitContoursH = new SliderIntModel(params.minLimitContours.height, 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
         SliderIntModel modelMaxContourArea    = new SliderIntModel(params.maxContourArea, 0, MIN_MAX_CONTOUR_AREA, MAX_MAX_CONTOUR_AREA);
+        SliderIntModel modelContourIdx        = new SliderIntModel(params.contourIdx    , 0, -1, Math.max(0, params.contourIdx));
+        SliderIntModel modelMaxLevel          = new SliderIntModel(params.maxLevel      , 0, 0, 100);
+
+        setMaxContourIdx = maxVal -> {
+            if (modelContourIdx.getMaximum() != maxVal)
+                SwingUtilities.invokeLater(() -> modelContourIdx.setMaximum(maxVal));
+        };
 
         Box boxFindContoursOptions = Box.createVerticalBox();
         {
@@ -211,7 +278,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                     if (ev.getStateChange() == ItemEvent.SELECTED) {
                         params.drawMethod = EFindContoursDrawMethod.DRAW_CONTOURS;
                         logger.trace("params.drawMethod changed to {}", params.drawMethod);
-                        makeDrawContoursParams(panelCustomParams, modelMaxContourArea);
+                        makeDrawContoursParams(panelCustomParams, modelMaxContourArea, modelContourIdx, modelMaxLevel);
                         panelCustomParams.revalidate();
                         resetImage();
                     }
@@ -234,15 +301,26 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                 radioGroup.add(radioBtn2);
 
                 switch (params.drawMethod) {
-                case DRAW_CONTOURS: makeDrawContoursParams(panelCustomParams, modelMaxContourArea); break;
+                case DRAW_CONTOURS: makeDrawContoursParams(panelCustomParams, modelMaxContourArea, modelContourIdx, modelMaxLevel); break;
                 case EXTERNAL_RECT: makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH); break;
                 default:
                     logger.error("Unknown params.drawMethod={}! Support him!", params.drawMethod);
                 }
             }
 
+            Box box4RandomColor = Box.createVerticalBox();
+            box4RandomColor.setBorder(BorderFactory.createTitledBorder(""));
+            JCheckBox checkBoxL2gradient = new JCheckBox("Random color", params.randomColors);
+            checkBoxL2gradient.addItemListener(ev -> {
+                params.randomColors = (ev.getStateChange() == ItemEvent.SELECTED);
+                logger.trace("randomColors is {}", (params.randomColors ? "checked" : "unchecked"));
+                resetImage();
+            });
+            box4RandomColor.add(checkBoxL2gradient);
+
             panelDrawContoursOptions.add(boxSelectDrawMethod, BorderLayout.NORTH);
             panelDrawContoursOptions.add(panelCustomParams  , BorderLayout.CENTER);
+            panelDrawContoursOptions.add(box4RandomColor    , BorderLayout.SOUTH);
         }
 
         JPanel panelAll = new JPanel();
@@ -267,12 +345,21 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             params.maxContourArea = modelMaxContourArea.getValue();
             resetImage();
         });
+        modelContourIdx.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelContourId: value={}", modelContourIdx.getFormatedText());
+            params.contourIdx = modelContourIdx.getValue();
+            resetImage();
+        });
+        modelMaxLevel.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelMaxLevel: value={}", modelMaxLevel.getFormatedText());
+            params.maxLevel = modelMaxLevel.getValue();
+            resetImage();
+        });
 
         return box4Options;
     }
 
-    private Box boxDrawContoursParams;
-    private void makeDrawContoursParams(JPanel panelCustomParams, SliderIntModel modelMaxContourArea) {
+    private void makeDrawContoursParams(JPanel panelCustomParams, SliderIntModel modelMaxContourArea, SliderIntModel modelContourIdx, SliderIntModel modelMaxLevel) {
         if (boxExteranlRectParams != null)
             boxExteranlRectParams.setVisible(false);
 
@@ -291,6 +378,10 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             boxDrawContoursParams.add(makeSliderVert(modelMaxContourArea, "Area", "Max show contour area"));
             boxDrawContoursParams.add(Box.createHorizontalStrut(2));
             boxDrawContoursParams.add(boxFilled);
+            boxDrawContoursParams.add(Box.createHorizontalStrut(2));
+            boxDrawContoursParams.add(makeSliderVert(modelContourIdx, "contourIdx", "Parameter indicating a contour to draw. If it is negative, all the contours are drawn"));
+            boxDrawContoursParams.add(Box.createHorizontalStrut(2));
+            boxDrawContoursParams.add(makeSliderVert(modelMaxLevel, "maxLevel", "Maximal level for drawn contours. If it is 0, only the specified contour is drawn. If it is 1, the function draws the contour(s) and all the nested contours. If it is 2, the function draws the contours, all the nested contours, all the nested-to-nested contours, and so on. (Theoretical max value: +2147483647 - C lang INT_MAX)"));
             boxDrawContoursParams.add(Box.createHorizontalGlue());
         }
         boxDrawContoursParams.setVisible(true);
@@ -300,7 +391,6 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     }
 
 
-    private Box boxExteranlRectParams;
     private void makeExteranlRectParams(JPanel panelCustomParams, SliderIntModel modelMinLimitContoursW, SliderIntModel modelMinLimitContoursH) {
         if (boxDrawContoursParams != null)
             boxDrawContoursParams.setVisible(false);
