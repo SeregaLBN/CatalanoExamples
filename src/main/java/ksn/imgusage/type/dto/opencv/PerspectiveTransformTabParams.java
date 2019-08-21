@@ -3,32 +3,19 @@ package ksn.imgusage.type.dto.opencv;
 import java.util.Locale;
 
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.opencv.WarpAffineTab;
+import ksn.imgusage.tabs.opencv.PerspectiveTransformTab;
+import ksn.imgusage.type.Point;
 import ksn.imgusage.type.Size;
 import ksn.imgusage.type.opencv.CvInterpolationFlags;
 
-/** Init parameters for {@link WarpAffineTab} */
-public class WarpAffineTabParams implements ITabParams {
+/** Init parameters for {@link PerspectiveTransformTab} */
+public class PerspectiveTransformTabParams implements ITabParams {
 
-    /** 2×3 transformation matrix */
-    public static class TransformationMatrix {
-        public double m11 = 1;
-        public double m12 = 0;
-        public double m13 = 0;
-        public double m21 = 0;
-        public double m22 = 1;
-        public double m23 = 0;
-
-        @Override
-        public String toString() {
-            return String.format(Locale.US,
-                    "{ m11=%.3f, m12=%.3f, m13=%.3f, m21=%.3f, m22=%.3f, m23=%.3f }",
-                    m11, m12, m13, m21, m22, m23);
-        }
-    }
-
-    /** 2×3 transformation matrix */
-    public TransformationMatrix transfMatrix = new TransformationMatrix();
+    // perspective transformation for the corresponding 4 point pairs
+    public Point pointLeftTop     = new Point(-1, -1);
+    public Point pointRightTop    = new Point(-1, -1);
+    public Point pointLeftBottom  = new Point(-1, -1);
+    public Point pointRightBottom = new Point(-1, -1);
 
     /** size of the output image */
     public Size dsize = new Size(0, 0);
@@ -37,11 +24,9 @@ public class WarpAffineTabParams implements ITabParams {
 
     public boolean useFlagInverseMap = false;
 
-
     public CvInterpolationFlags getInterpolation() {
         return interpolation;
     }
-
     public void setInterpolation(CvInterpolationFlags interpolation) {
         if (interpolation.getVal() < CvInterpolationFlags.INTER_MAX.getVal())
             this.interpolation = interpolation;
@@ -49,11 +34,15 @@ public class WarpAffineTabParams implements ITabParams {
             throw new IllegalArgumentException("Unsupported interpolation=" + interpolation);
     }
 
+
     @Override
     public String toString() {
         return String.format(Locale.US,
-            "{ transformMatrix=%s, dsize=%s, interpolation=%s, useFlagInverseMap=%b }",
-            transfMatrix.toString(),
+            "{ pointLeftTop=%s, pointRightTop=%s, pointLeftBottom=%s, pointRightBottom=%s, dsize=%s, interpolation=%s, useFlagInverseMap=%b }",
+            pointLeftTop    .toString(),
+            pointRightTop   .toString(),
+            pointLeftBottom .toString(),
+            pointRightBottom.toString(),
             dsize.toString(),
             interpolation,
             useFlagInverseMap);

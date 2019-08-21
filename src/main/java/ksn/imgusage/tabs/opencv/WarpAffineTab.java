@@ -1,10 +1,12 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 
 import org.opencv.core.CvType;
@@ -137,68 +139,28 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
         box4MSliders.add(boxM2);
       //box4MSliders.add(Box.createVerticalGlue());
 
-        Box boxSize = Box.createHorizontalBox();
-        boxSize.setBorder(BorderFactory.createTitledBorder("dsize"));
-        boxSize.setToolTipText("size of the output image");
-        boxSize.add(Box.createHorizontalGlue());
-        boxSize.add(makeSliderVert(modelSizeW, "Width", "Size Width"));
-        boxSize.add(Box.createHorizontalStrut(2));
-        boxSize.add(makeSliderVert(modelSizeH, "Height", "Size Height"));
-        boxSize.add(Box.createHorizontalGlue());
-
-        Box box4Interpolat = Box.createVerticalBox();
-        box4Interpolat.setBorder(BorderFactory.createTitledBorder("Interpolations"));
-        Box box4TypesRadioBttns = Box.createVerticalBox();
-        Box box4TypesCheckBoxes = Box.createVerticalBox();
-        {
-            box4TypesRadioBttns.setToolTipText("Interpolation methods");
-            ButtonGroup radioGroup1 = new ButtonGroup();
-            CvInterpolationFlags.getInterpolations()
-                .filter(e -> e != CvInterpolationFlags.INTER_LINEAR_EXACT) // CvException [org.opencv.core.CvException:
-                                                                           //  cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/core/src/parallel.cpp:240:
-                                                                           //  error: (-2:Unspecified error) in function 'finalize'
-                                                                           //  Exception in parallel_for() body:
-                                                                           //  OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/imgproc/src/imgwarp.cpp:1803:
-                                                                           //  error: (-5:Bad argument) Unknown interpolation method in function 'remap' ]
-                .forEach(interpolation ->
-            {
-                JRadioButton radioBtn = new JRadioButton(interpolation.name(), params.getInterpolation() == interpolation);
-                radioBtn.setToolTipText("Interpolation method");
-                radioBtn.addItemListener(ev -> {
-                    if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.setInterpolation(interpolation);
-                        logger.trace("Interpolation method changed to {}", interpolation);
-                        resetImage();
-                    }
-                });
-                box4TypesRadioBttns.add(radioBtn);
-                radioGroup1.add(radioBtn);
-            });
-        }
-        {
-            box4TypesCheckBoxes.setBorder(BorderFactory.createTitledBorder("Optional flag"));
-
-            JCheckBox checkBoxInverseMap = new JCheckBox(CvInterpolationFlags.WARP_INVERSE_MAP.name(), params.useFlagInverseMap);
-            checkBoxInverseMap.setToolTipText("flag, inverse transformation");
-            checkBoxInverseMap.addItemListener(ev -> {
-                params.useFlagInverseMap = (ev.getStateChange() == ItemEvent.SELECTED);
-                logger.trace("useFlagInverseMap is {}", (params.useFlagInverseMap ? "checked" : "unchecked"));
-                resetImage();
-            });
-
-            box4TypesCheckBoxes.add(checkBoxInverseMap);
-        }
-        box4Interpolat.add(box4TypesRadioBttns);
-        box4Interpolat.add(Box.createVerticalStrut(2));
-        box4Interpolat.add(box4TypesCheckBoxes);
+        Box boxSizeIntepol = Box.createHorizontalBox();
+        boxSizeIntepol.add(Box.createHorizontalGlue());
+        boxSizeIntepol.add(makeSize("dsize", "size of the output image", modelSizeW, modelSizeH));
+        boxSizeIntepol.add(Box.createHorizontalStrut(2));
+        boxSizeIntepol.add(makeInterpolations(
+            params::getInterpolation,
+            params::setInterpolation,
+            e -> e != CvInterpolationFlags.INTER_LINEAR_EXACT, // CvException [org.opencv.core.CvException:
+                                                               //  cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/core/src/parallel.cpp:240:
+                                                               //  error: (-2:Unspecified error) in function 'finalize'
+                                                               //  Exception in parallel_for() body:
+                                                               //  OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/imgproc/src/imgwarp.cpp:1803:
+                                                               //  error: (-5:Bad argument) Unknown interpolation method in function 'remap' ]
+            params.useFlagInverseMap,
+            v -> params.useFlagInverseMap = v));
+        boxSizeIntepol.add(Box.createHorizontalGlue());
 
         Box boxOptions = Box.createVerticalBox();
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(box4MSliders);
         boxOptions.add(Box.createVerticalStrut(2));
-        boxOptions.add(boxSize);
-        boxOptions.add(Box.createVerticalStrut(2));
-        boxOptions.add(box4Interpolat);
+        boxOptions.add(boxSizeIntepol);
         boxOptions.add(Box.createVerticalStrut(2));
         box4Options.add(boxOptions);
 
