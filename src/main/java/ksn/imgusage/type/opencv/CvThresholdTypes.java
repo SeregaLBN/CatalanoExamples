@@ -1,5 +1,7 @@
 package ksn.imgusage.type.opencv;
 
+import java.util.stream.Stream;
+
 import org.opencv.imgproc.Imgproc;
 
 /** @see <a href="https://docs.opencv.org/3.4.2/d7/d1b/group__imgproc__misc.html#gaa9e58d2860d4afa658ef70a9b1115576">type of the threshold operation</a> */
@@ -35,6 +37,12 @@ public enum CvThresholdTypes {
         if (useTriangleAlg)
             return val | THRESH_TRIANGLE.val;
         return val;
+    }
+
+    public static Stream<CvThresholdTypes> getThresholds() {
+        return Stream.of(CvThresholdTypes.values())
+            .filter(e -> e != THRESH_MASK)
+            .filter(e -> (e.getVal() & THRESH_MASK.val) != 0);
     }
 
 }

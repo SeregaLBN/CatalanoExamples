@@ -5,6 +5,7 @@ import java.util.Locale;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.GaussianBlurTab;
 import ksn.imgusage.type.Size;
+import ksn.imgusage.type.opencv.CvInterpolationFlags;
 
 /** Init parameters for {@link GaussianBlurTab} */
 public class WarpAffineTabParams implements ITabParams {
@@ -30,14 +31,31 @@ public class WarpAffineTabParams implements ITabParams {
     public TransformationMatrix transfMatrix = new TransformationMatrix();
 
     /** size of the output image */
-    public Size                 dsize = new Size(0, 0);
+    public Size dsize = new Size(0, 0);
+
+    private CvInterpolationFlags interpolation = CvInterpolationFlags.INTER_LINEAR;
+
+    public boolean useFlagInverseMap   = false;
+
+
+    public CvInterpolationFlags getInterpolation() {
+        return interpolation;
+    }
+    public void setInterpolation(CvInterpolationFlags interpolation) {
+        if (interpolation.getVal() < CvInterpolationFlags.INTER_MAX.getVal())
+            this.interpolation = interpolation;
+        else
+            throw new IllegalArgumentException("Unsupported interpolation=" + interpolation);
+    }
 
     @Override
     public String toString() {
         return String.format(Locale.US,
-            "{ transformMatrix=%s, dsize=%s }",
+            "{ transformMatrix=%s, dsize=%s, interpolation=%s, useFlagInverseMap=%b }",
             transfMatrix.toString(),
-            dsize.toString());
+            dsize.toString(),
+            interpolation,
+            useFlagInverseMap);
     }
 
 }

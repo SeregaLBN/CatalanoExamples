@@ -21,7 +21,7 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
     public static final String TAB_DESCRIPTION = "Finds edges in an image using the Canny algorithm";
 
     private static final double MIN_THRESHOLD     =   0;
-    private static final double MAX_THRESHOLD     = 999;
+    private static final double MAX_THRESHOLD     = 9999;
     public  static final int    MIN_APERTURE_SIZE =   3;
     private static final int    MAX_APERTURE_SIZE =   7;
 

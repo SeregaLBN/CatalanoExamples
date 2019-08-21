@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ItemEvent;
-import java.util.stream.Stream;
 
 import javax.swing.*;
 
@@ -97,8 +96,7 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
         {
             box4TypesRadioBttns.setToolTipText("Thresholding types");
             ButtonGroup radioGroup1 = new ButtonGroup();
-            Stream.of(CvThresholdTypes.values())
-                .filter(b -> b.getVal() < CvThresholdTypes.THRESH_MASK.getVal())
+            CvThresholdTypes.getThresholds()
                 .forEach(thresholdingType ->
             {
                 JRadioButton radioBtnThresh = new JRadioButton(thresholdingType.name(), thresholdingType == params.getThreshType());

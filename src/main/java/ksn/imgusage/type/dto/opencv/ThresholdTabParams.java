@@ -19,21 +19,10 @@ public class ThresholdTabParams implements ITabParams {
         return threshType;
     }
     public void setThreshType(CvThresholdTypes threshType) {
-        switch (threshType) {
-        case THRESH_BINARY    :
-        case THRESH_BINARY_INV:
-        case THRESH_TRUNC     :
-        case THRESH_TOZERO    :
-        case THRESH_TOZERO_INV:
+        if (threshType.getVal() < CvThresholdTypes.THRESH_MASK.getVal())
             this.threshType = threshType;
-            break;
-
-        case THRESH_OTSU:
-        case THRESH_TRIANGLE:
-        case THRESH_MASK:
-        default:
+        else
             throw new IllegalArgumentException("Unsupported threshType=" + threshType);
-        }
     }
 
     @Override

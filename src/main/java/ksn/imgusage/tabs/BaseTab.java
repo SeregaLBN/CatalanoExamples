@@ -36,6 +36,9 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
     @Override
     public void setSource(ITab<?> newSource) {
+        if (this.source == newSource) // ref eq
+            return;
+
         this.source = newSource;
         resetImage();
     }

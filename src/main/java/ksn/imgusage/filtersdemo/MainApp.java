@@ -111,6 +111,7 @@ public class MainApp {
         final int newPos = i + 1;
         newTab.setHandler(getTabHandler());
 
+        // TODO hardcode (
         if (newTab instanceof AddWeightedTab) {
             if (i < 1) {
                 onError("Can`t use AddWeighted operation: TWO previous tabs are be used!", null);
@@ -119,10 +120,12 @@ public class MainApp {
             ((AddWeightedTab)newTab).setSource2(tabs.get(i - 1));
         }
 
+        newTab.setSource(prev);
         tabPane.insertTab(newTab.getTitle(), null, newTab.makeTab(tabParams), newTab.getDescription(), newPos);
         tabs.add(newPos, newTab);
 
-        for (int j = newPos; j < tabs.size(); ++j) {
+        prev = newTab;
+        for (int j = newPos + 1; j < tabs.size(); ++j) {
             ITab<?> curr = tabs.get(j);
             curr.setSource(prev);
             prev = curr;
@@ -136,6 +139,7 @@ public class MainApp {
         logger.info("onCancel");
         onClose();
     }
+
     private void onClose() {
         frame.dispose();
         logger.warn("Good bay!\n\n");
@@ -245,7 +249,7 @@ public class MainApp {
 
     }
 
-    void onTabChanged(ChangeEvent ev) {
+    private void onTabChanged(ChangeEvent ev) {
         logger.trace("onTabChanged");
     }
 

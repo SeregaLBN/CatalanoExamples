@@ -1,19 +1,22 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
+import java.awt.event.ItemEvent;
+import java.awt.image.BufferedImage;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.dto.opencv.WarpAffineTabParams;
+import ksn.imgusage.type.opencv.CvInterpolationFlags;
 
 /** <a href='https://docs.opencv.org/3.4.2/da/d54/group__imgproc__transform.html#ga0203d9ee5fcd28d40dbc4a1ea4451983'>Applies an affine transformation to an image </a> */
 public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
@@ -28,6 +31,8 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
     private static final double MAX_MATRIX_VAL =  3000;
 
     private WarpAffineTabParams params;
+    private Runnable apllyParamsSettings;
+    private Runnable apllyRotateSettings;
 
     @Override
     public Component makeTab(WarpAffineTabParams params) {
@@ -48,7 +53,7 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
     @Override
     protected void applyOpencvFilter() {
         Mat dst = new Mat(imageMat.rows(), imageMat.cols(), imageMat.type());
-        Mat mt = new Mat(2, 3, CvType.CV_32FC1);
+        Mat mt = new Mat(2, 3, CvType.CV_64FC1);
         double[] mtx = new double[] {
             params.transfMatrix.m11,
             params.transfMatrix.m12,
@@ -59,7 +64,17 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
         };
         int checkVal = mt.put(0, 0, mtx);
         assert checkVal == 6;
-        Imgproc.warpAffine(imageMat, dst, mt, new Size(params.dsize.width, params.dsize.height));
+        Imgproc.warpAffine(
+            imageMat,
+            dst,
+            mt,
+            new Size(
+                params.dsize.width,
+                params.dsize.height),
+            params.getInterpolation().getVal(
+                false,
+                params.useFlagInverseMap)
+        );
         imageMat = dst;
     }
 
@@ -67,11 +82,20 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
     protected Component makeOptions() {
         JTabbedPane tabPane = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabPane.setBorder(BorderFactory.createEmptyBorder(8,8,2,8));
+        tabPane.addChangeListener(this::onTabChanged);
 
         tabPane.addTab(getTitle() + " options", null, makeWarpAffineOptions(), "The function warpAffine transforms the source image using the specified matrix: dst(x,y)=src(M11x+M12y+M13,M21x+M22y+M23)");
         tabPane.addTab("Rotate", null, makeRotateOptions(), "The function warpAffine transforms the source image using the specified matrix: dst(x,y)=src(M11x+M12y+M13,M21x+M22y+M23)");
 
         return tabPane;
+    }
+
+    private void onTabChanged(ChangeEvent ev) {
+        logger.trace("onTabChanged");
+        final int i = ((JTabbedPane)ev.getSource()).getSelectedIndex();
+        if (i == 1)
+            // its Rotate tab
+            apllyRotateSettings.run();
     }
 
     private Component makeWarpAffineOptions() {
@@ -122,13 +146,73 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
         boxSize.add(makeSliderVert(modelSizeH, "Height", "Size Height"));
         boxSize.add(Box.createHorizontalGlue());
 
+        Box box4Interpolat = Box.createVerticalBox();
+        box4Interpolat.setBorder(BorderFactory.createTitledBorder("Interpolations"));
+        Box box4TypesRadioBttns = Box.createVerticalBox();
+        Box box4TypesCheckBoxes = Box.createVerticalBox();
+        {
+            box4TypesRadioBttns.setToolTipText("Interpolation methods");
+            ButtonGroup radioGroup1 = new ButtonGroup();
+            CvInterpolationFlags.getInterpolations()
+                .filter(e -> e != CvInterpolationFlags.INTER_LINEAR_EXACT) // CvException [org.opencv.core.CvException:
+                                                                           //  cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/core/src/parallel.cpp:240:
+                                                                           //  error: (-2:Unspecified error) in function 'finalize'
+                                                                           //  Exception in parallel_for() body:
+                                                                           //  OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/imgproc/src/imgwarp.cpp:1803:
+                                                                           //  error: (-5:Bad argument) Unknown interpolation method in function 'remap' ]
+                .forEach(interpolation ->
+            {
+                JRadioButton radioBtn = new JRadioButton(interpolation.name(), params.getInterpolation() == interpolation);
+                radioBtn.setToolTipText("Interpolation method");
+                radioBtn.addItemListener(ev -> {
+                    if (ev.getStateChange() == ItemEvent.SELECTED) {
+                        params.setInterpolation(interpolation);
+                        logger.trace("Interpolation method changed to {}", interpolation);
+                        resetImage();
+                    }
+                });
+                box4TypesRadioBttns.add(radioBtn);
+                radioGroup1.add(radioBtn);
+            });
+        }
+        {
+            box4TypesCheckBoxes.setBorder(BorderFactory.createTitledBorder("Optional flag"));
+
+            JCheckBox checkBoxInverseMap = new JCheckBox(CvInterpolationFlags.WARP_INVERSE_MAP.name(), params.useFlagInverseMap);
+            checkBoxInverseMap.setToolTipText("flag, inverse transformation");
+            checkBoxInverseMap.addItemListener(ev -> {
+                params.useFlagInverseMap = (ev.getStateChange() == ItemEvent.SELECTED);
+                logger.trace("useFlagInverseMap is {}", (params.useFlagInverseMap ? "checked" : "unchecked"));
+                resetImage();
+            });
+
+            box4TypesCheckBoxes.add(checkBoxInverseMap);
+        }
+        box4Interpolat.add(box4TypesRadioBttns);
+        box4Interpolat.add(Box.createVerticalStrut(2));
+        box4Interpolat.add(box4TypesCheckBoxes);
+
         Box boxOptions = Box.createVerticalBox();
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(box4MSliders);
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(boxSize);
         boxOptions.add(Box.createVerticalStrut(2));
+        boxOptions.add(box4Interpolat);
+        boxOptions.add(Box.createVerticalStrut(2));
         box4Options.add(boxOptions);
+
+        apllyParamsSettings = () -> {
+            modelM11.setValue(params.transfMatrix.m11);
+            modelM12.setValue(params.transfMatrix.m12);
+            modelM13.setValue(params.transfMatrix.m13);
+            modelM21.setValue(params.transfMatrix.m21);
+            modelM22.setValue(params.transfMatrix.m22);
+            modelM23.setValue(params.transfMatrix.m23);
+
+            modelSizeW.setValue(params.dsize.width);
+            modelSizeH.setValue(params.dsize.height);
+        };
 
         modelM11.getWrapped().addChangeListener(ev -> {
             logger.trace("modelM11: value={}", modelM11.getFormatedText());
@@ -177,6 +261,95 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
     /** <a href='https://docs.opencv.org/3.4.2/da/d54/group__imgproc__transform.html#gafbbc470ce83812914a70abfb604f4326'>Calculates an affine matrix of 2D rotation</a> */
     private Component makeRotateOptions() {
         Box box4Options = Box.createVerticalBox();
+
+        SliderIntModel modelCenterX  = new    SliderIntModel(0, 0, -1000, +1000);
+        SliderIntModel modelCenterY  = new    SliderIntModel(0, 0, -1000, +1000);
+        SliderDoubleModel modelAngle = new SliderDoubleModel(0, 0, -360, +360);
+        SliderDoubleModel modelScale = new SliderDoubleModel(1, 0, 0.1, 100);
+
+        Box boxCenter = Box.createHorizontalBox();
+        boxCenter.setBorder(BorderFactory.createTitledBorder("Center"));
+        boxCenter.setToolTipText("Center of the rotation in the source image");
+        boxCenter.add(Box.createHorizontalGlue());
+        boxCenter.add(makeSliderVert(modelCenterX, "X", "center X"));
+        boxCenter.add(Box.createHorizontalStrut(2));
+        boxCenter.add(makeSliderVert(modelCenterY, "Y", "center Y"));
+        boxCenter.add(Box.createHorizontalGlue());
+
+        Box box4Sliders = Box.createHorizontalBox();
+        box4Sliders.add(Box.createHorizontalGlue());
+        box4Sliders.add(boxCenter);
+        box4Sliders.add(Box.createHorizontalStrut(2));
+        box4Sliders.add(makeSliderVert(modelAngle, "Angle", "Rotation angle in degrees. Positive values mean counter-clockwise rotation (the coordinate origin is assumed to be the top-left corner)"));
+        box4Sliders.add(Box.createHorizontalStrut(2));
+        box4Sliders.add(makeSliderVert(modelScale, "Scale", "Isotropic scale factor"));
+        box4Sliders.add(Box.createHorizontalGlue());
+
+        Runnable reset =() -> {
+            BufferedImage img = source.getImage();
+            modelCenterX.setValue((img==null) ? 300 : img.getWidth()  / 2);
+            modelCenterY.setValue((img==null) ? 200 : img.getHeight() / 2);
+            modelAngle.setValue(0.0);
+            modelScale.setValue(1.0);
+        };
+        reset.run();
+
+        JButton btnReset = new JButton(" reset ");
+        btnReset.addActionListener(ev -> reset.run());
+
+        box4Options.add(box4Sliders);
+        box4Options.add(Box.createVerticalStrut(4));
+        box4Options.add(btnReset);
+
+        apllyRotateSettings = () -> {
+            Mat rotateMatrix = Imgproc.getRotationMatrix2D(
+                    new Point(
+                        modelCenterX.getValue(),
+                        modelCenterY.getValue()),
+                    modelAngle.getValue(),
+                    modelScale.getValue());
+
+            assert rotateMatrix.rows() == 2;
+            assert rotateMatrix.cols() == 3;
+
+            double[] mtx = new double[6];
+            int readed = rotateMatrix.get(0, 0, mtx);
+            long fullSize = 6 * rotateMatrix.elemSize();
+            if (readed != fullSize) {
+                logger.error("hmm... fix me");
+                return;
+            }
+
+            params.transfMatrix.m11 = mtx[0];
+            params.transfMatrix.m12 = mtx[1];
+            params.transfMatrix.m13 = mtx[2];
+            params.transfMatrix.m21 = mtx[3];
+            params.transfMatrix.m22 = mtx[4];
+            params.transfMatrix.m23 = mtx[5];
+
+            params.dsize.width  = 0;
+            params.dsize.height = 0;
+
+            apllyParamsSettings.run();
+        };
+
+        modelAngle.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelAngle: value={}", modelAngle.getFormatedText());
+            apllyRotateSettings.run();
+        });
+        modelScale.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelScale: value={}", modelScale.getFormatedText());
+            apllyRotateSettings.run();
+        });
+        modelCenterX.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelCenterX: value={}", modelCenterX.getFormatedText());
+            apllyRotateSettings.run();
+        });
+        modelCenterY.getWrapped().addChangeListener(ev -> {
+            logger.trace("modelCenterY: value={}", modelCenterY.getFormatedText());
+            apllyRotateSettings.run();
+        });
+
 
         return box4Options;
     }
