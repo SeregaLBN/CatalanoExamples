@@ -77,6 +77,8 @@ public class MainApp {
       //UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_MINUS , 0                        , false), this::onRemoveCurrentFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0                        , false), this::onRemoveCurrentFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_W     , InputEvent.CTRL_DOWN_MASK, false), this::onRemoveCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_W     , InputEvent.SHIFT_DOWN_MASK
+                                                                                       + InputEvent.CTRL_DOWN_MASK, false), this::onRemoveAllFilters);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_L     , 0                        , false), this::onLoadPipeline);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_O     , InputEvent.CTRL_DOWN_MASK, false), this::onSelectImage);
 
@@ -159,7 +161,7 @@ public class MainApp {
             @Override public File   getCurrentDir()                                    { return MainApp.this.getFirstTab().getLatestImageDir(); }
             @Override public void onImageChanged(ITab<?> tab)                          {        MainApp.this.onImageChanged(tab); }
             @Override public void onAddNewFilter()                                     {        MainApp.this.onAddNewFilter(); }
-            @Override public void onRemoveFilter(ITab<?> tab)                          {        MainApp.this.onRemoveFilter(tab); }
+            @Override public void onRemoveFilter(ITab<?> tab)                          {        MainApp.this.onRemoveTab(tab); }
             @Override public void onCancel()                                           {        MainApp.this.onCancel(); }
             @Override public void onImagePanelPaint(JPanel imagePanel, Graphics2D g)   {        MainApp.this.onImagePanelPaint(imagePanel, g); }
             @Override public void onError(String message, ITab<?> tab, Component from) {        MainApp.this.onError(message, from); }
@@ -191,12 +193,16 @@ public class MainApp {
 
     private void onRemoveCurrentFilter() {
         int i = tabPane.getSelectedIndex();
-        if (i < 1)
-            return;
-        onRemoveFilter(tabs.get(i));
+        if (i > 1)
+            onRemoveTab(tabs.get(i));
     }
 
-    private void onRemoveFilter(ITab<?> tab) {
+    private void onRemoveAllFilters() {
+        while (tabs.size() > 1)
+            onRemoveTab(tabs.get(tabs.size() - 1));
+    }
+
+    private void onRemoveTab(ITab<?> tab) {
         int pos = tabs.lastIndexOf(tab);
         assert pos > 0;
 
@@ -399,10 +405,8 @@ public class MainApp {
             onError("FirstTab mus be instanceof " + FirstTab.class.getName(), frame);
         }
 
-        // remove all
-        do {
-            onRemoveFilter(tabs.get(0));
-        } while(!tabs.isEmpty());
+        onRemoveAllFilters();
+        onRemoveTab(tabs.get(0));
 
         for (PipelineItem item : pipeline)
             addTabByFilterFullName(item.tabName, item.params);

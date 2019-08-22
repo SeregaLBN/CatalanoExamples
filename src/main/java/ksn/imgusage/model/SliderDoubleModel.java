@@ -34,6 +34,16 @@ public class SliderDoubleModel implements ISliderModel<Double> {
     }
 
     @Override
+    public Double getMinimum() {
+        return model.getMinimum() * coefficient;
+    }
+
+    @Override
+    public void setMinimum(Double min) {
+        model.setMinimum((int)(min / coefficient));
+    }
+
+    @Override
     public Double getMaximum() {
         return model.getMaximum() * coefficient;
     }

@@ -10,7 +10,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-import org.slf4j.Logger;
 
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.model.SliderDoubleModel;
@@ -356,32 +355,14 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
         panelKernel2.add(box4Sliders, BorderLayout.CENTER);
         panelCreateParams.add(panelKernel2);
 
-        addModelK2ChangeListener("kernel2.modelKernelSizeW", modelKernelSizeW,  true, modelAnchorX    , () -> params.kernel2.kernelSize.width  = modelKernelSizeW.getValue());
-        addModelK2ChangeListener("kernel2.modelKernelSizeH", modelKernelSizeH,  true, modelAnchorY    , () -> params.kernel2.kernelSize.height = modelKernelSizeH.getValue());
-        addModelK2ChangeListener("kernel2.modelAnchorX"    , modelAnchorX    , false, modelKernelSizeW, () -> params.kernel2.anchor.x          = modelAnchorX    .getValue());
-        addModelK2ChangeListener("kernel2.modelAnchorY"    , modelAnchorY    , false, modelKernelSizeH, () -> params.kernel2.anchor.y          = modelAnchorY    .getValue());
+        addModelK2ChangeListener("kernel2.modelKernelSizeW", modelKernelSizeW, false, modelAnchorX    , () -> params.kernel2.kernelSize.width  = modelKernelSizeW.getValue());
+        addModelK2ChangeListener("kernel2.modelKernelSizeH", modelKernelSizeH, false, modelAnchorY    , () -> params.kernel2.kernelSize.height = modelKernelSizeH.getValue());
+        addModelK2ChangeListener("kernel2.modelAnchorX"    , modelAnchorX    ,  true, modelKernelSizeW, () -> params.kernel2.anchor.x          = modelAnchorX    .getValue());
+        addModelK2ChangeListener("kernel2.modelAnchorY"    , modelAnchorY    ,  true, modelKernelSizeH, () -> params.kernel2.anchor.y          = modelAnchorY    .getValue());
     }
 
     private void addModelK2ChangeListener(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams) {
-        addModelK2ChangeListener(name, model, checkMax, modelToCheck, applyValueParams, logger, this::resetImage);
-    }
-    static void addModelK2ChangeListener(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams, Logger logger, Runnable resetImage) {
-        model.getWrapped().addChangeListener(ev -> {
-            logger.trace("{}: value={}", name, model.getFormatedText());
-            Integer val = model.getValue();
-            if (checkMax) {
-                if (val <= modelToCheck.getValue())
-                    modelToCheck.setValue(val - 1);
-                else
-                    applyValueParams.run();
-            } else {
-                if (val >= modelToCheck.getValue())
-                    modelToCheck.setValue(val + 1);
-                else
-                    applyValueParams.run();
-            }
-            resetImage.run();
-        });
+        addChangeListenerDiff1WithModels(name, model, checkMax, modelToCheck, applyValueParams);
     }
 
     @Override

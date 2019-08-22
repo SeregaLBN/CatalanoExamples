@@ -70,6 +70,8 @@ public final class MapperFilter {
                                             GaussianBlurTab.TAB_DESCRIPTION),
             new FilterTabs(                 MorphologyExTab.TAB_TITLE,
                                             MorphologyExTab.TAB_DESCRIPTION),
+            new FilterTabs(         PerspectiveTransformTab.TAB_TITLE,
+                                    PerspectiveTransformTab.TAB_DESCRIPTION),
             new FilterTabs(                    ThresholdTab.TAB_TITLE,
                                                ThresholdTab.TAB_DESCRIPTION),
             new FilterTabs(                   WarpAffineTab.TAB_TITLE,
@@ -109,6 +111,8 @@ public final class MapperFilter {
             return                  GaussianBlurTab.class;
         case                        MorphologyExTab.TAB_NAME:
             return                  MorphologyExTab.class;
+        case                PerspectiveTransformTab.TAB_NAME:
+            return          PerspectiveTransformTab.class;
         case                           ThresholdTab.TAB_NAME:
             return                     ThresholdTab.class;
         case                          WarpAffineTab.TAB_NAME:
@@ -169,6 +173,8 @@ public final class MapperFilter {
             return                      GaussianBlurTabParams.class;
         case                            MorphologyExTab.TAB_NAME:
             return                      MorphologyExTabParams.class;
+        case                    PerspectiveTransformTab.TAB_NAME:
+            return              PerspectiveTransformTabParams.class;
         case                               ThresholdTab.TAB_NAME:
             return                         ThresholdTabParams.class;
         case                              WarpAffineTab.TAB_NAME:

@@ -25,6 +25,16 @@ public class SliderIntModel implements ISliderModel<Integer> {
     }
 
     @Override
+    public Integer getMinimum() {
+        return model.getMinimum();
+    }
+
+    @Override
+    public void setMinimum(Integer min) {
+        model.setMinimum(min);
+    }
+
+    @Override
     public Integer getMaximum() {
         return model.getMaximum();
     }

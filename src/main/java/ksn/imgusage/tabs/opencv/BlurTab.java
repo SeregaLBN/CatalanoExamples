@@ -116,16 +116,16 @@ public class BlurTab extends OpencvFilterTab<BlurTabParams> {
         boxOptions.add(Box.createVerticalStrut(2));
         box4Options.add(boxOptions);
 
-        addModelK2ChangeListener("modelKernelSizeW", modelKernelSizeW,  true, modelAnchorX    , () -> params.kernelSize.width  = modelKernelSizeW.getValue());
-        addModelK2ChangeListener("modelKernelSizeH", modelKernelSizeH,  true, modelAnchorY    , () -> params.kernelSize.height = modelKernelSizeH.getValue());
-        addModelK2ChangeListener("modelAnchorX"    , modelAnchorX    , false, modelKernelSizeW, () -> params.anchor.x          = modelAnchorX    .getValue());
-        addModelK2ChangeListener("modelAnchorY"    , modelAnchorY    , false, modelKernelSizeH, () -> params.anchor.y          = modelAnchorY    .getValue());
+        addModelK2ChangeListener("modelKernelSizeW", modelKernelSizeW, false, modelAnchorX    , () -> params.kernelSize.width  = modelKernelSizeW.getValue());
+        addModelK2ChangeListener("modelKernelSizeH", modelKernelSizeH, false, modelAnchorY    , () -> params.kernelSize.height = modelKernelSizeH.getValue());
+        addModelK2ChangeListener("modelAnchorX"    , modelAnchorX    ,  true, modelKernelSizeW, () -> params.anchor.x          = modelAnchorX    .getValue());
+        addModelK2ChangeListener("modelAnchorY"    , modelAnchorY    ,  true, modelKernelSizeH, () -> params.anchor.y          = modelAnchorY    .getValue());
 
         return box4Options;
     }
 
     private void addModelK2ChangeListener(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams) {
-        MorphologyExTab.addModelK2ChangeListener(name, model, checkMax, modelToCheck, applyValueParams, logger, this::resetImage);
+        addChangeListenerDiff1WithModels(name, model, checkMax, modelToCheck, applyValueParams);
     }
 
     @Override

@@ -10,6 +10,9 @@ public interface ISliderModel<T extends Number> {
     String getFormatedText();
     void setFormatedText(String value);
 
+    T getMinimum();
+    void setMinimum(T min);
+
     T getMaximum();
     void setMaximum(T max);
 

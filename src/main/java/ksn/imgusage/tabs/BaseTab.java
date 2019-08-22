@@ -23,6 +23,9 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     protected static final int WIDTH_LEFT_PANEL = 300;
 
+    protected static final int DEFAULT_WIDTH  = 300;
+    protected static final int DEFAULT_HEIGHT = 200;
+
     protected ITabHandler tabHandler;
     protected ITab<?> source;
     protected BufferedImage image;
@@ -303,6 +306,45 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         });
 
         return box;
+    }
+
+    protected void addChangeListenerDiff1WithModels(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams) {
+        assert model.getMinimum() == modelToCheck.getMinimum().intValue();
+        assert model.getMaximum() == modelToCheck.getMaximum().intValue();
+        model.getWrapped().addChangeListener(ev -> {
+            logger.trace("{}: value={}", name, model.getFormatedText());
+            Integer myVal = model.getValue();
+            Integer checkVal = modelToCheck.getValue();
+            if (checkMax) {
+                if (myVal >= checkVal)
+                    modelToCheck.setValue(myVal + 1);
+                else
+                    applyValueParams.run();
+            } else {
+                if (myVal <= checkVal)
+                    modelToCheck.setValue(myVal - 1);
+                else
+                    applyValueParams.run();
+            }
+            resetImage();
+        });
+    }
+
+    protected void addChangeListenerDiff1WithModelsSumm(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams) {
+        assert model.getMinimum() == modelToCheck.getMinimum().intValue();
+        assert model.getMinimum() == 0;
+        assert model.getMaximum() == modelToCheck.getMaximum().intValue();
+        int max = model.getMaximum();
+        model.getWrapped().addChangeListener(ev -> {
+            logger.trace("{}: value={}", name, model.getFormatedText());
+            Integer myVal = model.getValue();
+            Integer checkVal = modelToCheck.getValue();
+            if ((myVal + checkVal) >= max)
+                modelToCheck.setValue(max - myVal - 1);
+            else
+                applyValueParams.run();
+            resetImage();
+        });
     }
 
 }

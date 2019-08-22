@@ -157,4 +157,32 @@
     "maxLevel" : 100,
     "randomColors" : false
   }
+}, {
+  "tabName" : "OpenCV:PerspectiveTransform",
+  "pos" : 12,
+  "params" : {
+    "showRegion" : true,
+    "pointLeftTop" : {
+      "x" : 11,
+      "y" : 83
+    },
+    "pointRightTop" : {
+      "x" : 326,
+      "y" : 30
+    },
+    "pointLeftBottom" : {
+      "x" : 62,
+      "y" : 340
+    },
+    "pointRightBottom" : {
+      "x" : 451,
+      "y" : 194
+    },
+    "dsize" : {
+      "width" : 0,
+      "height" : 0
+    },
+    "interpolation" : "INTER_LINEAR",
+    "useFlagInverseMap" : false
+  }
 } ]

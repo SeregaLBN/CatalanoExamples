@@ -139,11 +139,11 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
         box4MSliders.add(boxM2);
       //box4MSliders.add(Box.createVerticalGlue());
 
-        Box boxSizeIntepol = Box.createHorizontalBox();
-        boxSizeIntepol.add(Box.createHorizontalGlue());
-        boxSizeIntepol.add(makeSize("dsize", "size of the output image", modelSizeW, modelSizeH));
-        boxSizeIntepol.add(Box.createHorizontalStrut(2));
-        boxSizeIntepol.add(makeInterpolations(
+        Box boxSizeInterpol = Box.createHorizontalBox();
+        boxSizeInterpol.add(Box.createHorizontalGlue());
+        boxSizeInterpol.add(makeSize(modelSizeW, modelSizeH, "dsize", "size of the output image"));
+        boxSizeInterpol.add(Box.createHorizontalStrut(2));
+        boxSizeInterpol.add(makeInterpolations(
             params::getInterpolation,
             params::setInterpolation,
             e -> e != CvInterpolationFlags.INTER_LINEAR_EXACT, // CvException [org.opencv.core.CvException:
@@ -154,13 +154,13 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
                                                                //  error: (-5:Bad argument) Unknown interpolation method in function 'remap' ]
             params.useFlagInverseMap,
             v -> params.useFlagInverseMap = v));
-        boxSizeIntepol.add(Box.createHorizontalGlue());
+        boxSizeInterpol.add(Box.createHorizontalGlue());
 
         Box boxOptions = Box.createVerticalBox();
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(box4MSliders);
         boxOptions.add(Box.createVerticalStrut(2));
-        boxOptions.add(boxSizeIntepol);
+        boxOptions.add(boxSizeInterpol);
         boxOptions.add(Box.createVerticalStrut(2));
         box4Options.add(boxOptions);
 
@@ -249,8 +249,8 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
 
         Runnable reset =() -> {
             BufferedImage img = source.getImage();
-            modelCenterX.setValue((img==null) ? 300 : img.getWidth()  / 2);
-            modelCenterY.setValue((img==null) ? 200 : img.getHeight() / 2);
+            modelCenterX.setValue((img==null) ? DEFAULT_WIDTH  : img.getWidth()  / 2);
+            modelCenterY.setValue((img==null) ? DEFAULT_HEIGHT : img.getHeight() / 2);
             modelAngle.setValue(0.0);
             modelScale.setValue(1.0);
         };
