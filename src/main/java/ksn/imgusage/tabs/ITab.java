@@ -12,6 +12,7 @@ public interface ITab<TTabParams extends ITabParams> {
     TTabParams getParams();
 
     BufferedImage getImage();
+    void resetImage(boolean debounce);
     void resetImage();
 
     String getTitle();

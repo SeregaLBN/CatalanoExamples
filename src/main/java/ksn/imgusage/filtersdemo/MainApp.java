@@ -152,22 +152,22 @@ public class MainApp {
         int pos = tabs.lastIndexOf(tab);
         assert pos > 0;
 
-        tabs.stream().skip(pos + 1).forEach(ITab::resetImage);
+        tabs.stream().skip(pos + 1).forEach(t -> t.resetImage(false));
     }
 
     private ITabHandler getTabHandler() {
         return new ITabHandler() {
-            @Override public JFrame getFrame()                                         { return MainApp.this.frame; }
-            @Override public File   getCurrentDir()                                    { return MainApp.this.getFirstTab().getLatestImageDir(); }
-            @Override public ITab<?> getFirstTab()                                     { return MainApp.this.getFirstTab(); }
-            @Override public void onImageChanged(ITab<?> tab)                          {        MainApp.this.onImageChanged(tab); }
-            @Override public void onAddNewFilter()                                     {        MainApp.this.onAddNewFilter(); }
-            @Override public void onRemoveFilter(ITab<?> tab)                          {        MainApp.this.onRemoveTab(tab); }
-            @Override public void onCancel()                                           {        MainApp.this.onCancel(); }
-            @Override public void onImagePanelPaint(JPanel imagePanel, Graphics2D g)   {        MainApp.this.onImagePanelPaint(imagePanel, g); }
-            @Override public void onError(String message, ITab<?> tab, Component from) {        MainApp.this.onError(message, from); }
-            @Override public void onSavePipeline()                                     {        MainApp.this.onSavePipeline(); }
-            @Override public void onLoadPipeline()                                     {        MainApp.this.onLoadPipeline(); }
+            @Override public JFrame getFrame()                                            { return MainApp.this.frame; }
+            @Override public File   getCurrentDir()                                       { return MainApp.this.getFirstTab().getLatestImageDir(); }
+            @Override public ITab<?> getFirstTab()                                        { return MainApp.this.getFirstTab(); }
+            @Override public void onImageChanged(ITab<?> tab)                             {        MainApp.this.onImageChanged(tab); }
+            @Override public void onAddNewFilter()                                        {        MainApp.this.onAddNewFilter(); }
+            @Override public void onRemoveFilter(ITab<?> tab)                             {        MainApp.this.onRemoveTab(tab); }
+            @Override public void onCancel()                                              {        MainApp.this.onCancel(); }
+            @Override public void onImgPanelDraw(JPanel imgPanel, Graphics2D g, Logger l) {        MainApp.this.onImgPanelDraw(imgPanel, g, l); }
+            @Override public void onError(String message, ITab<?> tab, Component from)    {        MainApp.this.onError(message, from); }
+            @Override public void onSavePipeline()                                        {        MainApp.this.onSavePipeline(); }
+            @Override public void onLoadPipeline()                                        {        MainApp.this.onLoadPipeline(); }
         };
     }
 
@@ -194,7 +194,7 @@ public class MainApp {
 
     private void onRemoveCurrentFilter() {
         int i = tabPane.getSelectedIndex();
-        if (i > 1)
+        if (i > 0)
             onRemoveTab(tabs.get(i));
     }
 
@@ -218,8 +218,8 @@ public class MainApp {
         }
     }
 
-    private void onImagePanelPaint(JPanel imagePanel, Graphics2D g) {
-        logger.trace("onImagePanelPaint");
+    private void onImgPanelDraw(JPanel imagePanel, Graphics2D g, Logger l) {
+        l.trace("onImgPanelDraw");
 
         g.setComposite(AlphaComposite.Src);
         g.setColor(new Color(0xAE, 0xD6, 0xF1));
@@ -241,14 +241,14 @@ public class MainApp {
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        logger.trace("image.size={{}, {}}", image     .getWidth(), image     .getHeight());
-        logger.trace("panel.size={{}, {}}", imagePanel.getWidth(), imagePanel.getHeight());
+//        l.trace("image.size={{}, {}}", image     .getWidth(), image     .getHeight());
+//        l.trace("panel.size={{}, {}}", imagePanel.getWidth(), imagePanel.getHeight());
 
         if (isScale.getAsBoolean()) {
             double zoomX = imagePanel.getWidth()  / (double)image.getWidth();
             double zoomY = imagePanel.getHeight() / (double)image.getHeight();
             double zoom = Math.min(zoomX, zoomY);
-            logger.trace("zoom={}", zoom);
+//            l.trace("zoom={}", zoom);
             g.drawImage(image, 0,0, (int)(zoom * image.getWidth()), (int)(zoom * image.getHeight()), (ImageObserver)null);
         } else {
             g.drawImage(image, 0,0, (ImageObserver)null);

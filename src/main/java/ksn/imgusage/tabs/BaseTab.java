@@ -70,9 +70,11 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
             try {
+                logger.trace("getImage: applyFilter...");
                 applyFilter();
+                logger.trace("getImage: ...applyFilter");
             } catch (Exception ex) {
-                logger.error(ex.toString());
+                logger.error("getImage: {}", ex);
                 image = ImgHelper.failedImage();
                 tabHandler.onError(ex.getMessage(), this, null);
             }
@@ -86,18 +88,25 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
 
     @Override
-    public void resetImage() {
+    public void resetImage(boolean debounce) {
         if (image == null) {
             logger.trace("> resetImage: already reseted");
         } else {
             logger.trace("> resetImage: reset...");
             image = null;
         }
-        UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::repaintImage, logger);
+        if (debounce)
+            UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::repaintImage, logger);
+        else
+            repaintImage();
+    }
+    @Override
+    public void resetImage() {
+        resetImage(true);
     }
 
     private void repaintImage() {
-        logger.trace("  repaintImage: repaint panel");
+        logger.trace("  repaintImage: mark to repaint panel");
         if (imagePanelRepaint != null)
             imagePanelRepaint.run();
         SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
@@ -186,7 +195,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 logger.trace("ImagePanel.paintComponent");
-                tabHandler.onImagePanelPaint(tmp[0], (Graphics2D)g);
+                tabHandler.onImgPanelDraw(tmp[0], (Graphics2D)g, logger);
             }
         };
         tmp[0] = imagePanel;
