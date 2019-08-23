@@ -487,28 +487,28 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         modelPadLeft.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPadLeft: value={}", modelPadLeft.getFormatedText());
             params.boundOfRoi.left = modelPadLeft.getValue();
-            if ((modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
+            if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
                 SwingUtilities.invokeLater(() -> modelPadRight.setValue(sourceImage.getWidth() - 1 - modelPadLeft.getValue()) );
             resetImage();
         });
         modelPadRight.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPadRight: value={}", modelPadRight.getFormatedText());
             params.boundOfRoi.right = modelPadRight.getValue();
-            if ((modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
+            if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
                 SwingUtilities.invokeLater(() -> modelPadLeft.setValue(sourceImage.getWidth() - 1 - modelPadRight.getValue()) );
             resetImage();
         });
         modelPadTop.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPadTop: value={}", modelPadTop.getFormatedText());
             params.boundOfRoi.top = modelPadTop.getValue();
-            if ((modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
+            if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
                 SwingUtilities.invokeLater(() -> modelPadBottom.setValue(sourceImage.getHeight() - 1 - modelPadTop.getValue()) );
             resetImage();
         });
         modelPadBottom.getWrapped().addChangeListener(ev -> {
             logger.trace("modelPadBottom: value={}", modelPadBottom.getFormatedText());
             params.boundOfRoi.bottom = modelPadBottom.getValue();
-            if ((modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
+            if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
                 SwingUtilities.invokeLater(() -> modelPadTop.setValue(sourceImage.getHeight() - 1 - modelPadBottom.getValue()) );
             resetImage();
         });
