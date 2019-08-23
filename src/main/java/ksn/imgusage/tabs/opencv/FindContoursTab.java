@@ -43,7 +43,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
     private FindContoursTabParams params;
     private Box boxDrawContoursParams;
-    private Box boxExteranlRectParams;
+    private Component cntrlExteranlRectParams;
     private IntConsumer setMaxContourIdx;
 
     @Override
@@ -218,37 +218,20 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
         Box boxFindContoursOptions = Box.createVerticalBox();
         {
-            Box boxMode = Box.createHorizontalBox();
-            {
-                boxMode.setBorder(BorderFactory.createTitledBorder("Contour retrieval mode"));
-                JComboBox<CvRetrievalModes> comboBoxMode = new JComboBox<>(CvRetrievalModes.values());
-                comboBoxMode.setSelectedItem(params.mode);
-                comboBoxMode.setToolTipText("Contour retrieval mode");
-                comboBoxMode.addActionListener(ev -> {
-                    params.mode = (CvRetrievalModes)comboBoxMode.getSelectedItem();
-                    logger.trace("Mode changed to {}", params.mode);
-                    resetImage();
-                });
-                boxMode.add(comboBoxMode);
-            }
-            Box boxMethod = Box.createHorizontalBox();
-            {
-                boxMethod.setBorder(BorderFactory.createTitledBorder("Contour approximation method"));
-                JComboBox<CvContourApproximationModes> comboBoxMeethod = new JComboBox<>(CvContourApproximationModes.values());
-                comboBoxMeethod.setSelectedItem(params.method);
-                comboBoxMeethod.setToolTipText("Contour approximation method");
-                comboBoxMeethod.addActionListener(ev -> {
-                    params.method = (CvContourApproximationModes)comboBoxMeethod.getSelectedItem();
-                    logger.trace("Method changed to {}", params.method);
-                    resetImage();
-                });
-                boxMethod.add(comboBoxMeethod);
-            }
-
             boxFindContoursOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
-            boxFindContoursOptions.add(boxMode);
+            boxFindContoursOptions.add(makeComboBox(CvRetrievalModes.values(),
+                                                    () -> params.mode,
+                                                    v  -> params.mode = v,
+                                                    "params.mode",
+                                                    "Contour retrieval mode",
+                                                    "Contour retrieval mode"));
             boxFindContoursOptions.add(Box.createVerticalStrut(2));
-            boxFindContoursOptions.add(boxMethod);
+            boxFindContoursOptions.add(makeComboBox(CvContourApproximationModes.values(),
+                                                    () -> params.method,
+                                                    v  -> params.method = v,
+                                                    "params.method",
+                                                    "Contour approximation method",
+                                                    "Contour approximation method"));
         }
 
         JPanel panelDrawContoursOptions = new JPanel();
@@ -323,38 +306,18 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
         box4Options.add(panelAll);
 
-        modelMinLimitContoursW.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMinLimitContoursW: value={}", modelMinLimitContoursW.getFormatedText());
-            params.minLimitContours.width = modelMinLimitContoursW.getValue();
-            resetImage();
-        });
-        modelMinLimitContoursH.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMinLimitContoursH: value={}", modelMinLimitContoursH.getFormatedText());
-            params.minLimitContours.height = modelMinLimitContoursH.getValue();
-            resetImage();
-        });
-        modelMaxContourArea.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMaxContourArea: value={}", modelMaxContourArea.getFormatedText());
-            params.maxContourArea = modelMaxContourArea.getValue();
-            resetImage();
-        });
-        modelContourIdx.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelContourId: value={}", modelContourIdx.getFormatedText());
-            params.contourIdx = modelContourIdx.getValue();
-            resetImage();
-        });
-        modelMaxLevel.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMaxLevel: value={}", modelMaxLevel.getFormatedText());
-            params.maxLevel = modelMaxLevel.getValue();
-            resetImage();
-        });
+        addChangeListener("modelMinLimitContoursW", modelMinLimitContoursW , v -> params.minLimitContours.width  = v);
+        addChangeListener("modelMinLimitContoursH", modelMinLimitContoursH , v -> params.minLimitContours.height = v);
+        addChangeListener("modelMaxContourArea"   , modelMaxContourArea    , v -> params.maxContourArea          = v);
+        addChangeListener("modelContourId"        , modelContourIdx        , v -> params.contourIdx              = v);
+        addChangeListener("modelMaxLevel"         , modelMaxLevel          , v -> params.maxLevel                = v);
 
         return box4Options;
     }
 
     private void makeDrawContoursParams(JPanel panelCustomParams, SliderIntModel modelMaxContourArea, SliderIntModel modelContourIdx, SliderIntModel modelMaxLevel) {
-        if (boxExteranlRectParams != null)
-            boxExteranlRectParams.setVisible(false);
+        if (cntrlExteranlRectParams != null)
+            cntrlExteranlRectParams.setVisible(false);
 
         if (boxDrawContoursParams == null) {
             boxDrawContoursParams = Box.createHorizontalBox();
@@ -388,20 +351,17 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
         if (boxDrawContoursParams != null)
             boxDrawContoursParams.setVisible(false);
 
-        if (boxExteranlRectParams == null) {
-            boxExteranlRectParams = Box.createHorizontalBox();
-            boxExteranlRectParams.setBorder(BorderFactory.createTitledBorder("MinLimitContour"));
-          //boxMinLimitContourSliders.setToolTipText("...");
-            boxExteranlRectParams.add(Box.createHorizontalGlue());
-            boxExteranlRectParams.add(makeSliderVert(modelMinLimitContoursW, "Width", "MinLimitContour.Width"));
-            boxExteranlRectParams.add(Box.createHorizontalStrut(2));
-            boxExteranlRectParams.add(makeSliderVert(modelMinLimitContoursH, "Height", "MinLimitContour.Height"));
-            boxExteranlRectParams.add(Box.createHorizontalGlue());
-        }
-        boxExteranlRectParams.setVisible(true);
+        if (cntrlExteranlRectParams == null)
+            cntrlExteranlRectParams = makeSize(modelMinLimitContoursW,  // modelSizeW
+                                             modelMinLimitContoursH,    // modelSizeH
+                                             "MinLimitContour",         // borderTitle
+                                             null,                      // tip
+                                             "MinLimitContour.Width",   // tipWidth
+                                             "MinLimitContour.Height"); // tipHeight
+        cntrlExteranlRectParams.setVisible(true);
 
         panelCustomParams.setBorder(BorderFactory.createTitledBorder("Raw contours options"));
-        panelCustomParams.add(boxExteranlRectParams, BorderLayout.CENTER);
+        panelCustomParams.add(cntrlExteranlRectParams, BorderLayout.CENTER);
     }
 
     @Override

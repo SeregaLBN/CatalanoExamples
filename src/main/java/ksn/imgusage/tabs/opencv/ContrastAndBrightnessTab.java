@@ -101,16 +101,8 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
 
         box4Options.add(panelOptions);
 
-        modelAlpha.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelAlpha: value={}", modelAlpha.getFormatedText());
-            params.alpha = modelAlpha.getValue();
-            resetImage();
-        });
-        modelBeta.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelBeta: value={}", modelBeta.getFormatedText());
-            params.beta = modelBeta.getValue();
-            resetImage();
-        });
+        addChangeListener("modelAlpha", modelAlpha, v -> params.alpha = v);
+        addChangeListener("modelBeta" , modelBeta , v -> params.beta  = v);
 
         return box4Options;
     }

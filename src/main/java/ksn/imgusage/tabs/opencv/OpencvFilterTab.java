@@ -6,15 +6,16 @@ import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.swing.*;
 
 import org.opencv.core.Mat;
 
-import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.BaseTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.opencv.CvBorderTypes;
 import ksn.imgusage.type.opencv.CvInterpolationFlags;
 import ksn.imgusage.utils.ImgHelper;
 
@@ -60,32 +61,6 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
     public void resetImage() {
         imageMat = null;
         super.resetImage();
-    }
-
-    public Component makePoint(SliderIntModel modelPointX, SliderIntModel modelPointY, String borderTitle, String tooltip) {
-        Box boxSize = Box.createHorizontalBox();
-        boxSize.setBorder(BorderFactory.createTitledBorder(borderTitle));
-        if (tooltip != null)
-            boxSize.setToolTipText(tooltip);
-        boxSize.add(Box.createHorizontalGlue());
-        boxSize.add(makeSliderVert(modelPointX, "X", null));
-        boxSize.add(Box.createHorizontalStrut(2));
-        boxSize.add(makeSliderVert(modelPointY, "Y", null));
-        boxSize.add(Box.createHorizontalGlue());
-        return boxSize;
-    }
-
-    public Component makeSize(SliderIntModel modelSizeW, SliderIntModel modelSizeH, String borderTitle, String tooltip) {
-        Box boxSize = Box.createHorizontalBox();
-        boxSize.setBorder(BorderFactory.createTitledBorder(borderTitle));
-        if (tooltip != null)
-            boxSize.setToolTipText(tooltip);
-        boxSize.add(Box.createHorizontalGlue());
-        boxSize.add(makeSliderVert(modelSizeW, "Width", "Size Width"));
-        boxSize.add(Box.createHorizontalStrut(2));
-        boxSize.add(makeSliderVert(modelSizeH, "Height", "Size Height"));
-        boxSize.add(Box.createHorizontalGlue());
-        return boxSize;
     }
 
     public Component makeInterpolations(
@@ -138,6 +113,41 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
         box4Interpolat.add(box4TypesCheckBoxes);
 
         return box4Interpolat;
+    }
+
+    protected Component makeBox4Border(
+        Predicate<CvBorderTypes> filterOfBorderTypeValues,
+        Supplier<CvBorderTypes> getterBorderType,
+        Consumer<CvBorderTypes> setterBorderType,
+        String tooltip)
+    {
+        Box box4Borders = Box.createHorizontalBox();
+        box4Borders.setBorder(BorderFactory.createTitledBorder("Border type"));
+        Box box4Borders1 = Box.createVerticalBox();
+        box4Borders1.setToolTipText(tooltip);
+        ButtonGroup radioGroup = new ButtonGroup();
+        Stream.of(CvBorderTypes.values())
+            .filter(filterOfBorderTypeValues)
+            .forEach(border ->
+        {
+            CvBorderTypes bt = getterBorderType.get();
+            JRadioButton radioBtnAlg = new JRadioButton(border.name(), (border == bt) || (border.getVal() == bt.getVal()));
+            radioBtnAlg.setToolTipText(tooltip);
+            radioBtnAlg.addItemListener(ev -> {
+                if (ev.getStateChange() == ItemEvent.SELECTED) {
+                    setterBorderType.accept(border);
+                    logger.trace("Border type changed to {}", border);
+                    resetImage();
+                }
+            });
+            box4Borders1.add(radioBtnAlg);
+            radioGroup.add(radioBtnAlg);
+        });
+        box4Borders.add(Box.createHorizontalGlue());
+        box4Borders.add(box4Borders1);
+        box4Borders.add(Box.createHorizontalGlue());
+
+        return box4Borders;
     }
 
 }

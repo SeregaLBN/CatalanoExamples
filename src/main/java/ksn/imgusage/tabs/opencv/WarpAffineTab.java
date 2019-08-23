@@ -141,7 +141,7 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
 
         Box boxSizeInterpol = Box.createHorizontalBox();
         boxSizeInterpol.add(Box.createHorizontalGlue());
-        boxSizeInterpol.add(makeSize(modelSizeW, modelSizeH, "dsize", "size of the output image"));
+        boxSizeInterpol.add(makeSize(modelSizeW, modelSizeH, "dsize", "Size of the output image", "Size Width", "Size Height"));
         boxSizeInterpol.add(Box.createHorizontalStrut(2));
         boxSizeInterpol.add(makeInterpolations(
             params::getInterpolation,
@@ -176,46 +176,14 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
             modelSizeH.setValue(params.dsize.height);
         };
 
-        modelM11.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelM11: value={}", modelM11.getFormatedText());
-            params.transfMatrix.m11 = modelM11.getValue();
-            resetImage();
-        });
-        modelM12.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelM12: value={}", modelM12.getFormatedText());
-            params.transfMatrix.m12 = modelM12.getValue();
-            resetImage();
-        });
-        modelM13.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelM13: value={}", modelM13.getFormatedText());
-            params.transfMatrix.m13 = modelM13.getValue();
-            resetImage();
-        });
-        modelM21.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelM21: value={}", modelM21.getFormatedText());
-            params.transfMatrix.m21 = modelM21.getValue();
-            resetImage();
-        });
-        modelM22.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelM22: value={}", modelM22.getFormatedText());
-            params.transfMatrix.m22 = modelM22.getValue();
-            resetImage();
-        });
-        modelM23.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelM23: value={}", modelM23.getFormatedText());
-            params.transfMatrix.m23 = modelM23.getValue();
-            resetImage();
-        });
-        modelSizeW.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelSizeW: value={}", modelSizeW.getFormatedText());
-            params.dsize.width = modelSizeW.getValue();
-            resetImage();
-        });
-        modelSizeH.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelSizeH: value={}", modelSizeH.getFormatedText());
-            params.dsize.height = modelSizeH.getValue();
-            resetImage();
-        });
+        addChangeListener("modelM11", modelM11, v -> params.transfMatrix.m11 = v);
+        addChangeListener("modelM12", modelM12, v -> params.transfMatrix.m12 = v);
+        addChangeListener("modelM13", modelM13, v -> params.transfMatrix.m13 = v);
+        addChangeListener("modelM21", modelM21, v -> params.transfMatrix.m21 = v);
+        addChangeListener("modelM22", modelM22, v -> params.transfMatrix.m22 = v);
+        addChangeListener("modelM23", modelM23, v -> params.transfMatrix.m23 = v);
+        addChangeListener("modelSizeW", modelSizeW, v -> params.dsize.width  = v);
+        addChangeListener("modelSizeH", modelSizeH, v -> params.dsize.height = v);
 
         return box4Options;
     }

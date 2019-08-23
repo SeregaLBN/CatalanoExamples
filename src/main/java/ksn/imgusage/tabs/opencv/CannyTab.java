@@ -96,16 +96,8 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
 
         box4Options.add(panelOptions);
 
-        modelThreshold1.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelThreshold1: value={}", modelThreshold1.getFormatedText());
-            params.threshold1 = modelThreshold1.getValue();
-            resetImage();
-        });
-        modelThreshold2.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelThreshold2: value={}", modelThreshold2.getFormatedText());
-            params.threshold2 = modelThreshold2.getValue();
-            resetImage();
-        });
+        addChangeListener("modelThreshold1", modelThreshold1, v -> params.threshold1 = v);
+        addChangeListener("modelThreshold2", modelThreshold2, v -> params.threshold2 = v);
 
         modelApertureSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelApertureSize: value={}", modelApertureSize.getFormatedText());

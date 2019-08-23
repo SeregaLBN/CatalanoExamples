@@ -169,16 +169,16 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
 
         Box boxPointsTop = Box.createHorizontalBox();
         boxPointsTop.add(Box.createHorizontalGlue());
-        boxPointsTop.add(makePoint(modelLTX , modelLTY, "Left-Top", "Left top point for perspective transformation"));
+        boxPointsTop.add(makePoint(modelLTX , modelLTY, "Left-Top", "Left top point for perspective transformation"  , null, null));
         boxPointsTop.add(Box.createHorizontalStrut(2));
-        boxPointsTop.add(makePoint(modelRTX , modelRTY, "Right-Top", "Right top point for perspective transformation"));
+        boxPointsTop.add(makePoint(modelRTX , modelRTY, "Right-Top", "Right top point for perspective transformation", null, null));
         boxPointsTop.add(Box.createHorizontalGlue());
 
         Box boxPointsBottom = Box.createHorizontalBox();
         boxPointsBottom.add(Box.createHorizontalGlue());
-        boxPointsBottom.add(makePoint(modelLBX , modelLBY, "Left-Bottom", "Left bottom point for perspective transformation"));
+        boxPointsBottom.add(makePoint(modelLBX , modelLBY, "Left-Bottom", "Left bottom point for perspective transformation"  , null, null));
         boxPointsBottom.add(Box.createHorizontalStrut(2));
-        boxPointsBottom.add(makePoint(modelRBX , modelRBY, "Right-Bottom", "Right bottom point for perspective transformation"));
+        boxPointsBottom.add(makePoint(modelRBX , modelRBY, "Right-Bottom", "Right bottom point for perspective transformation", null, null));
         boxPointsBottom.add(Box.createHorizontalGlue());
 
         Box boxPoints = Box.createVerticalBox();
@@ -192,7 +192,7 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
 
         Box boxSizeInterpol = Box.createHorizontalBox();
         boxSizeInterpol.add(Box.createHorizontalGlue());
-        boxSizeInterpol.add(makeSize(modelSizeW, modelSizeH, "dsize", "size of the output image"));
+        boxSizeInterpol.add(makeSize(modelSizeW, modelSizeH, "dsize", "Size of the output image", "Size Width", "Size Height"));
         boxSizeInterpol.add(Box.createHorizontalStrut(2));
         boxSizeInterpol.add(makeInterpolations(
             params::getInterpolation,
@@ -252,16 +252,8 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
         addPointsChangeListener("modelRBX", modelRBX, false, modelLBX, () -> params.pointRightBottom.x = modelRBX.getValue());
         addPointsChangeListener("modelRBY", modelRBY, false, modelRTY, () -> params.pointRightBottom.y = modelRBY.getValue());
 
-        modelSizeW.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelSizeW: value={}", modelSizeW.getFormatedText());
-            params.dsize.width = modelSizeW.getValue();
-            resetImage();
-        });
-        modelSizeH.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelSizeH: value={}", modelSizeH.getFormatedText());
-            params.dsize.height = modelSizeH.getValue();
-            resetImage();
-        });
+        addChangeListener("modelSizeW", modelSizeW, v -> params.dsize.width  = v);
+        addChangeListener("modelSizeH", modelSizeH, v -> params.dsize.height = v);
 
         return box4Options;
     }

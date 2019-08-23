@@ -69,16 +69,8 @@ public class BernsenThresholdTab extends CatalanoFilterTab<BernsenThresholdTabPa
 
         box4Options.add(boxOptions);
 
-        modelRadius.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelRadius: value={}", modelRadius.getFormatedText());
-            params.radius = modelRadius.getValue();
-            resetImage();
-        });
-        modelContrastThreshold.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelContrastThreshold: value={}", modelContrastThreshold.getFormatedText());
-            params.contrastThreshold = modelContrastThreshold.getValue();
-            resetImage();
-        });
+        addChangeListener("modelRadius", modelRadius, v -> params.radius = v);
+        addChangeListener("modelContrastThreshold", modelContrastThreshold, v -> params.contrastThreshold = v);
 
         return box4Options;
     }

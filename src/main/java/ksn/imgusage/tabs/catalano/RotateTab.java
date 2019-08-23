@@ -96,11 +96,7 @@ public class RotateTab extends CatalanoFilterTab<RotateTabParams> {
 
         box4Options.add(boxOptions);
 
-        modelAngle.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelAngle: value={}", modelAngle.getFormatedText());
-            params.angle = modelAngle.getValue();
-            resetImage();
-        });
+        addChangeListener("modelAngle", modelAngle, v -> params.angle = v);
 
         return box4Options;
     }
