@@ -61,6 +61,12 @@ public final class ImgHelper {
         return new FastBitmap(resize(from.toBufferedImage(), newWidth, newHeight));
     }
     public static BufferedImage resize(BufferedImage from, int newWidth, int newHeight) {
+        if (true) {
+            Mat src = OpenCvHelper.fromImage(from);
+            Mat dst = new Mat();
+            Imgproc.resize(src, dst, new Size(newWidth, newHeight), 0,0, Imgproc.INTER_AREA);
+            return OpenCvHelper.toImage(dst);
+        }
         Image tmp = from.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
         if (tmp instanceof BufferedImage)
             return (BufferedImage)tmp;

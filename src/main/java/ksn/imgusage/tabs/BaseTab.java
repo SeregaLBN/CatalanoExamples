@@ -29,6 +29,8 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected static final int DEFAULT_WIDTH  = 300;
     protected static final int DEFAULT_HEIGHT = 200;
 
+    private static final int DEBOUNCE_TIMEOUT_MS = 50;
+
     protected ITabHandler tabHandler;
     protected ITab<?> source;
     protected BufferedImage image;
@@ -90,13 +92,13 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     @Override
     public void resetImage(boolean debounce) {
         if (image == null) {
-            logger.trace("> resetImage: already reseted");
+//            logger.trace("> resetImage: already reseted");
         } else {
-            logger.trace("> resetImage: reset...");
+//            logger.trace("> resetImage: reset...");
             image = null;
         }
         if (debounce)
-            UiHelper.debounceExecutor(() -> timer, t -> timer = t, 300, this::repaintImage, logger);
+            UiHelper.debounceExecutor(() -> timer, t -> timer = t, DEBOUNCE_TIMEOUT_MS, this::repaintImage, logger);
         else
             repaintImage();
     }
@@ -106,9 +108,10 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     }
 
     private void repaintImage() {
-        logger.trace("  repaintImage: mark to repaint panel");
+        //logger.trace("  repaintImage: mark to repaint panel");
         if (imagePanelRepaint != null)
             imagePanelRepaint.run();
+
         //SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(source, this));
         tabHandler.onImageChanged(this);
     }
