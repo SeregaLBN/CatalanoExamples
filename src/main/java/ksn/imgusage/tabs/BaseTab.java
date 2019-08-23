@@ -109,7 +109,8 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         logger.trace("  repaintImage: mark to repaint panel");
         if (imagePanelRepaint != null)
             imagePanelRepaint.run();
-        SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(this));
+        //SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(source, this));
+        tabHandler.onImageChanged(this);
     }
 
     protected final JButton makeButtonAddFilter() {
