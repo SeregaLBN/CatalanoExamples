@@ -41,8 +41,7 @@ public enum CvThresholdTypes {
 
     public static Stream<CvThresholdTypes> getThresholds() {
         return Stream.of(CvThresholdTypes.values())
-            .filter(e -> e != THRESH_MASK)
-            .filter(e -> (e.getVal() & THRESH_MASK.val) != 0);
+                .filter(e -> (e.val <= THRESH_MASK.val) && (e != THRESH_MASK));
     }
 
 }

@@ -1,6 +1,7 @@
 package ksn.imgusage.utils;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.Arrays;
@@ -131,6 +132,19 @@ public final class UiHelper {
             @Override
             public void actionPerformed(ActionEvent e) { action.run(); }
         });
+    }
+
+    public static void enableAllChilds(Component component, boolean enable) {
+        if (component instanceof Container)
+            enableAllChilds((Container)component, enable);
+        else
+            component.setEnabled(enable);
+    }
+
+    public static void enableAllChilds(Container container, boolean enable) {
+        for (Component c : container.getComponents())
+            enableAllChilds(c, enable);
+        container.setEnabled(enable);
     }
 
 }

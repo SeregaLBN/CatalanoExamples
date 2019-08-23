@@ -12,6 +12,7 @@ import ksn.imgusage.type.opencv.CvInterpolationFlags;
 public class PerspectiveTransformTabParams implements ITabParams {
 
     public boolean showRegion = true;
+    public boolean applyToFirstTab = false;
 
     // perspective transformation for the corresponding 4 point pairs
     public Point pointLeftTop     = new Point(-1, -1);
@@ -40,8 +41,9 @@ public class PerspectiveTransformTabParams implements ITabParams {
     @Override
     public String toString() {
         return String.format(Locale.US,
-            "{ showRegion=%b, pointLeftTop=%s, pointRightTop=%s, pointLeftBottom=%s, pointRightBottom=%s, dsize=%s, interpolation=%s, useFlagInverseMap=%b }",
+            "{ showRegion=%b, applyToFirstTab=%b, pointLeftTop=%s, pointRightTop=%s, pointLeftBottom=%s, pointRightBottom=%s, dsize=%s, interpolation=%s, useFlagInverseMap=%b }",
             showRegion,
+            applyToFirstTab,
             pointLeftTop    .toString(),
             pointRightTop   .toString(),
             pointLeftBottom .toString(),

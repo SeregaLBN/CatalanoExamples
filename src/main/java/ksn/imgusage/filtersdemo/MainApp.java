@@ -51,7 +51,7 @@ public class MainApp {
     }
 
     private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
-    private static final String DEFAULT_CAPTION = "Demonstration of image filters";
+    public static final String DEFAULT_TITLE = "Demonstration of image filters";
     private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Alphabet.OpenCV.json").toAbsolutePath().toFile();
 
     private final JFrame frame;
@@ -62,7 +62,7 @@ public class MainApp {
     private Timer timer;
 
     public MainApp() {
-        frame = new JFrame(DEFAULT_CAPTION);
+        frame = new JFrame(DEFAULT_TITLE);
         makeLogo();
         initialize();
 
@@ -159,6 +159,7 @@ public class MainApp {
         return new ITabHandler() {
             @Override public JFrame getFrame()                                         { return MainApp.this.frame; }
             @Override public File   getCurrentDir()                                    { return MainApp.this.getFirstTab().getLatestImageDir(); }
+            @Override public ITab<?> getFirstTab()                                     { return MainApp.this.getFirstTab(); }
             @Override public void onImageChanged(ITab<?> tab)                          {        MainApp.this.onImageChanged(tab); }
             @Override public void onAddNewFilter()                                     {        MainApp.this.onAddNewFilter(); }
             @Override public void onRemoveFilter(ITab<?> tab)                          {        MainApp.this.onRemoveTab(tab); }
@@ -412,6 +413,8 @@ public class MainApp {
             addTabByFilterFullName(item.tabName, item.params);
 
         isScale = getFirstTab()::isScale;
+
+        frame.setTitle(frame.getTitle() +": pipline " + jsonFile.getName());
     }
 
     private FirstTab getFirstTab() {

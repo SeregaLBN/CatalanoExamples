@@ -56,8 +56,7 @@ public enum CvInterpolationFlags {
 
     public static Stream<CvInterpolationFlags> getInterpolations() {
         return Stream.of(CvInterpolationFlags.values())
-            .filter(e -> e != INTER_MAX)
-            .filter(e -> (e.getVal() & INTER_MAX.val) != 0);
+            .filter(e -> (e.val <= INTER_MAX.val) && (e != INTER_MAX));
     }
 
 }

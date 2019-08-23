@@ -12,6 +12,8 @@ public interface ITabHandler {
     JFrame getFrame();
     File getCurrentDir();
 
+    ITab<?> getFirstTab();
+
     void onImageChanged(ITab<?> tab);
     void onCancel();
     void onAddNewFilter();

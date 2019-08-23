@@ -14,6 +14,7 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.type.dto.opencv.ThresholdTabParams;
 import ksn.imgusage.type.opencv.CvThresholdTypes;
 import ksn.imgusage.utils.OpenCvHelper;
+import ksn.imgusage.utils.UiHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d7/d1b/group__imgproc__misc.html#gae8a4a146d1ca78c626a53577199e9c57'>Applies a fixed-level threshold to each array element</a> */
 public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
@@ -82,10 +83,8 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
             // In these cases, the function determines the optimal threshold value using the Otsu's or Triangle algorithm and uses it instead of the specified thresh.
             boolean enabled2 = !params.useOtsuMask && !params.useTriangleMask;
 
-            for (Component c : cntrlMaxvalSlider.getComponents())
-                c.setEnabled(enabled1 && enabled2);
-            for (Component c : cntrlThreshSlider.getComponents())
-                c.setEnabled(enabled2);
+            UiHelper.enableAllChilds(cntrlMaxvalSlider, enabled1 && enabled2);
+            UiHelper.enableAllChilds(cntrlThreshSlider, enabled2);
         };
 
 

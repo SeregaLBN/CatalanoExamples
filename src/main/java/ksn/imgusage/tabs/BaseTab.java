@@ -1,8 +1,11 @@
 package ksn.imgusage.tabs;
 
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -305,6 +308,30 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             }
         });
 
+        return box;
+    }
+
+    protected Component makeCheckBox(BooleanSupplier getter, Consumer<Boolean> setter, String title, String paramName, String tip, Runnable customListener) {
+        JCheckBox checkBox = new JCheckBox(title, getter.getAsBoolean());
+        if (tip != null)
+            checkBox.setToolTipText(tip);
+        checkBox.addItemListener(ev -> {
+            boolean checked = (ev.getStateChange() == ItemEvent.SELECTED);
+            setter.accept(checked);
+            logger.trace("{} is {}", paramName, checked ? "checked" : "unchecked");
+            if (customListener != null)
+                customListener.run();
+            resetImage();
+        });
+        return checkBox;
+    }
+
+    protected Component makeSingleCheckBox(BooleanSupplier getter, Consumer<Boolean> setter, String titleBorder, String titleCheckBox, String paramName, String tip, Runnable customListener) {
+        Box box = Box.createVerticalBox();
+        box.setBorder(BorderFactory.createTitledBorder(titleBorder==null ? "" : titleBorder));
+        if (tip != null)
+            box.setToolTipText(tip);
+        box.add(makeCheckBox(getter, setter, titleCheckBox, paramName, tip, customListener));
         return box;
     }
 

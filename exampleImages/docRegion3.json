@@ -161,7 +161,8 @@
   "tabName" : "OpenCV:PerspectiveTransform",
   "pos" : 12,
   "params" : {
-    "showRegion" : true,
+    "showRegion" : false,
+    "applyToFirstTab" : true,
     "pointLeftTop" : {
       "x" : 11,
       "y" : 83

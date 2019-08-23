@@ -1,13 +1,11 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.util.function.BiConsumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.JCheckBox;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -17,6 +15,7 @@ import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.dto.opencv.PerspectiveTransformTabParams;
 import ksn.imgusage.type.opencv.CvInterpolationFlags;
 import ksn.imgusage.utils.OpenCvHelper;
+import ksn.imgusage.utils.UiHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/da/d54/group__imgproc__transform.html#ga8c1ae0e3589a9d77fffc962c49b22043'>Perspective transformation for the corresponding 4 point pairs</a>
  * <br>
@@ -51,14 +50,21 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
     protected void applyOpencvFilter() {
         checkModelsDiapason.run();
 
+        imageMat = params.applyToFirstTab
+                ? getSourceMat(tabHandler.getFirstTab())
+                : imageMat;
         if (params.showRegion) {
 
             imageMat = OpenCvHelper.to3Channel(imageMat);
 
-            Imgproc.line(imageMat, new Point(params.pointLeftTop    .x, params.pointLeftTop    .y), new Point(params.pointRightTop   .x, params.pointRightTop   .y), new Scalar(255,   0,   0), 3);
-            Imgproc.line(imageMat, new Point(params.pointRightTop   .x, params.pointRightTop   .y), new Point(params.pointRightBottom.x, params.pointRightBottom.y), new Scalar(  0, 255,   0), 3);
-            Imgproc.line(imageMat, new Point(params.pointRightBottom.x, params.pointRightBottom.y), new Point(params.pointLeftBottom .x, params.pointLeftBottom .y), new Scalar(  0,   0, 255), 3);
-            Imgproc.line(imageMat, new Point(params.pointLeftBottom .x, params.pointLeftBottom .y), new Point(params.pointLeftTop    .x, params.pointLeftTop    .y), new Scalar(255, 200,   0), 3);
+            Imgproc.line(imageMat, new Point(params.pointLeftTop    .x, params.pointLeftTop    .y),
+                                   new Point(params.pointRightTop   .x, params.pointRightTop   .y), new Scalar(255,   0,   0), 3);
+            Imgproc.line(imageMat, new Point(params.pointRightTop   .x, params.pointRightTop   .y),
+                                   new Point(params.pointRightBottom.x, params.pointRightBottom.y), new Scalar(  0, 255,   0), 3);
+            Imgproc.line(imageMat, new Point(params.pointRightBottom.x, params.pointRightBottom.y),
+                                   new Point(params.pointLeftBottom .x, params.pointLeftBottom .y), new Scalar(  0,   0, 255), 3);
+            Imgproc.line(imageMat, new Point(params.pointLeftBottom .x, params.pointLeftBottom .y),
+                                   new Point(params.pointLeftTop    .x, params.pointLeftTop    .y), new Scalar(255, 200,   0), 3);
 
             return;
         }
@@ -161,21 +167,6 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
         checkModelsDiapason.run();
 
 
-        Box box4ShowRegion = Box.createVerticalBox();
-        {
-            box4ShowRegion.setBorder(BorderFactory.createTitledBorder(""));
-
-            JCheckBox checkBox = new JCheckBox("Show transformation region", params.showRegion);
-            checkBox.addItemListener(ev -> {
-                params.showRegion = (ev.getStateChange() == ItemEvent.SELECTED);
-                logger.trace("params.showRegion is {}", (params.showRegion ? "checked" : "unchecked"));
-                resetImage();
-            });
-
-            box4ShowRegion.add(checkBox);
-        }
-
-
         Box boxPointsTop = Box.createHorizontalBox();
         boxPointsTop.add(Box.createHorizontalGlue());
         boxPointsTop.add(makePoint(modelLTX , modelLTY, "Left-Top", "Left top point for perspective transformation"));
@@ -211,9 +202,34 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
             v -> params.useFlagInverseMap = v));
         boxSizeInterpol.add(Box.createHorizontalGlue());
 
+        Component cntrlToFirstTab  = makeCheckBox(
+                () -> params.applyToFirstTab,       // getter
+                v  -> params.applyToFirstTab = v,   // setter
+                "Apply to first tab",               // title
+                "params.applyToFirstTab",           // paramName
+                null,                               // tip
+                null);                              // customListener
+        Runnable showRegionCustomListener = () -> {
+          //UiHelper.enableAllChilds(cntrlToFirstTab, !params.showRegion);
+            UiHelper.enableAllChilds(boxSizeInterpol, !params.showRegion);
+        };
+        Component cntrlShowRegion = makeCheckBox(
+                () -> params.showRegion,        // getter
+                v  -> params.showRegion = v,    // setter
+                "Show transformation region",   // title
+                "params.showRegion",            // paramName
+                null,                           // tip
+                showRegionCustomListener);      // customListener
+        Box boxCustomsV = Box.createVerticalBox();
+        boxCustomsV.setBorder(BorderFactory.createTitledBorder(""));
+        boxCustomsV.add(cntrlShowRegion);
+        boxCustomsV.add(cntrlToFirstTab);
+        Box boxCustomsH = Box.createHorizontalBox();
+        boxCustomsH.add(boxCustomsV);
+
         Box boxOptions = Box.createVerticalBox();
         boxOptions.add(Box.createVerticalStrut(2));
-        boxOptions.add(box4ShowRegion);
+        boxOptions.add(boxCustomsH);
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(boxPoints);
         boxOptions.add(Box.createVerticalStrut(2));
@@ -221,6 +237,8 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
         boxOptions.add(Box.createVerticalStrut(2));
 
         box4Options.add(boxOptions);
+
+        showRegionCustomListener.run();
 
         addPointsChangeListener("modelLTX", modelLTX,  true, modelRTX, () -> params.pointLeftTop    .x = modelLTX.getValue());
         addPointsChangeListener("modelLTY", modelLTY,  true, modelLBY, () -> params.pointLeftTop    .y = modelLTY.getValue());
