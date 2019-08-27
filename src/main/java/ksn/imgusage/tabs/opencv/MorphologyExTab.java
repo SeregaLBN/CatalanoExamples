@@ -2,9 +2,12 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ItemEvent;
+import java.util.stream.Stream;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -148,36 +151,27 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
                 panelCreateMethod.setLayout(new BorderLayout());
                 panelCreateMethod.setBorder(BorderFactory.createTitledBorder("Create method"));
                 panelCreateMethod.setToolTipText("How to create kernel?");
-                Box boxMatter = Box.createVerticalBox();
-                ButtonGroup radioGroup = new ButtonGroup();
 
-                JRadioButton radioBtn1 = new JRadioButton("Mat::new", params.kernelSource == EMatSource.CTOR);
-                radioBtn1.setToolTipText("The Kernel created directly through the constructor");
-                radioBtn1.addItemListener(ev -> {
-                    if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.kernelSource = EMatSource.CTOR;
-                        logger.trace("Kernel type changed to {}", params.kernelSource);
-                        makeKernel1(panelCreateParams);
+                Box boxMatter = makeBoxedRadioButtons(
+                    Stream.of(EMatSource.values()),
+                    () -> params.kernelSource,
+                    v  -> params.kernelSource = v,
+                    null,
+                    "Kernel type",
+                    null,
+                    v -> v == EMatSource.CTOR
+                        ? "Mat::new"
+                        : "Imgproc.getStructuringElement",
+                    v -> v == EMatSource.CTOR
+                        ? "The Kernel created directly through the constructor"
+                        : "The Kernel created using getStructuringElement",
+                    v -> {
+                        if (v == EMatSource.CTOR)
+                            makeKernel1(panelCreateParams);
+                        else
+                            makeKernel2(panelCreateParams);
                         panelCreateParams.revalidate();
-                        resetImage();
-                    }
-                });
-                boxMatter.add(radioBtn1);
-                radioGroup.add(radioBtn1);
-
-                JRadioButton radioBtn2 = new JRadioButton("Imgproc.getStructuringElement", params.kernelSource == EMatSource.STRUCTURING_ELEMENT);
-                radioBtn2.setToolTipText("The Kernel created using getStructuringElement.");
-                radioBtn2.addItemListener(ev -> {
-                    if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.kernelSource = EMatSource.STRUCTURING_ELEMENT;
-                        logger.trace("Kernel type changed to {}", params.kernelSource);
-                        makeKernel2(panelCreateParams);
-                        panelCreateParams.revalidate();
-                        resetImage();
-                    }
-                });
-                boxMatter.add(radioBtn2);
-                radioGroup.add(radioBtn2);
+                    });
 
                 if (params.kernelSource == EMatSource.CTOR)
                     makeKernel1(panelCreateParams);
@@ -303,22 +297,18 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
 
         Box box4Shapes = Box.createHorizontalBox();
         box4Shapes.setBorder(BorderFactory.createTitledBorder("Shape"));
-        Box box4Borders1 = Box.createVerticalBox();
-        box4Borders1.setToolTipText("Shape of the structuring element");
-        ButtonGroup radioGroup = new ButtonGroup();
-        for (CvMorphShapes shape : CvMorphShapes.values()) {
-            JRadioButton radioBtnAlg = new JRadioButton(shape.name(), shape == params.kernel2.shape);
-            radioBtnAlg.setToolTipText("Shape of the structuring element");
-            radioBtnAlg.addItemListener(ev -> {
-                if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    params.kernel2.shape = shape;
-                    logger.trace("Shape param changed to {}", shape);
-                    resetImage();
-                }
-            });
-            box4Borders1.add(radioBtnAlg);
-            radioGroup.add(radioBtnAlg);
-        }
+
+        Component box4Borders1 = makeBoxedRadioButtons(
+            Stream.of(CvMorphShapes.values()),
+            () -> params.kernel2.shape,
+            v  -> params.kernel2.shape = v,
+            null,
+            "params.drawMethod",
+            "Shape of the structuring element",
+            null,
+            v -> "Shape of the structuring element",
+            null);
+
         box4Shapes.add(Box.createHorizontalGlue());
         box4Shapes.add(box4Borders1);
         box4Shapes.add(Box.createHorizontalGlue());

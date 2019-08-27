@@ -1,13 +1,14 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 
 import org.opencv.core.Mat;
 
@@ -15,6 +16,7 @@ import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.BaseTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.type.opencv.CvBorderTypes;
 import ksn.imgusage.type.opencv.CvInterpolationFlags;
 import ksn.imgusage.utils.ImgHelper;
 
@@ -95,49 +97,54 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
             boolean useFlagInverseMap,
             Consumer<Boolean> setterUseFlagInverseMap)
     {
-        Box box4Interpolat = Box.createVerticalBox();
-        box4Interpolat.setBorder(BorderFactory.createTitledBorder("Interpolations"));
-        Box box4TypesRadioBttns = Box.createVerticalBox();
-        Box box4TypesCheckBoxes = Box.createVerticalBox();
-        {
-            box4TypesRadioBttns.setToolTipText("Interpolation methods");
-            ButtonGroup radioGroup1 = new ButtonGroup();
+        Box box4Interpolat = makeBoxedRadioButtons(
             CvInterpolationFlags.getInterpolations()
-                .filter(filter)
-                .forEach(interpolation ->
-            {
-                JRadioButton radioBtn = new JRadioButton(interpolation.name(), getter.get() == interpolation);
-                radioBtn.setToolTipText("Interpolation method");
-                radioBtn.addItemListener(ev -> {
-                    if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        setter.accept(interpolation);
-                        logger.trace("Interpolation method changed to {}", interpolation);
-                        resetImage();
-                    }
-                });
-                box4TypesRadioBttns.add(radioBtn);
-                radioGroup1.add(radioBtn);
-            });
-        }
-        {
-            box4TypesCheckBoxes.setBorder(BorderFactory.createTitledBorder("Optional flag"));
-
-            JCheckBox checkBoxInverseMap = new JCheckBox(CvInterpolationFlags.WARP_INVERSE_MAP.name(), useFlagInverseMap);
-            checkBoxInverseMap.setToolTipText("flag, inverse transformation");
-            checkBoxInverseMap.addItemListener(ev -> {
-                boolean checked = (ev.getStateChange() == ItemEvent.SELECTED);
-                setterUseFlagInverseMap.accept(checked);
-                logger.trace("useFlagInverseMap is {}", (checked ? "checked" : "unchecked"));
-                resetImage();
-            });
-
-            box4TypesCheckBoxes.add(checkBoxInverseMap);
-        }
-        box4Interpolat.add(box4TypesRadioBttns);
+                .filter(filter),
+            getter,
+            setter,
+            "Interpolations",
+            "Interpolation method",
+            "Interpolation methods",
+            null, // radioText,
+            v -> "Interpolation method",
+            null // customListener
+        );
         box4Interpolat.add(Box.createVerticalStrut(2));
-        box4Interpolat.add(box4TypesCheckBoxes);
-
+        box4Interpolat.add(makeBoxedCheckBox(
+            () -> useFlagInverseMap,
+            setterUseFlagInverseMap,
+            "Optional flag",
+            CvInterpolationFlags.WARP_INVERSE_MAP.name(),
+            "useFlagInverseMap",
+            "flag, inverse transformation",
+            null));
         return box4Interpolat;
+    }
+
+    protected Box makeBox4Border(
+        Predicate<CvBorderTypes> filterOfBorderTypeValues,
+        Supplier<CvBorderTypes> getterBorderType,
+        Consumer<CvBorderTypes> setterBorderType,
+        String tooltip
+    ) {
+        Box box4Borders = Box.createHorizontalBox();
+        box4Borders.setBorder(BorderFactory.createTitledBorder("Border type"));
+        box4Borders.add(Box.createHorizontalGlue());
+        box4Borders.add(makeBoxedRadioButtons(
+            Stream.of(CvBorderTypes.values())
+                .filter(b -> b != CvBorderTypes.BORDER_REFLECT_101) // dublicate of BORDER_DEFAULT
+                .filter(filterOfBorderTypeValues),
+            getterBorderType,
+            setterBorderType,
+            null, // borderTitle,
+            "Border type",
+            tooltip,
+            null,
+            v -> tooltip,
+            null));
+        box4Borders.add(Box.createHorizontalGlue());
+
+        return box4Borders;
     }
 
 }

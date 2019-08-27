@@ -82,14 +82,10 @@ public class BilateralTab extends OpencvFilterTab<BilateralTabParams> {
         panelOptions.setLayout(new BorderLayout());
         panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
         panelOptions.add(box4Sliders, BorderLayout.CENTER);
-        panelOptions.add(GaussianBlurTab.makeBox4Border(
-                                                        b -> (b != CvBorderTypes.BORDER_TRANSPARENT) // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
-                                                          && (b != CvBorderTypes.BORDER_DEFAULT), // duplicate
-                                                        () -> params.borderType,
-                                                        bt -> params.borderType = bt,
-                                                        this::resetImage,
-                                                        "Border mode used to extrapolate pixels outside of the image",
-                                                        logger),
+        panelOptions.add(makeBox4Border(b -> (b != CvBorderTypes.BORDER_TRANSPARENT), // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
+                                        () -> params.borderType,
+                                        bt -> params.borderType = bt,
+                                        "Border mode used to extrapolate pixels outside of the image"),
                          BorderLayout.SOUTH);
 
         modelDiameter.getWrapped().addChangeListener(ev -> {

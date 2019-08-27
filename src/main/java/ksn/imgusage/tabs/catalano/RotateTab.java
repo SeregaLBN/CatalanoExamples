@@ -1,9 +1,11 @@
 package ksn.imgusage.tabs.catalano;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
+import java.awt.Container;
+import java.util.stream.Stream;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 
 import Catalano.Imaging.Filters.Rotate;
 import ksn.imgusage.model.SliderDoubleModel;
@@ -58,34 +60,24 @@ public class RotateTab extends CatalanoFilterTab<RotateTabParams> {
         Box boxOptions = Box.createHorizontalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
 
-        Box box2 = Box.createVerticalBox();
-        box2.setBorder(BorderFactory.createTitledBorder(""));
+        Container box2 = makeBoxedCheckBox(
+            () -> params.keepSize,
+            v  -> params.keepSize = v,
+            "",
+            "Keep size",
+            "params.keepSize",
+            "Keep the original size", null);
 
-        JCheckBox btnKeepSize = new JCheckBox("Keep size", params.keepSize);
-        btnKeepSize.setToolTipText("Keep the original size");
-        btnKeepSize.addActionListener(ev -> {
-            params.keepSize  = btnKeepSize.isSelected();
-            resetImage();
-        });
-        box2.add(btnKeepSize);
-
-        Box box4Alg = Box.createVerticalBox();
-        box4Alg.setBorder(BorderFactory.createTitledBorder("Algorithm"));
-        box4Alg.setToolTipText("Interpolation algorithm");
-        ButtonGroup radioGroup = new ButtonGroup();
-        for (Rotate.Algorithm alg : Rotate.Algorithm.values()) {
-            JRadioButton radioBtnAlg = new JRadioButton(alg.name(), alg == params.algorithm);
-            radioBtnAlg.setToolTipText("Interpolation algorithm");
-            radioBtnAlg.addItemListener(ev -> {
-                if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    params.algorithm = alg;
-                    logger.trace("algorithm changed to {}", alg);
-                    resetImage();
-                }
-            });
-            box4Alg.add(radioBtnAlg);
-            radioGroup.add(radioBtnAlg);
-        }
+        Component box4Alg = makeBoxedRadioButtons(
+            Stream.of(Rotate.Algorithm.values()),
+            () -> params.algorithm,
+            v  -> params.algorithm = v,
+            "Algorithm",
+            "params.algorithm",
+            "Interpolation algorithm",
+            null,
+            v -> "Interpolation algorithm",
+            null);
         box2.add(box4Alg);
 
         boxOptions.add(Box.createHorizontalGlue());

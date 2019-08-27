@@ -3,9 +3,11 @@ package ksn.imgusage.tabs.opencv;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.event.ItemEvent;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
@@ -88,61 +90,48 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
         };
 
 
-        Box box4Types = Box.createVerticalBox();
-        box4Types.setBorder(BorderFactory.createTitledBorder("Thresholding type"));
-        Box box4TypesRadioBttns = Box.createVerticalBox();
+        Box box4Types = makeBoxedRadioButtons(
+            CvThresholdTypes.getThresholds(),
+            params::getThreshType,
+            params::setThreshType,
+            "Thresholding type",
+            "params.threshType",
+            "Thresholding types",
+            null,
+            v -> "Type of the threshold operation",
+            v -> applyThresholdingType.run());
         Box box4TypesCheckBoxes = Box.createVerticalBox();
-        {
-            box4TypesRadioBttns.setToolTipText("Thresholding types");
-            ButtonGroup radioGroup1 = new ButtonGroup();
-            CvThresholdTypes.getThresholds()
-                .forEach(thresholdingType ->
-            {
-                JRadioButton radioBtnThresh = new JRadioButton(thresholdingType.name(), thresholdingType == params.getThreshType());
-                radioBtnThresh.setToolTipText("Type of the threshold operation");
-                radioBtnThresh.addItemListener(ev -> {
-                    if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.setThreshType(thresholdingType);
-                        logger.trace("Thresholding type changed to {}", thresholdingType);
-                        applyThresholdingType.run();
-                        resetImage();
-                    }
-                });
-                box4TypesRadioBttns.add(radioBtnThresh);
-                radioGroup1.add(radioBtnThresh);
-            });
-        }
         {
             box4TypesCheckBoxes.setBorder(BorderFactory.createTitledBorder("Special values"));
 
-            JCheckBox checkBoxOtsuMask = new JCheckBox(CvThresholdTypes.THRESH_OTSU.name(), params.useOtsuMask);
-            checkBoxOtsuMask.setToolTipText("the function determines the optimal threshold value using the Otsu's algorithm and uses it instead of the specified thresh");
-
-            JCheckBox checkBoxTriangleMask = new JCheckBox(CvThresholdTypes.THRESH_TRIANGLE.name(), params.useTriangleMask);
-            checkBoxTriangleMask.setToolTipText("the function determines the optimal threshold value using the Triangle algorithm and uses it instead of the specified thresh");
-
-            checkBoxOtsuMask.addItemListener(ev -> {
-                params.useOtsuMask = (ev.getStateChange() == ItemEvent.SELECTED);
-                logger.trace("Thresholding type THRESH_OTSU is {}", (params.useOtsuMask ? "checked" : "unchecked"));
-                if (params.useOtsuMask)
-                    checkBoxTriangleMask.setSelected(false);
-                applyThresholdingType.run();
-                resetImage();
-            });
-            checkBoxTriangleMask.addItemListener(ev -> {
-                params.useTriangleMask = (ev.getStateChange() == ItemEvent.SELECTED);
-                logger.trace("Thresholding type THRESH_TRIANGLE is {}", (params.useTriangleMask ? "checked" : "unchecked"));
-                if (params.useTriangleMask)
-                    checkBoxOtsuMask.setSelected(false);
-                applyThresholdingType.run();
-                resetImage();
-            });
+            JCheckBox[] checkBoxTriangleMask = { null };
+            JCheckBox checkBoxOtsuMask = makeCheckBox(
+                () -> params.useOtsuMask,
+                v  -> params.useOtsuMask = v,
+                CvThresholdTypes.THRESH_OTSU.name(),
+                "params.useOtsuMask",
+                "The function determines the optimal threshold value using the Otsu's algorithm and uses it instead of the specified thresh",
+                () -> {
+                    if (params.useOtsuMask)
+                        checkBoxTriangleMask[0].setSelected(false);
+                    applyThresholdingType.run();
+                });
+            checkBoxTriangleMask[0] = makeCheckBox(
+                () -> params.useTriangleMask,
+                v  -> params.useTriangleMask = v,
+                CvThresholdTypes.THRESH_TRIANGLE.name(),
+                "params.useTriangleMask",
+                "The function determines the optimal threshold value using the Triangle algorithm and uses it instead of the specified thresh",
+                () -> {
+                    if (params.useTriangleMask)
+                        checkBoxOtsuMask.setSelected(false);
+                    applyThresholdingType.run();
+                });
 
             box4TypesCheckBoxes.add(checkBoxOtsuMask);
-            box4TypesCheckBoxes.add(checkBoxTriangleMask);
+            box4TypesCheckBoxes.add(checkBoxTriangleMask[0]);
         }
 
-        box4Types.add(box4TypesRadioBttns);
         box4Types.add(Box.createVerticalStrut(2));
         box4Types.add(box4TypesCheckBoxes);
 

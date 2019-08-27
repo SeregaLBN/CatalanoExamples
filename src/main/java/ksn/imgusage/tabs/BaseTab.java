@@ -6,6 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -324,7 +327,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return box;
     }
 
-    protected Component makeCheckBox(BooleanSupplier getter, Consumer<Boolean> setter, String title, String paramName, String tip, Runnable customListener) {
+    protected JCheckBox makeCheckBox(BooleanSupplier getter, Consumer<Boolean> setter, String title, String paramName, String tip, Runnable customListener) {
         JCheckBox checkBox = new JCheckBox(title, getter.getAsBoolean());
         if (tip != null)
             checkBox.setToolTipText(tip);
@@ -339,12 +342,67 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return checkBox;
     }
 
-    protected Component makeSingleCheckBox(BooleanSupplier getter, Consumer<Boolean> setter, String titleBorder, String titleCheckBox, String paramName, String tip, Runnable customListener) {
+    protected Box makeBoxedCheckBox(BooleanSupplier getter, Consumer<Boolean> setter, String borderTitle, String checkBoxTitle, String paramName, String tip, Runnable customListener) {
         Box box = Box.createVerticalBox();
-        box.setBorder(BorderFactory.createTitledBorder(titleBorder==null ? "" : titleBorder));
+        if (borderTitle != null)
+            box.setBorder(BorderFactory.createTitledBorder(borderTitle));
         if (tip != null)
             box.setToolTipText(tip);
-        box.add(makeCheckBox(getter, setter, titleCheckBox, paramName, tip, customListener));
+        box.add(makeCheckBox(getter, setter, checkBoxTitle, paramName, tip, customListener));
+        return box;
+    }
+
+    protected <E extends Enum<?>> Stream<JRadioButton> makeRadioButtons(
+        Stream<E> values,
+        Supplier<E> getter,
+        Consumer<E> setter,
+        String paramName,
+        Function<E, String> radioText,
+        Function<E, String> radioTip,
+        Consumer<E> customListener
+    ) {
+        ButtonGroup radioGroup = new ButtonGroup();
+        E initVal = getter.get();
+        return values.map(e -> {
+            JRadioButton radioBtn = new JRadioButton(
+                radioText == null
+                    ? e.name()
+                    : radioText.apply(e),
+                e == initVal);
+            if (radioTip != null)
+                radioBtn.setToolTipText(radioTip.apply(e));
+            radioBtn.addItemListener(ev -> {
+                if (ev.getStateChange() == ItemEvent.SELECTED) {
+                    setter.accept(e);
+                    logger.trace("{} changed to {}", paramName, e);
+                    if (customListener != null)
+                        customListener.accept(e);;
+                    resetImage();
+                }
+            });
+            radioGroup.add(radioBtn);
+            return radioBtn;
+        });
+    }
+
+    protected <E extends Enum<?>> Box makeBoxedRadioButtons(
+        Stream<E> values,
+        Supplier<E> getter,
+        Consumer<E> setter,
+        String borderTitle,
+        String paramName,
+        String boxTip,
+        Function<E, String> radioText,
+        Function<E, String> radioTip,
+        Consumer<E> customListener
+    ) {
+        Box box = Box.createVerticalBox();
+        if (borderTitle != null)
+            box.setBorder(BorderFactory.createTitledBorder(borderTitle));
+        if (boxTip != null)
+            box.setToolTipText(boxTip);
+        makeRadioButtons(values, getter, setter, paramName, radioText, radioTip, customListener)
+            .forEach(box::add);
         return box;
     }
 

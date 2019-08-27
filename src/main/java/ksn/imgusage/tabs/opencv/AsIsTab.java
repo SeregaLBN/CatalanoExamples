@@ -4,7 +4,6 @@ import java.awt.Component;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.JCheckBox;
 
 import ksn.imgusage.type.dto.opencv.AsIsTabParams;
 import ksn.imgusage.utils.ImgHelper;
@@ -47,14 +46,12 @@ public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
         box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
         Box box = Box.createHorizontalBox();
-        JCheckBox btnAsGray = new JCheckBox("Gray", params.useGray);
-        btnAsGray.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btnAsGray.setToolTipText("Speed up by reducing the image");
-        btnAsGray.addActionListener(ev -> {
-            params.useGray = btnAsGray.isSelected();
-            resetImage();
-        });
-        box.add(btnAsGray);
+        box.add(makeCheckBox(
+            () -> params.useGray,
+            v  -> params.useGray = v,
+            "Gray",
+            "params.useGray",
+            "Speed up by reducing the image", null));
         box4Options.add(box);
 
         return box4Options;

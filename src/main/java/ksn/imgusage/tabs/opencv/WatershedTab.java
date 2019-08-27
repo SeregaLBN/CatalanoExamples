@@ -1,7 +1,6 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -10,8 +9,6 @@ import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.JRadioButton;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -145,24 +142,14 @@ public class WatershedTab extends OpencvFilterTab<WatershedTabParams> {
     protected Component makeOptions() {
         Box box4Steps = Box.createHorizontalBox();
         box4Steps.setBorder(BorderFactory.createTitledBorder("Visualization steps"));
-        Box box4Steps1 = Box.createVerticalBox();
-        ButtonGroup radioGroup = new ButtonGroup();
-        Stream.of(EShowSteps.values())
-            .forEach(step ->
-        {
-            JRadioButton radioBtnAlg = new JRadioButton(step.name(), params.showStep == step);
-            radioBtnAlg.addItemListener(ev -> {
-                if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    params.showStep = step;
-                    logger.trace("params.showStep type changed to {}", step);
-                    resetImage();
-                }
-            });
-            box4Steps1.add(radioBtnAlg);
-            radioGroup.add(radioBtnAlg);
-        });
+
         box4Steps.add(Box.createHorizontalGlue());
-        box4Steps.add(box4Steps1);
+        box4Steps.add(makeBoxedRadioButtons(
+            Stream.of(EShowSteps.values()),
+            () -> params.showStep,
+            v  -> params.showStep = v,
+            null, "params.showStep",
+            null, null, null, null));
         box4Steps.add(Box.createHorizontalGlue());
         return box4Steps;
     }

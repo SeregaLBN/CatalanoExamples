@@ -279,24 +279,20 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         return btnLoadImage;
     }
 
-    private final JCheckBox makeButtonUseGray() {
-        JCheckBox btnUseGray = new JCheckBox("Gray", params.useGray);
-        btnUseGray.addActionListener(ev -> {
-            params.useGray  = btnUseGray.isSelected();
-            resetImage();
-        });
-
-        return btnUseGray;
+    private final Component makeButtonUseGray() {
+        return makeCheckBox(
+            () -> params.useGray,
+            v  -> params.useGray = v,
+            "Gray",
+            "params.useGray", null, null);
     }
 
-    private final JCheckBox makeButtonUseScale() {
-        JCheckBox btnScale = new JCheckBox("Scale", params.useScale);
-        btnScale.addActionListener(ev -> {
-            params.useScale = btnScale.isSelected();
-            resetImage();
-        });
-
-        return btnScale;
+    private final Component makeButtonUseScale() {
+        return makeCheckBox(
+            () -> params.useScale,
+            v  -> params.useScale = v,
+            "Scale",
+            "params.useScale", null, null);
     }
 
     @Override
@@ -423,12 +419,13 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             box4ImageSize.add(Box.createHorizontalGlue());
 
             Box box4ImageSize2 = Box.createHorizontalBox();
-            JCheckBox btnKeepAspectRatio = new JCheckBox("Keep aspect ratio", params.useKeepAspectRatio);
-            btnKeepAspectRatio.addActionListener(ev -> {
-                params.useKeepAspectRatio = btnKeepAspectRatio.isSelected();
-                onCheckKeepAspectRationByWidth.run();
-                resetImage();
-            });
+            Component btnKeepAspectRatio = makeCheckBox(
+                () -> params.useKeepAspectRatio,
+                v  -> params.useKeepAspectRatio = v,
+                "Keep aspect ratio",
+                "params.useKeepAspectRatio",
+                null,
+                onCheckKeepAspectRationByWidth);
             JButton btnOrigSize = new JButton(" • ");
             btnOrigSize.setToolTipText("Reset to original size");
             btnOrigSize.addActionListener(ev -> {

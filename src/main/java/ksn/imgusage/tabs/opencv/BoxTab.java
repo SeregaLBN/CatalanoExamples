@@ -1,11 +1,9 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.JCheckBox;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
@@ -94,15 +92,12 @@ public class BoxTab extends OpencvFilterTab<BoxTabParams> {
         boxAnchor.add(makeSliderVert(modelAnchorY, "Y", "Anchor Y"));
         boxAnchor.add(Box.createHorizontalGlue());
 
-        Box box4Borders = GaussianBlurTab.makeBox4Border(
+        Box box4Borders = makeBox4Border(
                 b -> (b != CvBorderTypes.BORDER_WRAP)        // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/imgproc/src/filter.cpp:127: error: (-215:Assertion failed) columnBorderType != BORDER_WRAP in function 'init']
-                  && (b != CvBorderTypes.BORDER_TRANSPARENT) // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/core/src/copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'borderInterpolate']
-                  && (b != CvBorderTypes.BORDER_DEFAULT),    // dublicate
+                  && (b != CvBorderTypes.BORDER_TRANSPARENT),// CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/core/src/copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'borderInterpolate']
                 () -> params.borderType,
                 bt -> params.borderType = bt,
-                this::resetImage,
-                "Border mode used to extrapolate pixels outside of the image",
-                logger);
+                "Border mode used to extrapolate pixels outside of the image");
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
@@ -113,13 +108,12 @@ public class BoxTab extends OpencvFilterTab<BoxTabParams> {
         box4Sliders.add(boxAnchor);
         box4Sliders.add(Box.createHorizontalGlue());
 
-        JCheckBox checkBoxNormalize = new JCheckBox("Normalize", params.normalize);
-        checkBoxNormalize.setToolTipText("Flag, specifying whether the kernel is normalized by its area or not");
-        checkBoxNormalize.addItemListener(ev -> {
-            params.normalize = (ev.getStateChange() == ItemEvent.SELECTED);
-            logger.trace("Normalize is {}", (params.normalize ? "checked" : "unchecked"));
-            resetImage();
-        });
+        Component checkBoxNormalize = makeCheckBox(
+            () -> params.normalize,
+            v  -> params.normalize = v,
+            "Normalize",
+            "params.normalize",
+            "Flag, specifying whether the kernel is normalized by its area or not", null);
 
         Box boxOptions = Box.createVerticalBox();
         boxOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));

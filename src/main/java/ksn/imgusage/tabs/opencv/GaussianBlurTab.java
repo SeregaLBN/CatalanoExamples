@@ -1,17 +1,13 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
-import java.awt.event.ItemEvent;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.SwingUtilities;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
-import org.slf4j.Logger;
 
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
@@ -98,13 +94,10 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
         boxSigma.add(Box.createHorizontalGlue());
 
         Box box4Borders = makeBox4Border(
-                b -> (b != CvBorderTypes.BORDER_TRANSPARENT) // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
-                  && (b != CvBorderTypes.BORDER_DEFAULT),    // dublicate
+                b -> (b != CvBorderTypes.BORDER_TRANSPARENT), // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) C:\build\3_4_winpack-bindings-win64-vc14-static\opencv\modules\core\src\copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'cv::borderInterpolate'
                 () -> params.borderType,
                 bt -> params.borderType = bt,
-                this::resetImage,
-                "Pixel extrapolation method",
-                logger);
+                "Pixel extrapolation method");
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
@@ -161,43 +154,6 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
     @Override
     public GaussianBlurTabParams getParams() {
         return params;
-    }
-
-    static Box makeBox4Border(
-            Predicate<CvBorderTypes> filterOfBorderTypeValues,
-            Supplier<CvBorderTypes> getterBorderType,
-            Consumer<CvBorderTypes> setterBorderType,
-            Runnable resetImage,
-            String tooltip,
-            Logger logger)
-    {
-        Box box4Borders = Box.createHorizontalBox();
-        box4Borders.setBorder(BorderFactory.createTitledBorder("Border type"));
-        Box box4Borders1 = Box.createVerticalBox();
-        box4Borders1.setToolTipText(tooltip);
-        ButtonGroup radioGroup = new ButtonGroup();
-        Stream.of(CvBorderTypes.values())
-            .filter(filterOfBorderTypeValues)
-            .forEach(border ->
-        {
-            CvBorderTypes bt = getterBorderType.get();
-            JRadioButton radioBtnAlg = new JRadioButton(border.name(), (border == bt) || (border.getVal() == bt.getVal()));
-            radioBtnAlg.setToolTipText(tooltip);
-            radioBtnAlg.addItemListener(ev -> {
-                if (ev.getStateChange() == ItemEvent.SELECTED) {
-                    setterBorderType.accept(border);
-                    logger.trace("Border type changed to {}", border);
-                    resetImage.run();
-                }
-            });
-            box4Borders1.add(radioBtnAlg);
-            radioGroup.add(radioBtnAlg);
-        });
-        box4Borders.add(Box.createHorizontalGlue());
-        box4Borders.add(box4Borders1);
-        box4Borders.add(Box.createHorizontalGlue());
-
-        return box4Borders;
     }
 
 }

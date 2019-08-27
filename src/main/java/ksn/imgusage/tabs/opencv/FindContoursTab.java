@@ -2,7 +2,6 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +11,7 @@ import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.swing.*;
 
@@ -259,61 +259,42 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             JPanel panelCustomParams = new JPanel();
             panelCustomParams.setLayout(new BorderLayout());
 
-            Box boxSelectDrawMethod = Box.createVerticalBox();
-            {
-                boxSelectDrawMethod.setBorder(BorderFactory.createTitledBorder("Draw method"));
-                boxSelectDrawMethod.setToolTipText("How to draw contours?");
-                ButtonGroup radioGroup = new ButtonGroup();
-
-                JRadioButton radioBtn1 = new JRadioButton(EFindContoursDrawMethod.DRAW_CONTOURS.name(), params.drawMethod == EFindContoursDrawMethod.DRAW_CONTOURS);
-                radioBtn1.setToolTipText("to display the contours using <p>drawContours()</p> method");
-                radioBtn1.addItemListener(ev -> {
-                    if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.drawMethod = EFindContoursDrawMethod.DRAW_CONTOURS;
-                        logger.trace("params.drawMethod changed to {}", params.drawMethod);
+            Component boxSelectDrawMethod = makeBoxedRadioButtons(
+                Stream.of(EFindContoursDrawMethod.values()),
+                () -> params.drawMethod,
+                v  -> params.drawMethod = v,
+                "Draw method",
+                "params.drawMethod",
+                "How to draw contours?",
+                null,
+                v -> v == EFindContoursDrawMethod.DRAW_CONTOURS
+                    ? "to display the contours using <p>drawContours()</p> method"
+                    : "draw external rectangle of contours region",
+                v -> {
+                    if (v == EFindContoursDrawMethod.DRAW_CONTOURS)
                         makeDrawContoursParams(panelCustomParams, modelMaxContourArea, modelContourIdx, modelMaxLevel);
-                        panelCustomParams.revalidate();
-                        resetImage();
-                    }
-                });
-                boxSelectDrawMethod.add(radioBtn1);
-                radioGroup.add(radioBtn1);
-
-                JRadioButton radioBtn2 = new JRadioButton(EFindContoursDrawMethod.EXTERNAL_RECT.name(), params.drawMethod == EFindContoursDrawMethod.EXTERNAL_RECT);
-                radioBtn2.setToolTipText("draw external rectangle of contours region");
-                radioBtn2.addItemListener(ev -> {
-                    if (ev.getStateChange() == ItemEvent.SELECTED) {
-                        params.drawMethod = EFindContoursDrawMethod.EXTERNAL_RECT;
-                        logger.trace("params.drawMethod changed to {}", params.drawMethod);
+                    else
                         makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH);
-                        panelCustomParams.revalidate();
-                        resetImage();
-                    }
+                    panelCustomParams.revalidate();
                 });
-                boxSelectDrawMethod.add(radioBtn2);
-                radioGroup.add(radioBtn2);
 
-                switch (params.drawMethod) {
-                case DRAW_CONTOURS: makeDrawContoursParams(panelCustomParams, modelMaxContourArea, modelContourIdx, modelMaxLevel); break;
-                case EXTERNAL_RECT: makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH); break;
-                default:
-                    logger.error("Unknown params.drawMethod={}! Support him!", params.drawMethod);
-                }
+            switch (params.drawMethod) {
+            case DRAW_CONTOURS: makeDrawContoursParams(panelCustomParams, modelMaxContourArea, modelContourIdx, modelMaxLevel); break;
+            case EXTERNAL_RECT: makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH); break;
+            default:
+                logger.error("Unknown params.drawMethod={}! Support him!", params.drawMethod);
             }
 
-            Box box4RandomColor = Box.createVerticalBox();
-            box4RandomColor.setBorder(BorderFactory.createTitledBorder(""));
-            JCheckBox checkBoxL2gradient = new JCheckBox("Random color", params.randomColors);
-            checkBoxL2gradient.addItemListener(ev -> {
-                params.randomColors = (ev.getStateChange() == ItemEvent.SELECTED);
-                logger.trace("randomColors is {}", (params.randomColors ? "checked" : "unchecked"));
-                resetImage();
-            });
-            box4RandomColor.add(checkBoxL2gradient);
-
+            Component cntrl4RandomColor = makeBoxedCheckBox(
+                    () -> params.randomColors,
+                    v  -> params.randomColors = v,
+                    "",
+                    "Random color",
+                    "params.randomColors",
+                    null, null);
             panelDrawContoursOptions.add(boxSelectDrawMethod, BorderLayout.NORTH);
             panelDrawContoursOptions.add(panelCustomParams  , BorderLayout.CENTER);
-            panelDrawContoursOptions.add(box4RandomColor    , BorderLayout.SOUTH);
+            panelDrawContoursOptions.add(cntrl4RandomColor  , BorderLayout.SOUTH);
         }
 
         JPanel panelAll = new JPanel();
@@ -360,12 +341,12 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             boxDrawContoursParams = Box.createHorizontalBox();
             boxDrawContoursParams.setBorder(BorderFactory.createTitledBorder("Outlines or filled contours"));
 
-            JCheckBox boxFilled = new JCheckBox("Fill", params.fillContour);
-            boxFilled.addItemListener(ev -> {
-                params.fillContour = (ev.getStateChange() == ItemEvent.SELECTED);
-                logger.trace("params.fillContour is {}", (params.fillContour ? "checked" : "unchecked"));
-                resetImage();
-            });
+            Component boxFilled = makeCheckBox(
+                () -> params.fillContour,
+                v  -> params.fillContour = v,
+                "Fill",
+                "params.fillContour",
+                null, null);
 
             boxDrawContoursParams.add(Box.createHorizontalGlue());
             boxDrawContoursParams.add(makeSliderVert(modelMaxContourArea, "Area", "Max show contour area"));

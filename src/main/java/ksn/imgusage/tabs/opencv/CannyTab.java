@@ -2,9 +2,11 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ItemEvent;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
@@ -77,16 +79,14 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
         box4Sliders.add(makeSliderVert(modelApertureSize, "Aperture", "Aperture size for the Sobel operator"));
         box4Sliders.add(Box.createHorizontalGlue());
 
-        Box box4L2gradient = Box.createVerticalBox();
-        box4L2gradient.setBorder(BorderFactory.createTitledBorder(""));
-        JCheckBox checkBoxL2gradient = new JCheckBox("L2 gradient", params.l2gradient);
-        checkBoxL2gradient.setToolTipText("A flag, indicating whether a more accurate L2 norm =√‾((dI/dx)^2+(dI/dy)^2) should be used to calculate the image gradient magnitude ( L2gradient=true ), or whether the default L1 norm =|dI/dx|+|dI/dy| is enough ( L2gradient=false )");
-        checkBoxL2gradient.addItemListener(ev -> {
-            params.l2gradient = (ev.getStateChange() == ItemEvent.SELECTED);
-            logger.trace("L2 gradient is {}", (params.l2gradient ? "checked" : "unchecked"));
-            resetImage();
-        });
-        box4L2gradient.add(checkBoxL2gradient);
+        Component box4L2gradient = makeBoxedCheckBox(
+            () -> params.l2gradient,
+            v  -> params.l2gradient = v,
+            "",
+            "L2 gradient",
+            "L2 gradient",
+            "A flag, indicating whether a more accurate L2 norm =√‾((dI/dx)^2+(dI/dy)^2) should be used to calculate the image gradient magnitude ( L2gradient=true ), or whether the default L1 norm =|dI/dx|+|dI/dy| is enough ( L2gradient=false )",
+            null);
 
         JPanel panelOptions = new JPanel();
         panelOptions.setLayout(new BorderLayout());
