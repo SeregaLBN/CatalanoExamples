@@ -73,19 +73,13 @@ public class FrequencyFilterTab extends CatalanoFilterTab<FrequencyFilterTabPara
 
         box4Options.add(boxOptions);
 
-        modelMin.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMin: value={}", modelMin.getFormatedText());
-            params.min = modelMin.getValue();
+        addChangeListener("modelMin", modelMin, v -> params.min = v, () -> {
             if (params.min > modelMax.getValue())
                 modelMax.setValue(params.min);
-            resetImage();
         });
-        modelMax.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMax: value={}", modelMax.getFormatedText());
-            params.max = modelMax.getValue();
+        addChangeListener("modelMax", modelMax, v -> params.max = v, () -> {
             if (params.max < modelMin.getValue())
                 modelMin.setValue(params.max);
-            resetImage();
         });
 
         return box4Options;

@@ -63,11 +63,7 @@ public class BrightnessCorrectionTab extends CatalanoFilterTab<BrightnessCorrect
 
         box4Options.add(boxOptions);
 
-        modelAdjust.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelAdjust: value={}", modelAdjust.getFormatedText());
-            params.adjust = modelAdjust.getValue();
-            resetImage();
-        });
+        addChangeListener("modelAdjust", modelAdjust, v -> params.adjust = v);
 
         return box4Options;
     }

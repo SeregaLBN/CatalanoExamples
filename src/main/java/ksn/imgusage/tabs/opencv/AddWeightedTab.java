@@ -101,26 +101,10 @@ public class AddWeightedTab extends OpencvFilterTab<AddWeightedTabParams> {
 
         box4Options.add(panelOptions);
 
-        modelAlpha.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelAlpha: value={}", modelAlpha.getFormatedText());
-            params.alpha = modelAlpha.getValue();
-            resetImage();
-        });
-        modelBeta.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelBeta: value={}", modelBeta.getFormatedText());
-            params.beta = modelBeta.getValue();
-            resetImage();
-        });
-        modelGamma.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelGamma: value={}", modelGamma.getFormatedText());
-            params.gamma = modelGamma.getValue();
-            resetImage();
-        });
-        modelDType.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelDType: value={}", modelDType.getFormatedText());
-            params.dtype = modelDType.getValue();
-            resetImage();
-        });
+        addChangeListener("modelAlpha", modelAlpha, v -> params.alpha = v);
+        addChangeListener("modelBeta" , modelBeta , v -> params.beta  = v);
+        addChangeListener("modelGamma", modelGamma, v -> params.gamma = v);
+        addChangeListener("modelDType", modelDType, v -> params.dtype = v);
 
         return box4Options;
     }

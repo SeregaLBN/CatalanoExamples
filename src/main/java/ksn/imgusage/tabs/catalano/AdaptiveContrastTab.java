@@ -87,34 +87,16 @@ public class AdaptiveContrastTab extends CatalanoFilterTab<AdaptiveContrastTabPa
 
         box4Options.add(boxOptions);
 
-        modelWinSize.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
-            params.winSize = modelWinSize.getValue();
-            resetImage();
-        });
-        modelK1.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelK1: value={}", modelK1.getFormatedText());
-            params.k1 = modelK1.getValue();
-            resetImage();
-        });
-        modelK2.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelK2: value={}", modelK2.getFormatedText());
-            params.k2 = modelK2.getValue();
-            resetImage();
-        });
-        modelMinGain.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMinGain: value={}", modelMinGain.getFormatedText());
-            params.minGain = modelMinGain.getValue();
+        addChangeListener("modelWinSize", modelWinSize, v -> params.winSize = v);
+        addChangeListener("modelK1"     , modelK1     , v -> params.k1      = v);
+        addChangeListener("modelK2"     , modelK2     , v -> params.k2      = v);
+        addChangeListener("modelMinGain", modelMinGain, v -> params.minGain = v, () -> {
             if (params.minGain > modelMaxGain.getValue())
                 modelMaxGain.setValue(params.minGain);
-            resetImage();
         });
-        modelMaxGain.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMaxGain: value={}", modelMaxGain.getFormatedText());
-            params.maxGain = modelMaxGain.getValue();
+        addChangeListener("modelMaxGain", modelMaxGain, v -> params.maxGain = v, () -> {
             if (params.maxGain < modelMinGain.getValue())
                 modelMinGain.setValue(params.maxGain);
-            resetImage();
         });
 
         return box4Options;

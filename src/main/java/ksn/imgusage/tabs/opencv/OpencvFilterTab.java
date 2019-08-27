@@ -12,7 +12,6 @@ import javax.swing.Box;
 
 import org.opencv.core.Mat;
 
-import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.tabs.BaseTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
@@ -62,32 +61,6 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
     public void resetImage() {
         imageMat = null;
         super.resetImage();
-    }
-
-    public Component makePoint(SliderIntModel modelPointX, SliderIntModel modelPointY, String borderTitle, String tooltip) {
-        Box boxSize = Box.createHorizontalBox();
-        boxSize.setBorder(BorderFactory.createTitledBorder(borderTitle));
-        if (tooltip != null)
-            boxSize.setToolTipText(tooltip);
-        boxSize.add(Box.createHorizontalGlue());
-        boxSize.add(makeSliderVert(modelPointX, "X", null));
-        boxSize.add(Box.createHorizontalStrut(2));
-        boxSize.add(makeSliderVert(modelPointY, "Y", null));
-        boxSize.add(Box.createHorizontalGlue());
-        return boxSize;
-    }
-
-    public Component makeSize(SliderIntModel modelSizeW, SliderIntModel modelSizeH, String borderTitle, String tooltip) {
-        Box boxSize = Box.createHorizontalBox();
-        boxSize.setBorder(BorderFactory.createTitledBorder(borderTitle));
-        if (tooltip != null)
-            boxSize.setToolTipText(tooltip);
-        boxSize.add(Box.createHorizontalGlue());
-        boxSize.add(makeSliderVert(modelSizeW, "Width", "Size Width"));
-        boxSize.add(Box.createHorizontalStrut(2));
-        boxSize.add(makeSliderVert(modelSizeH, "Height", "Size Height"));
-        boxSize.add(Box.createHorizontalGlue());
-        return boxSize;
     }
 
     public Component makeInterpolations(

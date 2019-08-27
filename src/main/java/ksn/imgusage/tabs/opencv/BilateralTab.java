@@ -88,21 +88,9 @@ public class BilateralTab extends OpencvFilterTab<BilateralTabParams> {
                                         "Border mode used to extrapolate pixels outside of the image"),
                          BorderLayout.SOUTH);
 
-        modelDiameter.getWrapped().addChangeListener(ev -> {
-            params.diameter = modelDiameter.getValue();
-            logger.trace("modelDiameter: value={}", modelDiameter.getFormatedText());
-            resetImage();
-        });
-        modelSigmaColor.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelSigmaColor: value={}", modelSigmaColor.getFormatedText());
-            params.sigmaColor = modelSigmaColor.getValue();
-            resetImage();
-        });
-        modelSigmaSpace.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelSigmaSpace: value={}", modelSigmaSpace.getFormatedText());
-            params.sigmaSpace = modelSigmaSpace.getValue();
-            resetImage();
-        });
+        addChangeListener("modelDiameter"  , modelDiameter  , v -> params.diameter   = v);
+        addChangeListener("modelSigmaColor", modelSigmaColor, v -> params.sigmaColor = v);
+        addChangeListener("modelSigmaSpace", modelSigmaSpace, v -> params.sigmaSpace = v);
 
         return panelOptions;
     }

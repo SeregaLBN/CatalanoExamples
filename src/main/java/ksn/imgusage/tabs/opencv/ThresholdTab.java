@@ -155,16 +155,8 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
         // Note
         // Currently, the Otsu's and Triangle methods are implemented only for 8-bit single-channel images.
 
-        modelThresh.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelThresh: value={}", modelThresh.getFormatedText());
-            params.thresh = modelThresh.getValue();
-            resetImage();
-        });
-        modelMaxVal.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelMaxVal: value={}", modelMaxVal.getFormatedText());
-            params.maxVal = modelMaxVal.getValue();
-            resetImage();
-        });
+        addChangeListener("modelThresh", modelThresh, v -> params.thresh = v);
+        addChangeListener("modelMaxVal", modelMaxVal, v -> params.maxVal = v);
 
         return box4Options;
     }

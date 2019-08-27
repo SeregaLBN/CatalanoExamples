@@ -90,13 +90,6 @@ public class BlurTab extends OpencvFilterTab<BlurTabParams> {
         boxAnchor.add(makeSliderVert(modelAnchorY, "Y", "Anchor Y"));
         boxAnchor.add(Box.createHorizontalGlue());
 
-        Box box4Borders = makeBox4Border(
-                b -> (b != CvBorderTypes.BORDER_WRAP)        // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/imgproc/src/filter.cpp:127: error: (-215:Assertion failed) columnBorderType != BORDER_WRAP in function 'init']
-                  && (b != CvBorderTypes.BORDER_TRANSPARENT), // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/core/src/copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'borderInterpolate']
-                () -> params.borderType,
-                bt -> params.borderType = bt,
-                "Border mode used to extrapolate pixels outside of the image");
-
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
         box4Sliders.add(boxKernelSize);
@@ -109,7 +102,12 @@ public class BlurTab extends OpencvFilterTab<BlurTabParams> {
         boxOptions.add(Box.createVerticalStrut(2));
         boxOptions.add(box4Sliders);
         boxOptions.add(Box.createVerticalStrut(2));
-        boxOptions.add(box4Borders);
+        boxOptions.add(makeBox4Border(
+            b -> (b != CvBorderTypes.BORDER_WRAP)         // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/imgproc/src/filter.cpp:127: error: (-215:Assertion failed) columnBorderType != BORDER_WRAP in function 'init']
+              && (b != CvBorderTypes.BORDER_TRANSPARENT), // CvException [org.opencv.core.CvException: cv::Exception: OpenCV(3.4.2) /home/osboxes/opencv/opencv/opencv-3.4.2/modules/core/src/copy.cpp:940: error: (-5:Bad argument) Unknown/unsupported border type in function 'borderInterpolate']
+            () -> params.borderType,
+            bt -> params.borderType = bt,
+            "Border mode used to extrapolate pixels outside of the image"));
         boxOptions.add(Box.createVerticalStrut(2));
         box4Options.add(boxOptions);
 

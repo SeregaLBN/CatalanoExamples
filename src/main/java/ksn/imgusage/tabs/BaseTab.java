@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ksn.imgusage.model.ISliderModel;
+import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.SelectFilterDialog;
 import ksn.imgusage.utils.UiHelper;
@@ -32,7 +33,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected static final int DEFAULT_WIDTH  = 300;
     protected static final int DEFAULT_HEIGHT = 200;
 
-    private static final int DEBOUNCE_TIMEOUT_MS = 50;
+    private static final int DEBOUNCE_TIMEOUT_MS = 150;
 
     protected ITabHandler tabHandler;
     protected ITab<?> source;
@@ -327,6 +328,32 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return box;
     }
 
+    public <N extends Number> Component makePoint(ISliderModel<N> modelPointX, ISliderModel<N> modelPointY, String borderTitle, String tip, String tipX, String tipY) {
+        Box boxSize = Box.createHorizontalBox();
+        boxSize.setBorder(BorderFactory.createTitledBorder(borderTitle));
+        if (tip != null)
+            boxSize.setToolTipText(tip);
+        boxSize.add(Box.createHorizontalGlue());
+        boxSize.add(makeSliderVert(modelPointX, "X", tipX));
+        boxSize.add(Box.createHorizontalStrut(2));
+        boxSize.add(makeSliderVert(modelPointY, "Y", tipY));
+        boxSize.add(Box.createHorizontalGlue());
+        return boxSize;
+    }
+
+    public Component makeSize(SliderIntModel modelSizeW, SliderIntModel modelSizeH, String borderTitle, String tip, String tipWidth, String tipHeight) {
+        Box boxSize = Box.createHorizontalBox();
+        boxSize.setBorder(BorderFactory.createTitledBorder(borderTitle));
+        if (tip != null)
+            boxSize.setToolTipText(tip);
+        boxSize.add(Box.createHorizontalGlue());
+        boxSize.add(makeSliderVert(modelSizeW, "Width", tipWidth));
+        boxSize.add(Box.createHorizontalStrut(2));
+        boxSize.add(makeSliderVert(modelSizeH, "Height", tipHeight));
+        boxSize.add(Box.createHorizontalGlue());
+        return boxSize;
+    }
+
     protected JCheckBox makeCheckBox(BooleanSupplier getter, Consumer<Boolean> setter, String title, String paramName, String tip, Runnable customListener) {
         JCheckBox checkBox = new JCheckBox(title, getter.getAsBoolean());
         if (tip != null)
@@ -406,6 +433,24 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return box;
     }
 
+    protected <E extends Enum<?>> Component makeComboBox(E[] values, Supplier<E> getter, Consumer<E> setter, String name, String title, String tip) {
+        Box box = Box.createHorizontalBox();
+        box.setBorder(BorderFactory.createTitledBorder(title));
+        JComboBox<E> comboBox = new JComboBox<>(values);
+        comboBox.setSelectedItem(getter.get());
+        if (tip != null)
+            comboBox.setToolTipText(tip);
+        comboBox.addActionListener(ev -> {
+            @SuppressWarnings("unchecked")
+            E newValue = (E)comboBox.getSelectedItem();
+            setter.accept(newValue);
+            logger.trace("{} changed to {}", name, newValue);
+            resetImage();
+        });
+        box.add(comboBox);
+        return box;
+    }
+
     protected void addChangeListenerDiff1WithModels(String name, ISliderModel<Integer> model, boolean checkMax, ISliderModel<Integer> modelToCheck, Runnable applyValueParams) {
         assert model.getMinimum() == modelToCheck.getMinimum().intValue();
         assert model.getMaximum() == modelToCheck.getMaximum().intValue();
@@ -443,6 +488,20 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                 applyValueParams.run();
             resetImage();
         });
+    }
+
+    protected <N extends Number> void addChangeListener(String name, ISliderModel<N> model, Consumer<N> setter, Runnable customExecutor) {
+        model.getWrapped().addChangeListener(ev -> {
+            logger.trace("{}: value={}", name, model.getFormatedText());
+            setter.accept(model.getValue());
+            if (customExecutor != null)
+                customExecutor.run();
+            resetImage();
+        });
+    }
+
+    protected <N extends Number> void addChangeListener(String name, ISliderModel<N> model, Consumer<N> setter) {
+        addChangeListener(name, model, setter, null);
     }
 
 }

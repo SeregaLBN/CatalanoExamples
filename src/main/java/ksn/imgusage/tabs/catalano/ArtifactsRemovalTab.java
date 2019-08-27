@@ -63,11 +63,7 @@ public class ArtifactsRemovalTab extends CatalanoFilterTab<ArtifactsRemovalTabPa
 
         box4Options.add(boxOptions);
 
-        modelWinSize.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelWinSize: value={}", modelWinSize.getFormatedText());
-            params.windowSize = modelWinSize.getValue();
-            resetImage();
-        });
+        addChangeListener("modelWinSize", modelWinSize, v -> params.windowSize = v);
 
         return box4Options;
     }

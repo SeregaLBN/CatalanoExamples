@@ -125,17 +125,14 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
         panel.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
 
         {
-            JComboBox<CvMorphTypes> comboBoxMorphOper = new JComboBox<>(CvMorphTypes.values());
-            comboBoxMorphOper.setBorder(BorderFactory.createTitledBorder("Morphological operation"));
-            comboBoxMorphOper.setSelectedItem(params.morphologicalOperation);
-            comboBoxMorphOper.setAlignmentX(Component.LEFT_ALIGNMENT);
-            comboBoxMorphOper.setToolTipText("Type of a morphological operation");
-            comboBoxMorphOper.addActionListener(ev -> {
-                params.morphologicalOperation = (CvMorphTypes)comboBoxMorphOper.getSelectedItem();
-                logger.trace("Morphological operation changed to {}", params.morphologicalOperation);
-                resetImage();
-            });
-            panel.add(comboBoxMorphOper, BorderLayout.NORTH);
+            Component cntrlMorphOper = makeComboBox(
+                         CvMorphTypes.values(),
+                         () -> params.morphologicalOperation,
+                         v  -> params.morphologicalOperation = v,
+                         "params.morphologicalOperation",
+                         "Morphological operation",
+                         "Type of a morphological operation");
+            panel.add(cntrlMorphOper, BorderLayout.NORTH);
         }
 
         {
@@ -191,11 +188,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
             panel.add(panelKernel, BorderLayout.CENTER);
         }
 
-        modelIterations.getWrapped().addChangeListener(ev -> {
-            logger.trace("modelIterations: value={}", modelIterations.getFormatedText());
-            params.iterations = modelIterations.getValue();
-            resetImage();
-        });
+        addChangeListener("modelIterations", modelIterations, v -> params.iterations = v);
 
         box4Options.add(panel);
         return box4Options;
