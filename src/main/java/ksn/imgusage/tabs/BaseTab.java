@@ -38,7 +38,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected ITabHandler tabHandler;
     protected ITab<?> source;
     protected BufferedImage image;
-    private Runnable imagePanelRepaint;
+    protected Runnable imagePanelRepaint;
     private Timer timer;
 
     @Override

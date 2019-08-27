@@ -6,10 +6,12 @@ import java.util.List;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
+import ksn.imgusage.tabs.another.LeadToHorizontalTab;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.catalano.BlurTab;
 import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.type.dto.FirstTabParams;
+import ksn.imgusage.type.dto.another.LeadToHorizontalTabParams;
 import ksn.imgusage.type.dto.catalano.*;
 import ksn.imgusage.type.dto.catalano.BlurTabParams;
 import ksn.imgusage.type.dto.opencv.*;
@@ -81,6 +83,12 @@ public final class MapperFilter {
         );
     }
 
+    public static List<FilterTabs> getAnotherTabsDescr() {
+        return Arrays.<FilterTabs>asList( // alphabetical sort
+            new FilterTabs(LeadToHorizontalTab.TAB_TITLE,
+                           LeadToHorizontalTab.TAB_DESCRIPTION)
+        );
+    }
 
     /** map filters to tab classes */
     public static Class<? extends ITab<?>> getTabClass(String filterTabFullName) {
@@ -119,6 +127,12 @@ public final class MapperFilter {
             return                    WarpAffineTab.class;
         case                           WatershedTab.TAB_NAME:
             return                     WatershedTab.class;
+
+        // Another
+        // alphabetical sort
+        case                    LeadToHorizontalTab.TAB_NAME:
+            return              LeadToHorizontalTab.class;
+
         default:
 
             // Catalano-Framework
@@ -181,6 +195,12 @@ public final class MapperFilter {
             return                        WarpAffineTabParams.class;
         case                               WatershedTab.TAB_NAME:
             return                         WatershedTabParams.class;
+
+        // Another
+        // alphabetical sort
+        case                        LeadToHorizontalTab.TAB_NAME:
+            return                  LeadToHorizontalTabParams.class;
+
         default:
 
             // Catalano-Framework

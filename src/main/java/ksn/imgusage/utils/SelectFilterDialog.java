@@ -10,6 +10,7 @@ import javax.swing.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ksn.imgusage.tabs.another.AnotherTab;
 import ksn.imgusage.tabs.catalano.CatalanoFilterTab;
 import ksn.imgusage.tabs.opencv.OpencvFilterTab;
 
@@ -32,7 +33,6 @@ public class SelectFilterDialog {
         Box boxCatalanoFilters = Box.createVerticalBox();
         boxCatalanoFilters.setBorder(BorderFactory.createTitledBorder("Catalano filters"));
         ButtonGroup radioGroup = new ButtonGroup();
-
         MapperFilter.getAllCatalanoTabsDescr().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterTitle + ": " + tab.description);
             radioFilter.setActionCommand(CatalanoFilterTab.TAB_PREFIX + tab.filterTitle);
@@ -42,11 +42,19 @@ public class SelectFilterDialog {
 
         Box boxOpenCvFilters = Box.createVerticalBox();
         boxOpenCvFilters.setBorder(BorderFactory.createTitledBorder("OpenCV filters"));
-
         MapperFilter.getAllOpencvTabsDescr().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterTitle + ": " + tab.description);
             radioFilter.setActionCommand(OpencvFilterTab.TAB_PREFIX + tab.filterTitle);
             boxOpenCvFilters.add(radioFilter);
+            radioGroup.add(radioFilter);
+        });
+
+        Box boxAnotherFilters = Box.createVerticalBox();
+        boxAnotherFilters.setBorder(BorderFactory.createTitledBorder("Another filters"));
+        MapperFilter.getAnotherTabsDescr().forEach(tab -> {
+            JRadioButton radioFilter = new JRadioButton(tab.filterTitle + ": " + tab.description);
+            radioFilter.setActionCommand(AnotherTab.TAB_PREFIX + tab.filterTitle);
+            boxAnotherFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
 
@@ -63,6 +71,7 @@ public class SelectFilterDialog {
 
         Box boxCenter = Box.createVerticalBox();
         boxCenter.add(boxOpenCvFilters);
+        boxCenter.add(boxAnotherFilters);
         boxCenter.add(boxCatalanoFilters);
 
         dlg.add(boxCenter, BorderLayout.CENTER);

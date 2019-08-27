@@ -215,7 +215,7 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
         box4Sliders.add(makeSliderVert(modelScale, "Scale", "Isotropic scale factor"));
         box4Sliders.add(Box.createHorizontalGlue());
 
-        Runnable reset =() -> {
+        Runnable reset = () -> {
             BufferedImage img = source.getImage();
             modelCenterX.setValue((img==null) ? DEFAULT_WIDTH  : img.getWidth()  / 2);
             modelCenterY.setValue((img==null) ? DEFAULT_HEIGHT : img.getHeight() / 2);

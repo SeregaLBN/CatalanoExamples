@@ -19,7 +19,7 @@ import ksn.imgusage.type.opencv.CvBorderTypes;
 import ksn.imgusage.type.opencv.CvInterpolationFlags;
 import ksn.imgusage.utils.ImgHelper;
 
-public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends BaseTab<TTabParams>  {
+public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends BaseTab<TTabParams> {
 
     public static final String TAB_PREFIX = "OpenCV:";
 
