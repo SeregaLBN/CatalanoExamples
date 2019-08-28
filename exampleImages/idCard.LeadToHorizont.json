@@ -5,8 +5,8 @@
     "useGray" : true,
     "useScale" : true,
     "keepToSize" : {
-      "width" : 500,
-      "height" : 375
+      "width" : 498,
+      "height" : 378
     },
     "useKeepAspectRatio" : true,
     "boundOfRoi" : {
@@ -15,7 +15,7 @@
       "right" : 0,
       "bottom" : 0
     },
-    "imageFile" : "IMG_20190816_135819.jpg"
+    "imageFile" : "passportUkr_rnd.png"
   }
 }, {
   "tabName" : "OpenCV:GaussianBlur",
@@ -135,23 +135,13 @@
   "tabName" : "OpenCV:Canny",
   "pos" : 10,
   "params" : {
-    "threshold1" : 5.0,
-    "threshold2" : 5.0,
+    "threshold1" : 100.0,
+    "threshold2" : 850.0,
     "apertureSize" : 3,
     "l2gradient" : false
   }
 }, {
-  "tabName" : "OpenCV:FindContours",
+  "tabName" : "Another:LeadToHorizontal",
   "pos" : 11,
-  "params" : {
-    "mode" : "RETR_LIST",
-    "method" : "CHAIN_APPROX_SIMPLE",
-    "drawMethod" : "EXTERNAL_RECT",
-    "minLimitContours" : {
-      "width" : 300,
-      "height" : 200
-    },
-    "maxContourArea" : 0,
-    "fillContour" : false
-  }
+  "params" : { }
 } ]

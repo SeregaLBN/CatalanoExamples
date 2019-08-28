@@ -90,12 +90,18 @@ public class SelectFilterDialog {
         return basePath.toPath().relativize(from.toPath()).toFile();
     }
 
-    public static File checkExtension(File file, String mustBeExtension) {
+    public static String getExtension(File file) {
         String name = file.getName();
         int pos = name.lastIndexOf('.');
-        if ((pos < 0) || !name.substring(pos).equalsIgnoreCase(mustBeExtension))
-            file = new File(file.getAbsolutePath() + mustBeExtension);
-        return file;
+        if (pos < 0)
+            return null;
+        return name.substring(pos + 1);
+    }
+
+    public static File checkExtension(File file, String mustBeExtension) {
+        return mustBeExtension.equalsIgnoreCase(getExtension(file))
+            ? file
+            : new File(file.getAbsolutePath() + "." + mustBeExtension);
     }
 
 }

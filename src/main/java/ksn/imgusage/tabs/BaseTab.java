@@ -136,7 +136,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             File file = UiHelper.chooseFileToSavePngImage(btn, tabHandler.getCurrentDir());
             if (file == null)
                 return; // canceled
-            file = SelectFilterDialog.checkExtension(file, ".png");
+            file = SelectFilterDialog.checkExtension(file, "png");
             try {
                 boolean succ = ImageIO.write(image, "png", file);
                 if (succ)

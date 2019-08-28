@@ -1,8 +1,6 @@
 package ksn.imgusage.utils;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -88,6 +86,32 @@ public final class ImgHelper {
 //        int[] buffer = intBuff.getData();
 //        buffer[0] = 0x000000FF;
         return image;
+    }
+
+
+    public static BufferedImage rotate(BufferedImage image, double angle, boolean itsRadian) {
+        if (!itsRadian)
+            angle = Math.toRadians(angle);
+
+        double sin = Math.abs(Math.sin(angle));
+        double cos = Math.abs(Math.cos(angle));
+        int w = image.getWidth();
+        int h = image.getHeight();
+        int newW = (int)Math.floor(w * cos + h * sin);
+        int newH = (int)Math.floor(h * cos + w * sin);
+
+        GraphicsConfiguration gc = GraphicsEnvironment
+            .getLocalGraphicsEnvironment()
+            .getDefaultScreenDevice()
+            .getDefaultConfiguration();
+
+        BufferedImage result = gc.createCompatibleImage(newW, newH, Transparency.TRANSLUCENT);
+        Graphics2D g = result.createGraphics();
+        g.translate((newW - w) / 2, (newH - h) / 2);
+        g.rotate(angle, w / 2.0, h / 2.0);
+        g.drawRenderedImage(image, null);
+        g.dispose();
+        return result;
     }
 
 }

@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.Timer;
+import javax.swing.SwingUtilities;
 
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -24,15 +24,14 @@ public class LeadToHorizontalTab extends AnotherTab<LeadToHorizontalTabParams> {
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Find the optimal contour for binding to the horizontal";
 
-    public static final double ANGLE_LEAD_MIN = -120;
-    public static final double ANGLE_LEAD_MAX = +120;
+    public static final double ANGLE_LEAD_MIN = -60;
+    public static final double ANGLE_LEAD_MAX = +60;
 
     private LeadToHorizontalTabParams params;
     private Mat matStarted;
     private Double angleLead = null;
     private Rect rcLead = null;
     private double angleIteration;
-    private Timer timerIter = new Timer(5, ev -> nextIteration());
 
     @Override
     public Component makeTab(LeadToHorizontalTabParams params) {
@@ -57,17 +56,10 @@ public class LeadToHorizontalTab extends AnotherTab<LeadToHorizontalTabParams> {
         angleLead = null;
         rcLead = null;
 
-        timerIter.start();
+        SwingUtilities.invokeLater(this::nextIteration);
     }
 
     private void nextIteration() {
-        try {
-            nextIteration2();
-        } catch (Exception ex) {
-            logger.error("{}", ex);
-        }
-    }
-    private void nextIteration2() {
         Consumer<Mat> setImage = mat -> {
             imageMat = mat;
             image = ImgHelper.toBufferedImage(imageMat);
@@ -75,8 +67,6 @@ public class LeadToHorizontalTab extends AnotherTab<LeadToHorizontalTabParams> {
             tabHandler.onImageChanged(this);
         };
         if (angleIteration > ANGLE_LEAD_MAX) {
-            timerIter.stop();
-
             logger.trace("nextIteration: show lead: angleLead={}", angleLead);
 
             Pair resLead = rotate(angleLead, new Scalar(0, 255, 0));
@@ -101,6 +91,7 @@ public class LeadToHorizontalTab extends AnotherTab<LeadToHorizontalTabParams> {
                 }
             }
             angleIteration += 1.0;
+            SwingUtilities.invokeLater(this::nextIteration);
         }
     }
 

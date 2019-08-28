@@ -257,8 +257,8 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
             params.transfMatrix.m22 = mtx[4];
             params.transfMatrix.m23 = mtx[5];
 
-            params.dsize.width  = 0;
-            params.dsize.height = 0;
+//            params.dsize.width  = 0;
+//            params.dsize.height = 0;
 
             apllyParamsSettings.run();
         };

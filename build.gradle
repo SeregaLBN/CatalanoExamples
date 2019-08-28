@@ -73,6 +73,7 @@ dependencies {
     if (project.file('./libs/Catalano.Image.jar').exists())
         compile name:       'Catalano.Image'
 
+    testCompile 'org.slf4j:slf4j-simple:1.7.26'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
     testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.5.1'
 }
@@ -229,6 +230,14 @@ task downloadExampleImage() {
         downloadByUrl(
             new java.net.URL('https://upload.wikimedia.org/wikipedia/en/7/7d/Lenna_%28test_image%29.png'),
             project.file('./exampleImages/Lena.png'),
+            false)
+
+        // https://en.wikipedia.org/wiki/Ukrainian_identity_card
+        // https://commons.wikimedia.org/wiki/File:Passport_of_the_Citizen_of_Ukraine_(Since_2016).jpg
+        def urkPassFile = project.file('./exampleImages/passportUkr.jpg');
+        downloadByUrl(
+            new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/0/0f/Passport_of_the_Citizen_of_Ukraine_%28Since_2016%29.jpg'),
+            urkPassFile,
             false)
     }
 }

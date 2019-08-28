@@ -326,7 +326,7 @@ public class MainApp {
         File jsonFile = UiHelper.chooseFileToSavePipeline(frame, latestDir);
         if (jsonFile == null)
             return; // aborted
-        jsonFile = SelectFilterDialog.checkExtension(jsonFile, ".json");
+        jsonFile = SelectFilterDialog.checkExtension(jsonFile, "json");
 
         List<PipelineItem> pipeline = new ArrayList<>(tabs.size());
         for (int i = 0; i < tabs.size(); ++i) {
