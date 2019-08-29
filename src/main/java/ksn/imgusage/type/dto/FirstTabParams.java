@@ -24,7 +24,7 @@ public class FirstTabParams implements ITabParams {
     public boolean useKeepAspectRatio;
 
     /** padding of Region Of Interest */
-    public Padding boundOfRoi;
+    public Padding boundOfRoi = new Padding();
 
     public FirstTabParams() {}
 

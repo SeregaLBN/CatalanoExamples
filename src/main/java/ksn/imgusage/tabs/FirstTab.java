@@ -41,7 +41,6 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private BufferedImage previewImage;
     private File latestImageDir = DEFAULT_IMAGE.getParentFile();
     private FirstTabParams params;
-    private boolean lockCheckKeepAspectRation;
     private Runnable  onCheckKeepAspectRationByWidth;
     private Runnable  onCheckKeepAspectRationByHeight;
     private Runnable applyMaxSizeLimits;
@@ -343,44 +342,30 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         onCheckKeepAspectRationByWidth = () -> {
             if (sourceImage == null)
                 return;
-
-            if (lockCheckKeepAspectRation)
+            if (!params.useKeepAspectRatio)
                 return;
-            lockCheckKeepAspectRation = true;
-            try {
-                if (params.useKeepAspectRatio) {
-                    double koef = params.keepToSize.width / (double)sourceImage.getWidth();
-                    double newHeight = sourceImage.getHeight() * koef;
-                    int currentHeight = params.keepToSize.height;
-                    if (Math.abs(newHeight - currentHeight) > 1) {
-                        logger.trace("onCheckKeepAspectRationByWidth: diff={}; old={}; newDouble={}; new={}", (newHeight - currentHeight), currentHeight, newHeight, (int)newHeight);
-                        modelSizeH.setValue((int)newHeight);
-                    }
-                }
-            } finally {
-                lockCheckKeepAspectRation = false;
+
+            double koef = params.keepToSize.width / (double)sourceImage.getWidth();
+            double newHeight = sourceImage.getHeight() * koef;
+            int currentHeight = params.keepToSize.height;
+            if (Math.abs(newHeight - currentHeight) > 1) {
+                logger.trace("onCheckKeepAspectRationByWidth: diff={}; old={}; newDouble={}; new={}", (newHeight - currentHeight), currentHeight, newHeight, (int)newHeight);
+                modelSizeH.setValue((int)newHeight);
             }
         };
 
         onCheckKeepAspectRationByHeight = () -> {
             if (sourceImage == null)
                 return;
-
-            if (lockCheckKeepAspectRation)
+            if (!params.useKeepAspectRatio)
                 return;
-            lockCheckKeepAspectRation = true;
-            try {
-                if (params.useKeepAspectRatio) {
-                    double koef = params.keepToSize.height / (double)sourceImage.getHeight();
-                    double newWidth = sourceImage.getWidth() * koef;
-                    int currentWidth = params.keepToSize.width;
-                    if (Math.abs(newWidth - currentWidth) > 1) {
-                        logger.trace("onCheckKeepAspectRationByHeight: diff={}; old={}; newDouble={}; new={}", (newWidth - currentWidth), currentWidth, newWidth, (int)newWidth);
-                        modelSizeW.setValue((int)newWidth);
-                    }
-                }
-            } finally {
-                lockCheckKeepAspectRation = false;
+
+            double koef = params.keepToSize.height / (double)sourceImage.getHeight();
+            double newWidth = sourceImage.getWidth() * koef;
+            int currentWidth = params.keepToSize.width;
+            if (Math.abs(newWidth - currentWidth) > 1) {
+                logger.trace("onCheckKeepAspectRationByHeight: diff={}; old={}; newDouble={}; new={}", (newWidth - currentWidth), currentWidth, newWidth, (int)newWidth);
+                modelSizeW.setValue((int)newWidth);
             }
         };
 
@@ -465,11 +450,14 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         box4Options.add(Box.createVerticalStrut(2));
         box4Options.add(boxOfRoi);
 
-        applyMaxSizeLimits.run();
-        onCheckKeepAspectRationByWidth.run();
-
         addChangeListener("modelSizeW", modelSizeW, v -> params.keepToSize.width  = v, onCheckKeepAspectRationByWidth);
-        addChangeListener("modelSizeH", modelSizeH, v -> params.keepToSize.height = v, onCheckKeepAspectRationByHeight);
+//        addChangeListener("modelSizeH", modelSizeH, v -> params.keepToSize.height = v, onCheckKeepAspectRationByHeight);
+        modelSizeH.getWrapped().addChangeListener(ev -> {
+            logger.trace("{}: value={}", "modelSizeH", modelSizeH.getFormatedText());
+            params.keepToSize.height = modelSizeH.getValue();
+            onCheckKeepAspectRationByHeight.run();
+            resetImage();
+        });
 
         addChangeListener("modelPadLeft", modelPadLeft, v -> params.boundOfRoi.left = v, () -> {
             if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
@@ -487,6 +475,9 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
                 SwingUtilities.invokeLater(() -> modelPadTop.setValue(sourceImage.getHeight() - 1 - modelPadBottom.getValue()) );
         });
+
+        applyMaxSizeLimits.run();
+        onCheckKeepAspectRationByWidth.run();
 
         return box4Options;
     }
