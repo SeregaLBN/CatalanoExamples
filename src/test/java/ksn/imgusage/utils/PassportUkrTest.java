@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
-import ksn.imgusage.tabs.another.LeadToAxisTab;
+import ksn.imgusage.tabs.opencv.custom.LeadToAxisTab;
 
 public class PassportUkrTest {
 

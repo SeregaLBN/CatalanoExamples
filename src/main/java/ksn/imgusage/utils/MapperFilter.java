@@ -6,17 +6,17 @@ import java.util.List;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.another.LeadToAxisTab;
-import ksn.imgusage.tabs.another.LeadToPerspectiveTab;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.catalano.BlurTab;
 import ksn.imgusage.tabs.opencv.*;
+import ksn.imgusage.tabs.opencv.custom.LeadToAxisTab;
+import ksn.imgusage.tabs.opencv.custom.LeadToPerspectiveTab;
 import ksn.imgusage.type.dto.FirstTabParams;
-import ksn.imgusage.type.dto.another.LeadToAxisTabParams;
-import ksn.imgusage.type.dto.another.LeadToPerspectiveTabParams;
 import ksn.imgusage.type.dto.catalano.*;
 import ksn.imgusage.type.dto.catalano.BlurTabParams;
 import ksn.imgusage.type.dto.opencv.*;
+import ksn.imgusage.type.dto.opencv.custom.LeadToAxisTabParams;
+import ksn.imgusage.type.dto.opencv.custom.LeadToPerspectiveTabParams;
 
 public final class MapperFilter {
     private MapperFilter() {}

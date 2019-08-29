@@ -1,7 +1,7 @@
-package ksn.imgusage.type.dto.another;
+package ksn.imgusage.type.dto.opencv.custom;
 
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.another.LeadToAxisTab;
+import ksn.imgusage.tabs.opencv.custom.LeadToAxisTab;
 
 /** Init parameters for {@link LeadToAxisTab} */
 public class LeadToAxisTabParams implements ITabParams {

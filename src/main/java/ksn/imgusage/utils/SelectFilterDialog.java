@@ -10,9 +10,9 @@ import javax.swing.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ksn.imgusage.tabs.another.AnotherTab;
 import ksn.imgusage.tabs.catalano.CatalanoFilterTab;
 import ksn.imgusage.tabs.opencv.OpencvFilterTab;
+import ksn.imgusage.tabs.opencv.custom.AnotherTab;
 
 public class SelectFilterDialog {
 

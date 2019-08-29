@@ -141,7 +141,7 @@
     "l2gradient" : false
   }
 }, {
-  "tabName" : "Another:LeadToAxis",
+  "tabName" : "OpenCV:Custom:LeadToAxis",
   "pos" : 11,
   "params" : {
     "leadToHorizontal" : true,

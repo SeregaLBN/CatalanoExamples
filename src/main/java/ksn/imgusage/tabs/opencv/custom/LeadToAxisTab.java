@@ -1,4 +1,4 @@
-package ksn.imgusage.tabs.another;
+package ksn.imgusage.tabs.opencv.custom;
 
 import java.awt.Component;
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.type.dto.another.LeadToAxisTabParams;
+import ksn.imgusage.type.dto.opencv.custom.LeadToAxisTabParams;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 

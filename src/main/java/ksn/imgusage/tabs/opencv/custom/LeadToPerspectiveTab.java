@@ -1,4 +1,4 @@
-package ksn.imgusage.tabs.another;
+package ksn.imgusage.tabs.opencv.custom;
 
 import java.awt.Component;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import javax.swing.SwingUtilities;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
-import ksn.imgusage.type.dto.another.LeadToPerspectiveTabParams;
+import ksn.imgusage.type.dto.opencv.custom.LeadToPerspectiveTabParams;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 
