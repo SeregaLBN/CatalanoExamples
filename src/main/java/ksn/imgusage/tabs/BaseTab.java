@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -271,7 +272,22 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return boxColumn;
     }
 
-    protected static Container makeEditBox(ISliderModel<?> model, String title, String tip) {
+    protected static Container makeEditBox(ISliderModel<?> model, String title, String borderTitle, String tip) {
+        java.util.List<Consumer<String>> setterTextList = new ArrayList<>(1);
+        Container res = makeEditBox(
+            setterTextList::add,
+            newValue  -> {
+                if (newValue.equals(model.getFormatedText()))
+                    return;
+
+                model.setFormatedText(newValue);
+            },
+            title, borderTitle, tip);
+        setterTextList.get(0).accept(model.getFormatedText());
+        return res;
+    }
+
+    protected static Container makeEditBox(Consumer<Consumer<String>> setterTextExternal, Consumer<String> setterTextInternal, String title, String borderTitle, String tip) {
         JLabel labTitle = new JLabel(title + ": ");
         labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         labTitle.setToolTipText(tip);
@@ -286,7 +302,8 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         txtValue.setPreferredSize(prefSize);
 
         Box box = Box.createHorizontalBox();
-        box.setBorder(BorderFactory.createTitledBorder(""));
+        if (borderTitle != null)
+            box.setBorder(BorderFactory.createTitledBorder(borderTitle));
         box.setToolTipText(tip);
 
         box.add(Box.createHorizontalStrut(8));
@@ -295,9 +312,13 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         box.add(txtValue);
         box.add(Box.createHorizontalGlue());
 
-        Runnable executor = () -> txtValue.setText(model.getFormatedText());
-        executor.run();
-        model.getWrapped().addChangeListener(ev -> executor.run());
+        setterTextExternal.accept(txtValue::setText);
+
+        if (setterTextInternal == null) {
+            txtValue.setEditable(false);
+            return box;
+        }
+
         txtValue.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {
@@ -315,13 +336,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             }
 
             private void handle() {
-                SwingUtilities.invokeLater(() -> {
-                    String newVaue = txtValue.getText();
-                    if (newVaue.equals(model.getFormatedText()))
-                        return;
-
-                    model.setFormatedText(newVaue);
-                });
+                SwingUtilities.invokeLater(() -> setterTextInternal.accept(txtValue.getText()));
             }
         });
 

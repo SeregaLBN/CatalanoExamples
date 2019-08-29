@@ -182,7 +182,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
 
                 panelKernel.add(panelCreateMethod, BorderLayout.NORTH);
                 panelKernel.add(panelCreateParams, BorderLayout.CENTER);
-                panelKernel.add(makeEditBox(modelIterations, "Iterations", "Number of times erosion and dilation are applied"), BorderLayout.SOUTH);
+                panelKernel.add(makeEditBox(modelIterations, "Iterations", "", "Number of times erosion and dilation are applied"), BorderLayout.SOUTH);
             }
 
             panel.add(panelKernel, BorderLayout.CENTER);

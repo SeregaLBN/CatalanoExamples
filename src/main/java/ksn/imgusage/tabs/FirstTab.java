@@ -451,13 +451,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         box4Options.add(boxOfRoi);
 
         addChangeListener("modelSizeW", modelSizeW, v -> params.keepToSize.width  = v, onCheckKeepAspectRationByWidth);
-//        addChangeListener("modelSizeH", modelSizeH, v -> params.keepToSize.height = v, onCheckKeepAspectRationByHeight);
-        modelSizeH.getWrapped().addChangeListener(ev -> {
-            logger.trace("{}: value={}", "modelSizeH", modelSizeH.getFormatedText());
-            params.keepToSize.height = modelSizeH.getValue();
-            onCheckKeepAspectRationByHeight.run();
-            resetImage();
-        });
+        addChangeListener("modelSizeH", modelSizeH, v -> params.keepToSize.height = v, onCheckKeepAspectRationByHeight);
 
         addChangeListener("modelPadLeft", modelPadLeft, v -> params.boundOfRoi.left = v, () -> {
             if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())

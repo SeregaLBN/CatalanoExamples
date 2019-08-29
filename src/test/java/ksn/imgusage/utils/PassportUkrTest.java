@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
-import ksn.imgusage.tabs.opencv.custom.LeadToAxisTab;
-
 public class PassportUkrTest {
 
     private static final Logger logger = LoggerFabric.getLogger(PassportUkrTest.class);
@@ -32,8 +30,8 @@ public class PassportUkrTest {
         BufferedImage imgIn = ImageIO.read(imgFileIn);
 
         Random rnd = ThreadLocalRandom.current();
-        double angleMin = LeadToAxisTab.ANGLE_LEAD_MIN;
-        double angleMax = LeadToAxisTab.ANGLE_LEAD_MAX;
+        double angleMin = -50;
+        double angleMax = +50;
         double angle = angleMin + rnd.nextInt((int)(angleMax - angleMin));
         BufferedImage imgOut = ImgHelper.rotate(imgIn, angle, false);
         imgOut = addBorder(imgOut, Color.WHITE);

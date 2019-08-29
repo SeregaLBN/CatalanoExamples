@@ -1,15 +1,16 @@
 package ksn.imgusage.tabs.opencv.custom;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.opencv.core.*;
@@ -27,8 +28,9 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Find the optimal contour for binding to the axis X/Y (horizontal or vertical)";
 
-    public static final double ANGLE_LEAD_MIN = -60;
-    public static final double ANGLE_LEAD_MAX = +60;
+    public  static final int ANGLE_LEAD_MIN = -360;
+    public  static final int ANGLE_LEAD_MAX = +360;
+    private static final int ANGLE_LEAD_MIN_DIFF = 10;
 
     private static class IterationResult {
         final Mat mat;
@@ -50,11 +52,18 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     private LeadToAxisTabParams params;
     private Mat matStarted;
     private List<IterationResult> results = new ArrayList<>();
+    private Consumer<String> showResultAngle;
 
     @Override
     public Component makeTab(LeadToAxisTabParams params) {
         if (params == null)
             params = new LeadToAxisTabParams();
+
+        params.angleRangeMin = Math.max(ANGLE_LEAD_MIN                      , Math.min(ANGLE_LEAD_MAX - ANGLE_LEAD_MIN_DIFF, params.angleRangeMin));
+        params.angleRangeMax = Math.max(ANGLE_LEAD_MIN + ANGLE_LEAD_MIN_DIFF, Math.min(ANGLE_LEAD_MAX                      , params.angleRangeMax));
+        if (params.angleRangeMin > (params.angleRangeMax - ANGLE_LEAD_MIN_DIFF))
+            params.angleRangeMin =  params.angleRangeMax - ANGLE_LEAD_MIN_DIFF;
+
         this.params = params;
 
         return makeTab();
@@ -71,8 +80,9 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     protected void applyOpencvFilter() {
         results.clear();
         matStarted = imageMat;
+        showResultAngle.accept(".?.");
 
-        SwingUtilities.invokeLater(() -> this.nextIteration(ANGLE_LEAD_MIN));
+        SwingUtilities.invokeLater(() -> this.nextIteration(params.angleRangeMin));
     }
 
     private void applyImage(Mat mat) {
@@ -94,17 +104,19 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
             if (results.isEmpty()) {
                 // nothing found (
                 applyImage(matStarted);
+                showResultAngle.accept(":(");
             } else {
                 // show best result
                 IterationResult best = results.get(0);
                 best = rotateAndFindMaxContourArea(best.angle, new Scalar(0, 255, 0)); // optional; another rectangle color
                 applyImage(best.mat);
+                showResultAngle.accept(String.format(Locale.US, "%.2f", best.angle));
             }
         }
     }
 
     private boolean nextIteration2(double angle) {
-        if (angle > ANGLE_LEAD_MAX) {
+        if (angle > params.angleRangeMax) {
             findBestIteration();
             return false; // stop iterations
         } else {
@@ -116,7 +128,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     }
 
     private void findBestIteration() {
-        logger.trace("findBestIteration: input.size={}", results.size());
+        logger.trace("findBestIteration: total.size={}", results.size());
 
         List<IterationResult> valid = results.stream()
                 .filter(item -> item.area > 0)
@@ -144,7 +156,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
                 return Math.abs(100 - percent) <= (params.limitAreaDiffInPercent + 1);
             })
             .collect(Collectors.toList());
-        logger.trace("findBestIteration: best.size={}", best.size());
+        logger.trace("findBestIteration: medianed.size={}", best.size());
 
         // sort by rcOut area
         best.sort((item1, item2) -> {
@@ -173,7 +185,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     }
 
     private IterationResult rotateAndFindMaxContourArea(double angle, Scalar rcColor) {
-        Point center = new Point(matStarted.width() / 2, matStarted.height() / 2);
+        Point center = new Point(matStarted.width() / 2.0, matStarted.height() / 2.0);
         Mat rotateMatrix = Imgproc.getRotationMatrix2D(center, angle, 1);
 
         Mat dst = new Mat(matStarted.rows(), matStarted.cols(), matStarted.type());
@@ -245,29 +257,60 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
 
     @Override
     protected Component makeOptions() {
-        Box box4Options = Box.createVerticalBox();
-        box4Options.setBorder(BorderFactory.createTitledBorder(""));
-
         SliderIntModel modelLimitAreaDiffInPercent = new SliderIntModel(params.limitAreaDiffInPercent, 0, 0, 101);
+        SliderIntModel modelAngleRangeMin = new SliderIntModel(params.angleRangeMin, 0, ANGLE_LEAD_MIN, ANGLE_LEAD_MAX);
+        SliderIntModel modelAngleRangeMax = new SliderIntModel(params.angleRangeMax, 0, ANGLE_LEAD_MIN, ANGLE_LEAD_MAX);
 
         JButton btnRepeat = new JButton("Repeat...");
         btnRepeat.addActionListener(ev -> resetImage());
 
-        box4Options.add(btnRepeat);
-        box4Options.add(Box.createVerticalStrut(2));
-        box4Options.add(makeBoxedCheckBox(
+        Box boxLeadToHorizont = makeBoxedCheckBox(
             () -> params.leadToHorizontal,
             v  -> params.leadToHorizontal = v,
             "",
             "Lead to horizontal",
             "params.leadToHorizontal",
-            null, null));
-        box4Options.add(Box.createVerticalStrut(2));
-        box4Options.add(makeSliderVert(modelLimitAreaDiffInPercent, "Median diff", "leave not exceeding the median by X percent"));
+            null, null);
+
+        Box box4AngleRange = Box.createHorizontalBox();
+        box4AngleRange.setBorder(BorderFactory.createTitledBorder("Range angles"));
+        box4AngleRange.add(makeSliderVert(modelAngleRangeMin, "min", null));
+        box4AngleRange.add(Box.createHorizontalStrut(2));
+        box4AngleRange.add(makeSliderVert(modelAngleRangeMax, "max", null));
+
+        Box box4Sliders = Box.createHorizontalBox();
+        box4Sliders.add(makeSliderVert(modelLimitAreaDiffInPercent, "Median diff", "leave not exceeding the median by X percent"));
+        box4Sliders.add(Box.createHorizontalStrut(2));
+        box4Sliders.add(box4AngleRange);
+
+        List<Consumer<String>> setterTextList = new ArrayList<>(1);
+        Container cntrlToShowResult = makeEditBox(setterTextList::add, null, "Angle found", "Result", "Best turning angle");
+        showResultAngle = text -> setterTextList.get(0).accept(text == null ? "" : text);
 
         addChangeListener("modelLimitAreaDiffInPercent", modelLimitAreaDiffInPercent, v -> params.limitAreaDiffInPercent = v);
+        addChangeListener("modelAngleRangeMin", modelAngleRangeMin, v -> params.angleRangeMin = v, () -> {
+            if (params.angleRangeMin > (params.angleRangeMax - ANGLE_LEAD_MIN_DIFF))
+                SwingUtilities.invokeLater(() -> modelAngleRangeMax.setValue(params.angleRangeMin + ANGLE_LEAD_MIN_DIFF));
+        });
+        addChangeListener("modelAngleRangeMax", modelAngleRangeMax, v -> params.angleRangeMax = v, () -> {
+            if (params.angleRangeMax < (params.angleRangeMin + ANGLE_LEAD_MIN_DIFF))
+                SwingUtilities.invokeLater(() -> modelAngleRangeMin.setValue(params.angleRangeMax - ANGLE_LEAD_MIN_DIFF));
+        });
 
-        return box4Options;
+        JPanel panelOption = new JPanel();
+        panelOption.setLayout(new BorderLayout());
+        panelOption.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
+        panelOption.add(boxLeadToHorizont, BorderLayout.NORTH);
+        panelOption.add(box4Sliders      , BorderLayout.CENTER);
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(""));
+        panel.add(btnRepeat        , BorderLayout.NORTH);
+        panel.add(panelOption      , BorderLayout.CENTER);
+        panel.add(cntrlToShowResult, BorderLayout.SOUTH);
+
+        return panel;
     }
 
     @Override

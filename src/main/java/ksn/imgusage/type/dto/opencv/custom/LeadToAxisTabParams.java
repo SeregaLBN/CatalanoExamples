@@ -11,7 +11,17 @@ public class LeadToAxisTabParams implements ITabParams {
     /** leave not exceeding the median by X percent (101 - no limits) */
     public int limitAreaDiffInPercent = 101; // 0% .. 101%   101% - no limits
 
+    public int angleRangeMin = -60;
+    public int angleRangeMax = +60;
+
     @Override
-    public String toString() { return "{ leadToHorizontal=" + leadToHorizontal + ", limitAreaDiffInPercent=" + limitAreaDiffInPercent + " }"; }
+    public String toString() {
+        return "{"
+            + " leadToHorizontal=" + leadToHorizontal
+            + ", limitAreaDiffInPercent=" + limitAreaDiffInPercent
+            + ", angleRangeMin=" + angleRangeMin
+            + ", angleRangeMax=" + angleRangeMax
+            + " }";
+    }
 
 }
