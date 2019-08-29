@@ -15,6 +15,7 @@ import javax.swing.*;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
 
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.dto.opencv.custom.LeadToAxisTabParams;
@@ -28,8 +29,8 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Find the optimal contour for binding to the axis X/Y (horizontal or vertical)";
 
-    public  static final int ANGLE_LEAD_MIN = -360;
-    public  static final int ANGLE_LEAD_MAX = +360;
+    public  static final int ANGLE_LEAD_MIN = -180;
+    public  static final int ANGLE_LEAD_MAX = +180;
     private static final int ANGLE_LEAD_MIN_DIFF = 10;
 
     private static class IterationResult {
@@ -50,6 +51,8 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     }
 
     private LeadToAxisTabParams params;
+    private Mat matOriginal;
+    private double originalMaxArea;
     private Mat matStarted;
     private List<IterationResult> results = new ArrayList<>();
     private Consumer<String> showResultAngle;
@@ -79,8 +82,17 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     @Override
     protected void applyOpencvFilter() {
         results.clear();
-        matStarted = imageMat;
         showResultAngle.accept(".?.");
+        matOriginal = imageMat;
+        originalMaxArea = imageMat.width() * imageMat.height();
+
+        int max = Math.max(imageMat.width(), imageMat.height());
+        int diagonal = (int)Math.sqrt(max * max * 2);
+        matStarted = new Mat(diagonal, diagonal, imageMat.type(), new Scalar(0,0,0));
+        int offsetX = (diagonal - imageMat.width()) / 2;
+        int offsetY = (diagonal - imageMat.width()) / 2;
+        imageMat.copyTo(matStarted.colRange(offsetX, offsetX + imageMat.width())
+                                  .rowRange(offsetY, offsetY + imageMat.height()));
 
         SwingUtilities.invokeLater(() -> this.nextIteration(params.angleRangeMin));
     }
@@ -103,13 +115,29 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
             // show final result
             if (results.isEmpty()) {
                 // nothing found (
-                applyImage(matStarted);
+                applyImage(matOriginal);
                 showResultAngle.accept(":(");
             } else {
                 // show best result
                 IterationResult best = results.get(0);
                 best = rotateAndFindMaxContourArea(best.angle, new Scalar(0, 255, 0)); // optional; another rectangle color
-                applyImage(best.mat);
+
+                if ((matOriginal.width() < best.rcOut.width) || (matOriginal.height() < best.rcOut.height)) {
+                    logger.error(" hmmm... bad algorithm ;(");
+                    applyImage(best.mat);
+                } else {
+                    // restore original size
+                    Mat tmp = new Mat(matOriginal.size(), best.mat.type(), new Scalar(0,0,0));
+
+                    Rect roi = best.rcOut; roi.width++; roi.height++;
+                    int offsetX = (tmp.width()  - roi.width ) / 2;
+                    int offsetY = (tmp.height() - roi.height) / 2;
+                    new Mat(best.mat, roi).copyTo(tmp.colRange(offsetX, offsetX + roi.width)
+                                                     .rowRange(offsetY, offsetY + roi.height));
+
+                    applyImage(tmp);
+                }
+
                 showResultAngle.accept(String.format(Locale.US, "%.2f", best.angle));
             }
         }
@@ -196,7 +224,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
                 new org.opencv.core.Size(0, 0),
                 Imgproc.INTER_LINEAR);
 
-        IterationResult res = findMaxContourArea(angle, dst);
+        IterationResult res = findMaxContourArea(angle, dst, originalMaxArea, logger);
         if (res.rcOut != null) {
             Imgproc.rectangle(res.mat,
                 new Point(res.rcOut.x, res.rcOut.y),
@@ -207,7 +235,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
         return res;
     }
 
-    private IterationResult findMaxContourArea(double angle, Mat imageSrc) {
+    static IterationResult findMaxContourArea(double angle, Mat imageSrc, double originalMaxArea, Logger logger) {
         // cast to gray image
         imageSrc = OpenCvHelper.toGray(imageSrc);
 
@@ -231,7 +259,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
             return new IterationResult(imageSrc, angle, -1, null);
         }
 
-        double areaLimit = matStarted.width() * matStarted.height() / 3.5;
+        double areaLimit = originalMaxArea / 3.5;
         IterationResult pairMaxArea = contours.stream()
             .map(contour -> {
                 double area = Math.abs(Imgproc.contourArea(contour));
