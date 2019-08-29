@@ -21,7 +21,7 @@ import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 
 /** Find the optimal contour for binding to the axis X/Y (horizontal or vertical) */
-public class LeadToAxisTab extends AnotherTab<LeadToAxisTabParams> {
+public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
 
     public static final String TAB_TITLE = "LeadToAxis";
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;

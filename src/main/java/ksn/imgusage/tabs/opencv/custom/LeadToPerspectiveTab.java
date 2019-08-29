@@ -18,7 +18,7 @@ import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 
 /** Find the optimal perspective binded to an existing outer rectangle */
-public class LeadToPerspectiveTab extends AnotherTab<LeadToPerspectiveTabParams> {
+public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> {
 
     public static final String TAB_TITLE = "LeadToPerspective";
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
