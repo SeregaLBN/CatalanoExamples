@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
-import ksn.imgusage.tabs.another.LeadToHorizontalTab;
+import ksn.imgusage.tabs.another.LeadToAxisTab;
 
 public class PassportUkrTest {
 
@@ -32,8 +32,8 @@ public class PassportUkrTest {
         BufferedImage imgIn = ImageIO.read(imgFileIn);
 
         Random rnd = ThreadLocalRandom.current();
-        double angleMin = LeadToHorizontalTab.ANGLE_LEAD_MIN;
-        double angleMax = LeadToHorizontalTab.ANGLE_LEAD_MAX;
+        double angleMin = LeadToAxisTab.ANGLE_LEAD_MIN;
+        double angleMax = LeadToAxisTab.ANGLE_LEAD_MAX;
         double angle = angleMin + rnd.nextInt((int)(angleMax - angleMin));
         BufferedImage imgOut = ImgHelper.rotate(imgIn, angle, false);
         imgOut = addBorder(imgOut, Color.WHITE);
@@ -41,7 +41,7 @@ public class PassportUkrTest {
         String ext = SelectFilterDialog.getExtension(imgFileOut);
         boolean succ = ImageIO.write(imgOut, ext, imgFileOut);
         if (succ)
-            logger.info("Image saved to {} file {}", ext, imgFileOut);
+            logger.info("Image saved to {} file {}\n Rotate angle os {}", ext, imgFileOut, angle);
         else
             logger.error("Can`t save image to {} file {}", ext, imgFileOut);
         Assertions.assertTrue(succ);

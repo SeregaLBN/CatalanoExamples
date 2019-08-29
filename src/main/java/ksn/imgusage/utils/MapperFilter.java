@@ -6,13 +6,13 @@ import java.util.List;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.another.LeadToHorizontalTab;
+import ksn.imgusage.tabs.another.LeadToAxisTab;
 import ksn.imgusage.tabs.another.LeadToPerspectiveTab;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.catalano.BlurTab;
 import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.type.dto.FirstTabParams;
-import ksn.imgusage.type.dto.another.LeadToHorizontalTabParams;
+import ksn.imgusage.type.dto.another.LeadToAxisTabParams;
 import ksn.imgusage.type.dto.another.LeadToPerspectiveTabParams;
 import ksn.imgusage.type.dto.catalano.*;
 import ksn.imgusage.type.dto.catalano.BlurTabParams;
@@ -87,8 +87,8 @@ public final class MapperFilter {
 
     public static List<FilterTabs> getAnotherTabsDescr() {
         return Arrays.<FilterTabs>asList( // alphabetical sort
-            new FilterTabs( LeadToHorizontalTab.TAB_TITLE,
-                            LeadToHorizontalTab.TAB_DESCRIPTION),
+            new FilterTabs(       LeadToAxisTab.TAB_TITLE,
+                                  LeadToAxisTab.TAB_DESCRIPTION),
             new FilterTabs(LeadToPerspectiveTab.TAB_TITLE,
                            LeadToPerspectiveTab.TAB_DESCRIPTION)
         );
@@ -134,8 +134,8 @@ public final class MapperFilter {
 
         // Another
         // alphabetical sort
-        case                    LeadToHorizontalTab.TAB_NAME:
-            return              LeadToHorizontalTab.class;
+        case                          LeadToAxisTab.TAB_NAME:
+            return                    LeadToAxisTab.class;
         case                   LeadToPerspectiveTab.TAB_NAME:
             return             LeadToPerspectiveTab.class;
 
@@ -204,8 +204,8 @@ public final class MapperFilter {
 
         // Another
         // alphabetical sort
-        case                        LeadToHorizontalTab.TAB_NAME:
-            return                  LeadToHorizontalTabParams.class;
+        case                              LeadToAxisTab.TAB_NAME:
+            return                        LeadToAxisTabParams.class;
         case                       LeadToPerspectiveTab.TAB_NAME:
             return                 LeadToPerspectiveTabParams.class;
 

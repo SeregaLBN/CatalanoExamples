@@ -5,8 +5,8 @@
     "useGray" : true,
     "useScale" : true,
     "keepToSize" : {
-      "width" : 498,
-      "height" : 378
+      "width" : 500,
+      "height" : -1
     },
     "useKeepAspectRatio" : true,
     "boundOfRoi" : {
@@ -141,7 +141,10 @@
     "l2gradient" : false
   }
 }, {
-  "tabName" : "Another:LeadToHorizontal",
+  "tabName" : "Another:LeadToAxis",
   "pos" : 11,
-  "params" : { }
+  "params" : {
+    "leadToHorizontal" : true,
+    "limitAreaDiffInPercent" : 15
+  }
 } ]

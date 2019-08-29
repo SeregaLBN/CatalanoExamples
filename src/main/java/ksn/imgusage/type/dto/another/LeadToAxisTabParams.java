@@ -1,16 +1,17 @@
 package ksn.imgusage.type.dto.another;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.another.LeadToHorizontalTab;
+import ksn.imgusage.tabs.another.LeadToAxisTab;
 
-/** Init parameters for {@link LeadToHorizontalTab} */
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class LeadToHorizontalTabParams implements ITabParams {
+/** Init parameters for {@link LeadToAxisTab} */
+public class LeadToAxisTabParams implements ITabParams {
 
+    public boolean leadToHorizontal = true;
+
+    /** leave not exceeding the median by X percent (101 - no limits) */
+    public int limitAreaDiffInPercent = 101; // 0% .. 101%   101% - no limits
 
     @Override
-    public String toString() { return "{ ..none.. }"; }
+    public String toString() { return "{ leadToHorizontal=" + leadToHorizontal + ", limitAreaDiffInPercent=" + limitAreaDiffInPercent + " }"; }
 
 }
