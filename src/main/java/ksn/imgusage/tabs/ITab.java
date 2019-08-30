@@ -13,6 +13,8 @@ public interface ITab<TTabParams extends ITabParams> {
 
     /** get filtered image */
     BufferedImage getImage();
+    /** get a filtered image, possibly with an additional rendering layer */
+    BufferedImage getDrawImage();
     void resetImage(boolean debounce);
     void resetImage();
 

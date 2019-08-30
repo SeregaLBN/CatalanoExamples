@@ -38,7 +38,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private static final int MAX_ZOOM_KOEF = 2;
 
     private BufferedImage sourceImage;
-    private BufferedImage previewImage;
+    private BufferedImage drawImage;
     private File latestImageDir = DEFAULT_IMAGE.getParentFile();
     private FirstTabParams params;
     private Runnable  onCheckKeepAspectRationByWidth;
@@ -82,7 +82,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
     @Override
     public void resetImage() {
-        previewImage = null;
+        drawImage = null;
         super.resetImage();
     }
 
@@ -145,9 +145,10 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         image = tmp;
     }
 
-    public BufferedImage getPreviewImage() {
-        if (previewImage != null)
-            return previewImage;
+    @Override
+    public BufferedImage getDrawImage() {
+        if (drawImage != null)
+            return drawImage;
 
         int left   = params.boundOfRoi.left;
         int right  = params.boundOfRoi.right;
@@ -158,8 +159,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             (top    <= 0) &&
             (bottom <= 0))
         {
-            previewImage = getImage();
-            return previewImage;
+            drawImage = getImage();
+            return drawImage;
         }
 
         int wSrc = sourceImage.getWidth();
@@ -169,15 +170,15 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         double koefX = wDst / (double)wSrc;
         double koefY = hDst / (double)hSrc;
 
-        previewImage = ImgHelper.resize(sourceImage, wDst, hDst);
-        FastBitmap bmp = new FastBitmap(previewImage);
+        drawImage = ImgHelper.resize(sourceImage, wDst, hDst);
+        FastBitmap bmp = new FastBitmap(drawImage);
         if (params.useGray && !bmp.isGrayscale()) {
             bmp.toGrayscale();
             bmp.toRGB(); // ! restore colors for preview !
         }
-        previewImage = bmp.toBufferedImage();
+        drawImage = bmp.toBufferedImage();
 
-        Graphics2D g = previewImage.createGraphics();
+        Graphics2D g = drawImage.createGraphics();
         try {
             BasicStroke penLine1 = new BasicStroke(1.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
             BasicStroke penLine2 = new BasicStroke(2.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
@@ -221,7 +222,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             g.dispose();
         }
 
-        return previewImage;
+        return drawImage;
     }
 
     public void onSelectImage() {

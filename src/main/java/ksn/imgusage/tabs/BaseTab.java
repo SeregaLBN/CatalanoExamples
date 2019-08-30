@@ -64,6 +64,11 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     }
 
     @Override
+    public BufferedImage getDrawImage() {
+        return getImage();
+    }
+
+    @Override
     public BufferedImage getImage() {
         if (image != null)
             return image;

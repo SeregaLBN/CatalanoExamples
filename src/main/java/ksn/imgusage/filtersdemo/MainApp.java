@@ -236,9 +236,6 @@ public class MainApp {
         if (image == null)
             return;
 
-        if (i == 0)
-            image = ((FirstTab)tab).getPreviewImage();
-
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 //        l.trace("image.size={{}, {}}", image     .getWidth(), image     .getHeight());
