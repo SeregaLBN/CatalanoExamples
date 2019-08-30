@@ -89,10 +89,19 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     @Override
     protected void applyFilter() {
         image = ImgHelper.resize(sourceImage, params.keepToSize.width, params.keepToSize.height);
-        FastBitmap bmp = new FastBitmap(image);
-        if (params.useGray && !bmp.isGrayscale())
-            bmp.toGrayscale();
-        image = bmp.toBufferedImage();
+        if (params.useGray) {
+//            Mat mat = ImgHelper.toMat(image);
+//            if (mat.channels() != 1) {
+//                mat = OpenCvHelper.toGray(mat);
+//                image = ImgHelper.toBufferedImage(mat);
+//            }
+
+            FastBitmap bmp = new FastBitmap(image);
+            if (!bmp.isGrayscale()) {
+                bmp.toGrayscale();
+                image = bmp.toBufferedImage();
+            }
+        }
         cutIndent();
     }
 

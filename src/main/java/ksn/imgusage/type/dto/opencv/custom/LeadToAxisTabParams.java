@@ -7,6 +7,8 @@ import ksn.imgusage.tabs.opencv.custom.LeadToAxisTab;
 public class LeadToAxisTabParams implements ITabParams {
 
     public boolean leadToHorizontal = true;
+    public boolean keepSourceSize = true;
+    public boolean cutBorders = !keepSourceSize;
 
     /** leave not exceeding the median by X percent (101 - no limits) */
     public int limitAreaDiffInPercent = 101; // 0% .. 101%   101% - no limits
@@ -18,6 +20,8 @@ public class LeadToAxisTabParams implements ITabParams {
     public String toString() {
         return "{"
             + " leadToHorizontal=" + leadToHorizontal
+            + ", keepSourceSize=" + keepSourceSize
+            + ", cutBorders=" + cutBorders
             + ", limitAreaDiffInPercent=" + limitAreaDiffInPercent
             + ", angleRangeMin=" + angleRangeMin
             + ", angleRangeMax=" + angleRangeMax

@@ -51,9 +51,6 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     }
 
     private LeadToAxisTabParams params;
-    private Mat matOriginal;
-    private double originalMaxArea;
-    private Mat matStarted;
     private List<IterationResult> results = new ArrayList<>();
     private Consumer<String> showResultAngle;
 
@@ -82,19 +79,17 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     @Override
     protected void applyOpencvFilter() {
         results.clear();
-        showResultAngle.accept(".?.");
-        matOriginal = imageMat;
-        originalMaxArea = imageMat.width() * imageMat.height();
+        showResultAngle.accept("???");
 
         int max = Math.max(imageMat.width(), imageMat.height());
         int diagonal = (int)Math.sqrt(max * max * 2);
-        matStarted = new Mat(diagonal, diagonal, imageMat.type(), new Scalar(0,0,0));
+        Mat matStarted = new Mat(diagonal, diagonal, imageMat.type(), new Scalar(0,0,0));
         int offsetX = (diagonal - imageMat.width()) / 2;
         int offsetY = (diagonal - imageMat.width()) / 2;
         imageMat.copyTo(matStarted.colRange(offsetX, offsetX + imageMat.width())
                                   .rowRange(offsetY, offsetY + imageMat.height()));
 
-        SwingUtilities.invokeLater(() -> this.nextIteration(params.angleRangeMin));
+        SwingUtilities.invokeLater(() -> this.nextIteration(matStarted, params.angleRangeMin));
     }
 
     private void applyImage(Mat mat) {
@@ -104,51 +99,90 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
         tabHandler.onImageChanged(this);
     }
 
-    private void nextIteration(double angle) {
-        if (nextIteration2(angle)) {
+    private void nextIteration(Mat matStarted, double angle) {
+        try {
+            nextIteration1(matStarted, angle);
+        } catch (Exception ex) {
+            logger.error("nextIteration: {}", ex);
+            tabHandler.onError(ex.getMessage(), this, null);
+        }
+    }
+    private void nextIteration1(Mat matStarted, double angle) {
+        if (nextIteration2(matStarted, angle)) {
             // show intermediate result
             IterationResult last = results.get(results.size() - 1);
             applyImage(last.mat);
 
-            SwingUtilities.invokeLater(() -> this.nextIteration(angle + 1.0));
+            SwingUtilities.invokeLater(() -> this.nextIteration(matStarted, angle + 1.0));
         } else {
             // show final result
-            if (results.isEmpty()) {
-                // nothing found (
-                applyImage(matOriginal);
-                showResultAngle.accept(":(");
-            } else {
-                // show best result
-                IterationResult best = results.get(0);
-                best = rotateAndFindMaxContourArea(best.angle, new Scalar(0, 255, 0)); // optional; another rectangle color
-
-                if ((matOriginal.width() < best.rcOut.width) || (matOriginal.height() < best.rcOut.height)) {
-                    logger.error(" hmmm... bad algorithm ;(");
-                    applyImage(best.mat);
-                } else {
-                    // restore original size
-                    Mat tmp = new Mat(matOriginal.size(), best.mat.type(), new Scalar(0,0,0));
-
-                    Rect roi = best.rcOut; roi.width++; roi.height++;
-                    int offsetX = (tmp.width()  - roi.width ) / 2;
-                    int offsetY = (tmp.height() - roi.height) / 2;
-                    new Mat(best.mat, roi).copyTo(tmp.colRange(offsetX, offsetX + roi.width)
-                                                     .rowRange(offsetY, offsetY + roi.height));
-
-                    applyImage(tmp);
-                }
-
-                showResultAngle.accept(String.format(Locale.US, "%.2f", best.angle));
-            }
+            showFinalResult(matStarted);
         }
     }
 
-    private boolean nextIteration2(double angle) {
+    private void showFinalResult(Mat matStarted) {
+        if (results.isEmpty()) {
+            // nothing found (
+            applyImage(getSourceMat());
+            showResultAngle.accept(":(");
+
+            return;
+        }
+
+        // show best result
+        IterationResult best = results.get(0);
+        best = rotateAndFindMaxContourArea(matStarted, best.angle, new Scalar(0, 255, 0)); // optional; another rectangle color
+
+        Size sizeSrc = getSourceMat().size();
+        Mat dst = new Mat(sizeSrc, best.mat.type(), new Scalar(0,0,0));
+        Rect roi = best.rcOut;
+        roi.width++; roi.height++; // add color border :(
+        if (!params.keepSourceSize) {
+            if (params.cutBorders)
+                new Mat(best.mat, roi).copyTo(dst);
+            else
+                dst = best.mat;
+        } else {
+            // restore original size
+            if ((sizeSrc.width < best.rcOut.width) || (sizeSrc.height < best.rcOut.height)) {
+
+                logger.trace("src=[{}x{}]", sizeSrc.width, sizeSrc.height);
+                logger.trace("roi=[{}x{}]", roi.width, roi.height);
+                double zoomX = sizeSrc.width  / roi.width;
+                double zoomY = sizeSrc.height / roi.height;
+                double zoom = Math.min(zoomX, zoomY);
+
+                int newRoiWidth  = (int)(roi.width  * zoom);
+                int newRoiHeight = (int)(roi.height * zoom);
+                logger.trace("roiZoom=[{}x{}]", newRoiWidth, newRoiHeight);
+
+                Mat resized = new Mat();
+                Imgproc.resize(new Mat(best.mat, roi), resized, new Size(newRoiWidth, newRoiHeight));
+                logger.trace("resizedMat=[{}x{}]", resized.width(), resized.height());
+
+                int offsetX = ((int)sizeSrc.width  - newRoiWidth ) / 2;
+                int offsetY = ((int)sizeSrc.height - newRoiHeight) / 2;
+                logger.trace("offset=[{}x{}]", offsetX, offsetY);
+                resized.copyTo(dst.colRange(offsetX, offsetX + newRoiWidth)
+                                  .rowRange(offsetY, offsetY + newRoiHeight));
+            } else {
+                int offsetX = (dst.width()  - roi.width ) / 2;
+                int offsetY = (dst.height() - roi.height) / 2;
+                new Mat(best.mat, roi).copyTo(dst.colRange(offsetX, offsetX + roi.width)
+                                                 .rowRange(offsetY, offsetY + roi.height));
+            }
+        }
+        applyImage(dst);
+
+        showResultAngle.accept(String.format(Locale.US, "%.2f", best.angle));
+    }
+
+    private boolean nextIteration2(Mat matStarted, double angle) {
         if (angle > params.angleRangeMax) {
             findBestIteration();
             return false; // stop iterations
         } else {
-            IterationResult resIter = rotateAndFindMaxContourArea(angle, new Scalar(0, 0, 255));
+            IterationResult resIter = rotateAndFindMaxContourArea(matStarted, angle, new Scalar(0, 0, 255));
             logger.trace("nextIteration: {}", resIter);
             results.add(resIter);
             return true; // need next iteration
@@ -212,7 +246,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
         results.add(one);
     }
 
-    private IterationResult rotateAndFindMaxContourArea(double angle, Scalar rcColor) {
+    private IterationResult rotateAndFindMaxContourArea(Mat matStarted, double angle, Scalar rcColor) {
         Point center = new Point(matStarted.width() / 2.0, matStarted.height() / 2.0);
         Mat rotateMatrix = Imgproc.getRotationMatrix2D(center, angle, 1);
 
@@ -224,7 +258,8 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
                 new org.opencv.core.Size(0, 0),
                 Imgproc.INTER_LINEAR);
 
-        IterationResult res = findMaxContourArea(angle, dst, originalMaxArea, logger);
+        Size sizeSrc = getSourceMat().size();
+        IterationResult res = findMaxContourArea(angle, dst, sizeSrc.width * sizeSrc.height, logger);
         if (res.rcOut != null) {
             Imgproc.rectangle(res.mat,
                 new Point(res.rcOut.x, res.rcOut.y),
@@ -292,13 +327,36 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
         JButton btnRepeat = new JButton("Repeat...");
         btnRepeat.addActionListener(ev -> resetImage());
 
-        Box boxLeadToHorizont = makeBoxedCheckBox(
+        Container boxLeadToHorizont = makeBoxedCheckBox(
             () -> params.leadToHorizontal,
             v  -> params.leadToHorizontal = v,
             "",
             "Lead to horizontal",
             "params.leadToHorizontal",
             null, null);
+        JCheckBox[] cbCut = { null };
+        JCheckBox cbKeepSize = makeCheckBox(
+                () -> params.keepSourceSize,
+                v  -> params.keepSourceSize = v,
+                "Keep source size",
+                "params.keepSourceSize",
+                null,
+                () -> {
+                    if (params.keepSourceSize && cbCut[0].isSelected())
+                        cbCut[0].setSelected(false);
+                });
+        cbCut[0] = makeCheckBox(
+                () -> params.cutBorders,
+                v  -> params.cutBorders = v,
+                "Cut borders",
+                "params.cutBorders",
+                null,
+                () -> {
+                    if (params.cutBorders && cbKeepSize.isSelected())
+                        cbKeepSize.setSelected(false);
+                });
+        boxLeadToHorizont.add(cbKeepSize);
+        boxLeadToHorizont.add(cbCut[0]);
 
         Box box4AngleRange = Box.createHorizontalBox();
         box4AngleRange.setBorder(BorderFactory.createTitledBorder("Range angles"));

@@ -287,8 +287,8 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return res;
     }
 
-    protected static Container makeEditBox(Consumer<Consumer<String>> setterTextExternal, Consumer<String> setterTextInternal, String title, String borderTitle, String tip) {
-        JLabel labTitle = new JLabel(title + ": ");
+    protected static Container makeEditBox(Consumer<Consumer<String>> setterTextExternal, Consumer<String> setterTextInternal, String labelText, String borderTitle, String tip) {
+        JLabel labTitle = new JLabel(labelText + ": ");
         labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         labTitle.setToolTipText(tip);
 

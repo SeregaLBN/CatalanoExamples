@@ -11,6 +11,7 @@ public interface ITab<TTabParams extends ITabParams> {
     Component makeTab(TTabParams params);
     TTabParams getParams();
 
+    /** get filtered image */
     BufferedImage getImage();
     void resetImage(boolean debounce);
     void resetImage();
