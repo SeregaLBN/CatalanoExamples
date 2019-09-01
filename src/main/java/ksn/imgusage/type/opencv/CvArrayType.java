@@ -50,7 +50,7 @@ public enum CvArrayType {
             if (arrType.getVal() == val)
                 return arrType;
 
-        throw new IllegalArgumentException("Illegal argumet value=" + val);
+        throw new IllegalArgumentException("Illegal argument value=" + val);
     }
 
 }

@@ -30,7 +30,7 @@ public enum CvDepthType {
             if (depth.getVal() == val)
                 return depth;
 
-        throw new IllegalArgumentException("Illegal argumet value=" + val);
+        throw new IllegalArgumentException("Illegal argument value=" + val);
     }
 
 }
