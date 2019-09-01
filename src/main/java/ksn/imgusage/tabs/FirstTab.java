@@ -31,6 +31,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private static final int MIN_IMAGE_HEIGHT = 10;
     private static final int MAX_IMAGE_WIDTH  = 10000;
     private static final int MAX_IMAGE_HEIGHT = 10000;
+    private static final int MIN_SIZE_ROI = 10;
     private static final Color COLOR_LEFT   = Color.RED;
     private static final Color COLOR_RIGHT  = Color.GREEN;
     private static final Color COLOR_TOP    = Color.BLUE;
@@ -464,20 +465,20 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         addChangeListener("modelSizeH", modelSizeH, v -> params.keepToSize.height = v, onCheckKeepAspectRationByHeight);
 
         addChangeListener("modelPadLeft", modelPadLeft, v -> params.boundOfRoi.left = v, () -> {
-            if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
-                SwingUtilities.invokeLater(() -> modelPadRight.setValue(sourceImage.getWidth() - 1 - modelPadLeft.getValue()) );
+            if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) > (sourceImage.getWidth() - MIN_SIZE_ROI))
+                SwingUtilities.invokeLater(() -> modelPadRight.setValue(sourceImage.getWidth() - MIN_SIZE_ROI - modelPadLeft.getValue()) );
         });
         addChangeListener("modelPadRight", modelPadRight, v -> params.boundOfRoi.right = v, () -> {
-            if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) >= sourceImage.getWidth())
-                SwingUtilities.invokeLater(() -> modelPadLeft.setValue(sourceImage.getWidth() - 1 - modelPadRight.getValue()) );
+            if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) > (sourceImage.getWidth() - MIN_SIZE_ROI))
+                SwingUtilities.invokeLater(() -> modelPadLeft.setValue(sourceImage.getWidth() - MIN_SIZE_ROI - modelPadRight.getValue()) );
         });
         addChangeListener("modelPadTop", modelPadTop, v -> params.boundOfRoi.top = v, () -> {
-            if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
-                SwingUtilities.invokeLater(() -> modelPadBottom.setValue(sourceImage.getHeight() - 1 - modelPadTop.getValue()) );
+            if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) > (sourceImage.getHeight() - MIN_SIZE_ROI))
+                SwingUtilities.invokeLater(() -> modelPadBottom.setValue(sourceImage.getHeight() - MIN_SIZE_ROI - modelPadTop.getValue()) );
         });
         addChangeListener("modelPadBottom", modelPadBottom, v -> params.boundOfRoi.bottom = v, () -> {
-            if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) >= sourceImage.getHeight())
-                SwingUtilities.invokeLater(() -> modelPadTop.setValue(sourceImage.getHeight() - 1 - modelPadBottom.getValue()) );
+            if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) > (sourceImage.getHeight() - MIN_SIZE_ROI))
+                SwingUtilities.invokeLater(() -> modelPadTop.setValue(sourceImage.getHeight() - MIN_SIZE_ROI - modelPadBottom.getValue()) );
         });
 
         applyMaxSizeLimits.run();

@@ -9,12 +9,14 @@ import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.catalano.BlurTab;
 import ksn.imgusage.tabs.opencv.*;
+import ksn.imgusage.tabs.opencv.custom.BindToNeighborTab;
 import ksn.imgusage.tabs.opencv.custom.LeadToAxisTab;
 import ksn.imgusage.tabs.opencv.custom.LeadToPerspectiveTab;
 import ksn.imgusage.type.dto.FirstTabParams;
 import ksn.imgusage.type.dto.catalano.*;
 import ksn.imgusage.type.dto.catalano.BlurTabParams;
 import ksn.imgusage.type.dto.opencv.*;
+import ksn.imgusage.type.dto.opencv.custom.BindToNeighborTabParams;
 import ksn.imgusage.type.dto.opencv.custom.LeadToAxisTabParams;
 import ksn.imgusage.type.dto.opencv.custom.LeadToPerspectiveTabParams;
 
@@ -90,7 +92,9 @@ public final class MapperFilter {
             new FilterTabs(       LeadToAxisTab.TAB_TITLE,
                                   LeadToAxisTab.TAB_DESCRIPTION),
             new FilterTabs(LeadToPerspectiveTab.TAB_TITLE,
-                           LeadToPerspectiveTab.TAB_DESCRIPTION)
+                           LeadToPerspectiveTab.TAB_DESCRIPTION),
+            new FilterTabs(   BindToNeighborTab.TAB_TITLE,
+                              BindToNeighborTab.TAB_DESCRIPTION)
         );
     }
 
@@ -138,6 +142,8 @@ public final class MapperFilter {
             return                    LeadToAxisTab.class;
         case                   LeadToPerspectiveTab.TAB_NAME:
             return             LeadToPerspectiveTab.class;
+        case                      BindToNeighborTab.TAB_NAME:
+            return                BindToNeighborTab.class;
 
         default:
 
@@ -208,6 +214,8 @@ public final class MapperFilter {
             return                        LeadToAxisTabParams.class;
         case                       LeadToPerspectiveTab.TAB_NAME:
             return                 LeadToPerspectiveTabParams.class;
+        case                          BindToNeighborTab.TAB_NAME:
+            return                    BindToNeighborTabParams.class;
 
         default:
 

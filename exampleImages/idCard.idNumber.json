@@ -1,0 +1,170 @@
+[ {
+  "tabName" : "FirstTab",
+  "pos" : 0,
+  "params" : {
+    "useGray" : true,
+    "useScale" : true,
+    "keepToSize" : {
+      "width" : 3000,
+      "height" : 2250
+    },
+    "useKeepAspectRatio" : true,
+    "boundOfRoi" : {
+      "left" : 2300,
+      "top" : 400,
+      "right" : 300,
+      "bottom" : 2350
+    },
+    "imageFile" : "IMG_20190816_135747.jpg"
+  }
+}, {
+  "tabName" : "OpenCV:AsIs",
+  "pos" : 1,
+  "params" : {
+    "useGray" : false
+  }
+}, {
+  "tabName" : "OpenCV:GaussianBlur",
+  "pos" : 2,
+  "params" : {
+    "kernelSize" : {
+      "width" : 3,
+      "height" : 3
+    },
+    "sigmaX" : 100.0,
+    "sigmaY" : 0.0,
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:MorphologyEx",
+  "pos" : 3,
+  "params" : {
+    "morphologicalOperation" : "MORPH_GRADIENT",
+    "kernelSource" : "CTOR",
+    "kernel1" : {
+      "rows" : 21,
+      "cols" : 21,
+      "type" : "CV_8UC1",
+      "scalarVal0" : 300.0,
+      "scalarVal1" : 0.0,
+      "scalarVal2" : 0.0,
+      "scalarVal3" : 0.0
+    },
+    "kernel2" : {
+      "shape" : "MORPH_RECT",
+      "kernelSize" : {
+        "width" : 10,
+        "height" : 10
+      },
+      "anchor" : {
+        "x" : -1,
+        "y" : -1
+      }
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "iterations" : 1
+  }
+}, {
+  "tabName" : "OpenCV:MorphologyEx",
+  "pos" : 4,
+  "params" : {
+    "morphologicalOperation" : "MORPH_DILATE",
+    "kernelSource" : "STRUCTURING_ELEMENT",
+    "kernel1" : {
+      "rows" : 1,
+      "cols" : 1,
+      "type" : "CV_8UC1",
+      "scalarVal0" : 1.0,
+      "scalarVal1" : 0.0,
+      "scalarVal2" : 0.0,
+      "scalarVal3" : 0.0
+    },
+    "kernel2" : {
+      "shape" : "MORPH_RECT",
+      "kernelSize" : {
+        "width" : 12,
+        "height" : 12
+      },
+      "anchor" : {
+        "x" : -1,
+        "y" : -1
+      }
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "iterations" : 1
+  }
+}, {
+  "tabName" : "OpenCV:MorphologyEx",
+  "pos" : 5,
+  "params" : {
+    "morphologicalOperation" : "MORPH_CLOSE",
+    "kernelSource" : "STRUCTURING_ELEMENT",
+    "kernel1" : {
+      "rows" : 1,
+      "cols" : 1,
+      "type" : "CV_8UC1",
+      "scalarVal0" : 1.0,
+      "scalarVal1" : 0.0,
+      "scalarVal2" : 0.0,
+      "scalarVal3" : 0.0
+    },
+    "kernel2" : {
+      "shape" : "MORPH_RECT",
+      "kernelSize" : {
+        "width" : 3,
+        "height" : 3
+      },
+      "anchor" : {
+        "x" : -1,
+        "y" : -1
+      }
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "iterations" : 1
+  }
+}, {
+  "tabName" : "OpenCV:Threshold",
+  "pos" : 6,
+  "params" : {
+    "thresh" : 77.0,
+    "maxVal" : 255.0,
+    "threshType" : "THRESH_BINARY",
+    "useOtsuMask" : false,
+    "useTriangleMask" : false
+  }
+}, {
+  "tabName" : "OpenCV:Canny",
+  "pos" : 7,
+  "params" : {
+    "threshold1" : 7.0,
+    "threshold2" : 15.0,
+    "apertureSize" : 3,
+    "l2gradient" : true
+  }
+}, {
+  "tabName" : "OpenCV:FindContours",
+  "pos" : 8,
+  "params" : {
+    "mode" : "RETR_EXTERNAL",
+    "method" : "CHAIN_APPROX_SIMPLE",
+    "drawMethod" : "EXTERNAL_RECT",
+    "minLimitContours" : {
+      "width" : 10,
+      "height" : 10
+    },
+    "maxContourArea" : 100,
+    "contourIdx" : -1,
+    "fillContour" : true,
+    "maxLevel" : 100,
+    "randomColors" : false
+  }
+} ]
