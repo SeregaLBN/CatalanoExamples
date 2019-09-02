@@ -1,0 +1,83 @@
+[ {
+  "tabName" : "FirstTab",
+  "pos" : 0,
+  "params" : {
+    "useGray" : true,
+    "useScale" : true,
+    "keepToSize" : {
+      "width" : 3000,
+      "height" : 2114
+    },
+    "useKeepAspectRatio" : true,
+    "boundOfRoi" : {
+      "left" : 1900,
+      "top" : 40,
+      "right" : 200,
+      "bottom" : 2070
+    },
+    "imageFile" : "idCardTest2.jpg"
+  }
+}, {
+  "tabName" : "OpenCV:AsIs",
+  "pos" : 1,
+  "params" : {
+    "useGray" : false
+  }
+}, {
+  "tabName" : "OpenCV:Threshold",
+  "pos" : 2,
+  "params" : {
+    "thresh" : 100.0,
+    "maxVal" : 250.0,
+    "threshType" : "THRESH_BINARY",
+    "useOtsuMask" : false,
+    "useTriangleMask" : false
+  }
+}, {
+  "tabName" : "OpenCV:MorphologyEx",
+  "pos" : 3,
+  "params" : {
+    "morphologicalOperation" : "MORPH_GRADIENT",
+    "kernelSource" : "STRUCTURING_ELEMENT",
+    "kernel1" : {
+      "rows" : 1,
+      "cols" : 1,
+      "type" : "CV_8UC1",
+      "scalarVal0" : 1.0,
+      "scalarVal1" : 0.0,
+      "scalarVal2" : 0.0,
+      "scalarVal3" : 0.0
+    },
+    "kernel2" : {
+      "shape" : "MORPH_RECT",
+      "kernelSize" : {
+        "width" : 10,
+        "height" : 10
+      },
+      "anchor" : {
+        "x" : -1,
+        "y" : -1
+      }
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "iterations" : 1
+  }
+}, {
+  "tabName" : "OpenCV:Custom:BindToNeighborTab",
+  "pos" : 4,
+  "params" : {
+    "minLimitContours" : {
+      "width" : 15,
+      "height" : 15
+    },
+    "maxLimitContours" : {
+      "width" : 40,
+      "height" : 40
+    },
+    "bindSize" : 14,
+    "showBindIndex" : -1
+  }
+} ]

@@ -303,7 +303,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         txtValue.setMaximumSize(new Dimension(150, 40));
         txtValue.setToolTipText(tip);
         Dimension prefSize = txtValue.getPreferredSize();
-        prefSize.width = 45;
+        prefSize.width = 75;
         txtValue.setPreferredSize(prefSize);
 
         Box box = Box.createHorizontalBox();

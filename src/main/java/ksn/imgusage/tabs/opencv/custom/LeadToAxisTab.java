@@ -3,6 +3,7 @@ package ksn.imgusage.tabs.opencv.custom;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -52,6 +53,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
 
     private LeadToAxisTabParams params;
     private List<IterationResult> results = new ArrayList<>();
+    private BufferedImage best;
     private Consumer<String> showResultAngle;
 
     @Override
@@ -77,8 +79,16 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     public String getDescription() { return TAB_DESCRIPTION; }
 
     @Override
+    public BufferedImage getDrawImage() {
+        if (best != null)
+            return best;
+        return super.getDrawImage();
+    }
+
+    @Override
     protected void applyOpencvFilter() {
         results.clear();
+        best = null;
         showResultAngle.accept("???");
 
         int max = Math.max(imageMat.width(), imageMat.height());
