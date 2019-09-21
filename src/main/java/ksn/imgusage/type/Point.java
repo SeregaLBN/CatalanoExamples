@@ -7,9 +7,9 @@ public class Point {
 
     public Point() {}
 
-    public Point(int width, int height) {
-        this.x = width;
-        this.y = height;
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
     @Override

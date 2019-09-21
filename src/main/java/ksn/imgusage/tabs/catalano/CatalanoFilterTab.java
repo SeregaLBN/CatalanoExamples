@@ -20,14 +20,13 @@ public abstract class CatalanoFilterTab<TTabParams extends ITabParams> extends B
     }
 
     protected FastBitmap getSourceFastBitmap() {
-        if (source instanceof CatalanoFilterTab) {
+        if (source instanceof CatalanoFilterTab)
             return ((CatalanoFilterTab<?>)source).imageFBmp;
-        } else {
-            BufferedImage src = source.getImage();
-            if (src == null)
-                return null;
-            return new FastBitmap(src);
-        }
+
+        BufferedImage src = source.getImage();
+        if (src == null)
+            return null;
+        return new FastBitmap(src);
     }
 
     protected abstract void applyCatalanoFilter();

@@ -34,14 +34,13 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
     }
 
     protected static Mat getSourceMat(ITab<?> source) {
-        if (source instanceof OpencvFilterTab) {
+        if (source instanceof OpencvFilterTab)
             return ((OpencvFilterTab<?>)source).imageMat;
-        } else {
-            BufferedImage src = source.getImage();
-            if (src == null)
-                return null;
-            return ImgHelper.toMat(src);
-        }
+
+        BufferedImage src = source.getImage();
+        if (src == null)
+            return null;
+        return ImgHelper.toMat(src);
     }
 
     protected abstract void applyOpencvFilter();

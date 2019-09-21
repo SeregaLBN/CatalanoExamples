@@ -52,8 +52,9 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     }
 
     private LeadToAxisTabParams params;
-    private List<IterationResult> results = new ArrayList<>();
-    private BufferedImage best;
+    private List<IterationResult> allIterations = new ArrayList<>();
+    private IterationResult bestIteration;
+    private BufferedImage bestImg;
     private Consumer<String> showResultAngle;
 
     @Override
@@ -79,16 +80,24 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     public String getDescription() { return TAB_DESCRIPTION; }
 
     @Override
+    public void resetImage() {
+        bestIteration = null;
+        bestImg = null;
+        super.resetImage();
+    }
+
+    @Override
     public BufferedImage getDrawImage() {
-        if (best != null)
-            return best;
+        if (bestImg != null)
+            return bestImg;
         return super.getDrawImage();
     }
 
     @Override
     protected void applyOpencvFilter() {
-        results.clear();
-        best = null;
+        allIterations.clear();
+        bestImg = null;
+        bestIteration = null;
         showResultAngle.accept("???");
 
         int max = Math.max(imageMat.width(), imageMat.height());
@@ -120,7 +129,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     private void nextIteration1(Mat matStarted, double angle) {
         if (nextIteration2(matStarted, angle)) {
             // show intermediate result
-            IterationResult last = results.get(results.size() - 1);
+            IterationResult last = allIterations.get(allIterations.size() - 1);
             applyImage(last.mat);
 
             SwingUtilities.invokeLater(() -> this.nextIteration(matStarted, angle + 1.0));
@@ -131,7 +140,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     }
 
     private void showFinalResult(Mat matStarted) {
-        if (results.isEmpty()) {
+        if (bestIteration == null) {
             // nothing found (
             applyImage(getSourceMat());
             showResultAngle.accept(":(");
@@ -139,9 +148,17 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
             return;
         }
 
+        Mat imgNoBorder   = makeBestImage(matStarted, null);
+        Mat imgWithBorder = makeBestImage(matStarted, new Scalar(0, 255, 0));
+        bestImg = ImgHelper.toBufferedImage(imgWithBorder);
+        applyImage(imgNoBorder);
+
+        showResultAngle.accept(String.format(Locale.US, "%.2f", bestIteration.angle));
+    }
+
+    private Mat makeBestImage(Mat matStarted, Scalar regionRectColor) {
         // show best result
-        IterationResult best = results.get(0);
-        best = rotateAndFindMaxContourArea(matStarted, best.angle, new Scalar(0, 255, 0)); // optional; another rectangle color
+        IterationResult best = rotateAndFindMaxContourArea(matStarted, bestIteration.angle, regionRectColor); // optional; another rectangle color
 
         Size sizeSrc = getSourceMat().size();
         Mat dst = new Mat(sizeSrc, best.mat.type(), new Scalar(0,0,0));
@@ -182,9 +199,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
                                                  .rowRange(offsetY, offsetY + roi.height));
             }
         }
-        applyImage(dst);
-
-        showResultAngle.accept(String.format(Locale.US, "%.2f", best.angle));
+        return dst;
     }
 
     private boolean nextIteration2(Mat matStarted, double angle) {
@@ -194,15 +209,15 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
         } else {
             IterationResult resIter = rotateAndFindMaxContourArea(matStarted, angle, new Scalar(0, 0, 255));
             logger.trace("nextIteration: {}", resIter);
-            results.add(resIter);
+            allIterations.add(resIter);
             return true; // need next iteration
         }
     }
 
     private void findBestIteration() {
-        logger.trace("findBestIteration: total.size={}", results.size());
+        logger.trace("findBestIteration: total.size={}", allIterations.size());
 
-        List<IterationResult> valid = results.stream()
+        List<IterationResult> valid = allIterations.stream()
                 .filter(item -> item.area > 0)
                 .filter(item -> item.rcOut != null)
                 .filter(item ->
@@ -243,17 +258,12 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
 
         if (best.isEmpty()) {
             logger.warn("findBestIteration: Nothing found (");
-            results.clear();
             return;
         }
 
-        // get ONE best
-        IterationResult one = best.get(0);
-        logger.trace("findBestIteration: finded {}", one);
-
-        // set result
-        results.clear();
-        results.add(one);
+        // get ONE best result
+        bestIteration = best.get(0);
+        logger.trace("findBestIteration: finded {}", bestIteration);
     }
 
     private IterationResult rotateAndFindMaxContourArea(Mat matStarted, double angle, Scalar rcColor) {
@@ -270,7 +280,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
 
         Size sizeSrc = getSourceMat().size();
         IterationResult res = findMaxContourArea(angle, dst, sizeSrc.width * sizeSrc.height, logger);
-        if (res.rcOut != null) {
+        if ((res.rcOut != null) && (rcColor != null)) {
             Imgproc.rectangle(res.mat,
                 new Point(res.rcOut.x, res.rcOut.y),
                 new Point(res.rcOut.x + res.rcOut.width, res.rcOut.y + res.rcOut.height),

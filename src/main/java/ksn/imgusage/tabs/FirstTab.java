@@ -150,6 +150,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     public BufferedImage getDrawImage() {
         if (drawImage != null)
             return drawImage;
+        if (sourceImage == null)
+            return null;
 
         int left   = params.boundOfRoi.left;
         int right  = params.boundOfRoi.right;
