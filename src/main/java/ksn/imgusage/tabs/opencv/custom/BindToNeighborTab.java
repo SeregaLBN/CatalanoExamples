@@ -32,10 +32,10 @@ public class BindToNeighborTab extends CustomTab<BindToNeighborTabParams> {
     private static final int MIN_MAX_LIMIT_CONTOUR_SIZE =    5;
     private static final int MAX_MAX_LIMIT_CONTOUR_SIZE = 1000;
 
-    private static final Scalar green = new Scalar(0, 255, 0);
-    private static final Scalar red = new Scalar(0, 0, 255);
-    private static final Scalar orange = new Scalar(Color.ORANGE.getBlue(), Color.ORANGE.getGreen(), Color.ORANGE.getRed());
-    private static final Scalar white = new Scalar(Color.LIGHT_GRAY.getBlue(), Color.LIGHT_GRAY.getGreen(), Color.LIGHT_GRAY.getRed());
+    private static final Scalar GREEN  = new Scalar(0, 255, 0);
+    private static final Scalar RED    = new Scalar(0, 0, 255);
+    private static final Scalar ORANGE = new Scalar(Color.ORANGE.getBlue(), Color.ORANGE.getGreen(), Color.ORANGE.getRed());
+    private static final Scalar WHITE  = new Scalar(Color.LIGHT_GRAY.getBlue(), Color.LIGHT_GRAY.getGreen(), Color.LIGHT_GRAY.getRed());
 
     private BindToNeighborTabParams params;
     private IntConsumer setMaxBindIndex;
@@ -120,7 +120,7 @@ public class BindToNeighborTab extends CustomTab<BindToNeighborTabParams> {
 
             Point centerFrom = new Point(from.x + from.width / 2.0, from.y + from.height / 2.0);
             Point centerTo   = new Point(to  .x + to  .width / 2.2, to  .y + to  .height / 2.0);
-            Imgproc.line(imageMat, centerFrom, centerTo, white, params.bindSize * 2);
+            Imgproc.line(imageMat, centerFrom, centerTo, WHITE, params.bindSize * 2);
         }
 
         // draw rects/lines ower/after bold lines
@@ -129,7 +129,7 @@ public class BindToNeighborTab extends CustomTab<BindToNeighborTabParams> {
                 Imgproc.rectangle(imageMat,
                                   new Point(from.x, from.y),
                                   new Point(from.x + from.width, from.y + from.height),
-                                  green, 1);
+                                  GREEN, 1);
 
             for (BindItem item : toList) {
                 Rect to = regions.get(item.to);
@@ -138,9 +138,9 @@ public class BindToNeighborTab extends CustomTab<BindToNeighborTabParams> {
                     Imgproc.rectangle(imageMat,
                                       new Point(to.x, to.y),
                                       new Point(to.x + to.width, to.y + to.height),
-                                      red, 1);
+                                      RED, 1);
                 if (showMinBindSize)
-                    Imgproc.line(imageMat, item.minFrom, item.minTo, orange, 2);
+                    Imgproc.line(imageMat, item.minFrom, item.minTo, ORANGE, 2);
             }
         }
     }

@@ -1,6 +1,8 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
+import java.awt.Container;
+import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -17,6 +19,7 @@ public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
     public static final String TAB_DESCRIPTION = "As is";
 
     private AsIsTabParams params;
+    private Consumer<String> showImageSize;
 
     @Override
     public Component makeTab(AsIsTabParams params) {
@@ -38,6 +41,7 @@ public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
     protected void applyOpencvFilter() {
         if (params.useGray)
             imageMat = OpenCvHelper.toGray(imageMat);
+        showImageSize.accept(imageMat.width() + "x" + imageMat.height());
     }
 
     @Override
@@ -53,6 +57,10 @@ public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
             "params.useGray",
             "Speed up by reducing the image", null));
         box4Options.add(box);
+
+        Container cntrlEditBoxSize = makeEditBox(x -> showImageSize = x, null, "Image size", null, null);
+        showImageSize.accept("X*Y");
+        box4Options.add(cntrlEditBoxSize);
 
         return box4Options;
     }
