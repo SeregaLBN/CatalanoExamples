@@ -116,7 +116,7 @@ public class MainApp {
         // TODO hardcode (
         if (newTab instanceof AddWeightedTab) {
             if (i < 1) {
-                onError("Can`t use AddWeighted operation: TWO previous tabs are be used!", null, null);
+                onError(new Exception("Can`t use AddWeighted operation: TWO previous tabs are be used!"), null, null);
                 return;
             }
             ((AddWeightedTab)newTab).setSource2(tabs.get(i - 1));
@@ -165,7 +165,7 @@ public class MainApp {
             @Override public void onRemoveFilter(ITab<?> tab)                             {        MainApp.this.onRemoveTab(tab); }
             @Override public void onCancel()                                              {        MainApp.this.onCancel(); }
             @Override public void onImgPanelDraw(JPanel imgPanel, Graphics2D g, Logger l) {        MainApp.this.onImgPanelDraw(imgPanel, g, l); }
-            @Override public void onError(String message, ITab<?> tab, Component from)    {        MainApp.this.onError(message, tab, from); }
+            @Override public void onError(Exception ex, ITab<?> tab, Component from)      {        MainApp.this.onError(ex, tab, from); }
             @Override public void onSavePipeline()                                        {        MainApp.this.onSavePipeline(); }
             @Override public void onLoadPipeline()                                        {        MainApp.this.onLoadPipeline(); }
         };
@@ -257,16 +257,19 @@ public class MainApp {
         logger.trace("onTabChanged");
     }
 
-    private void onError(String message, ITab<?> tab, Component from) {
+    private void onError(Exception ex, ITab<?> tab, Component from) {
         if (from == null)
             from = frame.getRootPane();
 
         if (errorWindow == null) {
+            String errMsg = (ex.getMessage() == null)
+                ? ex.getClass().getSimpleName()
+                : ex.toString();
             JLabel errorLabel = new JLabel(
                 (tab == null
                     ? ""
                     : tab.getClass().getSimpleName() + ": ")
-                + message);
+                + errMsg);
             errorWindow = new JWindow(frame);
             JPanel contentPane = (JPanel) errorWindow.getContentPane();
             contentPane.add(errorLabel);
@@ -349,7 +352,7 @@ public class MainApp {
             json = JsonHelper.toJson(pipeline, true);
         } catch (Exception ex) {
             logger.error("Can`t convert to JSON: {}", ex);
-            onError("Can`t convert to JSON: " + ex, null, frame);
+            onError(new Exception("Can`t convert to JSON", ex), null, frame);
             return;
         }
 
@@ -358,7 +361,7 @@ public class MainApp {
             logger.info("Pipeline saved to file {}", jsonFile);
         } catch (Exception ex) {
             logger.error("Can`t save file '{}': {}", jsonFile, ex);
-            onError("Can`t save file '" + jsonFile + "': " + ex, null, frame);
+            onError(new Exception("Can`t save file '" + jsonFile + "'", ex), null, frame);
         } finally {
             firstParams.imageFile = tmp;
         }
@@ -388,7 +391,7 @@ public class MainApp {
             logger.info("Pipeline loaded from file {}", jsonFile);
         } catch (Exception ex) {
             logger.error("Can`t convert to JSON from file {}: {}", jsonFile, ex);
-            onError("Can`t convert to JSON from file '" + jsonFile + "' : " + ex, null, frame);
+            onError(new Exception("Can`t convert to JSON from file '" + jsonFile + "'", ex), null, frame);
             return;
         }
 
@@ -404,7 +407,7 @@ public class MainApp {
 
         if (!FirstTab.TAB_NAME.equals(pipeline.get(0).tabName)) {
             logger.error("FirstTab mus be instanceof {}", FirstTab.class.getName());
-            onError("FirstTab mus be instanceof " + FirstTab.class.getName(), null, frame);
+            onError(new Exception("FirstTab mus be instanceof " + FirstTab.class.getName()), null, frame);
         }
 
         onRemoveAllFilters();

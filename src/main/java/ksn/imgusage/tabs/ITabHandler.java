@@ -25,6 +25,6 @@ public interface ITabHandler {
     void onSavePipeline();
     void onLoadPipeline();
 
-    void onError(String message, ITab<?> tab, Component from);
+    void onError(Exception ex, ITab<?> tab, Component from);
 
 }

@@ -242,7 +242,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         try {
             if (!imageFile.exists()) {
                 logger.warn("File not found: {}", imageFile);
-                tabHandler.onError("File not found: " + imageFile, this, null);
+                tabHandler.onError(new Exception("File not found: " + imageFile), this, null);
                 return;
             }
             sourceImage = ImageIO.read(imageFile);

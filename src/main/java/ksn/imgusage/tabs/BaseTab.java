@@ -88,7 +88,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             } catch (Exception ex) {
                 logger.error("getImage: {}", ex);
                 image = ImgHelper.failedImage();
-                tabHandler.onError(ex.getMessage(), this, null);
+                tabHandler.onError(ex, this, null);
             }
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
@@ -151,7 +151,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                     logger.warn("Can`t save image to PNG file {}", file);
             } catch (Exception ex) {
                 logger.error("Can`t save image to PNG file: {}", ex);
-                tabHandler.onError("Can`t save image to PNG file: " + ex, this, btn);
+                tabHandler.onError(new Exception("Can`t save image to PNG file", ex), this, btn);
             }
         });
         return btn;

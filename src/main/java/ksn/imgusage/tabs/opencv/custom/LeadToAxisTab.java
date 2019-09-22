@@ -119,11 +119,13 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     }
 
     private void nextIteration(Mat matStarted, double angle) {
+        if (getSourceMat() == null)
+            return;
         try {
             nextIteration1(matStarted, angle);
         } catch (Exception ex) {
             logger.error("nextIteration: {}", ex);
-            tabHandler.onError(ex.getMessage(), this, null);
+            tabHandler.onError(ex, this, null);
         }
     }
     private void nextIteration1(Mat matStarted, double angle) {
