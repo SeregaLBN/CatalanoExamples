@@ -57,9 +57,9 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
     }
 
     @Override
-    public void resetImage() {
+    public void resetImage(boolean debounce) {
         imageMat = null;
-        super.resetImage();
+        super.resetImage(debounce);
     }
 
     public Component makeInterpolations(

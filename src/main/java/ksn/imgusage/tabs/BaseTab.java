@@ -113,7 +113,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             repaintImage();
     }
     @Override
-    public void resetImage() {
+    public final void resetImage() {
         resetImage(true);
     }
 

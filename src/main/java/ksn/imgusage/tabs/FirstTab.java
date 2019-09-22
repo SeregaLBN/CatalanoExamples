@@ -82,9 +82,9 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     }
 
     @Override
-    public void resetImage() {
+    public void resetImage(boolean debounce) {
         drawImage = null;
-        super.resetImage();
+        super.resetImage(debounce);
     }
 
     @Override

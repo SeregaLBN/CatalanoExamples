@@ -46,9 +46,9 @@ public abstract class CatalanoFilterTab<TTabParams extends ITabParams> extends B
     }
 
     @Override
-    public void resetImage() {
+    public void resetImage(boolean debounce) {
         imageFBmp = null;
-        super.resetImage();
+        super.resetImage(debounce);
     }
 
 }

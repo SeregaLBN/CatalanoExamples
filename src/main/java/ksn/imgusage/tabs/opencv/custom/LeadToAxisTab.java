@@ -80,10 +80,10 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     public String getDescription() { return TAB_DESCRIPTION; }
 
     @Override
-    public void resetImage() {
+    public void resetImage(boolean debounce) {
         bestIteration = null;
         bestImg = null;
-        super.resetImage();
+        super.resetImage(debounce);
     }
 
     @Override
