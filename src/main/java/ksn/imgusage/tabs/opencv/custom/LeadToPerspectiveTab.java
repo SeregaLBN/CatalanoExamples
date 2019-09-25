@@ -59,20 +59,50 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
 
     @Override
     protected void applyOpencvFilter() {
-        Size sizeSrc = imageMat.size();
-        startedContour = findMaxContourArea(imageMat, sizeSrc.width * sizeSrc.height, logger);
+        startedContour = tryPerspectiveAndFindMaxContourArea(null, null, new Scalar(0, 255, 255));
+        imageMat = startedContour.mat;
 
         SwingUtilities.invokeLater(this::nextIteration);
     }
 
     private void nextIteration() {
+        if (getSourceMat() == null)
+            return;
+
+        try {
+            nextIterationLeftTop(0, 0);
+        } catch (Exception ex) {
+            logger.error("nextIteration: {}", ex);
+            tabHandler.onError(ex, this, null);
+        }
+    }
+    private void nextIterationLeftTop(int offxsetX, int offxsetY) {
+        if (getSourceMat() == null)
+            return;
+
+        if (nextIterationLeftTopX(offxsetX)) {
+            // show intermediate result
+            IterationResult last = allIterations.get(allIterations.size() - 1);
+            applyImage(last.mat);
+
+            SwingUtilities.invokeLater(() -> this.nextIterationLeftTop(offxsetX + 1, offxsetY));
+        } else {
+            // next step
+            SwingUtilities.invokeLater(() -> this.nextIterationLeftBottom());
+        }
+    }
+    private void nextIterationLeftBottom() {
+
+    }
+
+    private boolean nextIterationLeftTopX(int offsetX) {
     }
 
     enum ETargetPoint {
-        rightTop,
-        leftTop,
-        leftBottom,
-        rightBottom
+        RIGHT_TOP,
+        LEFT_TOP,
+        LEFT_BOTTOM,
+        RIGHT_BOTTOM
     }
 
     private IterationResult tryPerspectiveAndFindMaxContourArea(Point targetPoint, ETargetPoint target, Scalar rcColor) {
@@ -86,10 +116,10 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
                                    rcLeftBottom ,
                                    rcRightBottom);
         Mat dst = new MatOfPoint2f(
-            (target == ETargetPoint.leftTop    ) ? targetPoint : rcLeftTop,
-            (target == ETargetPoint.rightTop   ) ? targetPoint : rcRightTop,
-            (target == ETargetPoint.leftBottom ) ? targetPoint : rcLeftBottom,
-            (target == ETargetPoint.rightBottom) ? targetPoint : rcRightBottom);
+            (target == ETargetPoint.LEFT_TOP    ) ? targetPoint : rcLeftTop,
+            (target == ETargetPoint.RIGHT_TOP   ) ? targetPoint : rcRightTop,
+            (target == ETargetPoint.LEFT_BOTTOM ) ? targetPoint : rcLeftBottom,
+            (target == ETargetPoint.RIGHT_BOTTOM) ? targetPoint : rcRightBottom);
         Mat transformMatrix = Imgproc.getPerspectiveTransform(src, dst);
 
         Mat dst2 = new Mat();
