@@ -11,7 +11,7 @@ public interface ITab<TTabParams extends ITabParams> {
     Component makeTab(TTabParams params);
     TTabParams getParams();
 
-    /** get filtered image */
+    /** get filtered image (used as source for net tab) */
     BufferedImage getImage();
     /** get a filtered image, possibly with an additional rendering layer */
     BufferedImage getDrawImage();

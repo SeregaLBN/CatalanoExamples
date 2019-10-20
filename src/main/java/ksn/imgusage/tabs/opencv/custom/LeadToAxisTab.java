@@ -34,6 +34,10 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     public  static final int ANGLE_LEAD_MAX = +180;
     private static final int ANGLE_LEAD_MIN_DIFF = 10;
 
+    private static final Scalar BLACK = new Scalar(0, 0, 0);
+    private static final Scalar RED   = new Scalar(0, 0, 255);
+    private static final Scalar GREEN = new Scalar(0, 255, 0);
+
     private static class IterationResult {
         final Mat mat;
         final double angle;
@@ -102,7 +106,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
 
         int max = Math.max(imageMat.width(), imageMat.height());
         int diagonal = (int)Math.sqrt(max * max * 2);
-        Mat matStarted = new Mat(diagonal, diagonal, imageMat.type(), new Scalar(0,0,0));
+        Mat matStarted = new Mat(diagonal, diagonal, imageMat.type(), BLACK);
         int offsetX = (diagonal - imageMat.width()) / 2;
         int offsetY = (diagonal - imageMat.width()) / 2;
         imageMat.copyTo(matStarted.colRange(offsetX, offsetX + imageMat.width())
@@ -151,7 +155,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
         }
 
         Mat imgNoBorder   = makeBestImage(matStarted, null);
-        Mat imgWithBorder = makeBestImage(matStarted, new Scalar(0, 255, 0));
+        Mat imgWithBorder = makeBestImage(matStarted, GREEN);
         bestImg = ImgHelper.toBufferedImage(imgWithBorder);
         applyImage(imgNoBorder);
 
@@ -163,7 +167,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
         IterationResult best = rotateAndFindMaxContourArea(matStarted, bestIteration.angle, regionRectColor); // optional; another rectangle color
 
         Size sizeSrc = getSourceMat().size();
-        Mat dst = new Mat(sizeSrc, best.mat.type(), new Scalar(0,0,0));
+        Mat dst = new Mat(sizeSrc, best.mat.type(), BLACK);
         Rect roi = best.rcOut;
         roi.width++; roi.height++; // add color border :(
         if (!params.keepSourceSize) {
@@ -209,7 +213,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
             findBestIteration();
             return false; // stop iterations
         } else {
-            IterationResult resIter = rotateAndFindMaxContourArea(matStarted, angle, new Scalar(0, 0, 255));
+            IterationResult resIter = rotateAndFindMaxContourArea(matStarted, angle, RED);
             logger.trace("nextIteration: {}", resIter);
             allIterations.add(resIter);
             return true; // need next iteration
