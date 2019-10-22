@@ -35,8 +35,7 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
         final Mat mat;
         final double area;
         final Rect rcOut;
-        Point targetPoint;
-        ETargetPoint target;
+
         IterationResult(Mat mat, double area, Rect rc) {
             this.mat = mat;
             this.area = area;
@@ -49,8 +48,12 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
     }
 
     private LeadToPerspectiveTabParams params;
-    private List<IterationResult> allIterations = new ArrayList<>();
-    private int bestIndex;
+    private IterationResult started;
+    private final Point offsetRT = new Point();
+    private final Point offsetRB = new Point();
+    private final Point offsetLT = new Point();
+    private final Point offsetLB = new Point();
+
     @Override
     public Component makeTab(LeadToPerspectiveTabParams params) {
         if (params == null)
@@ -69,11 +72,20 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
 
     @Override
     protected void applyOpencvFilter() {
-        allIterations.clear();
+        offsetRT.x = offsetRT.y = 0;
+        offsetRB.x = offsetRB.y = 0;
+        offsetLT.x = offsetLT.y = 0;
+        offsetLT.x = offsetLT.y = 0;
         Size sizeSrc = imageMat.size();
-        IterationResult started = findMaxContourArea(imageMat, sizeSrc.width * sizeSrc.height, logger);;
-        allIterations.add(started);
-        bestIndex = 0;
+        started = findMaxContourArea(imageMat, sizeSrc.width * sizeSrc.height, logger);
+        if (started.rcOut != null) {
+            Imgproc.rectangle(started.mat,
+                started.rcOut.tl(),
+                started.rcOut.br(),
+                YELLOW,
+                1);
+        }
+        logger.trace("applyOpencvFilter: iterationResult: rc={}, area={}", started.rcOut, started.area);
         imageMat = started.mat;
 
         SwingUtilities.invokeLater(this::nextIteration);
@@ -84,7 +96,7 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
             return;
 
         try {
-            nextIterationRightTopX(+115);
+            nextIterationRightTopX(+1);
         } catch (Exception ex) {
             logger.error("nextIteration: {}", ex);
             tabHandler.onError(ex, this, null);
@@ -98,93 +110,93 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
         tabHandler.onImageChanged(this);
     }
 
-    private void nextIterationRightTopX(int offxsetX) {
+    private void nextIterationRightTopX(int offsetX) {
         if (getSourceMat() == null)
             return;
 
-        IterationResult started = allIterations.get(0);
+        logger.trace("nextIterationRightTopX: offxsetX={}", offsetX);
+
         Rect rc = started.rcOut;
         Point rightTop = new Point(rc.x + rc.width, rc.y);
-        Point targetPoint = new Point(rightTop.x + offxsetX, rightTop.y);
+        Point offset = new Point(offsetX, offsetRT.y);
 
         boolean repeat;
-        if (targetPoint.x >= imageMat.width()*1.5) {
+        if ((rightTop.x + offset.x) >= imageMat.width()*1.5) {
             repeat = false;
         } else {
-          //IterationResult prev = allIterations.get(allIterations.size() - 1);
-            IterationResult curr = tryPerspectiveAndFindMaxContourArea(targetPoint, ETargetPoint.RIGHT_TOP, RED);
-            boolean skip = curr.rcOut == null;
+            IterationResult last = tryPerspectiveAndFindMaxContourArea(offset, ETargetPoint.RIGHT_TOP, RED);
+            logger.trace("nextIterationRightTopX: iterationResult: rc={}, area={}", last.rcOut, last.area);
+            boolean skip = last.rcOut == null;
             if (skip) {
                 repeat = true;
             } else {
-                allIterations.add(curr);
                 // show intermediate result
-                applyImage(curr.mat);
+                applyImage(last.mat);
 
-                boolean sameHeight = 4 < Math.abs(rc.height - curr.rcOut.height);
-                boolean betterByArea = curr.area <= started.area;
+                boolean sameHeight = 4 < Math.abs(rc.height - last.rcOut.height);
+                boolean betterByArea = last.area <= started.area;
                 boolean better = betterByArea && sameHeight;
                 if (better)
-                    bestIndex = allIterations.size() - 1;
+                    offsetRT.x = offsetX;
                 repeat = better;
             }
         }
 
         if (repeat)
-            SwingUtilities.invokeLater(() -> this.nextIterationRightTopX(offxsetX + 1));
-        else
-            SwingUtilities.invokeLater(() -> this.nextIterationRightTopY(-1));
-            //SwingUtilities.invokeLater(() -> this.nextIterationRightBottomX(+1));
+            SwingUtilities.invokeLater(() -> this.nextIterationRightTopX(offsetX + 1));
+//        else
+//            SwingUtilities.invokeLater(() -> this.nextIterationRightTopY(-1));
+//            SwingUtilities.invokeLater(() -> this.nextIterationRightBottomX(+1));
     }
 
-    private void nextIterationRightTopY(int offxsetY) {
+    private void nextIterationRightTopY(int offsetY) {
         if (getSourceMat() == null)
             return;
 
-        IterationResult started = allIterations.get(0);
+        logger.trace("nextIterationRightTopY: offxsetY={}", offsetY);
+
         Rect rc = started.rcOut;
         Point rightTop = new Point(rc.x + rc.width, rc.y);
-        Point targetPoint = new Point(rightTop.x, rightTop.y + offxsetY);
+        Point offset = new Point(offsetRT.x, offsetY);
 
         boolean repeat;
-        if (targetPoint.y <= -imageMat.height()/2) {
+        if ((rightTop.y + offset.y) <= -imageMat.height()/2) {
             repeat = false;
         } else {
-          //IterationResult prev = allIterations.get(allIterations.size() - 1);
-            IterationResult curr = tryPerspectiveAndFindMaxContourArea(targetPoint, ETargetPoint.RIGHT_TOP, RED);
-            boolean skip = curr.rcOut == null;
+            IterationResult last = tryPerspectiveAndFindMaxContourArea(offset, ETargetPoint.RIGHT_TOP, RED);
+            logger.trace("nextIterationRightTopY: iterationResult: rc={}, area={}", last.rcOut, last.area);
+            boolean skip = last.rcOut == null;
             if (skip) {
                 repeat = true;
             } else {
-                allIterations.add(curr);
                 // show intermediate result
-                applyImage(curr.mat);
+                applyImage(last.mat);
 
-                boolean sameWidth = 4 < Math.abs(rc.width - curr.rcOut.width);
-                boolean betterByArea = curr.area <= started.area;
+                boolean sameWidth = 4 < Math.abs(rc.width - last.rcOut.width);
+                boolean betterByArea = last.area <= started.area;
                 boolean better = betterByArea && sameWidth;
                 if (better)
-                    bestIndex = allIterations.size() - 1;
+                    offsetRT.y = offsetY;
                 repeat = better;
             }
         }
 
         if (repeat)
-            SwingUtilities.invokeLater(() -> this.nextIterationRightTopY(offxsetY - 1));
+            SwingUtilities.invokeLater(() -> this.nextIterationRightTopY(offsetY - 1));
         else
             SwingUtilities.invokeLater(() -> this.nextIterationRightBottomX(+1));
     }
 
     private void nextIterationRightBottomX(int offsetX) {
         // TODO
-        //showBest();
+        showBest();
     }
 
     private void showBest() {
-        IterationResult bestResult = allIterations.get(bestIndex);
-        IterationResult bestResultGreen = tryPerspectiveAndFindMaxContourArea(bestResult.targetPoint, bestResult.target, GREEN);
+        IterationResult bestResultGreen = tryPerspectiveAndFindMaxContourArea(null, null, GREEN);
         // show best result
         applyImage(bestResultGreen.mat);
+//        applyImage(started.mat);
     }
 
     enum ETargetPoint {
@@ -194,22 +206,31 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
         RIGHT_BOTTOM
     }
 
-    private IterationResult tryPerspectiveAndFindMaxContourArea(Point targetPoint, ETargetPoint target, Scalar rcColor) {
-        IterationResult started = allIterations.get(0);
-        Rect srcRc = started.rcOut;
-        Point rcLeftTop     = new Point(srcRc.x              , srcRc.y               );
-        Point rcRightTop    = new Point(srcRc.x + srcRc.width, srcRc.y               );
-        Point rcLeftBottom  = new Point(srcRc.x              , srcRc.y + srcRc.height);
-        Point rcRightBottom = new Point(srcRc.x + srcRc.width, srcRc.y + srcRc.height);
-        Mat src = new MatOfPoint2f(rcLeftTop    ,
-                                   rcRightTop   ,
-                                   rcLeftBottom ,
-                                   rcRightBottom);
+    private IterationResult tryPerspectiveAndFindMaxContourArea(Point offset, ETargetPoint target, Scalar rcColor) {
+        Rect rcSrc = started.rcOut;
+        Point pSrcLeftTop     = new Point(rcSrc.x              , rcSrc.y               );
+        Point pSrcRightTop    = new Point(rcSrc.x + rcSrc.width, rcSrc.y               );
+        Point pSrcLeftBottom  = new Point(rcSrc.x              , rcSrc.y + rcSrc.height);
+        Point pSrcRightBottom = new Point(rcSrc.x + rcSrc.width, rcSrc.y + rcSrc.height);
+        Mat src = new MatOfPoint2f(pSrcLeftTop    ,
+                                   pSrcRightTop   ,
+                                   pSrcLeftBottom ,
+                                   pSrcRightBottom);
+
+        Point pDstLeftTop     = new Point(pSrcLeftTop    .x + ((target == ETargetPoint.LEFT_TOP    ) ? offset.x : offsetLT.x),
+                                          pSrcLeftTop    .y + ((target == ETargetPoint.LEFT_TOP    ) ? offset.y : offsetLT.y));
+        Point pDstRightTop    = new Point(pSrcRightTop   .x + ((target == ETargetPoint.RIGHT_TOP   ) ? offset.x : offsetRT.x),
+                                          pSrcRightTop   .y + ((target == ETargetPoint.RIGHT_TOP   ) ? offset.y : offsetRT.y));
+        Point pDstLeftBottom  = new Point(pSrcLeftBottom .x + ((target == ETargetPoint.LEFT_BOTTOM ) ? offset.x : offsetLB.x),
+                                          pSrcLeftBottom .y + ((target == ETargetPoint.LEFT_BOTTOM ) ? offset.y : offsetLB.y));
+        Point pDstRightBottom = new Point(pSrcRightBottom.x + ((target == ETargetPoint.RIGHT_BOTTOM) ? offset.x : offsetRB.x),
+                                          pSrcRightBottom.y + ((target == ETargetPoint.RIGHT_BOTTOM) ? offset.y : offsetRB.y));
         Mat dst = new MatOfPoint2f(
-            (target == ETargetPoint.LEFT_TOP    ) ? targetPoint : rcLeftTop,
-            (target == ETargetPoint.RIGHT_TOP   ) ? targetPoint : rcRightTop,
-            (target == ETargetPoint.LEFT_BOTTOM ) ? targetPoint : rcLeftBottom,
-            (target == ETargetPoint.RIGHT_BOTTOM) ? targetPoint : rcRightBottom);
+            pDstLeftTop,
+            pDstRightTop,
+            pDstLeftBottom,
+            pDstRightBottom);
+
         Mat transformMatrix = Imgproc.getPerspectiveTransform(src, dst);
 
         Mat dst2 = new Mat();
@@ -225,13 +246,11 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
         IterationResult res = findMaxContourArea(dst2, sizeSrc.width * sizeSrc.height, logger);
         if ((res.rcOut != null) && (rcColor != null)) {
             Imgproc.rectangle(res.mat,
-                new Point(res.rcOut.x, res.rcOut.y),
-                new Point(res.rcOut.x + res.rcOut.width, res.rcOut.y + res.rcOut.height),
+                res.rcOut.tl(),
+                res.rcOut.br(),
                 rcColor,
                 1);
         }
-        res.target = target;
-        res.targetPoint = targetPoint;
         return res;
     }
 
