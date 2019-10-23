@@ -56,6 +56,8 @@ public final class MapperFilter {
 
     public static List<FilterTabs> getAllOpencvTabsDescr() {
         return Arrays.<FilterTabs>asList( // alphabetical sort
+            new FilterTabs(            AdaptiveThresholdTab.TAB_TITLE,
+                                       AdaptiveThresholdTab.TAB_DESCRIPTION),
             new FilterTabs(                  AddWeightedTab.TAB_TITLE,
                                              AddWeightedTab.TAB_DESCRIPTION),
             new FilterTabs(                         AsIsTab.TAB_TITLE,
@@ -107,6 +109,8 @@ public final class MapperFilter {
 
         // OpenCV
         // alphabetical sort
+        case                   AdaptiveThresholdTab.TAB_NAME:
+            return             AdaptiveThresholdTab.class;
         case                         AddWeightedTab.TAB_NAME:
             return                   AddWeightedTab.class;
         case                                AsIsTab.TAB_NAME:
@@ -179,6 +183,8 @@ public final class MapperFilter {
 
         // OpenCV
         // alphabetical sort
+        case                       AdaptiveThresholdTab.TAB_NAME:
+            return                 AdaptiveThresholdTabParams.class;
         case                             AddWeightedTab.TAB_NAME:
             return                       AddWeightedTabParams.class;
         case                                    AsIsTab.TAB_NAME:
