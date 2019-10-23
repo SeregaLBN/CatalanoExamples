@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs.opencv.custom;
 
 import java.awt.Component;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -49,10 +50,36 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
 
     private LeadToPerspectiveTabParams params;
     private IterationResult started;
+    private IterationResult last;
+    private boolean isBestFound;
     private final Point offsetRT = new Point();
     private final Point offsetRB = new Point();
     private final Point offsetLT = new Point();
     private final Point offsetLB = new Point();
+
+    @Override
+    public BufferedImage getDrawImage() {
+        Scalar color;
+        IterationResult res = last;
+        if (res == null) {
+            res = started;
+            color = YELLOW;
+        } else {
+            color = isBestFound ? GREEN : RED;
+        }
+        if (res != null && res.rcOut != null) {
+            Mat copy = res.mat.clone();
+            Imgproc.rectangle(
+                copy,
+                res.rcOut.tl(),
+                res.rcOut.br(),
+                color,
+                1);
+            return ImgHelper.toBufferedImage(copy);
+        }
+
+        return super.getDrawImage();
+    }
 
     @Override
     public Component makeTab(LeadToPerspectiveTabParams params) {
@@ -72,23 +99,20 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
 
     @Override
     protected void applyOpencvFilter() {
+        isBestFound = false;
         offsetRT.x = offsetRT.y = 0;
         offsetRB.x = offsetRB.y = 0;
         offsetLT.x = offsetLT.y = 0;
         offsetLT.x = offsetLT.y = 0;
         Size sizeSrc = imageMat.size();
         started = findMaxContourArea(imageMat, sizeSrc.width * sizeSrc.height, logger);
-        if (started.rcOut != null) {
-            Imgproc.rectangle(started.mat,
-                started.rcOut.tl(),
-                started.rcOut.br(),
-                YELLOW,
-                1);
-        }
         logger.trace("applyOpencvFilter: iterationResult: rc={}, area={}", started.rcOut, started.area);
         imageMat = started.mat;
 
-        SwingUtilities.invokeLater(this::nextIteration);
+        if (started.rcOut == null)
+            tabHandler.onError(new Exception("Not found started contour"), this, null);
+        else
+            SwingUtilities.invokeLater(this::nextIteration);
     }
 
     private void nextIteration() {
@@ -124,15 +148,16 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
         if ((rightTop.x + offset.x) >= imageMat.width()*1.5) {
             repeat = false;
         } else {
-            IterationResult last = tryPerspectiveAndFindMaxContourArea(offset, ETargetPoint.RIGHT_TOP, RED);
+            last = tryPerspectiveAndFindMaxContourArea(offset, ETargetPoint.RIGHT_TOP, RED);
             logger.trace("nextIterationRightTopX: iterationResult: rc={}, area={}", last.rcOut, last.area);
+
+            // show intermediate result
+            applyImage(last.mat);
+
             boolean skip = last.rcOut == null;
             if (skip) {
                 repeat = true;
             } else {
-                // show intermediate result
-                applyImage(last.mat);
-
                 boolean sameHeight = 4 < Math.abs(rc.height - last.rcOut.height);
                 boolean betterByArea = last.area <= started.area;
                 boolean better = betterByArea && sameHeight;
@@ -163,14 +188,16 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
         if ((rightTop.y + offset.y) <= -imageMat.height()/2) {
             repeat = false;
         } else {
-            IterationResult last = tryPerspectiveAndFindMaxContourArea(offset, ETargetPoint.RIGHT_TOP, RED);
+            last = tryPerspectiveAndFindMaxContourArea(offset, ETargetPoint.RIGHT_TOP, RED);
             logger.trace("nextIterationRightTopY: iterationResult: rc={}, area={}", last.rcOut, last.area);
+
+            // show intermediate result
+            applyImage(last.mat);
+
             boolean skip = last.rcOut == null;
             if (skip) {
                 repeat = true;
             } else {
-                // show intermediate result
-                applyImage(last.mat);
 
                 boolean sameWidth = 4 < Math.abs(rc.width - last.rcOut.width);
                 boolean betterByArea = last.area <= started.area;
@@ -193,6 +220,7 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
     }
 
     private void showBest() {
+        isBestFound = true;
         IterationResult bestResultGreen = tryPerspectiveAndFindMaxContourArea(null, null, GREEN);
         // show best result
         applyImage(bestResultGreen.mat);
@@ -243,15 +271,7 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
 
 
         Size sizeSrc = imageMat.size();
-        IterationResult res = findMaxContourArea(dst2, sizeSrc.width * sizeSrc.height, logger);
-        if ((res.rcOut != null) && (rcColor != null)) {
-            Imgproc.rectangle(res.mat,
-                res.rcOut.tl(),
-                res.rcOut.br(),
-                rcColor,
-                1);
-        }
-        return res;
+        return findMaxContourArea(dst2, sizeSrc.width * sizeSrc.height, logger);
     }
 
     static IterationResult findMaxContourArea(Mat imageSrc, double originalMaxArea, Logger logger) {

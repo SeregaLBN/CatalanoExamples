@@ -1,0 +1,147 @@
+[ {
+  "tabName" : "FirstTab",
+  "pos" : 0,
+  "params" : {
+    "useGray" : true,
+    "useScale" : true,
+    "keepToSize" : {
+      "width" : 500,
+      "height" : 375
+    },
+    "useKeepAspectRatio" : true,
+    "boundOfRoi" : {
+      "left" : 0,
+      "top" : 0,
+      "right" : 0,
+      "bottom" : 0
+    },
+    "imageFile" : "IMG_20190816_135833.jpg"
+  }
+}, {
+  "tabName" : "OpenCV:GaussianBlur",
+  "pos" : 1,
+  "params" : {
+    "kernelSize" : {
+      "width" : 0,
+      "height" : 0
+    },
+    "sigmaX" : 3.0,
+    "sigmaY" : 3.0,
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:AddWeighted",
+  "pos" : 2,
+  "params" : {
+    "alpha" : -2.0,
+    "beta" : 3.0,
+    "gamma" : 0.0,
+    "dtype" : -1
+  }
+}, {
+  "tabName" : "OpenCV:GaussianBlur",
+  "pos" : 3,
+  "params" : {
+    "kernelSize" : {
+      "width" : 0,
+      "height" : 0
+    },
+    "sigmaX" : 3.0,
+    "sigmaY" : 3.0,
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:AddWeighted",
+  "pos" : 4,
+  "params" : {
+    "alpha" : -2.0,
+    "beta" : 3.0,
+    "gamma" : 0.0,
+    "dtype" : -1
+  }
+}, {
+  "tabName" : "OpenCV:GaussianBlur",
+  "pos" : 5,
+  "params" : {
+    "kernelSize" : {
+      "width" : 0,
+      "height" : 0
+    },
+    "sigmaX" : 3.0,
+    "sigmaY" : 3.0,
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:AddWeighted",
+  "pos" : 6,
+  "params" : {
+    "alpha" : -2.0,
+    "beta" : 3.0,
+    "gamma" : 0.0,
+    "dtype" : -1
+  }
+}, {
+  "tabName" : "OpenCV:Bilateral",
+  "pos" : 7,
+  "params" : {
+    "diameter" : 4,
+    "sigmaColor" : 98.59,
+    "sigmaSpace" : 459.31,
+    "borderType" : "BORDER_REFLECT_101"
+  }
+}, {
+  "tabName" : "OpenCV:MorphologyEx",
+  "pos" : 8,
+  "params" : {
+    "morphologicalOperation" : "MORPH_ERODE",
+    "kernelSource" : "STRUCTURING_ELEMENT",
+    "kernel1" : {
+      "rows" : 1,
+      "cols" : 1,
+      "type" : "CV_8UC1",
+      "scalarVal0" : 1.0,
+      "scalarVal1" : 0.0,
+      "scalarVal2" : 0.0,
+      "scalarVal3" : 0.0
+    },
+    "kernel2" : {
+      "shape" : "MORPH_ELLIPSE",
+      "kernelSize" : {
+        "width" : 2,
+        "height" : 2
+      },
+      "anchor" : {
+        "x" : -1,
+        "y" : -1
+      }
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "iterations" : 1
+  }
+}, {
+  "tabName" : "OpenCV:Threshold",
+  "pos" : 9,
+  "params" : {
+    "thresh" : 228.94,
+    "maxVal" : 281.25,
+    "threshType" : "THRESH_TRUNC",
+    "useOtsuMask" : false,
+    "useTriangleMask" : false
+  }
+}, {
+  "tabName" : "OpenCV:Canny",
+  "pos" : 10,
+  "params" : {
+    "threshold1" : 100.0,
+    "threshold2" : 850.0,
+    "apertureSize" : 3,
+    "l2gradient" : false
+  }
+}, {
+  "tabName" : "OpenCV:Custom:LeadToPerspective",
+  "pos" : 11,
+  "params" : { }
+} ]
