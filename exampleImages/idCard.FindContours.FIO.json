@@ -1,0 +1,124 @@
+[ {
+  "tabName" : "FirstTab",
+  "pos" : 0,
+  "params" : {
+    "useGray" : true,
+    "useScale" : true,
+    "keepToSize" : {
+      "width" : 3000,
+      "height" : 2250
+    },
+    "useKeepAspectRatio" : true,
+    "boundOfRoi" : {
+      "left" : 2300,
+      "top" : 1552,
+      "right" : 300,
+      "bottom" : 1358
+    },
+    "imageFile" : "IMG_20190816_135747.jpg"
+  }
+}, {
+  "tabName" : "OpenCV:AsIs",
+  "pos" : 1,
+  "params" : {
+    "useGray" : false
+  }
+}, {
+  "tabName" : "OpenCV:Contrast/Brightness",
+  "pos" : 2,
+  "params" : {
+    "alpha" : 2.32,
+    "beta" : -132
+  }
+}, {
+  "tabName" : "OpenCV:Bilateral",
+  "pos" : 3,
+  "params" : {
+    "diameter" : 121,
+    "sigmaColor" : 34.57,
+    "sigmaSpace" : 49.38,
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:Threshold",
+  "pos" : 4,
+  "params" : {
+    "thresh" : 154.43,
+    "maxVal" : 439.81,
+    "threshType" : "THRESH_BINARY",
+    "useOtsuMask" : false,
+    "useTriangleMask" : false
+  }
+}, {
+  "tabName" : "OpenCV:Blur",
+  "pos" : 5,
+  "params" : {
+    "kernelSize" : {
+      "width" : 10,
+      "height" : 10
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "borderType" : "BORDER_DEFAULT"
+  }
+}, {
+  "tabName" : "OpenCV:AddWeighted",
+  "pos" : 6,
+  "params" : {
+    "alpha" : -1.0,
+    "beta" : 2.0,
+    "gamma" : 0.0,
+    "dtype" : -1
+  }
+}, {
+  "tabName" : "OpenCV:MorphologyEx",
+  "pos" : 7,
+  "params" : {
+    "morphologicalOperation" : "MORPH_ERODE",
+    "kernelSource" : "STRUCTURING_ELEMENT",
+    "kernel1" : {
+      "rows" : 1,
+      "cols" : 1,
+      "type" : "CV_8UC1",
+      "scalarVal0" : 1.0,
+      "scalarVal1" : 0.0,
+      "scalarVal2" : 0.0,
+      "scalarVal3" : 0.0
+    },
+    "kernel2" : {
+      "shape" : "MORPH_ELLIPSE",
+      "kernelSize" : {
+        "width" : 3,
+        "height" : 3
+      },
+      "anchor" : {
+        "x" : -1,
+        "y" : -1
+      }
+    },
+    "anchor" : {
+      "x" : -1,
+      "y" : -1
+    },
+    "iterations" : 2
+  }
+}, {
+  "tabName" : "OpenCV:FindContours",
+  "pos" : 8,
+  "params" : {
+    "mode" : "RETR_CCOMP",
+    "method" : "CHAIN_APPROX_SIMPLE",
+    "drawMethod" : "EXTERNAL_RECT",
+    "minLimitContours" : {
+      "width" : 15,
+      "height" : 15
+    },
+    "maxContourArea" : 100,
+    "contourIdx" : -1,
+    "fillContour" : true,
+    "maxLevel" : 100,
+    "randomColors" : false
+  }
+} ]
