@@ -15,7 +15,7 @@
       "right" : 0,
       "bottom" : 0
     },
-    "imageFile" : "passportUkr_rnd.png"
+    "imageFile" : "passportUkr_rotated.png"
   }
 }, {
   "tabName" : "OpenCV:GaussianBlur",

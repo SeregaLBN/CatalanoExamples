@@ -14,11 +14,22 @@ import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
+
+import ksn.imgusage.tabs.opencv.InitLib;
 
 public class PassportUkrTest {
 
     private static final Logger logger = LoggerFabric.getLogger(PassportUkrTest.class);
+
+    static {
+        InitLib.loadOpenCV();
+    }
 
     private void randomRotate(File imgFileIn, File imgFileOut) throws IOException {
         logger.debug("imgFileIn.exist={}; imgFileOut.exist={}", imgFileIn.exists(), imgFileOut.exists());
@@ -34,33 +45,108 @@ public class PassportUkrTest {
         double angleMax = +50;
         double angle = angleMin + rnd.nextInt((int)(angleMax - angleMin));
         BufferedImage imgOut = ImgHelper.rotate(imgIn, angle, false);
-        imgOut = addBorder(imgOut, Color.WHITE);
+        imgOut = addBorder(imgOut, Color.WHITE, new Size(imgIn.getWidth() / 10.0,
+                                                         imgIn.getHeight() / 10.0));
 
         String ext = SelectFilterDialog.getExtension(imgFileOut);
         boolean succ = ImageIO.write(imgOut, ext, imgFileOut);
         if (succ)
-            logger.info("Image saved to {} file {}\n Rotate angle os {}", ext, imgFileOut, angle);
+            logger.info("Image saved to {} file {}\n Rotate angle is {}", ext, imgFileOut, angle);
         else
             logger.error("Can`t save image to {} file {}", ext, imgFileOut);
         Assertions.assertTrue(succ);
     }
 
-    private BufferedImage addBorder(BufferedImage img, Color fillColor) {
+    private void randomPerspective(File imgFileIn, File imgFileOut) throws IOException {
+        logger.debug("imgFileIn.exist={}; imgFileOut.exist={}", imgFileIn.exists(), imgFileOut.exists());
+        logger.debug("imgFileIn.path={}", imgFileIn.getAbsolutePath());
+        if (!imgFileIn.exists())
+            throw new IllegalArgumentException("Input file not found " + imgFileIn.getAbsolutePath());
+
+
+        BufferedImage imgIn = ImageIO.read(imgFileIn);
+
+        Random rnd = ThreadLocalRandom.current();
+
+        int w = imgIn.getWidth();
+        int h = imgIn.getHeight();
+        double dx = w / 20.0;
+        double dy = h / 20.0;
+        Point offset1 = new Point(rnd.nextInt((int)dx),
+                                  rnd.nextInt((int)dy));
+        Point offset2 = new Point(rnd.nextInt((int)dx),
+                                  rnd.nextInt((int)dy));
+
+        Point pSrcLeftTop     = new Point(dx    , dy);
+        Point pSrcRightTop    = new Point(dx + w, dy);
+        Point pSrcLeftBottom  = new Point(dx    , dy + h);
+        Point pSrcRightBottom = new Point(dx + w, dy + h);
+        Mat src = new MatOfPoint2f(pSrcLeftTop    ,
+                                   pSrcRightTop   ,
+                                   pSrcLeftBottom ,
+                                   pSrcRightBottom);
+
+        boolean k = rnd.nextBoolean(); // false - left top   ; true - right top
+        boolean m = rnd.nextBoolean(); // false - left bottom; true - right bottom
+
+        Point pDstLeftTop     = new Point(pSrcLeftTop    .x - ( k ? offset1.x : 0),
+                                          pSrcLeftTop    .y - ( k ? offset1.y : 0));
+        Point pDstRightTop    = new Point(pSrcRightTop   .x + (!k ? offset1.x : 0),
+                                          pSrcRightTop   .y - (!k ? offset1.y : 0));
+        Point pDstLeftBottom  = new Point(pSrcLeftBottom .x - ( m ? offset2.x : 0),
+                                          pSrcLeftBottom .y + ( m ? offset2.y : 0));
+        Point pDstRightBottom = new Point(pSrcRightBottom.x + (!m ? offset2.x : 0),
+                                          pSrcRightBottom.y + (!m ? offset2.y : 0));
+        Mat dst = new MatOfPoint2f(
+            pDstLeftTop,
+            pDstRightTop,
+            pDstLeftBottom,
+            pDstRightBottom);
+
+        Mat transformMatrix = Imgproc.getPerspectiveTransform(src, dst);
+
+        BufferedImage imgTmp = addBorder(imgIn, Color.WHITE, new Size(dx * 2,
+                                                                      dy * 2));
+        Mat srcMat = ImgHelper.toMat(imgTmp);
+        Mat dstMat = new Mat();
+        Imgproc.warpPerspective(
+            srcMat,
+            dstMat,
+            transformMatrix,
+            new Size(0, 0),
+            Imgproc.INTER_NEAREST);
+
+        BufferedImage imgOut = ImgHelper.toBufferedImage(dstMat);
+
+        String ext = SelectFilterDialog.getExtension(imgFileOut);
+        boolean succ = ImageIO.write(imgOut, ext, imgFileOut);
+        if (succ)
+            logger.info("Image saved to {} file {}\n Perspective offsets: {} [{}]; {} [{}]",
+                        ext,
+                        imgFileOut,
+                        k ? "left-top" : "right-top",
+                        offset1,
+                        m ? "left-bottom" : "right-bottom",
+                        offset2);
+        else
+            logger.error("Can`t save image to {} file {}", ext, imgFileOut);
+        Assertions.assertTrue(succ);
+    }
+
+    private BufferedImage addBorder(BufferedImage img, Color fillColor, Size borderSize) {
         int w = img.getWidth();
         int h = img.getHeight();
-        double dx = w / 10.0;
-        double dy = h / 10.0;
         BufferedImage outImg = new BufferedImage(
-                w + (int)dx,
-                h + (int)dy,
+                w + (int)borderSize.width,
+                h + (int)borderSize.height,
                 img.getType());
 
         Graphics2D g = outImg.createGraphics();
         g.setComposite(AlphaComposite.Src);
         g.setColor(fillColor);
-        g.fillRect(0, 0, w + (int)dx, h + (int)dy);
+        g.fillRect(0, 0, w + (int)borderSize.width, h + (int)borderSize.height);
         g.drawImage(img,
-                (int)dx/2, (int)dy/2, w + (int)dx/2, h + (int)dy/2,
+                (int)borderSize.width/2, (int)borderSize.height/2, w + (int)borderSize.width/2, h + (int)borderSize.height/2,
                 0, 0, w, h,
                 fillColor, null);
         g.dispose();
@@ -72,7 +158,14 @@ public class PassportUkrTest {
     public void randomRotateTest() throws IOException {
         randomRotate(
                 Paths.get("exampleImages", "passportUkr.jpg"    ).toFile(),
-                Paths.get("exampleImages", "passportUkr_rnd.png").toFile());
+                Paths.get("exampleImages", "passportUkr_rotated.png").toFile());
+    }
+
+    @Test
+    public void randomPerspectiveTest() throws IOException {
+        randomPerspective(
+                Paths.get("exampleImages", "passportUkr.jpg"    ).toFile(),
+                Paths.get("exampleImages", "passportUkr_perspctve.png").toFile());
     }
 
     public static void main(String[] args) {
