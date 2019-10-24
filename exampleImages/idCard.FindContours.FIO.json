@@ -2,7 +2,7 @@
   "tabName" : "FirstTab",
   "pos" : 0,
   "params" : {
-    "useGray" : true,
+    "useGray" : false,
     "useScale" : true,
     "keepToSize" : {
       "width" : 3000,
@@ -21,7 +21,7 @@
   "tabName" : "OpenCV:AsIs",
   "pos" : 1,
   "params" : {
-    "useGray" : false
+    "useGray" : true
   }
 }, {
   "tabName" : "OpenCV:Contrast/Brightness",
@@ -31,50 +31,18 @@
     "beta" : -132
   }
 }, {
-  "tabName" : "OpenCV:Bilateral",
+  "tabName" : "OpenCV:Threshold",
   "pos" : 3,
   "params" : {
-    "diameter" : 121,
-    "sigmaColor" : 34.57,
-    "sigmaSpace" : 49.38,
-    "borderType" : "BORDER_DEFAULT"
-  }
-}, {
-  "tabName" : "OpenCV:Threshold",
-  "pos" : 4,
-  "params" : {
-    "thresh" : 154.43,
-    "maxVal" : 439.81,
+    "thresh" : 150.0,
+    "maxVal" : 250.0,
     "threshType" : "THRESH_BINARY",
     "useOtsuMask" : false,
     "useTriangleMask" : false
   }
 }, {
-  "tabName" : "OpenCV:Blur",
-  "pos" : 5,
-  "params" : {
-    "kernelSize" : {
-      "width" : 10,
-      "height" : 10
-    },
-    "anchor" : {
-      "x" : -1,
-      "y" : -1
-    },
-    "borderType" : "BORDER_DEFAULT"
-  }
-}, {
-  "tabName" : "OpenCV:AddWeighted",
-  "pos" : 6,
-  "params" : {
-    "alpha" : -1.0,
-    "beta" : 2.0,
-    "gamma" : 0.0,
-    "dtype" : -1
-  }
-}, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 7,
+  "pos" : 4,
   "params" : {
     "morphologicalOperation" : "MORPH_ERODE",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -90,8 +58,8 @@
     "kernel2" : {
       "shape" : "MORPH_ELLIPSE",
       "kernelSize" : {
-        "width" : 3,
-        "height" : 3
+        "width" : 2,
+        "height" : 2
       },
       "anchor" : {
         "x" : -1,
@@ -102,11 +70,11 @@
       "x" : -1,
       "y" : -1
     },
-    "iterations" : 2
+    "iterations" : 3
   }
 }, {
   "tabName" : "OpenCV:FindContours",
-  "pos" : 8,
+  "pos" : 5,
   "params" : {
     "mode" : "RETR_CCOMP",
     "method" : "CHAIN_APPROX_SIMPLE",
