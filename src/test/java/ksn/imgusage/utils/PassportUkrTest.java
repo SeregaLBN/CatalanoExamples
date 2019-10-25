@@ -13,16 +13,19 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
-import org.opencv.core.Size;
+import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 
 import ksn.imgusage.tabs.opencv.InitLib;
+import ksn.imgusage.type.opencv.CvBorderTypes;
 
+/** Prepare test images for demo pipelines:
+ * <li> @see {@link #randomRotateTest()}      - used for pipeline demo: ./exampleImages/idCard.LeadToHorizont.json
+ * <li> @see {@link #randomPerspectiveTest()} - used for pipeline demo: ./exampleImages/idCard.LeadToPerspective.json
+ */
 public class PassportUkrTest {
 
     private static final Logger logger = LoggerFabric.getLogger(PassportUkrTest.class);
@@ -70,12 +73,16 @@ public class PassportUkrTest {
 
         int w = imgIn.getWidth();
         int h = imgIn.getHeight();
-        double dx = w / 20.0;
-        double dy = h / 20.0;
-        Point offset1 = new Point(rnd.nextInt((int)dx),
-                                  rnd.nextInt((int)dy));
-        Point offset2 = new Point(rnd.nextInt((int)dx),
-                                  rnd.nextInt((int)dy));
+        double staticOffsetX  = w / 7.0;
+        double staticOffsetY  = h / 7.0;
+        double dynamicOffsetX = w / 20.0;
+        double dynamicOffsetY = h / 20.0;
+        double dx = staticOffsetX + dynamicOffsetX;
+        double dy = staticOffsetY + dynamicOffsetY;
+        Point offset1 = new Point(staticOffsetX + rnd.nextInt((int)dynamicOffsetX),
+                                  staticOffsetY + rnd.nextInt((int)dynamicOffsetY));
+        Point offset2 = new Point(staticOffsetX + rnd.nextInt((int)dynamicOffsetX),
+                                  staticOffsetY + rnd.nextInt((int)dynamicOffsetY));
 
         Point pSrcLeftTop     = new Point(dx    , dy);
         Point pSrcRightTop    = new Point(dx + w, dy);
@@ -114,7 +121,9 @@ public class PassportUkrTest {
             dstMat,
             transformMatrix,
             new Size(0, 0),
-            Imgproc.INTER_NEAREST);
+            Imgproc.INTER_NEAREST,
+            CvBorderTypes.BORDER_REPLICATE.getVal(),
+            new Scalar(0xFF, 0xFF, 0xFF));
 
         BufferedImage imgOut = ImgHelper.toBufferedImage(dstMat);
 
@@ -154,17 +163,21 @@ public class PassportUkrTest {
         return outImg;
     }
 
+    /** Make demo image for pipeline ./exampleImages/idCard.LeadToHorizont.json */
     @Test
+    @Order(1)
     public void randomRotateTest() throws IOException {
         randomRotate(
                 Paths.get("exampleImages", "passportUkr.jpg"    ).toFile(),
                 Paths.get("exampleImages", "passportUkr_rotated.png").toFile());
     }
 
+    /** Make demo image for pipeline ./exampleImages/idCard.LeadToPerspective.json */
     @Test
+    @Order(2)
     public void randomPerspectiveTest() throws IOException {
         randomPerspective(
-                Paths.get("exampleImages", "passportUkr.jpg"    ).toFile(),
+                Paths.get("exampleImages", "passportUkr_rotated.png"  ).toFile(),
                 Paths.get("exampleImages", "passportUkr_perspctve.png").toFile());
     }
 
