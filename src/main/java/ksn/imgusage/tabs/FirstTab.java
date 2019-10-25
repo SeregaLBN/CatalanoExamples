@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import Catalano.Imaging.FastBitmap;
-import ksn.imgusage.filtersdemo.MainApp;
+import ksn.imgusage.filtersdemo.ImageFilterExamples;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.Padding;
 import ksn.imgusage.type.Size;
@@ -248,7 +248,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             sourceImage = ImageIO.read(imageFile);
 
             params.imageFile = imageFile;
-            tabHandler.getFrame().setTitle(MainApp.DEFAULT_TITLE + ": " + imageFile.getName());
+            tabHandler.getFrame().setTitle(ImageFilterExamples.DEFAULT_TITLE + ": " + imageFile.getName());
             latestImageDir = imageFile.getParentFile();
 
             if (applyMaxSizeLimits != null)

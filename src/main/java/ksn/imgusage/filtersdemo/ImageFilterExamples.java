@@ -39,7 +39,7 @@ import ksn.imgusage.utils.MapperFilter;
 import ksn.imgusage.utils.SelectFilterDialog;
 import ksn.imgusage.utils.UiHelper;
 
-public class MainApp {
+public class ImageFilterExamples {
 
     static {
         System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY  , "TRACE");
@@ -50,7 +50,7 @@ public class MainApp {
         System.setProperty(org.slf4j.impl.SimpleLogger.SHOW_SHORT_LOG_NAME_KEY, "true");
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(MainApp.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImageFilterExamples.class);
     public static final String DEFAULT_TITLE = "Demonstration of image filters";
     private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "idCard.LeadToHorizont.json").toAbsolutePath().toFile();
 
@@ -61,7 +61,7 @@ public class MainApp {
     private JWindow errorWindow;
     private Timer timer;
 
-    public MainApp() {
+    public ImageFilterExamples() {
         frame = new JFrame(DEFAULT_TITLE);
         makeLogo();
         initialize();
@@ -84,7 +84,7 @@ public class MainApp {
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
-            public void windowClosing(WindowEvent we) { MainApp.this.onClose(); }
+            public void windowClosing(WindowEvent we) { ImageFilterExamples.this.onClose(); }
         });
 
         frame.setResizable(true);
@@ -157,17 +157,17 @@ public class MainApp {
 
     private ITabHandler getTabHandler() {
         return new ITabHandler() {
-            @Override public JFrame getFrame()                                            { return MainApp.this.frame; }
-            @Override public File   getCurrentDir()                                       { return MainApp.this.getFirstTab().getLatestImageDir(); }
-            @Override public ITab<?> getFirstTab()                                        { return MainApp.this.getFirstTab(); }
-            @Override public void onImageChanged(ITab<?> tab)                             {        MainApp.this.onImageChanged(tab); }
-            @Override public void onAddNewFilter()                                        {        MainApp.this.onAddNewFilter(); }
-            @Override public void onRemoveFilter(ITab<?> tab)                             {        MainApp.this.onRemoveTab(tab); }
-            @Override public void onCancel()                                              {        MainApp.this.onCancel(); }
-            @Override public void onImgPanelDraw(JPanel imgPanel, Graphics2D g, Logger l) {        MainApp.this.onImgPanelDraw(imgPanel, g, l); }
-            @Override public void onError(Exception ex, ITab<?> tab, Component from)      {        MainApp.this.onError(ex, tab, from); }
-            @Override public void onSavePipeline()                                        {        MainApp.this.onSavePipeline(); }
-            @Override public void onLoadPipeline()                                        {        MainApp.this.onLoadPipeline(); }
+            @Override public JFrame getFrame()                                            { return ImageFilterExamples.this.frame; }
+            @Override public File   getCurrentDir()                                       { return ImageFilterExamples.this.getFirstTab().getLatestImageDir(); }
+            @Override public ITab<?> getFirstTab()                                        { return ImageFilterExamples.this.getFirstTab(); }
+            @Override public void onImageChanged(ITab<?> tab)                             {        ImageFilterExamples.this.onImageChanged(tab); }
+            @Override public void onAddNewFilter()                                        {        ImageFilterExamples.this.onAddNewFilter(); }
+            @Override public void onRemoveFilter(ITab<?> tab)                             {        ImageFilterExamples.this.onRemoveTab(tab); }
+            @Override public void onCancel()                                              {        ImageFilterExamples.this.onCancel(); }
+            @Override public void onImgPanelDraw(JPanel imgPanel, Graphics2D g, Logger l) {        ImageFilterExamples.this.onImgPanelDraw(imgPanel, g, l); }
+            @Override public void onError(Exception ex, ITab<?> tab, Component from)      {        ImageFilterExamples.this.onError(ex, tab, from); }
+            @Override public void onSavePipeline()                                        {        ImageFilterExamples.this.onSavePipeline(); }
+            @Override public void onLoadPipeline()                                        {        ImageFilterExamples.this.onLoadPipeline(); }
         };
     }
 
@@ -443,11 +443,11 @@ public class MainApp {
 
         try {
             SwingUtilities.invokeAndWait(() -> {
-                MainApp mainWin = new MainApp();
+                ImageFilterExamples mainWin = new ImageFilterExamples();
                 mainWin.frame.setVisible(true);
             });
         } catch (Exception ex) {
-            logger.error(MainApp.class.getSimpleName() + "::main", ex);
+            logger.error(ImageFilterExamples.class.getSimpleName() + "::main", ex);
         }
     }
 
