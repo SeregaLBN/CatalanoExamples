@@ -105,7 +105,7 @@ public class CannyTab extends OpencvFilterTab<CannyTabParams> {
             int valValid = CannyTabParams.onlyOdd(val, params.apertureSize);
             if (val == valValid) {
                 params.apertureSize = valValid;
-                resetImage();
+                invalidateAsync();
             } else {
                 SwingUtilities.invokeLater(() -> modelApertureSize.setValue(valValid));
             }

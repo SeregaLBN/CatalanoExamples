@@ -84,10 +84,10 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     public String getDescription() { return TAB_DESCRIPTION; }
 
     @Override
-    public void resetImage(boolean debounce) {
+    protected void resetImage() {
         bestIteration = null;
         bestImg = null;
-        super.resetImage(debounce);
+        super.resetImage();
     }
 
     @Override
@@ -351,7 +351,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
         SliderIntModel modelAngleRangeMax = new SliderIntModel(params.angleRangeMax, 0, ANGLE_LEAD_MIN, ANGLE_LEAD_MAX);
 
         JButton btnRepeat = new JButton("Repeat...");
-        btnRepeat.addActionListener(ev -> resetImage());
+        btnRepeat.addActionListener(ev -> invalidateAsync());
 
         Container boxLeadToHorizont = makeBoxedCheckBox(
             () -> params.leadToHorizontal,

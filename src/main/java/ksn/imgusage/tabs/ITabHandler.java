@@ -16,6 +16,7 @@ public interface ITabHandler {
 
     ITab<?> getFirstTab();
 
+    /** User changed image */
     void onImageChanged(ITab<?> tab);
     void onCancel();
     void onAddNewFilter();

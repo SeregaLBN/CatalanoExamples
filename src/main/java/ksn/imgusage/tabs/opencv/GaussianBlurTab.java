@@ -121,7 +121,7 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
             int valValid = GaussianBlurTabParams.onlyZeroOrOdd(val, params.kernelSize.width);
             if (val == valValid) {
                 params.kernelSize.width = valValid;
-                resetImage();
+                invalidateAsync();
             } else {
                 SwingUtilities.invokeLater(() -> modelKernelSizeW.setValue(valValid));
             }
@@ -132,7 +132,7 @@ public class GaussianBlurTab extends OpencvFilterTab<GaussianBlurTabParams> {
             int valValid = GaussianBlurTabParams.onlyZeroOrOdd(val, params.kernelSize.height);
             if (val == valValid) {
                 params.kernelSize.height = valValid;
-                resetImage();
+                invalidateAsync();
             } else {
                 SwingUtilities.invokeLater(() -> modelKernelSizeH.setValue(valValid));
             }

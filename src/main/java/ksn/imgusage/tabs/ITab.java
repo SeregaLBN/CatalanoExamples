@@ -15,8 +15,9 @@ public interface ITab<TTabParams extends ITabParams> {
     BufferedImage getImage();
     /** get a filtered image, possibly with an additional rendering layer */
     BufferedImage getDrawImage();
-    void resetImage(boolean debounce);
-    void resetImage();
+
+    /** Mark the current image to be redrawn (the previous {@link ITab#getImage()} has changed} */
+    void invalidate();
 
     String getTitle();
     String getName();

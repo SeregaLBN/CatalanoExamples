@@ -82,9 +82,9 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     }
 
     @Override
-    public void resetImage(boolean debounce) {
+    protected void resetImage() {
         drawImage = null;
-        super.resetImage(debounce);
+        super.resetImage();
     }
 
     @Override
@@ -256,7 +256,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             if (onCheckKeepAspectRationByWidth != null)
                 onCheckKeepAspectRationByWidth.run();
 
-            resetImage();
+            invalidateAsync();
         } catch (IOException ex) {
             logger.error("Can`t read image", ex);
         }
@@ -431,7 +431,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
                     return;
                 modelSizeW.setValue(sourceImage.getWidth());
                 modelSizeH.setValue(sourceImage.getHeight());
-                resetImage();
+                invalidateAsync();
             });
             box4ImageSize2.add(Box.createHorizontalStrut(2));
             box4ImageSize2.add(btnKeepAspectRatio);

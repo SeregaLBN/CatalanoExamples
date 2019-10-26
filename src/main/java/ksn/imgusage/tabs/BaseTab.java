@@ -48,12 +48,12 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     }
 
     @Override
-    public void setSource(ITab<?> newSource) {
+    public final void setSource(ITab<?> newSource) {
         if (this.source == newSource) // ref eq
             return;
 
         this.source = newSource;
-        resetImage();
+        invalidate();
     }
 
     protected BufferedImage getSourceImage() {
@@ -100,30 +100,40 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
 
     @Override
-    public void resetImage(boolean debounce) {
+    public final void invalidate() {
+        resetImage();
+        repaint();
+    }
+
+    /** user changed parameters */
+    protected final void invalidateAsync() {
+        resetImage();
+        UiHelper.debounceExecutor(
+            () -> timer,
+            t -> timer = t,
+            DEBOUNCE_TIMEOUT_MS,
+            () -> {
+                repaint();
+
+                //SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(source, this));
+                tabHandler.onImageChanged(this);
+            },
+            logger);
+    }
+
+    protected void resetImage() {
         if (image == null) {
-//            logger.trace("> resetImage: already reseted");
+//          logger.trace("> invalidate: already reseted");
         } else {
-//            logger.trace("> resetImage: reset...");
+//          logger.trace("> invalidate: reset...");
             image = null;
         }
-        if (debounce)
-            UiHelper.debounceExecutor(() -> timer, t -> timer = t, DEBOUNCE_TIMEOUT_MS, this::repaintImage, logger);
-        else
-            repaintImage();
-    }
-    @Override
-    public final void resetImage() {
-        resetImage(true);
     }
 
-    private void repaintImage() {
-        //logger.trace("  repaintImage: mark to repaint panel");
+    private void repaint() {
+        //logger.trace("  repaint: mark to repaint panel");
         if (imagePanelRepaint != null)
             imagePanelRepaint.run();
-
-        //SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(source, this));
-        tabHandler.onImageChanged(this);
     }
 
     protected final JButton makeButtonAddFilter() {
@@ -384,7 +394,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             logger.trace("{} is {}", paramName, checked ? "checked" : "unchecked");
             if (customListener != null)
                 customListener.run();
-            resetImage();
+            invalidateAsync();
         });
         return checkBox;
     }
@@ -424,7 +434,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                     logger.trace("{} changed to {}", paramName, e);
                     if (customListener != null)
                         customListener.accept(e);;
-                    resetImage();
+                    invalidateAsync();
                 }
             });
             radioGroup.add(radioBtn);
@@ -465,7 +475,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             E newValue = (E)comboBox.getSelectedItem();
             setter.accept(newValue);
             logger.trace("{} changed to {}", name, newValue);
-            resetImage();
+            invalidateAsync();
         });
         box.add(comboBox);
         return box;
@@ -489,7 +499,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                 else
                     applyValueParams.run();
             }
-            resetImage();
+            invalidateAsync();
         });
     }
 
@@ -506,7 +516,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                 modelToCheck.setValue(max - myVal - 1);
             else
                 applyValueParams.run();
-            resetImage();
+            invalidateAsync();
         });
     }
 
@@ -516,7 +526,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             setter.accept(model.getValue());
             if (customExecutor != null)
                 customExecutor.run();
-            resetImage();
+            invalidateAsync();
         });
     }
 

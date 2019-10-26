@@ -135,7 +135,7 @@ public class AdaptiveThresholdTab extends OpencvFilterTab<AdaptiveThresholdTabPa
             int valValid = CannyTabParams.onlyOdd(val, params.blockSize);
             if (val == valValid) {
                 params.blockSize = valValid;
-                resetImage();
+                invalidateAsync();
             } else {
                 SwingUtilities.invokeLater(() -> modelBlockSize.setValue(valValid));
             }

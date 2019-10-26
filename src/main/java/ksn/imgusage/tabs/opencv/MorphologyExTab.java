@@ -240,7 +240,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
         comboArrayType.addActionListener(ev -> {
             params.kernel1.type = (CvArrayType)comboArrayType.getSelectedItem();
             logger.trace("kernel1 array type changed to {}", params.kernel1.type);
-            resetImage();
+            invalidateAsync();
         });
         box4ArrayType.add(comboArrayType);
 
@@ -270,7 +270,7 @@ public class MorphologyExTab extends OpencvFilterTab<MorphologyExTabParams> {
         model.getWrapped().addChangeListener(ev -> {
             logger.trace("{}: value={}", name, model.getFormatedText());
             applyValueParams.run();
-            resetImage();
+            invalidateAsync();
         });
     }
 

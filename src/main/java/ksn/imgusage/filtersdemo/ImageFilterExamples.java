@@ -152,7 +152,7 @@ public class ImageFilterExamples {
         int pos = tabs.lastIndexOf(tab);
         assert pos > 0;
 
-        tabs.stream().skip(pos + 1).forEach(t -> t.resetImage(false));
+        tabs.stream().skip(pos + 1).forEach(ITab::invalidate);
     }
 
     private ITabHandler getTabHandler() {

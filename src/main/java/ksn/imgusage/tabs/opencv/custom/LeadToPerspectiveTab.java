@@ -328,7 +328,7 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
         box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
         JButton btnRepeat = new JButton("Repeat...");
-        btnRepeat.addActionListener(ev -> resetImage());
+        btnRepeat.addActionListener(ev -> invalidateAsync());
         box4Options.add(btnRepeat);
 
         return box4Options;
