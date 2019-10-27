@@ -1,0 +1,49 @@
+[ {
+  "tabName" : "FirstTab",
+  "pos" : 0,
+  "params" : {
+    "useGray" : true,
+    "useScale" : true,
+    "keepToSize" : {
+      "width" : 500,
+      "height" : 375
+    },
+    "useKeepAspectRatio" : true,
+    "boundOfRoi" : {
+      "left" : 0,
+      "top" : 0,
+      "right" : 0,
+      "bottom" : 0
+    },
+    "imageFile" : "IMG_20190816_135833.jpg"
+  }
+}, {
+  "tabName" : "OpenCV:PerspectiveTransform",
+  "pos" : 1,
+  "params" : {
+    "showRegion" : true,
+    "applyToFirstTab" : false,
+    "pointLeftTop" : {
+      "x" : 11,
+      "y" : 83
+    },
+    "pointRightTop" : {
+      "x" : 326,
+      "y" : 30
+    },
+    "pointLeftBottom" : {
+      "x" : 62,
+      "y" : 340
+    },
+    "pointRightBottom" : {
+      "x" : 451,
+      "y" : 194
+    },
+    "dsize" : {
+      "width" : 0,
+      "height" : 0
+    },
+    "interpolation" : "INTER_LINEAR",
+    "useFlagInverseMap" : false
+  }
+} ]

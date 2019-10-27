@@ -68,72 +68,8 @@
     "iterations" : 1
   }
 }, {
-  "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 4,
-  "params" : {
-    "morphologicalOperation" : "MORPH_DILATE",
-    "kernelSource" : "STRUCTURING_ELEMENT",
-    "kernel1" : {
-      "rows" : 1,
-      "cols" : 1,
-      "type" : "CV_8UC1",
-      "scalarVal0" : 1.0,
-      "scalarVal1" : 0.0,
-      "scalarVal2" : 0.0,
-      "scalarVal3" : 0.0
-    },
-    "kernel2" : {
-      "shape" : "MORPH_RECT",
-      "kernelSize" : {
-        "width" : 12,
-        "height" : 12
-      },
-      "anchor" : {
-        "x" : -1,
-        "y" : -1
-      }
-    },
-    "anchor" : {
-      "x" : -1,
-      "y" : -1
-    },
-    "iterations" : 1
-  }
-}, {
-  "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 5,
-  "params" : {
-    "morphologicalOperation" : "MORPH_CLOSE",
-    "kernelSource" : "STRUCTURING_ELEMENT",
-    "kernel1" : {
-      "rows" : 1,
-      "cols" : 1,
-      "type" : "CV_8UC1",
-      "scalarVal0" : 1.0,
-      "scalarVal1" : 0.0,
-      "scalarVal2" : 0.0,
-      "scalarVal3" : 0.0
-    },
-    "kernel2" : {
-      "shape" : "MORPH_RECT",
-      "kernelSize" : {
-        "width" : 3,
-        "height" : 3
-      },
-      "anchor" : {
-        "x" : -1,
-        "y" : -1
-      }
-    },
-    "anchor" : {
-      "x" : -1,
-      "y" : -1
-    },
-    "iterations" : 1
-  }
-}, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 6,
+  "pos" : 4,
   "params" : {
     "thresh" : 77.0,
     "maxVal" : 255.0,
@@ -143,7 +79,7 @@
   }
 }, {
   "tabName" : "OpenCV:Canny",
-  "pos" : 7,
+  "pos" : 5,
   "params" : {
     "threshold1" : 7.0,
     "threshold2" : 15.0,
@@ -152,7 +88,7 @@
   }
 }, {
   "tabName" : "OpenCV:FindContours",
-  "pos" : 8,
+  "pos" : 6,
   "params" : {
     "mode" : "RETR_EXTERNAL",
     "method" : "CHAIN_APPROX_SIMPLE",
