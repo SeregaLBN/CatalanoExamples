@@ -58,6 +58,17 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
     private final Point offsetLB = new Point();
 
     @Override
+    protected void resetImage() {
+        isBestFound = false;
+        offsetRT.x = offsetRT.y = 0;
+        offsetRB.x = offsetRB.y = 0;
+        offsetLT.x = offsetLT.y = 0;
+        offsetLT.x = offsetLT.y = 0;
+        last = started = null;
+        super.resetImage();
+    }
+
+    @Override
     public BufferedImage getDrawImage() {
         Scalar color;
         IterationResult res = last;
@@ -99,11 +110,6 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
 
     @Override
     protected void applyOpencvFilter() {
-        isBestFound = false;
-        offsetRT.x = offsetRT.y = 0;
-        offsetRB.x = offsetRB.y = 0;
-        offsetLT.x = offsetLT.y = 0;
-        offsetLT.x = offsetLT.y = 0;
         Size sizeSrc = imageMat.size();
         started = findMaxContourArea(imageMat, sizeSrc.width * sizeSrc.height, logger);
         logger.trace("applyOpencvFilter: iterationResult: rc={}, area={}", started.rcOut, started.area);

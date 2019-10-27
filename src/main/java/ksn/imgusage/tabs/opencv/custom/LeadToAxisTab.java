@@ -85,8 +85,11 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
 
     @Override
     protected void resetImage() {
-        bestIteration = null;
+        allIterations.clear();
         bestImg = null;
+        bestIteration = null;
+        if (showResultAngle != null)
+            showResultAngle.accept("???");
         super.resetImage();
     }
 
@@ -99,11 +102,6 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
 
     @Override
     protected void applyOpencvFilter() {
-        allIterations.clear();
-        bestImg = null;
-        bestIteration = null;
-        showResultAngle.accept("???");
-
         int max = Math.max(imageMat.width(), imageMat.height());
         int diagonal = (int)Math.sqrt(max * max * 2);
         Mat matStarted = new Mat(diagonal, diagonal, imageMat.type(), BLACK);

@@ -205,15 +205,20 @@ public class ImageFilterExamples {
 
     private void onRemoveTab(ITab<?> tab) {
         int pos = tabs.lastIndexOf(tab);
-        assert pos > 0;
+        assert pos >= 0;
 
         tabPane.removeTabAt(pos);
         tabs.remove(tab);
+        if (pos == 0)
+            return;
+
         for (int i = pos; i < tabs.size(); ++i) {
-            if (i != 0) {
+            ITab<?> curr = tabs.get(i);
+            if (i == pos) {
                 ITab<?> prev = tabs.get(i-1);
-                ITab<?> curr = tabs.get(i);
                 curr.setSource(prev);
+            } else {
+                curr.invalidate();
             }
         }
     }
