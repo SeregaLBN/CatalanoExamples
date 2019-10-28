@@ -21,7 +21,8 @@ import ksn.imgusage.utils.ImgHelper;
 
 public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends BaseTab<TTabParams> {
 
-    public static final String TAB_PREFIX = "OpenCV:";
+    private static final String GROUP = "OpenCV";
+    public static final String TAB_PREFIX = GROUP + ":";
 
     public static final int BOOST_SIZE_MAX_X = 400;
     public static final int BOOST_SIZE_MAX_Y = 250;
@@ -41,6 +42,11 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
         if (src == null)
             return null;
         return ImgHelper.toMat(src);
+    }
+
+    @Override
+    public String getGroup() {
+        return GROUP;
     }
 
     protected abstract void applyOpencvFilter();

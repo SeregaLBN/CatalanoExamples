@@ -8,7 +8,8 @@ import ksn.imgusage.tabs.ITabParams;
 
 public abstract class CatalanoFilterTab<TTabParams extends ITabParams> extends BaseTab<TTabParams>  {
 
-    public static final String TAB_PREFIX = "Catalano:";
+    private static final String GROUP = "Catalano";
+    public static final String TAB_PREFIX = GROUP + ":";
 
     /** filter only works with gray image */
     protected final boolean onlyGray;
@@ -17,6 +18,11 @@ public abstract class CatalanoFilterTab<TTabParams extends ITabParams> extends B
 
     protected CatalanoFilterTab(boolean onlyGray) {
         this.onlyGray = onlyGray;
+    }
+
+    @Override
+    public String getGroup() {
+        return GROUP;
     }
 
     protected FastBitmap getSourceFastBitmap() {

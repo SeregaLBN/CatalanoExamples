@@ -20,6 +20,7 @@ public interface ITab<TTabParams extends ITabParams> {
     void invalidate();
 
     String getTitle();
+    String getGroup();
     String getName();
     String getDescription();
 

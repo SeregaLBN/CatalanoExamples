@@ -64,6 +64,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     @Override
     public String getTitle() { return TAB_TITLE; }
     @Override
+    public String getGroup() { return null; }
+    @Override
     public String getName() { return TAB_NAME; }
     @Override
     public String getDescription() { return TAB_DESCRIPTION; }

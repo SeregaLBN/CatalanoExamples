@@ -123,7 +123,15 @@ public class ImageFilterExamples {
         }
 
         newTab.setSource(prev);
-        tabPane.insertTab(newTab.getTitle(), null, newTab.makeTab(tabParams), newTab.getDescription(), newPos);
+        tabPane.insertTab(
+                newTab.getTitle(),
+                null,
+                newTab.makeTab(tabParams),
+                ((newTab.getGroup() == null)
+                        ? ""
+                        : (newTab.getGroup() + ": "))
+                    + newTab.getDescription(),
+                newPos);
         tabs.add(newPos, newTab);
 
         prev = newTab;

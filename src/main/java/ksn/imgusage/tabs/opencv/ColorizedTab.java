@@ -3,28 +3,30 @@ package ksn.imgusage.tabs.opencv;
 import java.awt.Component;
 import java.awt.Container;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 
-import ksn.imgusage.type.dto.opencv.AsIsTabParams;
+import ksn.imgusage.type.dto.opencv.ColorizedTabParams;
+import ksn.imgusage.type.dto.opencv.ColorizedTabParams.ECastTo;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 
-/** for testing internal classes {@link ImgHelper} {@link OpenCvHelper} */
-public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
+/** Transform image colors {@link ImgHelper} {@link OpenCvHelper} */
+public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
 
-    public static final String TAB_TITLE = "AsIs";
+    public static final String TAB_TITLE = "Colorized";
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
-    public static final String TAB_DESCRIPTION = "As is";
+    public static final String TAB_DESCRIPTION = "Cast image to gray or full colors";
 
-    private AsIsTabParams params;
+    private ColorizedTabParams params;
     private Consumer<String> showImageSize;
 
     @Override
-    public Component makeTab(AsIsTabParams params) {
+    public Component makeTab(ColorizedTabParams params) {
         if (params == null)
-            params = new AsIsTabParams();
+            params = new ColorizedTabParams();
         this.params = params;
 
         return makeTab();
@@ -39,34 +41,47 @@ public class AsIsTab extends OpencvFilterTab<AsIsTabParams> {
 
     @Override
     protected void applyOpencvFilter() {
-        if (params.useGray)
+        switch (params.colorsTo) {
+        case GRAY:
             imageMat = OpenCvHelper.toGray(imageMat);
+            break;
+        case RGB:
+            imageMat = OpenCvHelper.to3Channel(imageMat);
+            break;
+        default:
+            throw new UnsupportedOperationException("Unsupported image colors cast to " + params.colorsTo);
+        }
         showImageSize.accept(imageMat.width() + "x" + imageMat.height());
     }
 
     @Override
     protected Component makeOptions() {
-        Box box4Options = Box.createVerticalBox();
-        box4Options.setBorder(BorderFactory.createTitledBorder(""));
-
-        Box box = Box.createHorizontalBox();
-        box.add(makeCheckBox(
-            () -> params.useGray,
-            v  -> params.useGray = v,
-            "Gray",
-            "params.useGray",
-            "Speed up by reducing the image", null));
-        box4Options.add(box);
+        Box boxColorsTo = makeBoxedRadioButtons(
+            Stream.of(ColorizedTabParams.ECastTo.values()), // values
+            () -> params.colorsTo,                          // getter
+            v  -> params.colorsTo = v,                      // setter
+            "Transform colors",                             // borderTitle
+            "params.useGray",                               // paramName
+            TAB_DESCRIPTION,                                // boxTip
+            v -> v.userText() + "                    ",     // radioText
+            ECastTo::userTip,                               // radioTip
+            null                                            // customListener
+        );
 
         Container cntrlEditBoxSize = makeEditBox(x -> showImageSize = x, null, "Image size", null, null);
         showImageSize.accept("X*Y");
+
+        Box box4Options = Box.createVerticalBox();
+        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+
+        box4Options.add(boxColorsTo);
         box4Options.add(cntrlEditBoxSize);
 
         return box4Options;
     }
 
     @Override
-    public AsIsTabParams getParams() {
+    public ColorizedTabParams getParams() {
         return params;
     }
 
