@@ -2,26 +2,26 @@
   "tabName" : "FirstTab",
   "pos" : 0,
   "params" : {
-    "useGray" : true,
+    "useGray" : false,
     "useScale" : true,
     "keepToSize" : {
       "width" : 3000,
-      "height" : 2104
+      "height" : 2114
     },
     "useKeepAspectRatio" : true,
     "boundOfRoi" : {
       "left" : 1900,
       "top" : 40,
       "right" : 200,
-      "bottom" : 2100
+      "bottom" : 2070
     },
-    "imageFile" : "idCardTest1.jpg"
+    "imageFile" : "idCardOld.NoBorder2.jpg"
   }
 }, {
-  "tabName" : "OpenCV:AsIs",
+  "tabName" : "OpenCV:Colorized",
   "pos" : 1,
   "params" : {
-    "useGray" : false
+    "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:Threshold",
@@ -77,7 +77,7 @@
       "width" : 40,
       "height" : 40
     },
-    "bindSize" : 13,
+    "bindSize" : 14,
     "showBindIndex" : -1
   }
 } ]

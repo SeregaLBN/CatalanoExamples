@@ -15,13 +15,13 @@
       "right" : 300,
       "bottom" : 2350
     },
-    "imageFile" : "IMG_20190816_135747.jpg"
+    "imageFile" : "idCardOld.DarkBorder.jpg"
   }
 }, {
-  "tabName" : "OpenCV:AsIs",
+  "tabName" : "OpenCV:Colorized",
   "pos" : 1,
   "params" : {
-    "useGray" : false
+    "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:GaussianBlur",

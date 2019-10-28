@@ -2,30 +2,37 @@
   "tabName" : "FirstTab",
   "pos" : 0,
   "params" : {
-    "useGray" : true,
+    "useGray" : false,
     "useScale" : true,
     "keepToSize" : {
-      "width" : 3000,
-      "height" : 2250
+      "width" : 1298,
+      "height" : 942
     },
     "useKeepAspectRatio" : true,
     "boundOfRoi" : {
-      "left" : 2300,
-      "top" : 400,
-      "right" : 300,
-      "bottom" : 2350
+      "left" : 803,
+      "top" : 32,
+      "right" : 81,
+      "bottom" : 887
     },
-    "imageFile" : "IMG_20190816_135747.jpg"
+    "imageFile" : "idCardOld.NoBorder3.jpg"
   }
 }, {
-  "tabName" : "OpenCV:AsIs",
+  "tabName" : "OpenCV:Colorized",
   "pos" : 1,
   "params" : {
-    "useGray" : false
+    "colorsTo" : "GRAY"
+  }
+}, {
+  "tabName" : "OpenCV:Contrast/Brightness",
+  "pos" : 2,
+  "params" : {
+    "alpha" : 0.76,
+    "beta" : 9
   }
 }, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 2,
+  "pos" : 3,
   "params" : {
     "thresh" : 100.0,
     "maxVal" : 250.0,
@@ -35,7 +42,7 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 3,
+  "pos" : 4,
   "params" : {
     "morphologicalOperation" : "MORPH_GRADIENT",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -51,8 +58,8 @@
     "kernel2" : {
       "shape" : "MORPH_RECT",
       "kernelSize" : {
-        "width" : 10,
-        "height" : 10
+        "width" : 6,
+        "height" : 6
       },
       "anchor" : {
         "x" : -1,
@@ -67,17 +74,17 @@
   }
 }, {
   "tabName" : "OpenCV:Custom:BindToNeighborTab",
-  "pos" : 4,
+  "pos" : 5,
   "params" : {
     "minLimitContours" : {
-      "width" : 15,
-      "height" : 15
+      "width" : 0,
+      "height" : 0
     },
     "maxLimitContours" : {
-      "width" : 40,
-      "height" : 40
+      "width" : 48,
+      "height" : 44
     },
-    "bindSize" : 13,
+    "bindSize" : 8,
     "showBindIndex" : -1
   }
 } ]

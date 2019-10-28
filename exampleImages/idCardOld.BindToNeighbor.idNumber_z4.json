@@ -2,7 +2,7 @@
   "tabName" : "FirstTab",
   "pos" : 0,
   "params" : {
-    "useGray" : true,
+    "useGray" : false,
     "useScale" : true,
     "keepToSize" : {
       "width" : 3000,
@@ -15,13 +15,13 @@
       "right" : 168,
       "bottom" : 2175
     },
-    "imageFile" : "idCardTest3.jpg"
+    "imageFile" : "idCardOld.NoBorder4.jpg"
   }
 }, {
-  "tabName" : "OpenCV:AsIs",
+  "tabName" : "OpenCV:Colorized",
   "pos" : 1,
   "params" : {
-    "useGray" : false
+    "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:Threshold",
