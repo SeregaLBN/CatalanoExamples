@@ -13,7 +13,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
@@ -34,41 +33,30 @@ public class PassportUkrTest {
         InitLib.loadOpenCV();
     }
 
-    private void randomRotate(File imgFileIn, File imgFileOut) throws IOException {
-        logger.debug("imgFileIn.exist={}; imgFileOut.exist={}", imgFileIn.exists(), imgFileOut.exists());
-        logger.debug("imgFileIn.path={}", imgFileIn.getAbsolutePath());
-        if (!imgFileIn.exists())
-            throw new IllegalArgumentException("Input file not found " + imgFileIn.getAbsolutePath());
-
-
-        BufferedImage imgIn = ImageIO.read(imgFileIn);
-
+    private static BufferedImage randomRotate(BufferedImage imgIn) {
         Random rnd = ThreadLocalRandom.current();
         double angleMin = -50;
         double angleMax = +50;
         double angle = angleMin + rnd.nextInt((int)(angleMax - angleMin));
         BufferedImage imgOut = ImgHelper.rotate(imgIn, angle, false);
-        imgOut = addBorder(imgOut, Color.WHITE, new Size(imgIn.getWidth() / 10.0,
-                                                         imgIn.getHeight() / 10.0));
-
-        String ext = SelectFilterDialog.getExtension(imgFileOut);
-        boolean succ = ImageIO.write(imgOut, ext, imgFileOut);
-        if (succ)
-            logger.info("Image saved to {} file {}\n Rotate angle is {}", ext, imgFileOut, angle);
-        else
-            logger.error("Can`t save image to {} file {}", ext, imgFileOut);
-        Assertions.assertTrue(succ);
+        logger.info("Image rotate angle is {}", angle);
+        return addBorder(imgOut, Color.WHITE, new Size(imgIn.getWidth() / 10.0,
+                                                       imgIn.getHeight() / 10.0));
     }
 
-    private void randomPerspective(File imgFileIn, File imgFileOut) throws IOException {
+    private static void randomRotate(File imgFileIn, File imgFileOut) throws IOException {
         logger.debug("imgFileIn.exist={}; imgFileOut.exist={}", imgFileIn.exists(), imgFileOut.exists());
         logger.debug("imgFileIn.path={}", imgFileIn.getAbsolutePath());
         if (!imgFileIn.exists())
             throw new IllegalArgumentException("Input file not found " + imgFileIn.getAbsolutePath());
 
-
         BufferedImage imgIn = ImageIO.read(imgFileIn);
+        BufferedImage imgOut = randomRotate(imgIn);
 
+        save(imgOut, imgFileOut);
+    }
+
+    private static BufferedImage randomPerspective(BufferedImage imgIn) {
         Random rnd = ThreadLocalRandom.current();
 
         int w = imgIn.getWidth();
@@ -126,23 +114,36 @@ public class PassportUkrTest {
             new Scalar(0xFF, 0xFF, 0xFF));
 
         BufferedImage imgOut = ImgHelper.toBufferedImage(dstMat);
+        logger.info("Image perspective offsets: {} [{}]; {} [{}]",
+                    k ? "left-top" : "right-top",
+                    offset1,
+                    m ? "left-bottom" : "right-bottom",
+                    offset2);
+        return imgOut;
+    }
 
+    private static void randomPerspective(File imgFileIn, File imgFileOut) throws IOException {
+        logger.debug("imgFileIn.exist={}; imgFileOut.exist={}", imgFileIn.exists(), imgFileOut.exists());
+        logger.debug("imgFileIn.path={}", imgFileIn.getAbsolutePath());
+        if (!imgFileIn.exists())
+            throw new IllegalArgumentException("Input file not found " + imgFileIn.getAbsolutePath());
+
+        BufferedImage imgIn = ImageIO.read(imgFileIn);
+        BufferedImage imgOut = randomRotate(imgIn);
+        imgOut = randomPerspective(imgOut);
+
+        save(imgOut, imgFileOut);
+    }
+
+    private static void save(BufferedImage imgOut, File imgFileOut) throws IOException {
         String ext = SelectFilterDialog.getExtension(imgFileOut);
         boolean succ = ImageIO.write(imgOut, ext, imgFileOut);
-        if (succ)
-            logger.info("Image saved to {} file {}\n Perspective offsets: {} [{}]; {} [{}]",
-                        ext,
-                        imgFileOut,
-                        k ? "left-top" : "right-top",
-                        offset1,
-                        m ? "left-bottom" : "right-bottom",
-                        offset2);
-        else
+        if (!succ)
             logger.error("Can`t save image to {} file {}", ext, imgFileOut);
         Assertions.assertTrue(succ);
     }
 
-    private BufferedImage addBorder(BufferedImage img, Color fillColor, Size borderSize) {
+    private static BufferedImage addBorder(BufferedImage img, Color fillColor, Size borderSize) {
         int w = img.getWidth();
         int h = img.getHeight();
         BufferedImage outImg = new BufferedImage(
@@ -165,7 +166,6 @@ public class PassportUkrTest {
 
     /** Make demo image for pipeline ./exampleImages/idCard.LeadToHorizont.json */
     @Test
-    @Order(1)
     public void randomRotateTest() throws IOException {
         randomRotate(
                 Paths.get("exampleImages", "passportUkr.jpg"    ).toFile(),
@@ -174,10 +174,9 @@ public class PassportUkrTest {
 
     /** Make demo image for pipeline ./exampleImages/idCard.LeadToPerspective.json */
     @Test
-    @Order(2)
     public void randomPerspectiveTest() throws IOException {
         randomPerspective(
-                Paths.get("exampleImages", "passportUkr_rotated.png"  ).toFile(),
+                Paths.get("exampleImages", "passportUkr.jpg"          ).toFile(),
                 Paths.get("exampleImages", "passportUkr_perspctve.png").toFile());
     }
 
