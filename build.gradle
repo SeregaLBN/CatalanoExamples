@@ -41,7 +41,7 @@ test {
 }
 
 
-mainClassName = 'ksn.imgusage.filtersdemo.MainApp'
+mainClassName = 'ksn.imgusage.filtersdemo.ImageFilterExamples'
 version = '0.1.4'
 
 jar {
@@ -65,13 +65,13 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.9.3'
     compile 'org.apache.commons:commons-math3:3.6.1'
 
-    if (project.file('./libs/Catalano.Core.jar' ).exists())
+  //if (project.file('./libs/Catalano.Core.jar' ).exists())
         compile name:       'Catalano.Core'
-    if (project.file('./libs/Catalano.Math.jar' ).exists())
+  //if (project.file('./libs/Catalano.Math.jar' ).exists())
         compile name:       'Catalano.Math'
-    if (project.file('./libs/Catalano.IO.jar'   ).exists())
+  //if (project.file('./libs/Catalano.IO.jar'   ).exists())
         compile name:       'Catalano.IO'
-    if (project.file('./libs/Catalano.Image.jar').exists())
+  //if (project.file('./libs/Catalano.Image.jar').exists())
         compile name:       'Catalano.Image'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
@@ -250,3 +250,9 @@ project.tasks.clean           .dependsOn project.tasks.cleanAddons
 project.tasks.build           .dependsOn project.tasks.fatJar
 project.tasks.compileJava     .dependsOn project.tasks.downloadCatalanoFramework
 project.tasks.processResources.dependsOn project.tasks.downloadExampleImage
+
+/** /
+gradle.taskGraph.afterTask { Task task ->
+    println '>>>>>>   ' + task.project.name + ':' + task.name
+}
+/**/
