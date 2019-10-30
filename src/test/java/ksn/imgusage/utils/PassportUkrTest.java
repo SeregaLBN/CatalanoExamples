@@ -183,6 +183,7 @@ public class PassportUkrTest {
     public static void main(String[] args) {
         try {
             new PassportUkrTest().randomRotateTest();
+            new PassportUkrTest().randomPerspectiveTest();
         } catch (Exception ex) {
             logger.error("{}", ex);
         }

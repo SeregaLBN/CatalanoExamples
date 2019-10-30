@@ -28,8 +28,8 @@ public class AdaptiveThresholdTab extends OpencvFilterTab<AdaptiveThresholdTabPa
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Applies an adaptive threshold to an array";
 
-    private static final int    MIN_BLOCK_SIZE =  3;
-    private static final int    MAX_BLOCK_SIZE = 99;
+    private static final int    MIN_BLOCK_SIZE =   3;
+    private static final int    MAX_BLOCK_SIZE = 999;
     private static final double MIN_MAXVAL =   0;
     private static final double MAX_MAXVAL = 500;
     private static final double MIN_C = -999;
