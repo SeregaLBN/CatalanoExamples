@@ -60,8 +60,8 @@ public final class MapperFilter {
                                        AdaptiveThresholdTab.TAB_DESCRIPTION),
             new FilterTabs(                  AddWeightedTab.TAB_TITLE,
                                              AddWeightedTab.TAB_DESCRIPTION),
-            new FilterTabs(                         ColorizedTab.TAB_TITLE,
-                                                    ColorizedTab.TAB_DESCRIPTION),
+            new FilterTabs(                    ColorizedTab.TAB_TITLE,
+                                               ColorizedTab.TAB_DESCRIPTION),
             new FilterTabs(                    BilateralTab.TAB_TITLE,
                                                BilateralTab.TAB_DESCRIPTION),
             new FilterTabs(ksn.imgusage.tabs.opencv.BlurTab.TAB_TITLE,
@@ -76,6 +76,8 @@ public final class MapperFilter {
                                             FindContoursTab.TAB_DESCRIPTION),
             new FilterTabs(                 GaussianBlurTab.TAB_TITLE,
                                             GaussianBlurTab.TAB_DESCRIPTION),
+            new FilterTabs(        HistogramEqualizationTab.TAB_TITLE,
+                                   HistogramEqualizationTab.TAB_DESCRIPTION),
             new FilterTabs(                 MorphologyExTab.TAB_TITLE,
                                             MorphologyExTab.TAB_DESCRIPTION),
             new FilterTabs(         PerspectiveTransformTab.TAB_TITLE,
@@ -129,6 +131,8 @@ public final class MapperFilter {
             return                  FindContoursTab.class;
         case                        GaussianBlurTab.TAB_NAME:
             return                  GaussianBlurTab.class;
+        case               HistogramEqualizationTab.TAB_NAME:
+            return         HistogramEqualizationTab.class;
         case                        MorphologyExTab.TAB_NAME:
             return                  MorphologyExTab.class;
         case                PerspectiveTransformTab.TAB_NAME:
@@ -203,6 +207,8 @@ public final class MapperFilter {
             return                      FindContoursTabParams.class;
         case                            GaussianBlurTab.TAB_NAME:
             return                      GaussianBlurTabParams.class;
+        case                   HistogramEqualizationTab.TAB_NAME:
+            return             HistogramEqualizationTabParams.class;
         case                            MorphologyExTab.TAB_NAME:
             return                      MorphologyExTabParams.class;
         case                    PerspectiveTransformTab.TAB_NAME:
