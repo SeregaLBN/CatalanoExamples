@@ -36,7 +36,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private static final Color COLOR_RIGHT  = Color.GREEN;
     private static final Color COLOR_TOP    = Color.BLUE;
     private static final Color COLOR_BOTTOM = Color.ORANGE;
-    private static final int MAX_ZOOM_KOEF = 2;
+    private static final int MAX_ZOOM_KOEF = 3;
 
     private BufferedImage sourceImage;
     private BufferedImage drawImage;

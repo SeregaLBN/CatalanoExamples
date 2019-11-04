@@ -28,9 +28,9 @@ public class BindToNeighborTab extends CustomTab<BindToNeighborTabParams> {
     public static final String TAB_DESCRIPTION = "Connect the nearest regions";
 
     private static final int MIN_MIN_LIMIT_CONTOUR_SIZE =    0;
-    private static final int MAX_MIN_LIMIT_CONTOUR_SIZE =  995;
+    private static final int MAX_MIN_LIMIT_CONTOUR_SIZE = 1000;
     private static final int MIN_MAX_LIMIT_CONTOUR_SIZE =    5;
-    private static final int MAX_MAX_LIMIT_CONTOUR_SIZE = 1000;
+    private static final int MAX_MAX_LIMIT_CONTOUR_SIZE = 1001;
 
     private static final Scalar GREEN  = new Scalar(0, 255, 0);
     private static final Scalar RED    = new Scalar(0, 0, 255);
@@ -347,13 +347,13 @@ public class BindToNeighborTab extends CustomTab<BindToNeighborTabParams> {
         SliderIntModel modelShowBindIndex     = new SliderIntModel(params.showBindIndex, 0, -1, 999999);
         setMaxBindIndex = modelShowBindIndex::setMaximum;
 
-        Component cntrlMinLimit = makeSize(modelMinLimitContoursW,  // modelSizeW
+        Component cntrlMinLimit = makeSize(modelMinLimitContoursW,    // modelSizeW
                                            modelMinLimitContoursH,    // modelSizeH
                                            "MinLimitContour",         // borderTitle
                                            null,                      // tip
                                            "MinLimitContour.Width",   // tipWidth
                                            "MinLimitContour.Height"); // tipHeight
-        Component cntrlMaxLimit = makeSize(modelMaxLimitContoursW,  // modelSizeW
+        Component cntrlMaxLimit = makeSize(modelMaxLimitContoursW,    // modelSizeW
                                            modelMaxLimitContoursH,    // modelSizeH
                                            "MaxLimitContour",         // borderTitle
                                            null,                      // tip

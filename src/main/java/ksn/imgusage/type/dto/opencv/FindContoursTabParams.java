@@ -16,7 +16,13 @@ public class FindContoursTabParams implements ITabParams {
     public EFindContoursDrawMethod     drawMethod       = EFindContoursDrawMethod.EXTERNAL_RECT;
 
     /** usage only for {@link EFindContoursDrawMethod#EXTERNAL_RECT} */
-    public Size                        minLimitContours = new Size(10, 10);
+    public Size                        minLimitContours = new Size(5, 5);
+
+    /** usage only for {@link EFindContoursDrawMethod#EXTERNAL_RECT} */
+    public Size                        maxLimitContours = new Size(100, 100);
+
+    /** usage only for {@link EFindContoursDrawMethod#DRAW_CONTOURS} */
+    public int                         minContourArea   = 1;
 
     /** usage only for {@link EFindContoursDrawMethod#DRAW_CONTOURS} */
     public int                         maxContourArea   = 100;

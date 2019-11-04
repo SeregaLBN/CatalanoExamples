@@ -13,7 +13,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -38,8 +41,12 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
     private static final int MIN_MIN_LIMIT_CONTOUR_SIZE =    0;
     private static final int MAX_MIN_LIMIT_CONTOUR_SIZE = 1000;
+    private static final int MIN_MAX_LIMIT_CONTOUR_SIZE =    5;
+    private static final int MAX_MAX_LIMIT_CONTOUR_SIZE = 1001;
+    private static final int MIN_MIN_CONTOUR_AREA =    0;
+    private static final int MAX_MIN_CONTOUR_AREA = 10000;
     private static final int MIN_MAX_CONTOUR_AREA =    0;
-    private static final int MAX_MAX_CONTOUR_AREA = 10000;
+    private static final int MAX_MAX_CONTOUR_AREA = 10001;
 
     private FindContoursTabParams params;
     private Box boxDrawContoursParams;
@@ -112,7 +119,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                 IntConsumer check = idx -> {
                     MatOfPoint contour = contours.get(idx);
                     double area = Math.abs(Imgproc.contourArea(contour));
-                    if (area > params.maxContourArea)
+                    if ((area >= params.minContourArea) && (area <= params.maxContourArea))
                         tmpList.add(idx);
                 };
                 if (params.contourIdx < 0) {
@@ -190,6 +197,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             contours.stream()
                 .map(Imgproc::boundingRect)
                 .filter(rc -> (rc.width >= params.minLimitContours.width) && (rc.height >= params.minLimitContours.height))
+                .filter(rc -> (rc.width <= params.maxLimitContours.width) && (rc.height <= params.maxLimitContours.height))
                 .forEach(rc -> Imgproc.rectangle(imageMat,
                                                  new Point(rc.x, rc.y),
                                                  new Point(rc.x + rc.width, rc.y + rc.height),
@@ -207,6 +215,9 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
         SliderIntModel modelMinLimitContoursW = new SliderIntModel(params.minLimitContours.width , 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
         SliderIntModel modelMinLimitContoursH = new SliderIntModel(params.minLimitContours.height, 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
+        SliderIntModel modelMaxLimitContoursW = new SliderIntModel(params.maxLimitContours.width , 0, MIN_MAX_LIMIT_CONTOUR_SIZE, MAX_MAX_LIMIT_CONTOUR_SIZE);
+        SliderIntModel modelMaxLimitContoursH = new SliderIntModel(params.maxLimitContours.height, 0, MIN_MAX_LIMIT_CONTOUR_SIZE, MAX_MAX_LIMIT_CONTOUR_SIZE);
+        SliderIntModel modelMinContourArea    = new SliderIntModel(params.minContourArea, 0, MIN_MIN_CONTOUR_AREA, MAX_MIN_CONTOUR_AREA);
         SliderIntModel modelMaxContourArea    = new SliderIntModel(params.maxContourArea, 0, MIN_MAX_CONTOUR_AREA, MAX_MAX_CONTOUR_AREA);
         SliderIntModel modelContourIdx        = new SliderIntModel(params.contourIdx    , 0, -1, Math.max(0, params.contourIdx));
         SliderIntModel modelMaxLevel          = new SliderIntModel(params.maxLevel      , 0, 0, 100);
@@ -255,15 +266,15 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                     : "draw external rectangle of contours region",
                 v -> {
                     if (v == EFindContoursDrawMethod.DRAW_CONTOURS)
-                        makeDrawContoursParams(panelCustomParams, modelMaxContourArea, modelContourIdx, modelMaxLevel);
+                        makeDrawContoursParams(panelCustomParams, modelMinContourArea, modelMaxContourArea, modelContourIdx, modelMaxLevel);
                     else
-                        makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH);
+                        makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH, modelMaxLimitContoursW, modelMaxLimitContoursH);
                     panelCustomParams.revalidate();
                 });
 
             switch (params.drawMethod) {
-            case DRAW_CONTOURS: makeDrawContoursParams(panelCustomParams, modelMaxContourArea, modelContourIdx, modelMaxLevel); break;
-            case EXTERNAL_RECT: makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH); break;
+            case DRAW_CONTOURS: makeDrawContoursParams(panelCustomParams, modelMinContourArea, modelMaxContourArea, modelContourIdx, modelMaxLevel); break;
+            case EXTERNAL_RECT: makeExteranlRectParams(panelCustomParams, modelMinLimitContoursW, modelMinLimitContoursH, modelMaxLimitContoursW, modelMaxLimitContoursH); break;
             default:
                 logger.error("Unknown params.drawMethod={}! Support him!", params.drawMethod);
             }
@@ -289,6 +300,9 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
         addChangeListener("modelMinLimitContoursW", modelMinLimitContoursW , v -> params.minLimitContours.width  = v);
         addChangeListener("modelMinLimitContoursH", modelMinLimitContoursH , v -> params.minLimitContours.height = v);
+        addChangeListener("modelMaxLimitContoursW", modelMaxLimitContoursW , v -> params.maxLimitContours.width  = v);
+        addChangeListener("modelMaxLimitContoursH", modelMaxLimitContoursH , v -> params.maxLimitContours.height = v);
+        addChangeListener("modelMinContourArea"   , modelMinContourArea    , v -> params.minContourArea          = v);
         addChangeListener("modelMaxContourArea"   , modelMaxContourArea    , v -> params.maxContourArea          = v);
         addChangeListener("modelContourId"        , modelContourIdx        , v -> params.contourIdx              = v);
         addChangeListener("modelMaxLevel"         , modelMaxLevel          , v -> params.maxLevel                = v);
@@ -296,7 +310,13 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
         return box4Options;
     }
 
-    private void makeDrawContoursParams(JPanel panelCustomParams, SliderIntModel modelMaxContourArea, SliderIntModel modelContourIdx, SliderIntModel modelMaxLevel) {
+    private void makeDrawContoursParams(
+            JPanel panelCustomParams,
+            SliderIntModel modelMinContourArea,
+            SliderIntModel modelMaxContourArea,
+            SliderIntModel modelContourIdx,
+            SliderIntModel modelMaxLevel
+    ) {
         if (cntrlExteranlRectParams != null)
             cntrlExteranlRectParams.setVisible(false);
 
@@ -312,7 +332,9 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                 null, null);
 
             boxDrawContoursParams.add(Box.createHorizontalGlue());
-            boxDrawContoursParams.add(makeSliderVert(modelMaxContourArea, "Area", "Max show contour area"));
+            boxDrawContoursParams.add(makeSliderVert(modelMinContourArea, "Area Min", "Min show contour area"));
+            boxDrawContoursParams.add(Box.createHorizontalStrut(2));
+            boxDrawContoursParams.add(makeSliderVert(modelMaxContourArea, "Area Max", "Max show contour area"));
             boxDrawContoursParams.add(Box.createHorizontalStrut(2));
             boxDrawContoursParams.add(boxFilled);
             boxDrawContoursParams.add(Box.createHorizontalStrut(2));
@@ -328,17 +350,38 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     }
 
 
-    private void makeExteranlRectParams(JPanel panelCustomParams, SliderIntModel modelMinLimitContoursW, SliderIntModel modelMinLimitContoursH) {
+    private void makeExteranlRectParams(
+            JPanel panelCustomParams,
+            SliderIntModel modelMinLimitContoursW, SliderIntModel modelMinLimitContoursH,
+            SliderIntModel modelMaxLimitContoursW, SliderIntModel modelMaxLimitContoursH
+    ) {
         if (boxDrawContoursParams != null)
             boxDrawContoursParams.setVisible(false);
 
-        if (cntrlExteranlRectParams == null)
-            cntrlExteranlRectParams = makeSize(modelMinLimitContoursW,  // modelSizeW
-                                             modelMinLimitContoursH,    // modelSizeH
-                                             "MinLimitContour",         // borderTitle
-                                             null,                      // tip
-                                             "MinLimitContour.Width",   // tipWidth
-                                             "MinLimitContour.Height"); // tipHeight
+        if (cntrlExteranlRectParams == null) {
+            Component cntrlMinLimit = makeSize(
+                    modelMinLimitContoursW,    // modelSizeW
+                    modelMinLimitContoursH,    // modelSizeH
+                    "MinLimitContour",         // borderTitle
+                    null,                      // tip
+                    "MinLimitContour.Width",   // tipWidth
+                    "MinLimitContour.Height"); // tipHeight
+            Component cntrlMaxLimit = makeSize(
+                    modelMaxLimitContoursW,    // modelSizeW
+                    modelMaxLimitContoursH,    // modelSizeH
+                    "MaxLimitContour",         // borderTitle
+                    null,                      // tip
+                    "MaxLimitContour.Width",   // tipWidth
+                    "MaxLimitContour.Height"); // tipHeight
+
+            Box box4Limits = Box.createHorizontalBox();
+            box4Limits.add(cntrlMinLimit);
+            box4Limits.add(Box.createHorizontalStrut(2));
+            box4Limits.add(cntrlMaxLimit);
+
+            cntrlExteranlRectParams = box4Limits;
+        }
+
         cntrlExteranlRectParams.setVisible(true);
 
         panelCustomParams.setBorder(BorderFactory.createTitledBorder("Raw contours options"));
