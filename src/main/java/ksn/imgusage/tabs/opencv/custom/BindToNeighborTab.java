@@ -372,6 +372,22 @@ public class BindToNeighborTab extends CustomTab<BindToNeighborTabParams> {
         box4Binds.add(Box.createHorizontalStrut(2));
         box4Binds.add(cntrlBindIndex);
 
+        modelMinLimitContoursW.getWrapped().addChangeListener(ev -> {
+            if (modelMinLimitContoursW.getValue() > modelMaxLimitContoursW.getValue())
+                modelMaxLimitContoursW.setValue(modelMinLimitContoursW.getValue());
+        });
+        modelMinLimitContoursH.getWrapped().addChangeListener(ev -> {
+            if (modelMinLimitContoursH.getValue() > modelMaxLimitContoursH.getValue())
+                modelMaxLimitContoursH.setValue(modelMinLimitContoursH.getValue());
+        });
+        modelMaxLimitContoursW.getWrapped().addChangeListener(ev -> {
+            if (modelMaxLimitContoursW.getValue() < modelMinLimitContoursW.getValue())
+                modelMinLimitContoursW.setValue(modelMaxLimitContoursW.getValue());
+        });
+        modelMaxLimitContoursH.getWrapped().addChangeListener(ev -> {
+            if (modelMaxLimitContoursH.getValue() < modelMinLimitContoursH.getValue())
+                modelMinLimitContoursH.setValue(modelMaxLimitContoursH.getValue());
+        });
 
         addChangeListener("modelMinLimitContoursW", modelMinLimitContoursW , v -> params.minLimitContours.width  = v);
         addChangeListener("modelMinLimitContoursH", modelMinLimitContoursH , v -> params.minLimitContours.height = v);

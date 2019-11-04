@@ -384,6 +384,27 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return boxSize;
     }
 
+    public Component makeMinMax(SliderIntModel modelMin, SliderIntModel modelMax, String borderTitle, String tip, String tipMin, String tipMax) {
+        Box boxSize = Box.createHorizontalBox();
+        boxSize.setBorder(BorderFactory.createTitledBorder(borderTitle));
+        if (tip != null)
+            boxSize.setToolTipText(tip);
+        boxSize.add(Box.createHorizontalGlue());
+        boxSize.add(makeSliderVert(modelMin, "Min", tipMin));
+        boxSize.add(Box.createHorizontalStrut(2));
+        boxSize.add(makeSliderVert(modelMax, "Max", tipMax));
+        boxSize.add(Box.createHorizontalGlue());
+        modelMin.getWrapped().addChangeListener(ev -> {
+            if (modelMin.getValue() > modelMax.getValue())
+                modelMax.setValue(modelMin.getValue());
+        });
+        modelMax.getWrapped().addChangeListener(ev -> {
+            if (modelMax.getValue() < modelMin.getValue())
+                modelMin.setValue(modelMax.getValue());
+        });
+        return boxSize;
+    }
+
     protected JCheckBox makeCheckBox(BooleanSupplier getter, Consumer<Boolean> setter, String title, String paramName, String tip, Runnable customListener) {
         JCheckBox checkBox = new JCheckBox(title, getter.getAsBoolean());
         if (tip != null)
