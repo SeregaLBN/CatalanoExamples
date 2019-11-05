@@ -2,12 +2,10 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.IntConsumer;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,10 +16,7 @@ import javax.swing.Box;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Point;
-import org.opencv.core.Scalar;
+import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderIntModel;
@@ -47,6 +42,12 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     private static final int MAX_MIN_CONTOUR_AREA = 10000;
     private static final int MIN_MAX_CONTOUR_AREA =    0;
     private static final int MAX_MAX_CONTOUR_AREA = 10001;
+
+    private static final Scalar GREEN       = new Scalar(0x00, 0xFF, 0x00);
+    private static final Scalar MEDIUM_BLUE = new Scalar(0xCD, 0x00, 0x00);
+    private static final Scalar ORANGE      = new Scalar(0x00, 0xA5, 0xFF);
+    private static final Scalar GOLD        = new Scalar(0x00, 0xD7, 0xFF);
+    private static final Scalar MAGENTA     = new Scalar(0xFF, 0x00, 0xFF);
 
     private FindContoursTabParams params;
     private Box boxDrawContoursParams;
@@ -102,11 +103,10 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
         }
 
 
-        Scalar green = new Scalar(0, 255, 0);
         Random rnd = ThreadLocalRandom.current();
         Supplier<Scalar> getColor = () -> params.randomColors
                 ? new Scalar(rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256))
-                : green;
+                : GREEN;
 
         switch (params.drawMethod) {
         case DRAW_CONTOURS:
@@ -194,18 +194,119 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             /**/
             break;
         case EXTERNAL_RECT:
-            contours.stream()
+            Predicate<Rect> checkBounds = rc ->
+                    (rc.width  >= params.minLimitContours.width ) &&
+                    (rc.height >= params.minLimitContours.height) &&
+                    (rc.width  <= params.maxLimitContours.width ) &&
+                    (rc.height <= params.maxLimitContours.height);
+            List<Rect> filteredRects = contours.stream()
                 .map(Imgproc::boundingRect)
-                .filter(rc -> (rc.width >= params.minLimitContours.width) && (rc.height >= params.minLimitContours.height))
-                .filter(rc -> (rc.width <= params.maxLimitContours.width) && (rc.height <= params.maxLimitContours.height))
-                .forEach(rc -> Imgproc.rectangle(imageMat,
-                                                 new Point(rc.x, rc.y),
-                                                 new Point(rc.x + rc.width, rc.y + rc.height),
-                                                 getColor.get(), 1));
+                .filter(checkBounds)
+                .collect(Collectors.toList());
+
+            // group rects (intersect) and draw pass round
+            IntersectRes res = groupIntersectedRect(filteredRects, checkBounds);
+            res.grouped.forEach(rc -> Imgproc.rectangle(
+                    imageMat,
+                    rc.tl(), rc.br(),
+                    MAGENTA, 3));
+            res.excluded.forEach(rc -> Imgproc.rectangle(
+                    imageMat,
+                    rc.tl(), rc.br(),
+                    GOLD, 2));
+            res.intersected.forEach(rc -> Imgproc.rectangle(
+                    imageMat,
+                    rc.tl(), rc.br(),
+                    MEDIUM_BLUE, 2));
+
+            // pass round single rects
+            filteredRects.stream()
+                .filter(rc -> !res.excluded.contains(rc))
+                .filter(rc -> !res.intersected.contains(rc))
+                .forEach(rc -> Imgproc.rectangle(
+                    imageMat,
+                    rc.tl(), rc.br(),
+                    getColor.get(), 1));
+
             break;
         default:
             logger.error("Unknown this.drawMethod={}! Support him!", params.drawMethod);
         }
+    }
+
+    static class IntersectRes {
+        /** rectangle intersection */
+        Set<Rect> grouped;
+        /** intersecting rectangles */
+        Set<Rect> intersected;
+        /** inner rectangles */
+        Set<Rect> excluded;
+    }
+
+    private static IntersectRes groupIntersectedRect(List<Rect> rects, Predicate<Rect> checkBounds) {
+        IntersectRes res = new IntersectRes();
+        res.excluded = new HashSet<>();
+        // exclude all inner rects
+        for (Rect rc1 : rects) {
+            if (res.excluded.contains(rc1))
+                continue;
+            Point br1 = rc1.br();
+            rects.stream()
+                .filter(rc2 -> !rc1.equals(rc2))
+                .filter(rc2 -> !res.excluded.contains(rc2))
+                .forEach(rc2 -> {
+                    Point br2 = rc2.br();
+                    if ((rc2.x >= rc1.x) &&
+                        (rc2.y >= rc1.y) &&
+                        (br2.x <= br1.x) &&
+                        (br2.y <= br1.y))
+                    {
+                        res.excluded.add(rc2);
+                    }
+                });
+        }
+
+        // group by predicate
+        res.intersected = new HashSet<>();
+        res.grouped = new HashSet<>();
+        for (Rect rc1 : rects) {
+            if (res.excluded.contains(rc1))
+                continue;
+            if (res.intersected.contains(rc1))
+                continue;
+
+            Rect rcGrouped = rects.stream()
+                .filter(rc2 -> !rc2.equals(rc1))
+                .filter(rc2 -> !res.intersected.contains(rc2))
+                .reduce(rc1, (rcAccumulated, rc2) -> {
+                    Rect rc = intersect(rcAccumulated, rc2);
+                    if (checkBounds.test(rc) &&
+                        !rc.equals(rcAccumulated) &&
+                        !rc.equals(rc2))
+                    {
+                        if (rcAccumulated.equals(rc1))
+                            res.intersected.add(rc1);
+                        res.intersected.add(rc2);
+                        return rc;
+                    }
+                    return rcAccumulated;
+                });
+            if (!rcGrouped.equals(rc1))
+                res.grouped.add(rcGrouped);
+        }
+
+        return res;
+    }
+
+    private static Rect intersect(Rect rc1, Rect rc2) {
+        Point br1 = rc1.br();
+        Point br2 = rc2.br();
+        return new Rect(
+            new Point(Math.min(rc1.x, rc2.x),
+                      Math.min(rc1.y, rc2.y)),
+            new Point(Math.max(br1.x, br2.x),
+                      Math.max(br1.y, br2.y))
+        );
     }
 
     @Override
