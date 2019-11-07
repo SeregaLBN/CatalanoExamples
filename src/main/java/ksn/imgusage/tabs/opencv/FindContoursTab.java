@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.IntConsumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -16,6 +15,7 @@ import javax.swing.Box;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.math3.util.Pair;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
@@ -45,7 +45,6 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
     private static final Scalar GREEN       = new Scalar(0x00, 0xFF, 0x00);
     private static final Scalar MEDIUM_BLUE = new Scalar(0xCD, 0x00, 0x00);
-    private static final Scalar ORANGE      = new Scalar(0x00, 0xA5, 0xFF);
     private static final Scalar GOLD        = new Scalar(0x00, 0xD7, 0xFF);
     private static final Scalar MAGENTA     = new Scalar(0xFF, 0x00, 0xFF);
 
@@ -194,39 +193,53 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             /**/
             break;
         case EXTERNAL_RECT:
-            Predicate<Rect> checkBounds = rc ->
-                    (rc.width  >= params.minLimitContours.width ) &&
-                    (rc.height >= params.minLimitContours.height) &&
-                    (rc.width  <= params.maxLimitContours.width ) &&
-                    (rc.height <= params.maxLimitContours.height);
-            List<Rect> filteredRects = contours.stream()
-                .map(Imgproc::boundingRect)
-                .filter(checkBounds)
-                .collect(Collectors.toList());
+
+            FindContoursResult finded = new FindContoursResult();
+            finded.contours  = contours;
+            finded.hierarchy = hierarchy;
+            ArrayList<ContourContext> all = new ArrayList<>(finded.contours.size());
+            for (int i = 0; i < finded.contours.size(); ++i) {
+                MatOfPoint contour = finded.contours.get(i);
+
+                ContourContext cc = new ContourContext();
+                cc.index = i;
+                cc.rc = Imgproc.boundingRect(contour);
+                all.add(cc);
+            }
+            finded.limited = all.stream()
+                    .filter(this::checkBounds)
+                    .collect(Collectors.toList());
 
             // group rects (intersect) and draw pass round
-            IntersectRes res = groupIntersectedRect(filteredRects, checkBounds);
-            res.grouped.forEach(rc -> Imgproc.rectangle(
-                    imageMat,
-                    rc.tl(), rc.br(),
-                    MAGENTA, 3));
-            res.excluded.forEach(rc -> Imgproc.rectangle(
-                    imageMat,
-                    rc.tl(), rc.br(),
-                    GOLD, 2));
-            res.intersected.forEach(rc -> Imgproc.rectangle(
-                    imageMat,
-                    rc.tl(), rc.br(),
-                    MEDIUM_BLUE, 2));
+            List<SymbolContours> groups = groupNearbyСontours(finded);
 
-            // pass round single rects
-            filteredRects.stream()
-                .filter(rc -> !res.excluded.contains(rc))
-                .filter(rc -> !res.intersected.contains(rc))
-                .forEach(rc -> Imgproc.rectangle(
+            // colorized borders symbol/regions
+            imageMat = OpenCvHelper.to3Channel(imageMat);
+            groups.forEach(gc -> {
+                Rect rc = gc.getOwnRect();
+                Imgproc.rectangle(
                     imageMat,
                     rc.tl(), rc.br(),
-                    getColor.get(), 1));
+                    MAGENTA, 3);
+            });
+            groups.stream()
+                .map(gc -> gc.excluded.stream())
+                .flatMap(x -> x)
+                .forEach(cc ->
+                    Imgproc.rectangle(
+                        imageMat,
+                        cc.rc.tl(), cc.rc.br(),
+                        GOLD, 2)
+                );
+            groups.stream()
+                .map(gc -> gc.included.stream())
+                .flatMap(x -> x)
+                .forEach(cc ->
+                    Imgproc.rectangle(
+                        imageMat,
+                        cc.rc.tl(), cc.rc.br(),
+                        MEDIUM_BLUE, 1)
+                );
 
             break;
         default:
@@ -234,65 +247,140 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
         }
     }
 
-    static class IntersectRes {
-        /** rectangle intersection */
-        Set<Rect> grouped;
-        /** intersecting rectangles */
-        Set<Rect> intersected;
-        /** inner rectangles */
-        Set<Rect> excluded;
+    static class ContourContext {
+        /** the contour index in the original result sequence {@link FindContoursResult#contours} */
+        int index;
+        /** contour own rectangle */
+        Rect rc;
     }
 
-    private static IntersectRes groupIntersectedRect(List<Rect> rects, Predicate<Rect> checkBounds) {
-        IntersectRes res = new IntersectRes();
-        res.excluded = new HashSet<>();
-        // exclude all inner rects
-        for (Rect rc1 : rects) {
-            if (res.excluded.contains(rc1))
-                continue;
-            Point br1 = rc1.br();
-            rects.stream()
-                .filter(rc2 -> !rc1.equals(rc2))
-                .filter(rc2 -> !res.excluded.contains(rc2))
-                .forEach(rc2 -> {
+    static class FindContoursResult {
+        /** original from @see {link {@link Imgproc#findContours(Mat, List, Mat, int, int)}} */
+        List<MatOfPoint> contours;
+
+        /** original from @see {link {@link Imgproc#findContours(Mat, List, Mat, int, int)}} */
+        Mat hierarchy;
+
+        /** {@link contours}.stream.map(cast to {@link ContourContext}).filtered(this::{@link #checkBounds}()) */
+        List<ContourContext> limited;
+    }
+
+    /** a group of contours that form a single character */
+    static class SymbolContours {
+        /** own contours */
+        Set<ContourContext> included;
+
+        /** inner contours */
+        Set<ContourContext> excluded;
+
+        /** own rectangle */
+        Rect getOwnRect() {
+            if (included == null)
+                return null;
+            if (included.isEmpty())
+                return new Rect();
+
+            Optional<Rect> oRc = included.stream()
+                .map(cntxt -> cntxt.rc)
+                .reduce((rc1, rc2) -> {
+                    Point br1 = rc1.br();
                     Point br2 = rc2.br();
-                    if ((rc2.x >= rc1.x) &&
-                        (rc2.y >= rc1.y) &&
-                        (br2.x <= br1.x) &&
-                        (br2.y <= br1.y))
-                    {
-                        res.excluded.add(rc2);
-                    }
+                    return new Rect(
+                        new Point(Math.min(rc1.x, rc2.x),
+                                  Math.min(rc1.y, rc2.y)),
+                        new Point(Math.max(br1.x, br2.x),
+                                  Math.max(br1.y, br2.y))
+                    );
                 });
+            return oRc.isPresent() ? oRc.get() : null;
         }
 
-        // group by predicate
-        res.intersected = new HashSet<>();
-        res.grouped = new HashSet<>();
-        for (Rect rc1 : rects) {
-            if (res.excluded.contains(rc1))
+    }
+
+    private List<SymbolContours> groupNearbyСontours(FindContoursResult finded) {
+        Set<ContourContext> excludedAll = new HashSet<>();
+        Set<Pair<ContourContext /* excluded */, ContourContext /* excludedFrom */>> excludedFrom = new HashSet<>();
+        // exclude all inner rects
+        for (ContourContext cc1 : finded.limited) {
+            if (excludedAll.contains(cc1))
                 continue;
-            if (res.intersected.contains(rc1))
+            Rect rc1 = cc1.rc;
+            Point br1 = rc1.br();
+            for (ContourContext cc2 : finded.limited) {
+                if (cc1.equals(cc2))
+                    continue;
+                if (excludedAll.contains(cc2))
+                    continue;
+
+                Rect rc2 = cc2.rc;
+                Point br2 = rc2.br();
+                if ((rc2.x >= rc1.x) &&
+                    (rc2.y >= rc1.y) &&
+                    (br2.x <= br1.x) &&
+                    (br2.y <= br1.y))
+                {
+                    excludedAll.add(cc2);
+                    excludedFrom.add(new Pair<>(cc2, cc1));
+                }
+            }
+        }
+
+        List<SymbolContours> res = new ArrayList<>();
+        // group by predicate
+        Set<ContourContext> includedAll = new HashSet<>();
+        for (ContourContext cc1 : finded.limited) {
+            if (excludedAll.contains(cc1))
+                continue;
+            if (includedAll.contains(cc1))
                 continue;
 
-            Rect rcGrouped = rects.stream()
-                .filter(rc2 -> !rc2.equals(rc1))
-                .filter(rc2 -> !res.intersected.contains(rc2))
-                .reduce(rc1, (rcAccumulated, rc2) -> {
-                    Rect rc = intersect(rcAccumulated, rc2);
-                    if (checkBounds.test(rc) &&
-                        !rc.equals(rcAccumulated) &&
-                        !rc.equals(rc2))
-                    {
-                        if (rcAccumulated.equals(rc1))
-                            res.intersected.add(rc1);
-                        res.intersected.add(rc2);
-                        return rc;
-                    }
-                    return rcAccumulated;
-                });
-            if (!rcGrouped.equals(rc1))
-                res.grouped.add(rcGrouped);
+            SymbolContours gc = new SymbolContours();
+            res.add(gc);
+            gc.included = new HashSet<>();
+            gc.excluded = new HashSet<>();
+
+            gc.included.add(cc1);
+            includedAll.add(cc1);
+
+            Rect rc1 = cc1.rc;
+            Rect rcOwn = rc1;
+            for (ContourContext cc2 : finded.limited) {
+                if (cc2.equals(cc1))
+                    continue;
+                if (excludedAll.contains(cc2))
+                    continue;
+                if (includedAll.contains(cc2))
+                    continue;
+
+                Rect rc2 = cc2.rc;
+                Rect rc = intersect(rcOwn, rc2);
+                if (!checkBounds(rc) ||
+                    rc.equals(rcOwn) ||
+                    rc.equals(rc2))
+                {
+                    continue;
+                }
+
+                gc.included.add(cc2);
+                includedAll.add(cc2);
+                rcOwn = rc;
+            }
+        }
+
+        for (Pair<ContourContext /* excluded */, ContourContext /* excludedFrom */> pair : excludedFrom) {
+            ContourContext excluded = pair.getFirst();
+            ContourContext included = pair.getSecond();
+
+            Optional<SymbolContours> opGc = res.stream()
+                .filter(gc -> gc.included.contains(included))
+                .findAny();
+            if (!opGc.isPresent()) {
+                logger.error("Bad algorithm... ;(");
+            } else {
+                opGc.get()
+                    .excluded
+                    .add(excluded);
+            }
         }
 
         return res;
@@ -517,6 +605,16 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     @Override
     public FindContoursTabParams getParams() {
         return params;
+    }
+
+    private boolean checkBounds(ContourContext cntxt) {
+        return checkBounds(cntxt.rc);
+    }
+    private boolean checkBounds(Rect rc) {
+        return (rc.width  >= params.minLimitContours.width ) &&
+               (rc.height >= params.minLimitContours.height) &&
+               (rc.width  <= params.maxLimitContours.width ) &&
+               (rc.height <= params.maxLimitContours.height);
     }
 
 }
