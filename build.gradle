@@ -247,12 +247,15 @@ task downloadExampleImage() {
 
 defaultTasks 'clean', 'build'
 project.tasks.clean           .dependsOn project.tasks.cleanAddons
-project.tasks.build           .dependsOn project.tasks.fatJar
+//project.tasks.build           .dependsOn project.tasks.fatJar
 project.tasks.compileJava     .dependsOn project.tasks.downloadCatalanoFramework
 project.tasks.processResources.dependsOn project.tasks.downloadExampleImage
 
 /** /
-gradle.taskGraph.afterTask { Task task ->
+gradle.taskGraph.beforeTask { Task task ->
     println '>>>>>>   ' + task.project.name + ':' + task.name
+}
+gradle.taskGraph.afterTask { Task task ->
+    println '<<<<<<   ' + task.project.name + ':' + task.name
 }
 /**/
