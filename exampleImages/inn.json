@@ -15,7 +15,7 @@
       "right" : 373,
       "bottom" : 520
     },
-    "imageFile" : "idCode.noBorder.jpg"
+    "imageFile" : "taxCode.noBorder.jpg"
   }
 }, {
   "tabName" : "OpenCV:Colorized",

@@ -15,7 +15,7 @@
       "right" : 200,
       "bottom" : 2100
     },
-    "imageFile" : "idCardOld.NoBorder.jpg"
+    "imageFile" : "idCardOld1.Page1.NoBorder.jpg"
   }
 }, {
   "tabName" : "OpenCV:Colorized",

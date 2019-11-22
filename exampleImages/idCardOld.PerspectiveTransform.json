@@ -15,7 +15,7 @@
       "right" : 0,
       "bottom" : 0
     },
-    "imageFile" : "idCardOld.DarkBorder.PerspectiveTransform.jpg"
+    "imageFile" : "idCardOld1.Page1.DarkBorder.PerspectiveTransform.jpg"
   }
 }, {
   "tabName" : "OpenCV:PerspectiveTransform",
