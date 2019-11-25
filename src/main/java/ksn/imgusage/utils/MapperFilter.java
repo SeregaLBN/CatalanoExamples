@@ -80,6 +80,8 @@ public final class MapperFilter {
                                    HistogramEqualizationTab.TAB_DESCRIPTION),
             new FilterTabs(                 MorphologyExTab.TAB_TITLE,
                                             MorphologyExTab.TAB_DESCRIPTION),
+            new FilterTabs(                         MserTab.TAB_TITLE,
+                                                    MserTab.TAB_DESCRIPTION),
             new FilterTabs(         PerspectiveTransformTab.TAB_TITLE,
                                     PerspectiveTransformTab.TAB_DESCRIPTION),
             new FilterTabs(                    ThresholdTab.TAB_TITLE,
@@ -135,6 +137,8 @@ public final class MapperFilter {
             return         HistogramEqualizationTab.class;
         case                        MorphologyExTab.TAB_NAME:
             return                  MorphologyExTab.class;
+        case                                MserTab.TAB_NAME:
+            return                          MserTab.class;
         case                PerspectiveTransformTab.TAB_NAME:
             return          PerspectiveTransformTab.class;
         case                           ThresholdTab.TAB_NAME:
@@ -211,6 +215,8 @@ public final class MapperFilter {
             return             HistogramEqualizationTabParams.class;
         case                            MorphologyExTab.TAB_NAME:
             return                      MorphologyExTabParams.class;
+        case                                    MserTab.TAB_NAME:
+            return                              MserTabParams.class;
         case                    PerspectiveTransformTab.TAB_NAME:
             return              PerspectiveTransformTabParams.class;
         case                               ThresholdTab.TAB_NAME:
