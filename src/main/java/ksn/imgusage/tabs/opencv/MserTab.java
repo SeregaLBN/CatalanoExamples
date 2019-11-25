@@ -12,10 +12,12 @@ import javax.swing.SwingUtilities;
 
 import org.opencv.core.*;
 import org.opencv.features2d.MSER;
+import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.dto.opencv.MserTabParams;
+import ksn.imgusage.utils.OpenCvHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d3/d28/classcv_1_1MSER.html'>Maximally stable extremal region extractor</a> */
 public class MserTab extends OpencvFilterTab<MserTabParams> {
@@ -44,6 +46,8 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     private static final int    MAX_EDGE_BLUR_SIZE = 300;
 
     private static final Scalar CONTOUR_COLOR = new Scalar(255);
+    private static final Scalar GREEN         = new Scalar(0x00, 0xFF, 0x00);
+    private static final Scalar MAGENTA       = new Scalar(0xFF, 0x00, 0xFF);
 
     private MserTabParams params;
 
@@ -83,12 +87,39 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         List<Rect> rcBoxes = bboxes.toList();
 
         Mat mask = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+
+        imageMat = OpenCvHelper.to3Channel(imageMat);
+
         for (Rect rect : rcBoxes) {
             Mat roi = new Mat(mask, rect);
             roi.setTo(CONTOUR_COLOR);
+
+            // mark single char
+            Imgproc.rectangle(imageMat, rect.br(), rect.tl(), GREEN);
         }
 
-        imageMat = mask;
+        // mark word
+        Mat morbyte = new Mat();
+        Mat kernel = new Mat(1, 50, CvType.CV_8UC1, Scalar.all(255));
+        Imgproc.morphologyEx(mask, morbyte, Imgproc.MORPH_DILATE, kernel);
+        List<MatOfPoint> contour2 = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        int imgsize = imageMat.height() * imageMat.width();
+        Imgproc.findContours(morbyte, contour2, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+//        Scalar zeos = new Scalar(0, 0, 0);
+        for (int ind = 0; ind < contour2.size(); ind++) {
+            Rect rectan3 = Imgproc.boundingRect(contour2.get(ind));
+            if ((rectan3.area() > 0.5 * imgsize) || (rectan3.area() < 100) || (rectan3.width / rectan3.height < 2)) {
+//                Mat roi = new Mat(morbyte, rectan3);
+//                roi.setTo(zeos);
+            } else {
+                Imgproc.rectangle(imageMat, rectan3.br(), rectan3.tl(), MAGENTA);
+            }
+        }
+
+
+
+//        imageMat = mask;
     }
 
     @Override
