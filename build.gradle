@@ -203,6 +203,18 @@ task downloadCatalanoFramework(type: Copy) {
     include 'Catalano.IO.jar'
     include 'Catalano.Math.jar'
     into(project.file('./libs'))
+
+    println '...Catalano jar`s unpacked to directory: ' + project.file('./libs')
+
+    if (!project.file('./libs/Catalano.Core.jar').exists()) {
+        // WTF!
+        System.err.println('--------------------------------------------')
+        System.err.println('--')
+        System.err.println('--  Sorrryyyy!  Please call manually:')
+        System.err.println('> gradle run')
+        System.err.println('--')
+        System.err.println('--------------------------------------------')
+    }
 }
 
 // Download default example image
@@ -245,14 +257,18 @@ task downloadExampleImage() {
 
 
 
-defaultTasks 'clean', 'build'
+defaultTasks 'clean', 'build', 'run'
+
 project.tasks.clean           .dependsOn project.tasks.cleanAddons
 project.tasks.build           .dependsOn project.tasks.fatJar
 project.tasks.compileJava     .dependsOn project.tasks.downloadCatalanoFramework
 project.tasks.processResources.dependsOn project.tasks.downloadExampleImage
 
 /** /
-gradle.taskGraph.afterTask { Task task ->
+gradle.taskGraph.beforeTask { Task task ->
     println '>>>>>>   ' + task.project.name + ':' + task.name
+}
+gradle.taskGraph.afterTask { Task task ->
+    println '<<<<<<   ' + task.project.name + ':' + task.name
 }
 /**/

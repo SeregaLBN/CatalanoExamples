@@ -52,7 +52,7 @@ public class ImageFilterExamples {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageFilterExamples.class);
     public static final String DEFAULT_TITLE = "Demonstration of image filters";
-    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "idCard.LeadToPerspective.json").toAbsolutePath().toFile();
+    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Lena.OpenCV.Neon.json").toAbsolutePath().toFile();
 
     private final JFrame frame;
     private JTabbedPane tabPane;
