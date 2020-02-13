@@ -29,14 +29,14 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
     private static final int MIN_IMAGE_WIDTH  = 10;
     private static final int MIN_IMAGE_HEIGHT = 10;
-    private static final int MAX_IMAGE_WIDTH  = 10000;
-    private static final int MAX_IMAGE_HEIGHT = 10000;
+    private static final int MAX_IMAGE_WIDTH  = 7000;
+    private static final int MAX_IMAGE_HEIGHT = 7000;
     private static final int MIN_SIZE_ROI = 10;
     private static final Color COLOR_LEFT   = Color.RED;
     private static final Color COLOR_RIGHT  = Color.GREEN;
     private static final Color COLOR_TOP    = Color.BLUE;
     private static final Color COLOR_BOTTOM = Color.ORANGE;
-    private static final int MAX_ZOOM_KOEF = 3;
+  //private static final int MAX_ZOOM_KOEF = 3;
 
     private BufferedImage sourceImage;
     private BufferedImage drawImage;
@@ -52,9 +52,9 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             params = new FirstTabParams(DEFAULT_IMAGE, false, true, new Size(-1, -1), true, new Padding(0,0,0,0));
 
         if (params.keepToSize.width < MIN_IMAGE_WIDTH)
-            params.keepToSize.width = MAX_IMAGE_WIDTH;
+            params.keepToSize.width = MIN_IMAGE_WIDTH;
         if (params.keepToSize.height < MIN_IMAGE_HEIGHT)
-            params.keepToSize.height = MAX_IMAGE_HEIGHT;
+            params.keepToSize.height = MIN_IMAGE_HEIGHT;
         this.params = params;
 
         readImageFile(params.imageFile);
@@ -387,8 +387,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         applyMaxSizeLimits = () -> {
             if (sourceImage == null)
                 return;
-            modelSizeW.setMaximum(sourceImage.getWidth()  * MAX_ZOOM_KOEF);
-            modelSizeH.setMaximum(sourceImage.getHeight() * MAX_ZOOM_KOEF);
+          //modelSizeW.setMaximum(sourceImage.getWidth()  * MAX_ZOOM_KOEF);
+          //modelSizeH.setMaximum(sourceImage.getHeight() * MAX_ZOOM_KOEF);
             modelPadLeft  .setMaximum(sourceImage.getWidth()  - 1);
             modelPadRight .setMaximum(sourceImage.getWidth()  - 1);
             modelPadTop   .setMaximum(sourceImage.getHeight() - 1);

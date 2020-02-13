@@ -7,11 +7,17 @@ import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JCheckBox;
+
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.xphoto.Xphoto;
 
 import ksn.imgusage.type.dto.opencv.ColorizedTabParams;
 import ksn.imgusage.type.dto.opencv.ColorizedTabParams.ECastTo;
 import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.OpenCvHelper;
+import ksn.imgusage.utils.UiHelper;
 
 /** Transform image colors {@link ImgHelper} {@link OpenCvHelper} */
 public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
@@ -22,6 +28,7 @@ public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
 
     private ColorizedTabParams params;
     private Consumer<String> showImageSize;
+    private Consumer<Boolean> onEnablerUseWhiteBalancer;
 
     @Override
     public Component makeTab(ColorizedTabParams params) {
@@ -52,6 +59,16 @@ public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
             throw new UnsupportedOperationException("Unsupported image colors cast to " + params.colorsTo);
         }
         showImageSize.accept(imageMat.width() + "x" + imageMat.height());
+
+        boolean canUseWhiteBalancer = imageMat.type() == CvType.CV_8UC3 || imageMat.type() == CvType.CV_16UC3;
+        if (onEnablerUseWhiteBalancer != null)
+            onEnablerUseWhiteBalancer.accept(canUseWhiteBalancer);
+
+        if (params.useWhiteBalancer && canUseWhiteBalancer) {
+            Mat dst = new Mat();
+            Xphoto.createGrayworldWB().balanceWhite(imageMat, dst);
+            imageMat = dst;
+        }
     }
 
     @Override
@@ -71,11 +88,20 @@ public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
         Container cntrlEditBoxSize = makeEditBox(x -> showImageSize = x, null, "Image size", null, null);
         showImageSize.accept("X*Y");
 
+        JCheckBox cntrlUseWhiteBalancer = makeCheckBox(
+            () -> params.useWhiteBalancer,
+            v  -> params.useWhiteBalancer = v,
+            "WhiteBalancer",
+            "params.useWhiteBalancer",
+            "Applies white balancing to the input image", null);
+        onEnablerUseWhiteBalancer = canUseWhiteBalancer -> UiHelper.enableAllChilds(cntrlUseWhiteBalancer, canUseWhiteBalancer);
+
         Box box4Options = Box.createVerticalBox();
         box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
         box4Options.add(boxColorsTo);
         box4Options.add(cntrlEditBoxSize);
+        box4Options.add(cntrlUseWhiteBalancer);
 
         return box4Options;
     }

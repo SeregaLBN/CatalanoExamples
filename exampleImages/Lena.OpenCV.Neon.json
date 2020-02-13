@@ -18,8 +18,15 @@
     "imageFile" : "Lena.png"
   }
 }, {
-  "tabName" : "OpenCV:Bilateral",
+  "tabName" : "OpenCV:Colorized",
   "pos" : 1,
+  "params" : {
+    "colorsTo" : "RGB",
+    "useWhiteBalancer" : true
+  }
+}, {
+  "tabName" : "OpenCV:Bilateral",
+  "pos" : 2,
   "params" : {
     "diameter" : 38,
     "sigmaColor" : 80.0,
@@ -28,7 +35,7 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 2,
+  "pos" : 3,
   "params" : {
     "morphologicalOperation" : "MORPH_GRADIENT",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -60,7 +67,7 @@
   }
 }, {
   "tabName" : "OpenCV:Blur",
-  "pos" : 3,
+  "pos" : 4,
   "params" : {
     "kernelSize" : {
       "width" : 30,
@@ -74,7 +81,7 @@
   }
 }, {
   "tabName" : "OpenCV:AddWeighted",
-  "pos" : 4,
+  "pos" : 5,
   "params" : {
     "alpha" : -4.0,
     "beta" : 4.0,
