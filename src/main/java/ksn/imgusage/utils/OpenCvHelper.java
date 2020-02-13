@@ -178,7 +178,7 @@ public final class OpenCvHelper {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
             ImageIO.write(image, "png", byteArrayOutputStream);
             byteArrayOutputStream.flush();
-            return Imgcodecs.imdecode(new MatOfByte(byteArrayOutputStream.toByteArray()), Imgcodecs.CV_LOAD_IMAGE_UNCHANGED);
+            return Imgcodecs.imdecode(new MatOfByte(byteArrayOutputStream.toByteArray()), Imgcodecs.IMREAD_UNCHANGED);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
