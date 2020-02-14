@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ksn.imgusage.tabs.catalano.CatalanoFilterTab;
+import ksn.imgusage.tabs.commons.CommonTab;
 import ksn.imgusage.tabs.opencv.OpencvFilterTab;
 import ksn.imgusage.tabs.opencv.custom.CustomTab;
 
@@ -30,9 +31,18 @@ public class SelectFilterDialog {
         JDialog dlg = new JDialog(owner, "Select filter...", true);
         UiHelper.bindKey(dlg.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, false), dlg::dispose);
 
+        ButtonGroup radioGroup = new ButtonGroup();
+        Box boxCommonFilters = Box.createVerticalBox();
+        boxCommonFilters.setBorder(BorderFactory.createTitledBorder("Common filters"));
+        MapperFilter.getAllCommonTabsDescr().forEach(tab -> {
+            JRadioButton radioFilter = new JRadioButton(tab.filterTitle + ": " + tab.description);
+            radioFilter.setActionCommand(CommonTab.TAB_PREFIX + tab.filterTitle);
+            boxCommonFilters.add(radioFilter);
+            radioGroup.add(radioFilter);
+        });
+
         Box boxCatalanoFilters = Box.createVerticalBox();
         boxCatalanoFilters.setBorder(BorderFactory.createTitledBorder("Catalano filters"));
-        ButtonGroup radioGroup = new ButtonGroup();
         MapperFilter.getAllCatalanoTabsDescr().forEach(tab -> {
             JRadioButton radioFilter = new JRadioButton(tab.filterTitle + ": " + tab.description);
             radioFilter.setActionCommand(CatalanoFilterTab.TAB_PREFIX + tab.filterTitle);
@@ -71,6 +81,7 @@ public class SelectFilterDialog {
         });
 
         Box boxCenter = Box.createVerticalBox();
+        boxCenter.add(boxCommonFilters);
         boxCenter.add(boxOpenCvFilters);
         boxCenter.add(boxCatalanoFilters);
 

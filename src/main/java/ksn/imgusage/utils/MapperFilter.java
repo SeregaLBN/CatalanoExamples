@@ -8,6 +8,8 @@ import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.catalano.*;
 import ksn.imgusage.tabs.catalano.BlurTab;
+import ksn.imgusage.tabs.commons.ResizeTab;
+import ksn.imgusage.tabs.commons.RoiTab;
 import ksn.imgusage.tabs.opencv.*;
 import ksn.imgusage.tabs.opencv.custom.BindToNeighborTab;
 import ksn.imgusage.tabs.opencv.custom.LeadToAxisTab;
@@ -15,6 +17,8 @@ import ksn.imgusage.tabs.opencv.custom.LeadToPerspectiveTab;
 import ksn.imgusage.type.dto.FirstTabParams;
 import ksn.imgusage.type.dto.catalano.*;
 import ksn.imgusage.type.dto.catalano.BlurTabParams;
+import ksn.imgusage.type.dto.common.ResizeTabParams;
+import ksn.imgusage.type.dto.common.RoiTabParams;
 import ksn.imgusage.type.dto.opencv.*;
 import ksn.imgusage.type.dto.opencv.custom.BindToNeighborTabParams;
 import ksn.imgusage.type.dto.opencv.custom.LeadToAxisTabParams;
@@ -31,6 +35,15 @@ public final class MapperFilter {
             this.filterTitle  = filterTitle;
             this.description = description;
         }
+    }
+
+    public static List<FilterTabs> getAllCommonTabsDescr() {
+        return Arrays.<FilterTabs>asList( // alphabetical sort
+            new FilterTabs(ResizeTab.TAB_TITLE,
+                           ResizeTab.TAB_DESCRIPTION),
+            new FilterTabs(   RoiTab.TAB_TITLE,
+                              RoiTab.TAB_DESCRIPTION)
+        );
     }
 
     public static List<FilterTabs> getAllCatalanoTabsDescr() {
@@ -111,14 +124,21 @@ public final class MapperFilter {
         case       FirstTab.TAB_NAME:
             return FirstTab.class;
 
+        // Common
+        // alphabetical sort
+        case                              ResizeTab.TAB_NAME:
+            return                        ResizeTab.class;
+        case                                 RoiTab.TAB_NAME:
+            return                           RoiTab.class;
+
         // OpenCV
         // alphabetical sort
         case                   AdaptiveThresholdTab.TAB_NAME:
             return             AdaptiveThresholdTab.class;
         case                         AddWeightedTab.TAB_NAME:
             return                   AddWeightedTab.class;
-        case                                ColorizedTab.TAB_NAME:
-            return                          ColorizedTab.class;
+        case                           ColorizedTab.TAB_NAME:
+            return                     ColorizedTab.class;
         case                           BilateralTab.TAB_NAME:
             return                     BilateralTab.class;
         case       ksn.imgusage.tabs.opencv.BlurTab.TAB_NAME:
@@ -189,14 +209,21 @@ public final class MapperFilter {
         case       FirstTab.TAB_NAME:
             return FirstTabParams.class;
 
+        // Common
+        // alphabetical sort
+        case                                  ResizeTab.TAB_NAME:
+            return                            ResizeTabParams.class;
+        case                                     RoiTab.TAB_NAME:
+            return                               RoiTabParams.class;
+
         // OpenCV
         // alphabetical sort
         case                       AdaptiveThresholdTab.TAB_NAME:
             return                 AdaptiveThresholdTabParams.class;
         case                             AddWeightedTab.TAB_NAME:
             return                       AddWeightedTabParams.class;
-        case                                    ColorizedTab.TAB_NAME:
-            return                              ColorizedTabParams.class;
+        case                               ColorizedTab.TAB_NAME:
+            return                         ColorizedTabParams.class;
         case                               BilateralTab.TAB_NAME:
             return                         BilateralTabParams.class;
         case       ksn.imgusage.tabs.    opencv.BlurTab.TAB_NAME:
