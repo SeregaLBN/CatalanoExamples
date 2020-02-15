@@ -1,20 +1,27 @@
 [ {
   "tabName" : "FirstTab",
   "params" : {
-    "useGray" : false,
     "useScale" : true,
+    "imageFile" : "taxCode.noBorder.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 3665,
       "height" : 2333
     },
-    "useKeepAspectRatio" : true,
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "Common:ROI",
+  "params" : {
     "boundOfRoi" : {
       "left" : 770,
       "top" : 494,
       "right" : 373,
       "bottom" : 520
-    },
-    "imageFile" : "taxCode.noBorder.jpg"
+    }
   }
 }, {
   "tabName" : "OpenCV:Colorized",

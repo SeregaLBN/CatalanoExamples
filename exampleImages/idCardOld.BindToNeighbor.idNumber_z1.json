@@ -1,20 +1,27 @@
 [ {
   "tabName" : "FirstTab",
   "params" : {
-    "useGray" : false,
     "useScale" : true,
+    "imageFile" : "idCardOld1.Page1.NoBorder.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 3000,
       "height" : 2104
     },
-    "useKeepAspectRatio" : true,
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "Common:ROI",
+  "params" : {
     "boundOfRoi" : {
       "left" : 1900,
       "top" : 40,
       "right" : 200,
       "bottom" : 2100
-    },
-    "imageFile" : "idCardOld1.Page1.NoBorder.jpg"
+    }
   }
 }, {
   "tabName" : "OpenCV:Colorized",

@@ -1,20 +1,17 @@
 [ {
   "tabName" : "FirstTab",
   "params" : {
-    "useGray" : false,
     "useScale" : true,
+    "imageFile" : "VolodHill.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 500,
       "height" : 280
     },
-    "useKeepAspectRatio" : true,
-    "boundOfRoi" : {
-      "left" : 0,
-      "top" : 0,
-      "right" : 0,
-      "bottom" : 0
-    },
-    "imageFile" : "VolodHill.jpg"
+    "useKeepAspectRatio" : true
   }
 }, {
   "tabName" : "Catalano:BrightnessCorrection",

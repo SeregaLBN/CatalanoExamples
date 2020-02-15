@@ -2,20 +2,22 @@
   "tabName" : "FirstTab",
   "pos" : 0,
   "params" : {
-    "useGray" : true,
     "useScale" : true,
+    "imageFile" : "passportUkr.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 1200,
       "height" : 766
     },
-    "useKeepAspectRatio" : true,
-    "boundOfRoi" : {
-      "left" : 0,
-      "top" : 0,
-      "right" : 0,
-      "bottom" : 0
-    },
-    "imageFile" : "passportUkr.jpg"
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "OpenCV:Colorized",
+  "params" : {
+    "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:AdaptiveThreshold",

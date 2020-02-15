@@ -8,8 +8,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.type.Padding;
-import ksn.imgusage.type.Size;
 
 /** Init parameters for {@link FirstTab} */
 public class FirstTabParams implements ITabParams {
@@ -18,30 +16,16 @@ public class FirstTabParams implements ITabParams {
     @JsonIgnore
     public File    imageFile;
 
-    public boolean useGray;
     public boolean useScale;
-    public Size    keepToSize;
-    public boolean useKeepAspectRatio;
-
-    /** padding of Region Of Interest */
-    public Padding boundOfRoi = new Padding();
 
     public FirstTabParams() {}
 
     public FirstTabParams(
         File    imageFile,
-        boolean useGray,
-        boolean useScale,
-        Size    keepToSize,
-        boolean useKeepAspectRatio,
-        Padding boundOfRoi)
+        boolean useScale)
     {
-        this.imageFile          = imageFile;
-        this.useGray            = useGray;
-        this.useScale           = useScale;
-        this.keepToSize         = keepToSize;
-        this.useKeepAspectRatio = useKeepAspectRatio;
-        this.boundOfRoi         = boundOfRoi;
+        this.imageFile = imageFile;
+        this.useScale  = useScale;
     }
 
     @JsonProperty("imageFile")
@@ -61,13 +45,9 @@ public class FirstTabParams implements ITabParams {
     @Override
     public String toString() {
         return String.format(
-                "{imageFile='%s', useGray=%b, useScale=%b, keepToSize=%s, useKeepAspectRatio=%b, boundOfRoi=%s}",
+                "{imageFile='%s', useScale=%b}",
                 imageFile,
-                useGray,
-                useScale,
-                keepToSize,
-                useKeepAspectRatio,
-                boundOfRoi);
+                useScale);
     }
 
 }

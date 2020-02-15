@@ -1,7 +1,6 @@
 package ksn.imgusage.tabs.opencv;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -27,7 +26,6 @@ public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
     public static final String TAB_DESCRIPTION = "Cast image to gray or full colors";
 
     private ColorizedTabParams params;
-    private Consumer<String> showImageSize;
     private Consumer<Boolean> onEnablerUseWhiteBalancer;
 
     @Override
@@ -58,7 +56,6 @@ public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
         default:
             throw new UnsupportedOperationException("Unsupported image colors cast to " + params.colorsTo);
         }
-        showImageSize.accept(imageMat.width() + "x" + imageMat.height());
 
         boolean canUseWhiteBalancer = imageMat.type() == CvType.CV_8UC3 || imageMat.type() == CvType.CV_16UC3;
         if (onEnablerUseWhiteBalancer != null)
@@ -85,9 +82,6 @@ public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
             null                                            // customListener
         );
 
-        Container cntrlEditBoxSize = makeEditBox(x -> showImageSize = x, null, "Image size", null, null);
-        showImageSize.accept("X*Y");
-
         JCheckBox cntrlUseWhiteBalancer = makeCheckBox(
             () -> params.useWhiteBalancer,
             v  -> params.useWhiteBalancer = v,
@@ -100,7 +94,6 @@ public class ColorizedTab extends OpencvFilterTab<ColorizedTabParams> {
         box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
         box4Options.add(boxColorsTo);
-        box4Options.add(cntrlEditBoxSize);
         box4Options.add(cntrlUseWhiteBalancer);
 
         return box4Options;

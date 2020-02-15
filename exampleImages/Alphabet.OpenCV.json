@@ -1,20 +1,22 @@
 [ {
   "tabName" : "FirstTab",
   "params" : {
-    "useGray" : true,
     "useScale" : true,
+    "imageFile" : "Alphabet.eng.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 900,
       "height" : 493
     },
-    "useKeepAspectRatio" : true,
-    "boundOfRoi" : {
-      "left" : 0,
-      "top" : 0,
-      "right" : 0,
-      "bottom" : 0
-    },
-    "imageFile" : "Alphabet.eng.jpg"
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "OpenCV:Colorized",
+  "params" : {
+    "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:GaussianBlur",
