@@ -73,8 +73,6 @@ public final class MapperFilter {
                                        AdaptiveThresholdTab.TAB_DESCRIPTION),
             new FilterTabs(                  AddWeightedTab.TAB_TITLE,
                                              AddWeightedTab.TAB_DESCRIPTION),
-            new FilterTabs(                    ColorizedTab.TAB_TITLE,
-                                               ColorizedTab.TAB_DESCRIPTION),
             new FilterTabs(                    BilateralTab.TAB_TITLE,
                                                BilateralTab.TAB_DESCRIPTION),
             new FilterTabs(ksn.imgusage.tabs.opencv.BlurTab.TAB_TITLE,
@@ -83,6 +81,8 @@ public final class MapperFilter {
                                                      BoxTab.TAB_DESCRIPTION),
             new FilterTabs(                        CannyTab.TAB_TITLE,
                                                    CannyTab.TAB_DESCRIPTION),
+            new FilterTabs(                    ColorizedTab.TAB_TITLE,
+                                               ColorizedTab.TAB_DESCRIPTION),
             new FilterTabs(        ContrastAndBrightnessTab.TAB_TITLE,
                                    ContrastAndBrightnessTab.TAB_DESCRIPTION),
             new FilterTabs(                 FindContoursTab.TAB_TITLE,
@@ -137,8 +137,6 @@ public final class MapperFilter {
             return             AdaptiveThresholdTab.class;
         case                         AddWeightedTab.TAB_NAME:
             return                   AddWeightedTab.class;
-        case                           ColorizedTab.TAB_NAME:
-            return                     ColorizedTab.class;
         case                           BilateralTab.TAB_NAME:
             return                     BilateralTab.class;
         case       ksn.imgusage.tabs.opencv.BlurTab.TAB_NAME:
@@ -147,6 +145,8 @@ public final class MapperFilter {
             return                           BoxTab.class;
         case                               CannyTab.TAB_NAME:
             return                         CannyTab.class;
+        case                           ColorizedTab.TAB_NAME:
+            return                     ColorizedTab.class;
         case               ContrastAndBrightnessTab.TAB_NAME:
             return         ContrastAndBrightnessTab.class;
         case                        FindContoursTab.TAB_NAME:
@@ -222,8 +222,6 @@ public final class MapperFilter {
             return                 AdaptiveThresholdTabParams.class;
         case                             AddWeightedTab.TAB_NAME:
             return                       AddWeightedTabParams.class;
-        case                               ColorizedTab.TAB_NAME:
-            return                         ColorizedTabParams.class;
         case                               BilateralTab.TAB_NAME:
             return                         BilateralTabParams.class;
         case       ksn.imgusage.tabs.    opencv.BlurTab.TAB_NAME:
@@ -232,6 +230,8 @@ public final class MapperFilter {
             return                               BoxTabParams.class;
         case                                   CannyTab.TAB_NAME:
             return                             CannyTabParams.class;
+        case                               ColorizedTab.TAB_NAME:
+            return                         ColorizedTabParams.class;
         case                   ContrastAndBrightnessTab.TAB_NAME:
             return             ContrastAndBrightnessTabParams.class;
         case                            FindContoursTab.TAB_NAME:

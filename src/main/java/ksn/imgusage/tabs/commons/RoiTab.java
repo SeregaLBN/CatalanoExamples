@@ -69,26 +69,30 @@ public class RoiTab extends CommonTab<RoiTabParams> {
         int right  = params.boundOfRoi.right;
         int top    = params.boundOfRoi.top;
         int bottom = params.boundOfRoi.bottom;
+
+        BufferedImage sourceImage = getSourceImage();
+        /**/
         if ((left   <= 0) &&
             (right  <= 0) &&
             (top    <= 0) &&
             (bottom <= 0))
         {
+            image = sourceImage;
             return;
         }
+        /**/
 
-        BufferedImage sourceImage = getSourceImage();
         int w = sourceImage.getWidth();
         int h = sourceImage.getHeight();
 
         BufferedImage tmp = new BufferedImage(
             Math.max(1, w - left - right),
             Math.max(1, h - top - bottom),
-            image.getType());
+            sourceImage.getType());
         Graphics2D g = tmp.createGraphics();
         try {
             g.drawImage(
-                image,
+                sourceImage,
                 0,0, tmp.getWidth(), tmp.getHeight(),
                 left,
                 top,
