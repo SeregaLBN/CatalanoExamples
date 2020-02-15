@@ -346,11 +346,10 @@ public class ImageFilterExamples {
         jsonFile = SelectFilterDialog.checkExtension(jsonFile, "json");
 
         List<PipelineItem> pipeline = new ArrayList<>(tabs.size());
-        for (int i = 0; i < tabs.size(); ++i) {
+        for (ITab<?> tab : tabs) {
             PipelineItem item = new PipelineItem();
-            item.pos = i;
-            item.tabName = tabs.get(i).getName();
-            item.params  = tabs.get(i).getParams();
+            item.tabName = tab.getName();
+            item.params  = tab.getParams();
             pipeline.add(item);
         }
 
@@ -411,12 +410,6 @@ public class ImageFilterExamples {
         // restore full path from relative
         FirstTabParams firstParams = (FirstTabParams)pipeline.get(0).params;
         firstParams.imageFile = jsonFile.toPath().getParent().resolve(firstParams.imageFile.toPath()).toFile();
-
-        pipeline.sort((p1, p2) -> {
-            if (p1.pos > p2.pos) return  1;
-            if (p1.pos < p2.pos) return -1;
-            return 0;
-        });
 
         if (!FirstTab.TAB_NAME.equals(pipeline.get(0).tabName)) {
             logger.error("FirstTab mus be instanceof {}", FirstTab.class.getName());

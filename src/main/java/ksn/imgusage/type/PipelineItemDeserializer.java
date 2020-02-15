@@ -27,9 +27,7 @@ public class PipelineItemDeserializer extends StdDeserializer<PipelineItem> {
         PipelineItem res = new PipelineItem();
 
         JsonNode node = jp.getCodec().readTree(jp);
-        JsonNode posNode = node.get(PipelineItem.KEY_POS);
         res.tabName = node.get(PipelineItem.KEY_TAB_NAME).textValue();
-        res.pos     = (posNode==null) ? 1 : posNode.numberValue().intValue();
         res.params  = JsonHelper.fromJson(node.get(PipelineItem.KEY_PARAMS), MapperFilter.getTabParamsClass(res.tabName));
 
         return res;

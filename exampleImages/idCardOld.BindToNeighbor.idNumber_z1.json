@@ -1,6 +1,5 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
     "useGray" : false,
     "useScale" : true,
@@ -19,13 +18,11 @@
   }
 }, {
   "tabName" : "OpenCV:Colorized",
-  "pos" : 1,
   "params" : {
     "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 2,
   "params" : {
     "thresh" : 100.0,
     "maxVal" : 250.0,
@@ -35,7 +32,6 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 3,
   "params" : {
     "morphologicalOperation" : "MORPH_GRADIENT",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -67,7 +63,6 @@
   }
 }, {
   "tabName" : "OpenCV:Custom:BindToNeighborTab",
-  "pos" : 4,
   "params" : {
     "minLimitContours" : {
       "width" : 15,

@@ -1,6 +1,5 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
     "useGray" : true,
     "useScale" : true,
@@ -19,7 +18,6 @@
   }
 }, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 1,
   "params" : {
     "thresh" : 228.94,
     "maxVal" : 281.25,
@@ -29,7 +27,6 @@
   }
 }, {
   "tabName" : "OpenCV:Canny",
-  "pos" : 2,
   "params" : {
     "threshold1" : 100.0,
     "threshold2" : 850.0,
@@ -38,7 +35,6 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 3,
   "params" : {
     "morphologicalOperation" : "MORPH_DILATE",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -70,6 +66,5 @@
   }
 }, {
   "tabName" : "OpenCV:Custom:LeadToPerspective",
-  "pos" : 4,
   "params" : { }
 } ]

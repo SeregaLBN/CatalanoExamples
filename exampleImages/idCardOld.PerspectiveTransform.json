@@ -1,6 +1,5 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
     "useGray" : true,
     "useScale" : true,
@@ -19,7 +18,6 @@
   }
 }, {
   "tabName" : "OpenCV:PerspectiveTransform",
-  "pos" : 1,
   "params" : {
     "showRegion" : true,
     "applyToFirstTab" : false,
