@@ -152,7 +152,7 @@ public class ImageFilterExamples {
 
     private void onClose() {
         frame.dispose();
-        logger.warn("Good bay!\n\n");
+        logger.info("Good bay!\n\n");
         tabs.forEach(tab -> logger.info("{}.params={}", tab.getClass().getName(), tab.getParams()));
     }
 

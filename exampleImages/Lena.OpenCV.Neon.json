@@ -5,21 +5,6 @@
     "imageFile" : "Lena.png"
   }
 }, {
-  "tabName" : "Common:Resize",
-  "params" : {
-    "keepToSize" : {
-      "width" : 500,
-      "height" : 500
-    },
-    "useKeepAspectRatio" : true
-  }
-}, {
-  "tabName" : "OpenCV:Colorized",
-  "params" : {
-    "colorsTo" : "RGB",
-    "useWhiteBalancer" : true
-  }
-}, {
   "tabName" : "OpenCV:Bilateral",
   "params" : {
     "diameter" : 38,

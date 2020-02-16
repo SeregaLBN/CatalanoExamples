@@ -12,7 +12,7 @@ import javax.swing.SwingUtilities;
 
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.model.SliderIntModel;
-import ksn.imgusage.type.Padding;
+import ksn.imgusage.type.Rect;
 import ksn.imgusage.type.dto.common.RoiTabParams;
 import ksn.imgusage.utils.ImgHelper;
 
@@ -33,12 +33,12 @@ public class RoiTab extends CommonTab<RoiTabParams> {
 
     private BufferedImage drawImage;
     private RoiTabParams params;
-    Runnable applyMaxSizeLimits;
+    private Runnable applyLimits;
 
     @Override
     public Component makeTab(RoiTabParams params) {
         if (params == null)
-            params = new RoiTabParams(new Padding(0,0,0,0));
+            params = new RoiTabParams(new Rect(0, 0, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT));
 
         this.params = params;
 
@@ -60,44 +60,34 @@ public class RoiTab extends CommonTab<RoiTabParams> {
 
     @Override
     protected void applyFilter() {
-        if (image == null) {
-            if (applyMaxSizeLimits != null)
-                applyMaxSizeLimits.run();
-        }
-
-        int left   = params.boundOfRoi.left;
-        int right  = params.boundOfRoi.right;
-        int top    = params.boundOfRoi.top;
-        int bottom = params.boundOfRoi.bottom;
+        if (image == null)
+            applyLimits.run();
 
         BufferedImage sourceImage = getSourceImage();
-        /**/
-        if ((left   <= 0) &&
-            (right  <= 0) &&
-            (top    <= 0) &&
-            (bottom <= 0))
+        int srcW = sourceImage.getWidth();
+        int srcH = sourceImage.getHeight();
+
+        int x = params.rc.x;
+        int y = params.rc.y;
+        int w = params.rc.width;
+        int h = params.rc.height;
+
+        if ((x == 0) &&
+            (y == 0) &&
+            (w == srcW) &&
+            (w == srcH))
         {
             image = sourceImage;
             return;
         }
-        /**/
 
-        int w = sourceImage.getWidth();
-        int h = sourceImage.getHeight();
-
-        BufferedImage tmp = new BufferedImage(
-            Math.max(1, w - left - right),
-            Math.max(1, h - top - bottom),
-            sourceImage.getType());
+        BufferedImage tmp = new BufferedImage(w, h, sourceImage.getType());
         Graphics2D g = tmp.createGraphics();
         try {
             g.drawImage(
                 sourceImage,
-                0,0, tmp.getWidth(), tmp.getHeight(),
-                left,
-                top,
-                w - right,
-                h - bottom,
+                0, 0, w, h,
+                x, y, x + w, y + h,
                 null);
         } finally {
             g.dispose();
@@ -107,32 +97,37 @@ public class RoiTab extends CommonTab<RoiTabParams> {
 
     @Override
     public BufferedImage getDrawImage() {
-        if (drawImage != null)
+        if (drawImage == null)
+            applyLimits.run();
+        else
             return drawImage;
 
         BufferedImage sourceImage = getSourceImage();
         if (sourceImage == null)
             return null;
 
-        int left   = params.boundOfRoi.left;
-        int right  = params.boundOfRoi.right;
-        int top    = params.boundOfRoi.top;
-        int bottom = params.boundOfRoi.bottom;
-        if ((left   <= 0) &&
-            (right  <= 0) &&
-            (top    <= 0) &&
-            (bottom <= 0))
+        int srcW = sourceImage.getWidth();
+        int srcH = sourceImage.getHeight();
+
+        int x = params.rc.x;
+        int y = params.rc.y;
+        int w = params.rc.width;
+        int h = params.rc.height;
+
+        if ((x == 0) &&
+            (y == 0) &&
+            (w == srcW) &&
+            (w == srcH))
         {
             drawImage = getImage();
             return drawImage;
         }
 
-        int w = sourceImage.getWidth();
-        int h = sourceImage.getHeight();
-
         drawImage = ImgHelper.copy(sourceImage);
-        FastBitmap bmp = new FastBitmap(drawImage);
-        if (bmp.isGrayscale()) {
+
+        if (sourceImage.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+            FastBitmap bmp = new FastBitmap(drawImage);
+            assert bmp.isGrayscale();
             bmp.toRGB(); // ! restore colors for preview !
             drawImage = bmp.toBufferedImage();
         }
@@ -141,37 +136,37 @@ public class RoiTab extends CommonTab<RoiTabParams> {
         try {
             BasicStroke penLine1 = new BasicStroke(1.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
             BasicStroke penLine2 = new BasicStroke(2.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER);
-            if (left > 0) {
+            if (x > 0) {
                 g.setStroke(penLine2);
                 g.setColor(Color.WHITE);
-                g.drawLine(left, 0, left, h);
+                g.drawLine(x, 0, x, srcH);
                 g.setStroke(penLine1);
                 g.setColor(COLOR_LEFT);
-                g.drawLine(left, 0, left, h);
+                g.drawLine(x, 0, x, srcH);
             }
-            if (right > 0) {
+            if (y > 0) {
                 g.setStroke(penLine2);
                 g.setColor(Color.WHITE);
-                g.drawLine(w - right, 0, w - right, h);
+                g.drawLine(0, y, srcW, y);
                 g.setStroke(penLine1);
                 g.setColor(COLOR_RIGHT);
-                g.drawLine(w - right, 0, w - right, h);
+                g.drawLine(0, y, srcW, y);
             }
-            if (top > 0) {
+            if ((x + w) < srcW) {
                 g.setStroke(penLine2);
                 g.setColor(Color.WHITE);
-                g.drawLine(0, top, w, top);
+                g.drawLine(x + w, 0, x + w, srcH);
                 g.setStroke(penLine1);
                 g.setColor(COLOR_TOP);
-                g.drawLine(0, top, w, top);
+                g.drawLine(x + w, 0, x + w, srcH);
             }
-            if (bottom > 0) {
+            if ((y + h) < srcH) {
                 g.setStroke(penLine2);
                 g.setColor(Color.WHITE);
-                g.drawLine(0, h - bottom, w, h - bottom);
+                g.drawLine(0, y + h, srcW, y + h);
                 g.setStroke(penLine1);
                 g.setColor(COLOR_BOTTOM);
-                g.drawLine(0, h - bottom, w, h - bottom);
+                g.drawLine(0, y + h, srcW, y + h);
             }
         } finally {
             g.dispose();
@@ -182,24 +177,23 @@ public class RoiTab extends CommonTab<RoiTabParams> {
 
     @Override
     protected Component makeOptions() {
-        SliderIntModel modelPadLeft   = new SliderIntModel(params.boundOfRoi.left  , 0, 0, MAX_IMAGE_WIDTH);
-        SliderIntModel modelPadRight  = new SliderIntModel(params.boundOfRoi.right , 0, 0, MAX_IMAGE_WIDTH);
-        SliderIntModel modelPadTop    = new SliderIntModel(params.boundOfRoi.top   , 0, 0, MAX_IMAGE_HEIGHT);
-        SliderIntModel modelPadBottom = new SliderIntModel(params.boundOfRoi.bottom, 0, 0, MAX_IMAGE_HEIGHT);
+        SliderIntModel modelRcX = new SliderIntModel(params.rc.x     , 0, 0, MAX_IMAGE_WIDTH - MIN_SIZE_ROI);
+        SliderIntModel modelRcY = new SliderIntModel(params.rc.y     , 0, 0, MAX_IMAGE_WIDTH - MIN_SIZE_ROI);
+        SliderIntModel modelRcW = new SliderIntModel(params.rc.width , 0, MIN_SIZE_ROI, MAX_IMAGE_HEIGHT);
+        SliderIntModel modelRcH = new SliderIntModel(params.rc.height, 0, MIN_SIZE_ROI, MAX_IMAGE_HEIGHT);
 
-        applyMaxSizeLimits = () -> {
+        applyLimits = () -> {
             BufferedImage sourceImage = getSourceImage();
             if (sourceImage == null)
                 return;
-            modelPadLeft  .setMaximum(sourceImage.getWidth()  - 1);
-            modelPadRight .setMaximum(sourceImage.getWidth()  - 1);
-            modelPadTop   .setMaximum(sourceImage.getHeight() - 1);
-            modelPadBottom.setMaximum(sourceImage.getHeight() - 1);
 
-            params.boundOfRoi.left   = Math.min(params.boundOfRoi.left  , modelPadLeft  .getMaximum());
-            params.boundOfRoi.right  = Math.min(params.boundOfRoi.right , modelPadRight .getMaximum());
-            params.boundOfRoi.top    = Math.min(params.boundOfRoi.top   , modelPadTop   .getMaximum());
-            params.boundOfRoi.bottom = Math.min(params.boundOfRoi.bottom, modelPadBottom.getMaximum());
+            int srcW = sourceImage.getWidth();
+            int srcH = sourceImage.getHeight();
+
+            modelRcX.setMaximum(srcW - MIN_SIZE_ROI);
+            modelRcY.setMaximum(srcH - MIN_SIZE_ROI);
+            modelRcW.setMaximum(srcW - modelRcX.getValue());
+            modelRcH.setMaximum(srcH - modelRcY.getValue());
         };
 
 
@@ -212,40 +206,51 @@ public class RoiTab extends CommonTab<RoiTabParams> {
             boxOfRoi.setToolTipText("Region Of Interest");
 
             boxOfRoi.add(Box.createHorizontalStrut(8));
-            boxOfRoi.add(makeSliderVert(modelPadLeft  , "Left"  , "Padding left"));
+            boxOfRoi.add(makeSliderVert(modelRcX, "X", "Padding left - offset of ROI"));
             boxOfRoi.add(Box.createHorizontalStrut(2));
-            boxOfRoi.add(makeSliderVert(modelPadRight , "Right" , "Padding right"));
+            boxOfRoi.add(makeSliderVert(modelRcY, "Y", "Padding right - offset of ROI"));
             boxOfRoi.add(Box.createHorizontalStrut(2));
-            boxOfRoi.add(makeSliderVert(modelPadTop   , "Top"   , "Padding top"));
+            boxOfRoi.add(makeSliderVert(modelRcW, "Width" , "Size of ROI"));
             boxOfRoi.add(Box.createHorizontalStrut(2));
-            boxOfRoi.add(makeSliderVert(modelPadBottom, "Bottom", "Padding bottom"));
+            boxOfRoi.add(makeSliderVert(modelRcH, "Height", "Size of ROI"));
             boxOfRoi.add(Box.createHorizontalStrut(8));
         }
 
         box4Options.add(boxOfRoi);
 
-        addChangeListener("modelPadLeft", modelPadLeft, v -> params.boundOfRoi.left = v, () -> {
+        addChangeListener("params.rc.x", modelRcX, v -> params.rc.x = v, () -> {
             BufferedImage sourceImage = getSourceImage();
-            if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) > (sourceImage.getWidth() - MIN_SIZE_ROI))
-                SwingUtilities.invokeLater(() -> modelPadRight.setValue(sourceImage.getWidth() - MIN_SIZE_ROI - modelPadLeft.getValue()) );
+            if (sourceImage == null)
+                return;
+            if ((params.rc.x + params.rc.width) > sourceImage.getWidth())
+                SwingUtilities.invokeLater(() -> {
+                    modelRcW.setValue(sourceImage.getWidth() - modelRcX.getValue());
+                });
         });
-        addChangeListener("modelPadRight", modelPadRight, v -> params.boundOfRoi.right = v, () -> {
+        addChangeListener("params.rc.y", modelRcY, v -> params.rc.y = v, () -> {
             BufferedImage sourceImage = getSourceImage();
-            if ((sourceImage != null) && (modelPadLeft.getValue() + modelPadRight.getValue()) > (sourceImage.getWidth() - MIN_SIZE_ROI))
-                SwingUtilities.invokeLater(() -> modelPadLeft.setValue(sourceImage.getWidth() - MIN_SIZE_ROI - modelPadRight.getValue()) );
-        });
-        addChangeListener("modelPadTop", modelPadTop, v -> params.boundOfRoi.top = v, () -> {
-            BufferedImage sourceImage = getSourceImage();
-            if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) > (sourceImage.getHeight() - MIN_SIZE_ROI))
-                SwingUtilities.invokeLater(() -> modelPadBottom.setValue(sourceImage.getHeight() - MIN_SIZE_ROI - modelPadTop.getValue()) );
-        });
-        addChangeListener("modelPadBottom", modelPadBottom, v -> params.boundOfRoi.bottom = v, () -> {
-            BufferedImage sourceImage = getSourceImage();
-            if ((sourceImage != null) && (modelPadTop.getValue() + modelPadBottom.getValue()) > (sourceImage.getHeight() - MIN_SIZE_ROI))
-                SwingUtilities.invokeLater(() -> modelPadTop.setValue(sourceImage.getHeight() - MIN_SIZE_ROI - modelPadBottom.getValue()) );
+            if (sourceImage == null)
+                return;
+            if ((params.rc.y + params.rc.height) > sourceImage.getHeight())
+                SwingUtilities.invokeLater(() -> {
+                    modelRcH.setValue(sourceImage.getHeight() - modelRcY.getValue());
+                });
         });
 
-        applyMaxSizeLimits.run();
+        addChangeListener("params.rc.width",
+                          modelRcW,
+                          v -> {
+                              params.rc.width = v;
+                          },
+                          null);
+        addChangeListener("params.rc.height",
+                          modelRcH,
+                          v -> {
+                              params.rc.height = v;
+                          },
+                          null);
+
+        applyLimits.run();
 
         return box4Options;
     }

@@ -18,7 +18,10 @@ import ksn.imgusage.utils.UiHelper;
 /** The first tab to select an image to work with. */
 public class FirstTab extends BaseTab<FirstTabParams> {
 
-    public static final File DEFAULT_IMAGE = Paths.get("exampleImages", "VolodHill.jpg").toAbsolutePath().toFile();
+    public static final File DEFAULT_IMAGE = Paths.get("exampleImages"
+                                                     //, "VolodHill.jpg"
+                                                       , "Lena.png"
+                                                      ).toAbsolutePath().toFile();
 
     public static final String TAB_TITLE = "Original";
     public static final String TAB_NAME  = "FirstTab";

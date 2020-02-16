@@ -96,6 +96,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return image;
     }
 
+    /** apply the filter of the current tab to the image of the previous tab */
     protected abstract void applyFilter();
 
 
