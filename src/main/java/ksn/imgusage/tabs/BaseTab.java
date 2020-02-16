@@ -303,7 +303,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return res;
     }
 
-    protected static Container makeEditBox(Consumer<Consumer<String>> setterTextExternal, Consumer<String> setterTextInternal, String labelText, String borderTitle, String tip) {
+    protected static Container makeEditBox(Consumer<Consumer<String>> getTextSetter, Consumer<String> changeTextListener, String labelText, String borderTitle, String tip) {
         JLabel labTitle = new JLabel(labelText + ": ");
         labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         labTitle.setToolTipText(tip);
@@ -328,34 +328,32 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         box.add(txtValue);
         box.add(Box.createHorizontalGlue());
 
-        setterTextExternal.accept(txtValue::setText);
+        getTextSetter.accept(txtValue::setText);
 
-        if (setterTextInternal == null) {
+        if (changeTextListener == null) {
             txtValue.setEditable(false);
-            return box;
+        } else {
+            txtValue.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    handle();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    handle();
+                }
+
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    handle();
+                }
+
+                private void handle() {
+                    SwingUtilities.invokeLater(() -> changeTextListener.accept(txtValue.getText()));
+                }
+            });
         }
-
-        txtValue.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                handle();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                handle();
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                handle();
-            }
-
-            private void handle() {
-                SwingUtilities.invokeLater(() -> setterTextInternal.accept(txtValue.getText()));
-            }
-        });
-
         return box;
     }
 

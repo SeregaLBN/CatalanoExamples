@@ -1,10 +1,8 @@
 package ksn.imgusage.tabs.commons;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -34,6 +32,8 @@ public class RoiTab extends CommonTab<RoiTabParams> {
     private BufferedImage drawImage;
     private RoiTabParams params;
     private Runnable applyLimits;
+    private Consumer<String> showRatioX;
+    private Consumer<String> showRatioY;
 
     @Override
     public Component makeTab(RoiTabParams params) {
@@ -216,6 +216,19 @@ public class RoiTab extends CommonTab<RoiTabParams> {
             boxOfRoi.add(Box.createHorizontalStrut(8));
         }
 
+        Box boxRatio = Box.createHorizontalBox();
+        boxRatio.setBorder(BorderFactory.createTitledBorder("Ratio"));
+
+        Container cntrlRatioX = makeEditBox(s -> showRatioX = s, v -> {}, "Ratio X", null, null);
+        Container cntrlRatioY = makeEditBox(s -> showRatioY = s, v -> {}, "Ratio Y", null, null);
+
+        boxRatio.add(cntrlRatioX);
+        boxRatio.add(cntrlRatioY);
+
+        box4Options.add(boxRatio);
+        box4Options.add(boxOfRoi);
+
+
         box4Options.add(boxOfRoi);
 
         addChangeListener("params.rc.x", modelRcX, v -> params.rc.x = v, () -> {
@@ -251,6 +264,15 @@ public class RoiTab extends CommonTab<RoiTabParams> {
                           null);
 
         applyLimits.run();
+
+        BufferedImage sourceImage = getSourceImage();
+        if (sourceImage == null) {
+            showRatioX.accept("100");
+            showRatioY.accept("100");
+        } else {
+            showRatioX.accept(sourceImage.getWidth() + "");
+            showRatioY.accept(sourceImage.getHeight() + "");
+        }
 
         return box4Options;
     }
