@@ -34,7 +34,7 @@ public class RoiTab extends CommonTab<RoiTabParams> {
     @Override
     public Component makeTab(RoiTabParams params) {
         if (params == null)
-            params = new RoiTabParams(new Size(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT), new Rect(0, 0, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT));
+            params = new RoiTabParams(new Size(500, 300), new Rect(0, 0, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT));
 
         this.params = params;
 
@@ -194,15 +194,6 @@ public class RoiTab extends CommonTab<RoiTabParams> {
             modelRoiH.setMaximum(srcH - modelRoiY.getValue());
         };
 
-        Runnable ratioReset = () -> {
-            BufferedImage sourceImage = getSourceImage();
-            if (sourceImage == null)
-                return;
-
-            modelRatioW.setValue(sourceImage.getWidth());
-            modelRatioH.setValue(sourceImage.getHeight());
-        };
-
         JPanel panel4Options = new JPanel();
         panel4Options.setLayout(new BorderLayout());
 
@@ -231,7 +222,14 @@ public class RoiTab extends CommonTab<RoiTabParams> {
 
         JButton btnOrigSize = new JButton(" • ");
         btnOrigSize.setToolTipText("Ratio as source size");
-        btnOrigSize.addActionListener(ev -> ratioReset.run());
+        btnOrigSize.addActionListener(ev -> {
+            BufferedImage sourceImage = getSourceImage();
+            if (sourceImage == null)
+                return;
+
+            modelRatioW.setValue(sourceImage.getWidth());
+            modelRatioH.setValue(sourceImage.getHeight());
+        });
 
         boxRatio.add(Box.createHorizontalGlue());
         boxRatio.add(cntrlRatioW);
@@ -275,7 +273,6 @@ public class RoiTab extends CommonTab<RoiTabParams> {
                           v -> params.roi.height = v,
                           null);
 
-        ratioReset.run();
         applyLimits.run();
 
         return panel4Options;
