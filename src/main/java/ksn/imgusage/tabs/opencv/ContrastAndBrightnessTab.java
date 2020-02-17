@@ -2,16 +2,22 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import org.opencv.core.Mat;
+import org.apache.commons.math3.util.Pair;
+import org.opencv.core.*;
+import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.dto.opencv.ContrastAndBrightnessTabParams;
+import ksn.imgusage.utils.OpenCvHelper;
 
 /** <a href='https://docs.opencv.org/3.4/d3/dc1/tutorial_basic_linear_transform.html'>Changing the contrast and brightness of an image</a> */
 public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightnessTabParams> {
@@ -22,10 +28,12 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
 
     private static final double MIN_ALPHA =    0;
     private static final double MAX_ALPHA =   10;
-    public  static final int    MIN_BETA  = -200;
-    private static final int    MAX_BETA  =  200;
+    public  static final double MIN_BETA  = -200;
+    private static final double MAX_BETA  =  250;
 
     private ContrastAndBrightnessTabParams params;
+    /** histogram clipping in percent 1..99 */
+    private int clipHistPercent = 25;
 
     @Override
     public Component makeTab(ContrastAndBrightnessTabParams params) {
@@ -43,6 +51,14 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
     @Override
     public String getDescription() { return TAB_DESCRIPTION; }
 
+    @Override
+    protected void applyOpencvFilter() {
+        Mat dst = new Mat();
+        Core.convertScaleAbs(imageMat, dst, params.alpha, params.beta);
+        imageMat = dst;
+    }
+
+    /** /
     @Override
     protected void applyOpencvFilter() {
         Mat newImage = Mat.zeros(imageMat.size(), imageMat.type());
@@ -73,7 +89,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
             return 0;
         return (byte)iVal;
     }
-
+    /**/
 
     @Override
     protected Component makeOptions() {
@@ -81,7 +97,8 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
         SliderDoubleModel modelAlpha = new SliderDoubleModel(params.alpha, 0, MIN_ALPHA, MAX_ALPHA);
-        SliderIntModel    modelBeta  = new    SliderIntModel(params.beta , 0, MIN_BETA , MAX_BETA);
+        SliderDoubleModel modelBeta  = new SliderDoubleModel(params.beta , 0, MIN_BETA , MAX_BETA);
+        SliderIntModel    modelClipHist = new SliderIntModel(clipHistPercent, 0, 1, 99);
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.setToolTipText("Two commonly used point processes are multiplication and addition with a constant: g(x)=αf(x)+β");
@@ -94,15 +111,40 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         box4Sliders.add(Box.createHorizontalGlue());
 
 
+        Container cntrlHistClip = makeEditBox("clipHistPercent", modelClipHist, "Histogram clipping", null, null);
+        JButton btnAuto = new JButton("Apply..");
+        btnAuto.setToolTipText("Automatic brightness and contrast optimization");
+        btnAuto.addActionListener(ev -> {
+            Mat sourceMat = getSourceMat();
+            if (sourceMat == null)
+                return;
+
+            Pair<Double, Double> val = automaticBrightnessAndContrast(sourceMat, clipHistPercent);
+            modelAlpha.setValue(val.getFirst());
+            modelBeta.setValue(val.getSecond());
+        });
+
+        Box boxFindAutoParams = Box.createHorizontalBox();
+        boxFindAutoParams.setBorder(BorderFactory.createTitledBorder("Automatic brightness and contrast"));
+        boxFindAutoParams.setToolTipText("Find brightness and contrast");
+        boxFindAutoParams.add(Box.createHorizontalGlue());
+        boxFindAutoParams.add(cntrlHistClip);
+        boxFindAutoParams.add(Box.createHorizontalGlue());
+        boxFindAutoParams.add(btnAuto);
+        boxFindAutoParams.add(Box.createHorizontalGlue());
+
+
         JPanel panelOptions = new JPanel();
         panelOptions.setLayout(new BorderLayout());
         panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
+        panelOptions.add(boxFindAutoParams, BorderLayout.NORTH);
         panelOptions.add(box4Sliders, BorderLayout.CENTER);
 
         box4Options.add(panelOptions);
 
-        addChangeListener("modelAlpha", modelAlpha, v -> params.alpha = v);
-        addChangeListener("modelBeta" , modelBeta , v -> params.beta  = v);
+        addChangeListener("params.alpha"    , modelAlpha   , v -> params.alpha    = v);
+        addChangeListener("params.beta"     , modelBeta    , v -> params.beta     = v);
+        addChangeListener("clipHistPercent" , modelClipHist, v -> clipHistPercent = v);
 
         return box4Options;
     }
@@ -110,6 +152,60 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
     @Override
     public ContrastAndBrightnessTabParams getParams() {
         return params;
+    }
+
+    private static Pair<Double, Double> automaticBrightnessAndContrast(Mat image, int clipHistPercent /* = 25 */) {
+        Mat gray = OpenCvHelper.toGray(image);
+
+        // Calculate grayscale histogram
+        Mat hist = new Mat();
+        Imgproc.calcHist(
+             Arrays.asList(gray),
+             new MatOfInt(0),
+             new Mat(),
+             hist,
+             new MatOfInt(256),
+             new MatOfFloat(0, 256));
+        Size histSize0 = hist.size();
+        int histSize = (int)histSize0.height;
+
+        // Calculate cumulative distribution from the histogram
+        float[] accumulator = new float[histSize];
+        float[] val = {0};
+        for (int i = 0; i < histSize; ++i) {
+            int res = hist.get(i, 0, val);
+            assert res == 4; // 4 bytes read
+            accumulator[i] = (i == 0)
+                    ? val[0]
+                    : val[0] + accumulator[i - 1];
+        }
+
+        // Locate points to clip
+        float maximum = accumulator[accumulator.length - 1];
+        clipHistPercent *= maximum / 100.0;
+        clipHistPercent /= 2;
+
+        // Locate left cut
+        int minimumGray = 0;
+        while (accumulator[minimumGray] < clipHistPercent) {
+            ++minimumGray;
+            if (minimumGray >= histSize)
+                break;
+        }
+
+        // Locate right cut
+        int maximumGray = histSize - 1;
+        while (accumulator[maximumGray] >= (maximum - clipHistPercent)) {
+            --maximumGray;
+            if (maximumGray < 0)
+                break;
+        }
+
+        // Calculate alpha and beta values
+        double alpha = 255.0 / (maximumGray - minimumGray);
+        double beta = -minimumGray * alpha;
+
+        return new Pair<>(alpha, beta);
     }
 
 }
