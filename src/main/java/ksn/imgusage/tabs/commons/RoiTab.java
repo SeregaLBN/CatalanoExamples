@@ -2,15 +2,13 @@ package ksn.imgusage.tabs.commons;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.function.Consumer;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.Rect;
+import ksn.imgusage.type.Size;
 import ksn.imgusage.type.dto.common.RoiTabParams;
 import ksn.imgusage.utils.ImgHelper;
 
@@ -32,13 +30,11 @@ public class RoiTab extends CommonTab<RoiTabParams> {
     private BufferedImage drawImage;
     private RoiTabParams params;
     private Runnable applyLimits;
-    private Consumer<String> showRatioX;
-    private Consumer<String> showRatioY;
 
     @Override
     public Component makeTab(RoiTabParams params) {
         if (params == null)
-            params = new RoiTabParams(new Rect(0, 0, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT));
+            params = new RoiTabParams(new Size(MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT), new Rect(0, 0, MAX_IMAGE_WIDTH, MAX_IMAGE_HEIGHT));
 
         this.params = params;
 
@@ -67,15 +63,15 @@ public class RoiTab extends CommonTab<RoiTabParams> {
         int srcW = sourceImage.getWidth();
         int srcH = sourceImage.getHeight();
 
-        int x = params.rc.x;
-        int y = params.rc.y;
-        int w = params.rc.width;
-        int h = params.rc.height;
+        int x = fromRatioX(params.roi.x);
+        int y = fromRatioY(params.roi.y);
+        int w = fromRatioX(params.roi.width);
+        int h = fromRatioY(params.roi.height);
 
-        if ((x == 0) &&
-            (y == 0) &&
-            (w == srcW) &&
-            (w == srcH))
+        if ((x <= 0) &&
+            (y <= 0) &&
+            (w >= srcW) &&
+            (h >= srcH))
         {
             image = sourceImage;
             return;
@@ -109,15 +105,15 @@ public class RoiTab extends CommonTab<RoiTabParams> {
         int srcW = sourceImage.getWidth();
         int srcH = sourceImage.getHeight();
 
-        int x = params.rc.x;
-        int y = params.rc.y;
-        int w = params.rc.width;
-        int h = params.rc.height;
+        int x = fromRatioX(params.roi.x);
+        int y = fromRatioY(params.roi.y);
+        int w = fromRatioX(params.roi.width);
+        int h = fromRatioY(params.roi.height);
 
-        if ((x == 0) &&
-            (y == 0) &&
-            (w == srcW) &&
-            (w == srcH))
+        if ((x <= 0) &&
+            (y <= 0) &&
+            (w >= srcW) &&
+            (h >= srcH))
         {
             drawImage = getImage();
             return drawImage;
@@ -177,28 +173,38 @@ public class RoiTab extends CommonTab<RoiTabParams> {
 
     @Override
     protected Component makeOptions() {
-        SliderIntModel modelRcX = new SliderIntModel(params.rc.x     , 0, 0, MAX_IMAGE_WIDTH - MIN_SIZE_ROI);
-        SliderIntModel modelRcY = new SliderIntModel(params.rc.y     , 0, 0, MAX_IMAGE_WIDTH - MIN_SIZE_ROI);
-        SliderIntModel modelRcW = new SliderIntModel(params.rc.width , 0, MIN_SIZE_ROI, MAX_IMAGE_HEIGHT);
-        SliderIntModel modelRcH = new SliderIntModel(params.rc.height, 0, MIN_SIZE_ROI, MAX_IMAGE_HEIGHT);
+        SliderIntModel modelRatioW = new SliderIntModel(params.ratio.width , 0, 15, MAX_IMAGE_WIDTH);
+        SliderIntModel modelRatioH = new SliderIntModel(params.ratio.height, 0, 15, MAX_IMAGE_HEIGHT);
+        SliderIntModel modelRoiX = new SliderIntModel(params.roi.x     , 0, 0, MAX_IMAGE_WIDTH  - MIN_SIZE_ROI);
+        SliderIntModel modelRoiY = new SliderIntModel(params.roi.y     , 0, 0, MAX_IMAGE_HEIGHT - MIN_SIZE_ROI);
+        SliderIntModel modelRoiW = new SliderIntModel(params.roi.width , 0, MIN_SIZE_ROI, MAX_IMAGE_WIDTH);
+        SliderIntModel modelRoiH = new SliderIntModel(params.roi.height, 0, MIN_SIZE_ROI, MAX_IMAGE_HEIGHT);
 
         applyLimits = () -> {
             BufferedImage sourceImage = getSourceImage();
             if (sourceImage == null)
                 return;
 
-            int srcW = sourceImage.getWidth();
-            int srcH = sourceImage.getHeight();
+            int srcW = toRatioX(sourceImage.getWidth());
+            int srcH = toRatioY(sourceImage.getHeight());
 
-            modelRcX.setMaximum(srcW - MIN_SIZE_ROI);
-            modelRcY.setMaximum(srcH - MIN_SIZE_ROI);
-            modelRcW.setMaximum(srcW - modelRcX.getValue());
-            modelRcH.setMaximum(srcH - modelRcY.getValue());
+            modelRoiX.setMaximum(srcW - MIN_SIZE_ROI);
+            modelRoiY.setMaximum(srcH - MIN_SIZE_ROI);
+            modelRoiW.setMaximum(srcW - modelRoiX.getValue());
+            modelRoiH.setMaximum(srcH - modelRoiY.getValue());
         };
 
+        Runnable ratioReset = () -> {
+            BufferedImage sourceImage = getSourceImage();
+            if (sourceImage == null)
+                return;
 
-        Box box4Options = Box.createVerticalBox();
-        box4Options.setBorder(BorderFactory.createTitledBorder(""));
+            modelRatioW.setValue(sourceImage.getWidth());
+            modelRatioH.setValue(sourceImage.getHeight());
+        };
+
+        JPanel panel4Options = new JPanel();
+        panel4Options.setLayout(new BorderLayout());
 
         Box boxOfRoi = Box.createHorizontalBox();
         {
@@ -206,80 +212,127 @@ public class RoiTab extends CommonTab<RoiTabParams> {
             boxOfRoi.setToolTipText("Region Of Interest");
 
             boxOfRoi.add(Box.createHorizontalStrut(8));
-            boxOfRoi.add(makeSliderVert(modelRcX, "X", "Padding left - offset of ROI"));
+            boxOfRoi.add(makeSliderVert(modelRoiX, "X", "Padding left - offset of ROI"));
             boxOfRoi.add(Box.createHorizontalStrut(2));
-            boxOfRoi.add(makeSliderVert(modelRcY, "Y", "Padding right - offset of ROI"));
+            boxOfRoi.add(makeSliderVert(modelRoiY, "Y", "Padding right - offset of ROI"));
             boxOfRoi.add(Box.createHorizontalStrut(2));
-            boxOfRoi.add(makeSliderVert(modelRcW, "Width" , "Size of ROI"));
+            boxOfRoi.add(makeSliderVert(modelRoiW, "Width" , "Size of ROI"));
             boxOfRoi.add(Box.createHorizontalStrut(2));
-            boxOfRoi.add(makeSliderVert(modelRcH, "Height", "Size of ROI"));
+            boxOfRoi.add(makeSliderVert(modelRoiH, "Height", "Size of ROI"));
             boxOfRoi.add(Box.createHorizontalStrut(8));
         }
 
         Box boxRatio = Box.createHorizontalBox();
         boxRatio.setBorder(BorderFactory.createTitledBorder("Ratio"));
+        boxRatio.setToolTipText("Ratio applies only to ROI");
 
-        Container cntrlRatioX = makeEditBox(s -> showRatioX = s, v -> {}, "Ratio X", null, null);
-        Container cntrlRatioY = makeEditBox(s -> showRatioY = s, v -> {}, "Ratio Y", null, null);
+        Container cntrlRatioW = makeEditBox("params.ratio.width" , modelRatioW, "Width" , null, null);
+        Container cntrlRatioH = makeEditBox("params.ratio.height", modelRatioH, "Height", null, null);
 
-        boxRatio.add(cntrlRatioX);
-        boxRatio.add(cntrlRatioY);
+        JButton btnOrigSize = new JButton(" • ");
+        btnOrigSize.setToolTipText("Ratio as source size");
+        btnOrigSize.addActionListener(ev -> ratioReset.run());
 
-        box4Options.add(boxRatio);
-        box4Options.add(boxOfRoi);
+        boxRatio.add(Box.createHorizontalGlue());
+        boxRatio.add(cntrlRatioW);
+        boxRatio.add(Box.createHorizontalGlue());
+        boxRatio.add(cntrlRatioH);
+        boxRatio.add(Box.createHorizontalGlue());
+        boxRatio.add(btnOrigSize);
+        boxRatio.add(Box.createHorizontalGlue());
 
+        panel4Options.add(boxRatio, BorderLayout.NORTH);
+        panel4Options.add(boxOfRoi, BorderLayout.CENTER);
 
-        box4Options.add(boxOfRoi);
+        addChangeListener("params.ratio.width", modelRatioW, v -> params.ratio.width = v, () -> {
+            applyLimits.run();
+        });
+        addChangeListener("params.ratio.height", modelRatioH, v -> params.ratio.height = v, () -> {
+            applyLimits.run();
+        });
 
-        addChangeListener("params.rc.x", modelRcX, v -> params.rc.x = v, () -> {
+        addChangeListener("params.roi.x", modelRoiX, v -> params.roi.x = v, () -> {
             BufferedImage sourceImage = getSourceImage();
             if (sourceImage == null)
                 return;
-            if ((params.rc.x + params.rc.width) > sourceImage.getWidth())
-                SwingUtilities.invokeLater(() -> {
-                    modelRcW.setValue(sourceImage.getWidth() - modelRcX.getValue());
-                });
+            if ((params.roi.x + params.roi.width) > sourceImage.getWidth())
+                SwingUtilities.invokeLater(() -> modelRoiW.setValue(sourceImage.getWidth() - modelRoiX.getValue()));
         });
-        addChangeListener("params.rc.y", modelRcY, v -> params.rc.y = v, () -> {
+        addChangeListener("params.roi.y", modelRoiY, v -> params.roi.y = v, () -> {
             BufferedImage sourceImage = getSourceImage();
             if (sourceImage == null)
                 return;
-            if ((params.rc.y + params.rc.height) > sourceImage.getHeight())
-                SwingUtilities.invokeLater(() -> {
-                    modelRcH.setValue(sourceImage.getHeight() - modelRcY.getValue());
-                });
+            if ((params.roi.y + params.roi.height) > sourceImage.getHeight())
+                SwingUtilities.invokeLater(() -> modelRoiH.setValue(sourceImage.getHeight() - modelRoiY.getValue()));
         });
 
-        addChangeListener("params.rc.width",
-                          modelRcW,
-                          v -> {
-                              params.rc.width = v;
-                          },
+        addChangeListener("params.roi.width",
+                          modelRoiW,
+                          v -> params.roi.width = v,
                           null);
-        addChangeListener("params.rc.height",
-                          modelRcH,
-                          v -> {
-                              params.rc.height = v;
-                          },
+        addChangeListener("params.roi.height",
+                          modelRoiH,
+                          v -> params.roi.height = v,
                           null);
 
+        ratioReset.run();
         applyLimits.run();
 
-        BufferedImage sourceImage = getSourceImage();
-        if (sourceImage == null) {
-            showRatioX.accept("100");
-            showRatioY.accept("100");
-        } else {
-            showRatioX.accept(sourceImage.getWidth() + "");
-            showRatioY.accept(sourceImage.getHeight() + "");
-        }
-
-        return box4Options;
+        return panel4Options;
     }
 
     @Override
     public RoiTabParams getParams() {
         return params;
+    }
+
+    private int toRatioX(int val) {
+        BufferedImage sourceImage = getSourceImage();
+        if (sourceImage == null)
+            return val;
+
+        int srcW = sourceImage.getWidth();
+        if (srcW == params.ratio.width)
+            return val;
+
+        return (int)(val * (double)params.ratio.width / srcW);
+    }
+
+    private int toRatioY(int val) {
+        BufferedImage sourceImage = getSourceImage();
+        if (sourceImage == null)
+            return val;
+
+        int srcH = sourceImage.getHeight();
+        if (srcH == params.ratio.height)
+            return val;
+
+        return (int)(val * (double)params.ratio.height / srcH);
+    }
+
+
+    private int fromRatioX(int val) {
+        BufferedImage sourceImage = getSourceImage();
+        if (sourceImage == null)
+            return val;
+
+        int srcW = sourceImage.getWidth();
+        if (srcW == params.ratio.width)
+            return val;
+
+        return (int)(val * (double)srcW / params.ratio.width);
+    }
+
+    private int fromRatioY(int val) {
+        BufferedImage sourceImage = getSourceImage();
+        if (sourceImage == null)
+            return val;
+
+        int srcH = sourceImage.getHeight();
+        if (srcH == params.ratio.height)
+            return val;
+
+        return (int)(val * (double)srcH / params.ratio.height);
     }
 
 }

@@ -288,7 +288,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return boxColumn;
     }
 
-    protected static Container makeEditBox(ISliderModel<?> model, String title, String borderTitle, String tip) {
+    protected Container makeEditBox(String name, ISliderModel<?> model, String title, String borderTitle, String tip) {
         java.util.List<Consumer<String>> setterTextList = new ArrayList<>(1);
         Container res = makeEditBox(
             setterTextList::add,
@@ -299,7 +299,13 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                 model.setFormatedText(newValue);
             },
             title, borderTitle, tip);
-        setterTextList.get(0).accept(model.getFormatedText());
+
+        Consumer<String> setterText = setterTextList.get(0);
+        setterText.accept(model.getFormatedText());
+        addChangeListener(name,
+                          model,
+                          v -> setterText.accept(model.getFormatedText()),
+                          null);
         return res;
     }
 

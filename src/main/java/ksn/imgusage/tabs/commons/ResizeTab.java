@@ -148,7 +148,7 @@ public class ResizeTab extends CommonTab<ResizeTabParams> {
                     return;
                 modelSizeW.setValue(getSourceImage().getWidth());
                 modelSizeH.setValue(getSourceImage().getHeight());
-                invalidateAsync();
+//                invalidateAsync();
             });
             box4ImageSize2.add(Box.createHorizontalStrut(2));
             box4ImageSize2.add(btnKeepAspectRatio);
