@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.util.Arrays;
+import java.util.Locale;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -28,12 +29,10 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
 
     private static final double MIN_ALPHA =    0;
     private static final double MAX_ALPHA =   10;
-    public  static final double MIN_BETA  = -200;
-    private static final double MAX_BETA  =  250;
+    public  static final double MIN_BETA  = -1600;
+    private static final double MAX_BETA  =  300;
 
     private ContrastAndBrightnessTabParams params;
-    /** histogram clipping in percent 1..99 */
-    private int clipHistPercent = 25;
 
     @Override
     public Component makeTab(ContrastAndBrightnessTabParams params) {
@@ -56,6 +55,8 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         Mat dst = new Mat();
         Core.convertScaleAbs(imageMat, dst, params.alpha, params.beta);
         imageMat = dst;
+
+        calcWhiteBk();
     }
 
     /** /
@@ -98,7 +99,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
 
         SliderDoubleModel modelAlpha = new SliderDoubleModel(params.alpha, 0, MIN_ALPHA, MAX_ALPHA);
         SliderDoubleModel modelBeta  = new SliderDoubleModel(params.beta , 0, MIN_BETA , MAX_BETA);
-        SliderIntModel    modelClipHist = new SliderIntModel(clipHistPercent, 0, 1, 99);
+        SliderIntModel    modelClipHist = new SliderIntModel(params.clipHistPercent, 0, 1, 99);
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.setToolTipText("Two commonly used point processes are multiplication and addition with a constant: g(x)=αf(x)+β");
@@ -110,19 +111,32 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
                 "\n where i and j indicates that the pixel is located in the i-th row and j-th column"));
         box4Sliders.add(Box.createHorizontalGlue());
 
-
-        Container cntrlHistClip = makeEditBox("clipHistPercent", modelClipHist, "Histogram clipping", null, null);
-        JButton btnAuto = new JButton("Apply..");
-        btnAuto.setToolTipText("Automatic brightness and contrast optimization");
-        btnAuto.addActionListener(ev -> {
+        Runnable applyHistClip = () -> {
             Mat sourceMat = getSourceMat();
             if (sourceMat == null)
                 return;
 
-            Pair<Double, Double> val = automaticBrightnessAndContrast(sourceMat, clipHistPercent);
-            modelAlpha.setValue(val.getFirst());
-            modelBeta.setValue(val.getSecond());
-        });
+            Pair<Double, Double> val = automaticBrightnessAndContrast(sourceMat, params.clipHistPercent);
+            double alpha = val.getFirst();
+            double beta  = val.getSecond();
+            logger.trace(String.format(Locale.US, "automaticBrightnessAndContrast: alpha=%.2f, beta=%.2f", alpha, beta));
+            modelAlpha.setValue(alpha);
+            modelBeta.setValue(beta);
+        };
+
+        Component box4L2gradient = makeBoxedCheckBox(
+            () -> params.autoClipHist,
+            v  -> params.autoClipHist = v,
+            "...through clipping a histogram",
+            "",
+            "params.autoClipHist",
+            "use automatic optimization of brightness and contrast through clipping a histogram",
+            null);
+
+        Container cntrlHistClip = makeEditBox("clipHistPercent", modelClipHist, "Histogram clipping", null, null);
+        JButton btnAuto = new JButton("Apply..");
+        btnAuto.setToolTipText("Automatic brightness and contrast optimization");
+        btnAuto.addActionListener(ev -> applyHistClip);
 
         Box boxFindAutoParams = Box.createHorizontalBox();
         boxFindAutoParams.setBorder(BorderFactory.createTitledBorder("Automatic brightness and contrast"));
@@ -166,6 +180,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
              hist,
              new MatOfInt(256),
              new MatOfFloat(0, 256));
+        printHist(hist);
         Size histSize0 = hist.size();
         int histSize = (int)histSize0.height;
 
@@ -206,6 +221,30 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         double beta = -minimumGray * alpha;
 
         return new Pair<>(alpha, beta);
+    }
+
+    private static void printHist(Mat hist) {
+        // TODO
+    }
+
+    private void calcWhiteBk() {
+        int cntWhite = 0;
+        Mat gray = OpenCvHelper.toGray(imageMat);
+        int w = gray.width();
+        int h = gray.height();
+        final byte whitePixel = (byte)0xFF;
+        for (int i=0; i < w; ++i)
+            for (int j=0; j < h; ++j) {
+                byte[] pixel = {0};
+                int res = gray.get(j, i, pixel);
+                assert res == 1; // read 1 bytes
+
+                if (pixel[0] == whitePixel)
+                    ++cntWhite;
+            }
+
+        double percent = cntWhite * 100.0 / (w * h);
+        logger.debug(String.format(Locale.US, "white bk is %.2f%%", percent));
     }
 
 }
