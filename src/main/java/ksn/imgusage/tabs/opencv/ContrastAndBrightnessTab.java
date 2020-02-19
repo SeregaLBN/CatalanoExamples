@@ -5,11 +5,9 @@ import java.awt.Component;
 import java.awt.Container;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Consumer;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import org.apache.commons.math3.util.Pair;
 import org.opencv.core.*;
@@ -19,6 +17,7 @@ import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.dto.opencv.ContrastAndBrightnessTabParams;
 import ksn.imgusage.utils.OpenCvHelper;
+import ksn.imgusage.utils.UiHelper;
 
 /** <a href='https://docs.opencv.org/3.4/d3/dc1/tutorial_basic_linear_transform.html'>Changing the contrast and brightness of an image</a> */
 public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightnessTabParams> {
@@ -33,6 +32,8 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
     private static final double MAX_BETA  =  300;
 
     private ContrastAndBrightnessTabParams params;
+    private Consumer<Double> setterAlpha;
+    private Consumer<Double> setterBeta;
 
     @Override
     public Component makeTab(ContrastAndBrightnessTabParams params) {
@@ -53,7 +54,19 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
     @Override
     protected void applyOpencvFilter() {
         Mat dst = new Mat();
-        Core.convertScaleAbs(imageMat, dst, params.alpha, params.beta);
+
+        double alpha = params.alpha;
+        double beta  = params.beta;
+        if (params.autoClipHist) {
+            Pair<Double, Double> val = automaticBrightnessAndContrast(imageMat, params.clipHistPercent);
+            alpha = val.getFirst();
+            beta  = val.getSecond();
+            logger.trace(String.format(Locale.US, "automaticBrightnessAndContrast: alpha=%.2f, beta=%.2f", alpha, beta));
+            setterAlpha.accept(alpha);
+            setterBeta .accept(beta);
+        }
+
+        Core.convertScaleAbs(imageMat, dst, alpha, beta);
         imageMat = dst;
 
         calcWhiteBk();
@@ -101,6 +114,21 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         SliderDoubleModel modelBeta  = new SliderDoubleModel(params.beta , 0, MIN_BETA , MAX_BETA);
         SliderIntModel    modelClipHist = new SliderIntModel(params.clipHistPercent, 0, 1, 99);
 
+        setterAlpha = alpha -> SwingUtilities.invokeLater(() -> {
+            if (modelAlpha.getMinimum() > alpha)
+                modelAlpha.setMinimum(alpha);
+            if (modelAlpha.getMaximum() < alpha)
+                modelAlpha.setMaximum(alpha);
+            modelAlpha.setValue(alpha);
+        });
+        setterBeta = beta -> SwingUtilities.invokeLater(() -> {
+            if (modelBeta.getMinimum() > beta)
+                modelBeta.setMinimum(beta);
+            if (modelBeta.getMaximum() < beta)
+                modelBeta.setMaximum(beta);
+            modelBeta.setValue(beta);
+        });
+
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.setToolTipText("Two commonly used point processes are multiplication and addition with a constant: g(x)=αf(x)+β");
         box4Sliders.add(Box.createHorizontalGlue());
@@ -111,54 +139,37 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
                 "\n where i and j indicates that the pixel is located in the i-th row and j-th column"));
         box4Sliders.add(Box.createHorizontalGlue());
 
-        Runnable applyHistClip = () -> {
-            Mat sourceMat = getSourceMat();
-            if (sourceMat == null)
-                return;
-
-            Pair<Double, Double> val = automaticBrightnessAndContrast(sourceMat, params.clipHistPercent);
-            double alpha = val.getFirst();
-            double beta  = val.getSecond();
-            logger.trace(String.format(Locale.US, "automaticBrightnessAndContrast: alpha=%.2f, beta=%.2f", alpha, beta));
-            modelAlpha.setValue(alpha);
-            modelBeta.setValue(beta);
-        };
-
-        Component box4L2gradient = makeBoxedCheckBox(
+        JCheckBox checkboxAutoClipHist = makeCheckBox(
             () -> params.autoClipHist,
             v  -> params.autoClipHist = v,
-            "...through clipping a histogram",
-            "",
+            "apply",
             "params.autoClipHist",
             "use automatic optimization of brightness and contrast through clipping a histogram",
-            null);
+            () -> {
+                UiHelper.enableAllChilds(box4Sliders, !params.autoClipHist);
+            });
 
         Container cntrlHistClip = makeEditBox("clipHistPercent", modelClipHist, "Histogram clipping", null, null);
-        JButton btnAuto = new JButton("Apply..");
-        btnAuto.setToolTipText("Automatic brightness and contrast optimization");
-        btnAuto.addActionListener(ev -> applyHistClip);
 
-        Box boxFindAutoParams = Box.createHorizontalBox();
-        boxFindAutoParams.setBorder(BorderFactory.createTitledBorder("Automatic brightness and contrast"));
-        boxFindAutoParams.setToolTipText("Find brightness and contrast");
-        boxFindAutoParams.add(Box.createHorizontalGlue());
-        boxFindAutoParams.add(cntrlHistClip);
-        boxFindAutoParams.add(Box.createHorizontalGlue());
-        boxFindAutoParams.add(btnAuto);
-        boxFindAutoParams.add(Box.createHorizontalGlue());
+        Box boxAutoParams = Box.createHorizontalBox();
+        boxAutoParams.setBorder(BorderFactory.createTitledBorder("Automatic brightness and contrast"));
+      //boxAutoParams.setToolTipText("Find brightness and contrast");
+        boxAutoParams.add(cntrlHistClip);
+        boxAutoParams.add(Box.createHorizontalGlue());
+        boxAutoParams.add(checkboxAutoClipHist);
 
 
         JPanel panelOptions = new JPanel();
         panelOptions.setLayout(new BorderLayout());
         panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
-        panelOptions.add(boxFindAutoParams, BorderLayout.NORTH);
+        panelOptions.add(boxAutoParams, BorderLayout.NORTH);
         panelOptions.add(box4Sliders, BorderLayout.CENTER);
 
         box4Options.add(panelOptions);
 
-        addChangeListener("params.alpha"    , modelAlpha   , v -> params.alpha    = v);
-        addChangeListener("params.beta"     , modelBeta    , v -> params.beta     = v);
-        addChangeListener("clipHistPercent" , modelClipHist, v -> clipHistPercent = v);
+        addChangeListener("params.alpha"    , modelAlpha   , v -> params.alpha           = v);
+        addChangeListener("params.beta"     , modelBeta    , v -> params.beta            = v);
+        addChangeListener("clipHistPercent" , modelClipHist, v -> params.clipHistPercent = v);
 
         return box4Options;
     }
