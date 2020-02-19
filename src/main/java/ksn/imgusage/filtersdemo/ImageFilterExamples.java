@@ -60,6 +60,7 @@ public class ImageFilterExamples {
     private List<ITab<?>> tabs = new ArrayList<>();
     private JWindow errorWindow;
     private Timer timer;
+    private File latestPipelineDir = DEFAULT_PIPELINE.getParentFile();
 
     public ImageFilterExamples() {
         frame = new JFrame(DEFAULT_TITLE);
@@ -339,8 +340,7 @@ public class ImageFilterExamples {
     }
 
     private void onSavePipeline() {
-        File latestDir = getFirstTab().getLatestImageDir();
-        File jsonFile = UiHelper.chooseFileToSavePipeline(frame, latestDir);
+        File jsonFile = UiHelper.chooseFileToSavePipeline(frame, latestPipelineDir);
         if (jsonFile == null)
             return; // aborted
         jsonFile = SelectFilterDialog.checkExtension(jsonFile, "json");
@@ -380,8 +380,7 @@ public class ImageFilterExamples {
     }
 
     private void onLoadPipeline() {
-        File latestDir = getFirstTab().getLatestImageDir();
-        File jsonFile = UiHelper.chooseFileToLoadPipeline(frame, latestDir);
+        File jsonFile = UiHelper.chooseFileToLoadPipeline(frame, latestPipelineDir);
         if (jsonFile == null)
             return; // aborted
         loadPipeline(jsonFile);
