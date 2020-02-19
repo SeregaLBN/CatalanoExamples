@@ -2,7 +2,6 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -53,57 +52,33 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
 
     @Override
     protected void applyOpencvFilter() {
-        Mat dst = new Mat();
-
         double alpha = params.alpha;
         double beta  = params.beta;
+
+        if (params.autoWhiteBkAjust) {
+            beta = -132.0; // TODO hmm..?
+            alpha = findBestAlphaForWhiteBk(beta);
+            logger.trace(String.format(Locale.US, "findBestAlphaForWhiteBk: alpha=%.2f, beta=%.2f", alpha, beta));
+            setterAlpha.accept(alpha);
+            setterBeta .accept(beta);
+        } else
+
         if (params.autoClipHist) {
             Pair<Double, Double> val = automaticBrightnessAndContrast(imageMat, params.clipHistPercent);
             alpha = val.getFirst();
             beta  = val.getSecond();
             logger.trace(String.format(Locale.US, "automaticBrightnessAndContrast: alpha=%.2f, beta=%.2f", alpha, beta));
+
             setterAlpha.accept(alpha);
             setterBeta .accept(beta);
         }
 
+        Mat dst = new Mat();
         Core.convertScaleAbs(imageMat, dst, alpha, beta);
         imageMat = dst;
 
-        calcWhiteBk();
+        calcWhiteBk(dst);
     }
-
-    /** /
-    @Override
-    protected void applyOpencvFilter() {
-        Mat newImage = Mat.zeros(imageMat.size(), imageMat.type());
-
-        byte[] imageData = new byte[(int) (imageMat.total() * imageMat.channels())];
-        imageMat.get(0, 0, imageData);
-        byte[] newImageData = new byte[(int) (newImage.total() * newImage.channels())];
-        for (int y = 0; y < imageMat.rows(); y++) {
-            for (int x = 0; x < imageMat.cols(); x++) {
-                for (int c = 0; c < imageMat.channels(); c++) {
-                    double pixelValue = imageData[(y * imageMat.cols() + x) * imageMat.channels() + c];
-                    pixelValue = pixelValue < 0 ? pixelValue + 256 : pixelValue;
-                    newImageData[(y * imageMat.cols() + x) * imageMat.channels() + c] =
-                            saturate(params.alpha * pixelValue + params.beta);
-                }
-            }
-        }
-        newImage.put(0, 0, newImageData);
-
-        imageMat = newImage;
-    }
-
-    private static byte saturate(double val) {
-        int iVal = (int)Math.round(val);
-        if (iVal > 255)
-            return (byte)255;
-        if (iVal < 0)
-            return 0;
-        return (byte)iVal;
-    }
-    /**/
 
     @Override
     protected Component makeOptions() {
@@ -113,6 +88,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         SliderDoubleModel modelAlpha = new SliderDoubleModel(params.alpha, 0, MIN_ALPHA, MAX_ALPHA);
         SliderDoubleModel modelBeta  = new SliderDoubleModel(params.beta , 0, MIN_BETA , MAX_BETA);
         SliderIntModel    modelClipHist = new SliderIntModel(params.clipHistPercent, 0, 1, 99);
+        SliderIntModel    modelWhiteBk  = new SliderIntModel(params.whiteBkPercent , 0, 1, 99);
 
         setterAlpha = alpha -> SwingUtilities.invokeLater(() -> {
             if (modelAlpha.getMinimum() > alpha)
@@ -139,37 +115,60 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
                 "\n where i and j indicates that the pixel is located in the i-th row and j-th column"));
         box4Sliders.add(Box.createHorizontalGlue());
 
-        JCheckBox checkboxAutoClipHist = makeCheckBox(
-            () -> params.autoClipHist,
-            v  -> params.autoClipHist = v,
-            "apply",
-            "params.autoClipHist",
-            "use automatic optimization of brightness and contrast through clipping a histogram",
-            () -> {
-                UiHelper.enableAllChilds(box4Sliders, !params.autoClipHist);
-            });
+        JCheckBox[] cbAutoClipHist     = { null };
+        JCheckBox[] cbAutoWhiteBkAjust = { null };
 
-        Container cntrlHistClip = makeEditBox("clipHistPercent", modelClipHist, "Histogram clipping", null, null);
+        Box boxHistClipParams = Box.createHorizontalBox();
+        boxHistClipParams.setBorder(BorderFactory.createTitledBorder(""));
+        boxHistClipParams.add(makeEditBox("clipHistPercent", modelClipHist, "Histogram clipping", null, null));
+        boxHistClipParams.add(Box.createHorizontalGlue());
+        boxHistClipParams.add(cbAutoClipHist[0] = makeCheckBox(
+                () -> params.autoClipHist,
+                v  -> params.autoClipHist = v,
+                "apply",
+                "params.autoClipHist",
+                "use automatic optimization of brightness and contrast through clipping a histogram",
+                () -> {
+                    UiHelper.enableAllChilds(box4Sliders, !params.autoClipHist && !params.autoWhiteBkAjust);
+                    if (params.autoClipHist)
+                        cbAutoWhiteBkAjust[0].setSelected(false);
+                }));
 
-        Box boxAutoParams = Box.createHorizontalBox();
+        Box boxWhiteBkParams = Box.createHorizontalBox();
+        boxWhiteBkParams.setBorder(BorderFactory.createTitledBorder(""));
+        boxWhiteBkParams.add(makeEditBox("WhiteBkPercent", modelWhiteBk, "White percentage", null, null));
+        boxWhiteBkParams.add(Box.createHorizontalGlue());
+        boxWhiteBkParams.add(cbAutoWhiteBkAjust[0] = makeCheckBox(
+                () -> params.autoWhiteBkAjust,
+                v  -> params.autoWhiteBkAjust = v,
+                "apply",
+                "params.autoWhiteBkAjust",
+                "use automatic white background adjustment",
+                () -> {
+                    UiHelper.enableAllChilds(box4Sliders, !params.autoWhiteBkAjust && !params.autoClipHist);
+                    if (params.autoWhiteBkAjust)
+                        cbAutoClipHist[0].setSelected(false);
+                }));
+
+        Box boxAutoParams = Box.createVerticalBox();
         boxAutoParams.setBorder(BorderFactory.createTitledBorder("Automatic brightness and contrast"));
       //boxAutoParams.setToolTipText("Find brightness and contrast");
-        boxAutoParams.add(cntrlHistClip);
-        boxAutoParams.add(Box.createHorizontalGlue());
-        boxAutoParams.add(checkboxAutoClipHist);
+        boxAutoParams.add(boxHistClipParams);
+        boxAutoParams.add(boxWhiteBkParams);
 
 
         JPanel panelOptions = new JPanel();
         panelOptions.setLayout(new BorderLayout());
         panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
         panelOptions.add(boxAutoParams, BorderLayout.NORTH);
-        panelOptions.add(box4Sliders, BorderLayout.CENTER);
+        panelOptions.add(box4Sliders  , BorderLayout.CENTER);
 
         box4Options.add(panelOptions);
 
-        addChangeListener("params.alpha"    , modelAlpha   , v -> params.alpha           = v);
-        addChangeListener("params.beta"     , modelBeta    , v -> params.beta            = v);
-        addChangeListener("clipHistPercent" , modelClipHist, v -> params.clipHistPercent = v);
+        addChangeListener("params.alpha"          , modelAlpha   , v -> params.alpha           = v);
+        addChangeListener("params.beta"           , modelBeta    , v -> params.beta            = v);
+        addChangeListener("params.clipHistPercent", modelClipHist, v -> params.clipHistPercent = v);
+        addChangeListener("params.whiteBkPercent" , modelWhiteBk , v -> params.whiteBkPercent  = v);
 
         return box4Options;
     }
@@ -238,24 +237,42 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         // TODO
     }
 
-    private void calcWhiteBk() {
-        int cntWhite = 0;
-        Mat gray = OpenCvHelper.toGray(imageMat);
+    private double calcWhiteBk(Mat mat) {
+        Mat gray = OpenCvHelper.toGray(mat);
+
         int w = gray.width();
         int h = gray.height();
+        int size = w * h;
+
+        byte[] matBuff = new byte[size * (int)gray.elemSize()];
+        assert matBuff.length == size; // gray.elemSize() of gray must be == 1
+
+        int res = gray.get(0, 0, matBuff);
+        assert res == matBuff.length;
+
         final byte whitePixel = (byte)0xFF;
-        for (int i=0; i < w; ++i)
-            for (int j=0; j < h; ++j) {
-                byte[] pixel = {0};
-                int res = gray.get(j, i, pixel);
-                assert res == 1; // read 1 bytes
+        int cntWhite = 0;
+        for (byte b : matBuff)
+            if (b == whitePixel)
+                ++cntWhite;
 
-                if (pixel[0] == whitePixel)
-                    ++cntWhite;
-            }
+        double percent = cntWhite * 100.0 / size;
+//        logger.debug(String.format(Locale.US, "white bk is %.2f%%", percent));
+        return percent;
+    }
 
-        double percent = cntWhite * 100.0 / (w * h);
-        logger.debug(String.format(Locale.US, "white bk is %.2f%%", percent));
+    private double findBestAlphaForWhiteBk(double beta) {
+        Mat src = getSourceMat();
+        for (double alpha = MIN_ALPHA; alpha <= MAX_ALPHA; alpha += 0.01) {
+            Mat dst = new Mat();
+            Core.convertScaleAbs(src, dst, alpha, beta);
+            double percent = calcWhiteBk(dst);
+            if (params.whiteBkPercent <= percent)
+                return alpha;
+        }
+
+        //return Double.NaN;
+        throw new IllegalArgumentException("Alpha value not found for white backgroung percentage " + params.whiteBkPercent);
     }
 
 }
