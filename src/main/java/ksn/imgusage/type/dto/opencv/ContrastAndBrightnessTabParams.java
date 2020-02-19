@@ -16,10 +16,10 @@ public class ContrastAndBrightnessTabParams implements ITabParams {
     /** histogram clipping in percent 1..99 */
     public int clipHistPercent = 25;
 
-    /** use automatic white background adjustment */
-    public boolean autoWhiteBkAjust = false;
-    /** white percentage 1..99 */
-    public int whiteBkPercent = 65;
+    /** use automatic white colocr adjustment */
+    public boolean autoWhiteAjust = false;
+    /** white color percentage 1..99 */
+    public int whitePercent = 65;
 
 
     @Override
@@ -29,15 +29,15 @@ public class ContrastAndBrightnessTabParams implements ITabParams {
             + ", beta=%.2f"
             + ", autoClipHist=%b"
             + ", clipHistPercent=%d"
-            + ", autoWhiteBkAjust=%b"
-            + ", whiteBkPercent=%d"
+            + ", autoWhiteAjust=%b"
+            + ", whitePercent=%d"
             + " }",
             alpha,
             beta,
             autoClipHist,
             clipHistPercent,
-            autoWhiteBkAjust,
-            whiteBkPercent);
+            autoWhiteAjust,
+            whitePercent);
     }
 
 }

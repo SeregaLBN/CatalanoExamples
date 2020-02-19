@@ -371,6 +371,7 @@ public class ImageFilterExamples {
         try (FileOutputStream fos = new FileOutputStream(jsonFile)) {
             fos.write(json.getBytes(StandardCharsets.UTF_8));
             logger.info("Pipeline saved to file {}", jsonFile);
+            latestPipelineDir = jsonFile.getParentFile();
         } catch (Exception ex) {
             logger.error("Can`t save file '{}': {}", jsonFile, ex);
             onError(new Exception("Can`t save file '" + jsonFile + "'", ex), null, frame);
@@ -424,6 +425,8 @@ public class ImageFilterExamples {
         isScale = getFirstTab()::isScale;
 
         frame.setTitle(frame.getTitle() +": pipline " + jsonFile.getName());
+
+        latestPipelineDir = jsonFile.getParentFile();
     }
 
     private FirstTab getFirstTab() {

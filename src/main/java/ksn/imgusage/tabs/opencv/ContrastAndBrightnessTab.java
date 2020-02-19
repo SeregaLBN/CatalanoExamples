@@ -55,10 +55,10 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         double alpha = params.alpha;
         double beta  = params.beta;
 
-        if (params.autoWhiteBkAjust) {
+        if (params.autoWhiteAjust) {
             beta = -132.0; // TODO hmm..?
-            alpha = findBestAlphaForWhiteBk(beta);
-            logger.trace(String.format(Locale.US, "findBestAlphaForWhiteBk: alpha=%.2f, beta=%.2f", alpha, beta));
+            alpha = findBestAlphaForWhiteColor(beta);
+            logger.trace(String.format(Locale.US, "findBestAlphaForWhiteColor: alpha=%.2f, beta=%.2f", alpha, beta));
             setterAlpha.accept(alpha);
             setterBeta .accept(beta);
         } else
@@ -76,8 +76,6 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         Mat dst = new Mat();
         Core.convertScaleAbs(imageMat, dst, alpha, beta);
         imageMat = dst;
-
-        calcWhiteBk(dst);
     }
 
     @Override
@@ -88,7 +86,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         SliderDoubleModel modelAlpha = new SliderDoubleModel(params.alpha, 0, MIN_ALPHA, MAX_ALPHA);
         SliderDoubleModel modelBeta  = new SliderDoubleModel(params.beta , 0, MIN_BETA , MAX_BETA);
         SliderIntModel    modelClipHist = new SliderIntModel(params.clipHistPercent, 0, 1, 99);
-        SliderIntModel    modelWhiteBk  = new SliderIntModel(params.whiteBkPercent , 0, 1, 99);
+        SliderIntModel    modelWhiteClr = new SliderIntModel(params.whitePercent   , 0, 1, 99);
 
         setterAlpha = alpha -> SwingUtilities.invokeLater(() -> {
             if (modelAlpha.getMinimum() > alpha)
@@ -115,8 +113,8 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
                 "\n where i and j indicates that the pixel is located in the i-th row and j-th column"));
         box4Sliders.add(Box.createHorizontalGlue());
 
-        JCheckBox[] cbAutoClipHist     = { null };
-        JCheckBox[] cbAutoWhiteBkAjust = { null };
+        JCheckBox[] cbAutoClipHist   = { null };
+        JCheckBox[] cbAutoWhiteAjust = { null };
 
         Box boxHistClipParams = Box.createHorizontalBox();
         boxHistClipParams.setBorder(BorderFactory.createTitledBorder(""));
@@ -129,24 +127,24 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
                 "params.autoClipHist",
                 "use automatic optimization of brightness and contrast through clipping a histogram",
                 () -> {
-                    UiHelper.enableAllChilds(box4Sliders, !params.autoClipHist && !params.autoWhiteBkAjust);
+                    UiHelper.enableAllChilds(box4Sliders, !params.autoClipHist && !params.autoWhiteAjust);
                     if (params.autoClipHist)
-                        cbAutoWhiteBkAjust[0].setSelected(false);
+                        cbAutoWhiteAjust[0].setSelected(false);
                 }));
 
-        Box boxWhiteBkParams = Box.createHorizontalBox();
-        boxWhiteBkParams.setBorder(BorderFactory.createTitledBorder(""));
-        boxWhiteBkParams.add(makeEditBox("WhiteBkPercent", modelWhiteBk, "White percentage", null, null));
-        boxWhiteBkParams.add(Box.createHorizontalGlue());
-        boxWhiteBkParams.add(cbAutoWhiteBkAjust[0] = makeCheckBox(
-                () -> params.autoWhiteBkAjust,
-                v  -> params.autoWhiteBkAjust = v,
+        Box boxWhiteParams = Box.createHorizontalBox();
+        boxWhiteParams.setBorder(BorderFactory.createTitledBorder(""));
+        boxWhiteParams.add(makeEditBox("WhitePercent", modelWhiteClr, "White color percentage", null, null));
+        boxWhiteParams.add(Box.createHorizontalGlue());
+        boxWhiteParams.add(cbAutoWhiteAjust[0] = makeCheckBox(
+                () -> params.autoWhiteAjust,
+                v  -> params.autoWhiteAjust = v,
                 "apply",
-                "params.autoWhiteBkAjust",
-                "use automatic white background adjustment",
+                "params.autoWhiteAjust",
+                "use automatic white color adjustment",
                 () -> {
-                    UiHelper.enableAllChilds(box4Sliders, !params.autoWhiteBkAjust && !params.autoClipHist);
-                    if (params.autoWhiteBkAjust)
+                    UiHelper.enableAllChilds(box4Sliders, !params.autoWhiteAjust && !params.autoClipHist);
+                    if (params.autoWhiteAjust)
                         cbAutoClipHist[0].setSelected(false);
                 }));
 
@@ -154,7 +152,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         boxAutoParams.setBorder(BorderFactory.createTitledBorder("Automatic brightness and contrast"));
       //boxAutoParams.setToolTipText("Find brightness and contrast");
         boxAutoParams.add(boxHistClipParams);
-        boxAutoParams.add(boxWhiteBkParams);
+        boxAutoParams.add(boxWhiteParams);
 
 
         JPanel panelOptions = new JPanel();
@@ -168,7 +166,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         addChangeListener("params.alpha"          , modelAlpha   , v -> params.alpha           = v);
         addChangeListener("params.beta"           , modelBeta    , v -> params.beta            = v);
         addChangeListener("params.clipHistPercent", modelClipHist, v -> params.clipHistPercent = v);
-        addChangeListener("params.whiteBkPercent" , modelWhiteBk , v -> params.whiteBkPercent  = v);
+        addChangeListener("params.whitePercent"   , modelWhiteClr, v -> params.whitePercent    = v);
 
         return box4Options;
     }
@@ -190,7 +188,6 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
              hist,
              new MatOfInt(256),
              new MatOfFloat(0, 256));
-        printHist(hist);
         Size histSize0 = hist.size();
         int histSize = (int)histSize0.height;
 
@@ -233,11 +230,7 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         return new Pair<>(alpha, beta);
     }
 
-    private static void printHist(Mat hist) {
-        // TODO
-    }
-
-    private double calcWhiteBk(Mat mat) {
+    private static double calcWhiteColor(Mat mat) {
         Mat gray = OpenCvHelper.toGray(mat);
 
         int w = gray.width();
@@ -257,22 +250,22 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
                 ++cntWhite;
 
         double percent = cntWhite * 100.0 / size;
-//        logger.debug(String.format(Locale.US, "white bk is %.2f%%", percent));
+//        logger.debug(String.format(Locale.US, "white color is %.2f%%", percent));
         return percent;
     }
 
-    private double findBestAlphaForWhiteBk(double beta) {
+    private double findBestAlphaForWhiteColor(double beta) {
         Mat src = getSourceMat();
         for (double alpha = MIN_ALPHA; alpha <= MAX_ALPHA; alpha += 0.01) {
             Mat dst = new Mat();
             Core.convertScaleAbs(src, dst, alpha, beta);
-            double percent = calcWhiteBk(dst);
-            if (params.whiteBkPercent <= percent)
+            double percent = calcWhiteColor(dst);
+            if (params.whitePercent <= percent)
                 return alpha;
         }
 
         //return Double.NaN;
-        throw new IllegalArgumentException("Alpha value not found for white backgroung percentage " + params.whiteBkPercent);
+        throw new IllegalArgumentException("Alpha value not found for white backgroung percentage " + params.whitePercent);
     }
 
 }
