@@ -2,6 +2,7 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -56,11 +57,11 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
         double beta  = params.beta;
 
         if (params.autoWhiteAjust) {
-            beta = -132.0; // TODO hmm..?
+            beta = params.beta;
             alpha = findBestAlphaForWhiteColor(beta);
             logger.trace(String.format(Locale.US, "findBestAlphaForWhiteColor: alpha=%.2f, beta=%.2f", alpha, beta));
             setterAlpha.accept(alpha);
-            setterBeta .accept(beta);
+          //setterBeta .accept(beta);
         } else
 
         if (params.autoClipHist) {
@@ -103,14 +104,17 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
             modelBeta.setValue(beta);
         });
 
+        Container alphaSlider = makeSliderVert(modelAlpha, "Alpha", "The parameters α>0 and β are often called the gain and bias parameters; sometimes these parameters are said to control contrast and brightness respectively");
+        Container betaSlider = makeSliderVert(modelBeta , "Beta", "You can think of f(x) as the source image pixels and g(x) as the output image pixels. Then, more conveniently we can write the expression as:" +
+                "\n g(i,j)=α⋅f(i,j)+β \n" +
+                "\n where i and j indicates that the pixel is located in the i-th row and j-th column");
+
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.setToolTipText("Two commonly used point processes are multiplication and addition with a constant: g(x)=αf(x)+β");
         box4Sliders.add(Box.createHorizontalGlue());
-        box4Sliders.add(makeSliderVert(modelAlpha, "Alpha", "The parameters α>0 and β are often called the gain and bias parameters; sometimes these parameters are said to control contrast and brightness respectively"));
+        box4Sliders.add(alphaSlider);
         box4Sliders.add(Box.createHorizontalStrut(2));
-        box4Sliders.add(makeSliderVert(modelBeta , "Beta", "You can think of f(x) as the source image pixels and g(x) as the output image pixels. Then, more conveniently we can write the expression as:" +
-                "\n g(i,j)=α⋅f(i,j)+β \n" +
-                "\n where i and j indicates that the pixel is located in the i-th row and j-th column"));
+        box4Sliders.add(betaSlider);
         box4Sliders.add(Box.createHorizontalGlue());
 
         JCheckBox[] cbAutoClipHist   = { null };
@@ -127,9 +131,12 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
                 "params.autoClipHist",
                 "use automatic optimization of brightness and contrast through clipping a histogram",
                 () -> {
-                    UiHelper.enableAllChilds(box4Sliders, !params.autoClipHist && !params.autoWhiteAjust);
                     if (params.autoClipHist)
                         cbAutoWhiteAjust[0].setSelected(false);
+
+                    boolean enable = !params.autoClipHist && !params.autoWhiteAjust;
+                    UiHelper.enableAllChilds(alphaSlider, enable);
+                    UiHelper.enableAllChilds(betaSlider, enable);
                 }));
 
         Box boxWhiteParams = Box.createHorizontalBox();
@@ -143,9 +150,12 @@ public class ContrastAndBrightnessTab extends OpencvFilterTab<ContrastAndBrightn
                 "params.autoWhiteAjust",
                 "use automatic white color adjustment",
                 () -> {
-                    UiHelper.enableAllChilds(box4Sliders, !params.autoWhiteAjust && !params.autoClipHist);
                     if (params.autoWhiteAjust)
                         cbAutoClipHist[0].setSelected(false);
+
+                    boolean enable = !params.autoWhiteAjust && !params.autoClipHist;
+                    UiHelper.enableAllChilds(alphaSlider, enable);
+                    UiHelper.enableAllChilds(betaSlider, true);
                 }));
 
         Box boxAutoParams = Box.createVerticalBox();
