@@ -92,7 +92,7 @@ task cleanAddons(type: Delete) {
     //delete project.file('./exampleImages')
 }
 
-
+/** /
 // can run as single JAR:
 //  java -jar ./ImageFilterExamples/build/libs/ImageFilterExamples-fat-{version}.jar
 task fatJar(type: Jar) {
@@ -113,6 +113,7 @@ task fatJar(type: Jar) {
     }
     with jar
 }
+/**/
 
 def downloadByUrl(url, targetFile, recheckSize) {
     try {
@@ -261,7 +262,7 @@ task downloadExampleImage() {
 defaultTasks 'clean', 'build', 'run'
 
 project.tasks.clean           .dependsOn project.tasks.cleanAddons
-project.tasks.build           .dependsOn project.tasks.fatJar
+//project.tasks.build           .dependsOn project.tasks.fatJar
 project.tasks.compileJava     .dependsOn project.tasks.downloadCatalanoFramework
 project.tasks.processResources.dependsOn project.tasks.downloadExampleImage
 
