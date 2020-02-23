@@ -85,7 +85,7 @@ public class ThresholdTab extends OpencvFilterTab<ThresholdTabParams> {
             // In these cases, the function determines the optimal threshold value using the Otsu's or Triangle algorithm and uses it instead of the specified thresh.
             boolean enabled2 = !params.useOtsuMask && !params.useTriangleMask;
 
-            UiHelper.enableAllChilds(cntrlMaxvalSlider, enabled1 && enabled2);
+            UiHelper.enableAllChilds(cntrlMaxvalSlider, enabled1);
             UiHelper.enableAllChilds(cntrlThreshSlider, enabled2);
         };
 

@@ -1,25 +1,25 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
-    "useGray" : true,
     "useScale" : true,
+    "imageFile" : "idCardOld1.Page1.DarkBorder.PerspectiveTransform.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 500,
       "height" : 375
     },
-    "useKeepAspectRatio" : true,
-    "boundOfRoi" : {
-      "left" : 0,
-      "top" : 0,
-      "right" : 0,
-      "bottom" : 0
-    },
-    "imageFile" : "idCardOld.DarkBorder.PerspectiveTransform.jpg"
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "OpenCV:Colorized",
+  "params" : {
+    "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:PerspectiveTransform",
-  "pos" : 1,
   "params" : {
     "showRegion" : true,
     "applyToFirstTab" : false,

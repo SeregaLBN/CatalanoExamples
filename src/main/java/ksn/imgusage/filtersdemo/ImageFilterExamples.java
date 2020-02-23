@@ -52,7 +52,7 @@ public class ImageFilterExamples {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageFilterExamples.class);
     public static final String DEFAULT_TITLE = "Demonstration of image filters";
-    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "idCard.LeadToPerspective.json").toAbsolutePath().toFile();
+    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Lena.OpenCV.Neon.json").toAbsolutePath().toFile();
 
     private final JFrame frame;
     private JTabbedPane tabPane;
@@ -60,6 +60,7 @@ public class ImageFilterExamples {
     private List<ITab<?>> tabs = new ArrayList<>();
     private JWindow errorWindow;
     private Timer timer;
+    private File latestPipelineDir = DEFAULT_PIPELINE.getParentFile();
 
     public ImageFilterExamples() {
         frame = new JFrame(DEFAULT_TITLE);
@@ -152,7 +153,7 @@ public class ImageFilterExamples {
 
     private void onClose() {
         frame.dispose();
-        logger.warn("Good bay!\n\n");
+        logger.info("Good bay!\n\n");
         tabs.forEach(tab -> logger.info("{}.params={}", tab.getClass().getName(), tab.getParams()));
     }
 
@@ -339,18 +340,16 @@ public class ImageFilterExamples {
     }
 
     private void onSavePipeline() {
-        File latestDir = getFirstTab().getLatestImageDir();
-        File jsonFile = UiHelper.chooseFileToSavePipeline(frame, latestDir);
+        File jsonFile = UiHelper.chooseFileToSavePipeline(frame, latestPipelineDir);
         if (jsonFile == null)
             return; // aborted
         jsonFile = SelectFilterDialog.checkExtension(jsonFile, "json");
 
         List<PipelineItem> pipeline = new ArrayList<>(tabs.size());
-        for (int i = 0; i < tabs.size(); ++i) {
+        for (ITab<?> tab : tabs) {
             PipelineItem item = new PipelineItem();
-            item.pos = i;
-            item.tabName = tabs.get(i).getName();
-            item.params  = tabs.get(i).getParams();
+            item.tabName = tab.getName();
+            item.params  = tab.getParams();
             pipeline.add(item);
         }
 
@@ -372,6 +371,7 @@ public class ImageFilterExamples {
         try (FileOutputStream fos = new FileOutputStream(jsonFile)) {
             fos.write(json.getBytes(StandardCharsets.UTF_8));
             logger.info("Pipeline saved to file {}", jsonFile);
+            latestPipelineDir = jsonFile.getParentFile();
         } catch (Exception ex) {
             logger.error("Can`t save file '{}': {}", jsonFile, ex);
             onError(new Exception("Can`t save file '" + jsonFile + "'", ex), null, frame);
@@ -381,8 +381,7 @@ public class ImageFilterExamples {
     }
 
     private void onLoadPipeline() {
-        File latestDir = getFirstTab().getLatestImageDir();
-        File jsonFile = UiHelper.chooseFileToLoadPipeline(frame, latestDir);
+        File jsonFile = UiHelper.chooseFileToLoadPipeline(frame, latestPipelineDir);
         if (jsonFile == null)
             return; // aborted
         loadPipeline(jsonFile);
@@ -412,12 +411,6 @@ public class ImageFilterExamples {
         FirstTabParams firstParams = (FirstTabParams)pipeline.get(0).params;
         firstParams.imageFile = jsonFile.toPath().getParent().resolve(firstParams.imageFile.toPath()).toFile();
 
-        pipeline.sort((p1, p2) -> {
-            if (p1.pos > p2.pos) return  1;
-            if (p1.pos < p2.pos) return -1;
-            return 0;
-        });
-
         if (!FirstTab.TAB_NAME.equals(pipeline.get(0).tabName)) {
             logger.error("FirstTab mus be instanceof {}", FirstTab.class.getName());
             onError(new Exception("FirstTab mus be instanceof " + FirstTab.class.getName()), null, frame);
@@ -432,6 +425,8 @@ public class ImageFilterExamples {
         isScale = getFirstTab()::isScale;
 
         frame.setTitle(frame.getTitle() +": pipline " + jsonFile.getName());
+
+        latestPipelineDir = jsonFile.getParentFile();
     }
 
     private FirstTab getFirstTab() {

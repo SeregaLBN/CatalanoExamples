@@ -9,14 +9,10 @@ import ksn.imgusage.tabs.ITabParams;
 public class PipelineItem {
 
     public static final String KEY_TAB_NAME = "tabName";
-    public static final String KEY_POS      = "pos";
     public static final String KEY_PARAMS   = "params";
 
     @JsonProperty(KEY_TAB_NAME)
     public String tabName;
-
-    @JsonProperty(KEY_POS)
-    public int pos;
 
     @JsonProperty(KEY_PARAMS)
     public ITabParams params;

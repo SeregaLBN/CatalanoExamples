@@ -1,25 +1,25 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
-    "useGray" : true,
     "useScale" : true,
+    "imageFile" : "Alphabet.eng.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 900,
       "height" : 493
     },
-    "useKeepAspectRatio" : true,
-    "boundOfRoi" : {
-      "left" : 0,
-      "top" : 0,
-      "right" : 0,
-      "bottom" : 0
-    },
-    "imageFile" : "Alphabet.eng.jpg"
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "OpenCV:Colorized",
+  "params" : {
+    "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:GaussianBlur",
-  "pos" : 1,
   "params" : {
     "kernelSize" : {
       "width" : 5,
@@ -31,7 +31,6 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 2,
   "params" : {
     "morphologicalOperation" : "MORPH_CLOSE",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -63,7 +62,6 @@
   }
 }, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 3,
   "params" : {
     "thresh" : 228.94,
     "maxVal" : 281.25,
@@ -73,7 +71,6 @@
   }
 }, {
   "tabName" : "OpenCV:Canny",
-  "pos" : 4,
   "params" : {
     "threshold1" : 5.0,
     "threshold2" : 5.0,
@@ -82,7 +79,6 @@
   }
 }, {
   "tabName" : "OpenCV:FindContours",
-  "pos" : 5,
   "params" : {
     "mode" : "RETR_EXTERNAL",
     "method" : "CHAIN_APPROX_SIMPLE",
@@ -99,7 +95,6 @@
   }
 }, {
   "tabName" : "OpenCV:Watershed",
-  "pos" : 6,
   "params" : {
     "showStep" : "STEP4_COMBINE_TO_ORIGINAL"
   }

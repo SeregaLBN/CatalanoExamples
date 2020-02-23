@@ -1,31 +1,40 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
-    "useGray" : true,
     "useScale" : true,
+    "imageFile" : "idCardOld1.Page1.DarkBorder.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 3000,
       "height" : 2250
     },
-    "useKeepAspectRatio" : true,
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "OpenCV:Colorized",
+  "params" : {
+    "colorsTo" : "GRAY"
+  }
+}, {
+  "tabName" : "Common:ROI",
+  "params" : {
     "boundOfRoi" : {
       "left" : 2300,
       "top" : 400,
       "right" : 300,
       "bottom" : 2350
-    },
-    "imageFile" : "idCardOld.DarkBorder.jpg"
+    }
   }
 }, {
   "tabName" : "OpenCV:Colorized",
-  "pos" : 1,
   "params" : {
     "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:GaussianBlur",
-  "pos" : 2,
   "params" : {
     "kernelSize" : {
       "width" : 3,
@@ -37,7 +46,6 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 3,
   "params" : {
     "morphologicalOperation" : "MORPH_GRADIENT",
     "kernelSource" : "CTOR",
@@ -69,7 +77,6 @@
   }
 }, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 4,
   "params" : {
     "thresh" : 77.0,
     "maxVal" : 255.0,
@@ -79,7 +86,6 @@
   }
 }, {
   "tabName" : "OpenCV:Canny",
-  "pos" : 5,
   "params" : {
     "threshold1" : 7.0,
     "threshold2" : 15.0,
@@ -88,7 +94,6 @@
   }
 }, {
   "tabName" : "OpenCV:FindContours",
-  "pos" : 6,
   "params" : {
     "mode" : "RETR_EXTERNAL",
     "method" : "CHAIN_APPROX_SIMPLE",

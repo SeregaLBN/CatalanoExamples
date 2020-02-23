@@ -1,38 +1,41 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
-    "useGray" : false,
     "useScale" : true,
+    "imageFile" : "idCardOld1.Page1.DarkBorder.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 3000,
       "height" : 2250
     },
-    "useKeepAspectRatio" : true,
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "Common:ROI",
+  "params" : {
     "boundOfRoi" : {
       "left" : 2300,
       "top" : 1552,
       "right" : 300,
       "bottom" : 1358
-    },
-    "imageFile" : "idCardOld.DarkBorder.jpg"
+    }
   }
 }, {
   "tabName" : "OpenCV:Colorized",
-  "pos" : 1,
   "params" : {
     "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:Contrast/Brightness",
-  "pos" : 2,
   "params" : {
     "alpha" : 2.32,
     "beta" : -132
   }
 }, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 3,
   "params" : {
     "thresh" : 150.0,
     "maxVal" : 250.0,
@@ -42,7 +45,6 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 4,
   "params" : {
     "morphologicalOperation" : "MORPH_ERODE",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -74,7 +76,6 @@
   }
 }, {
   "tabName" : "OpenCV:FindContours",
-  "pos" : 5,
   "params" : {
     "mode" : "RETR_CCOMP",
     "method" : "CHAIN_APPROX_SIMPLE",

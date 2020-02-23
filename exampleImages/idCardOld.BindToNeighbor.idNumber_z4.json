@@ -1,31 +1,35 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
-    "useGray" : false,
     "useScale" : true,
+    "imageFile" : "idCardOld4.Page1.NoBorder.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 3000,
       "height" : 2380
     },
-    "useKeepAspectRatio" : true,
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "Common:ROI",
+  "params" : {
     "boundOfRoi" : {
       "left" : 1570,
       "top" : 29,
       "right" : 168,
       "bottom" : 2175
-    },
-    "imageFile" : "idCardOld.NoBorder4.jpg"
+    }
   }
 }, {
   "tabName" : "OpenCV:Colorized",
-  "pos" : 1,
   "params" : {
     "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 2,
   "params" : {
     "thresh" : 100.0,
     "maxVal" : 250.0,
@@ -35,7 +39,6 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 3,
   "params" : {
     "morphologicalOperation" : "MORPH_GRADIENT",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -67,7 +70,6 @@
   }
 }, {
   "tabName" : "OpenCV:Custom:BindToNeighborTab",
-  "pos" : 4,
   "params" : {
     "minLimitContours" : {
       "width" : 15,

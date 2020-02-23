@@ -4,7 +4,8 @@ public class InitLib {
     private InitLib() {}
 
     static {
-        nu.pattern.OpenCV.loadLocally();
+        new org.bytedeco.opencv.opencv_java();
+//        nu.pattern.OpenCV.loadLocally();
     }
 
     public static void loadOpenCV() {

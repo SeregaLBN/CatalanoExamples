@@ -1,43 +1,35 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
-    "useGray" : false,
     "useScale" : true,
+    "imageFile" : "VolodHill.jpg"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 500,
       "height" : 280
     },
-    "useKeepAspectRatio" : true,
-    "boundOfRoi" : {
-      "left" : 0,
-      "top" : 0,
-      "right" : 0,
-      "bottom" : 0
-    },
-    "imageFile" : "VolodHill.jpg"
+    "useKeepAspectRatio" : true
   }
 }, {
   "tabName" : "Catalano:BrightnessCorrection",
-  "pos" : 1,
   "params" : {
     "adjust" : 87
   }
 }, {
   "tabName" : "Catalano:ArtifactsRemoval",
-  "pos" : 2,
   "params" : {
     "windowSize" : 50
   }
 }, {
   "tabName" : "Catalano:BradleyLocalThreshold",
-  "pos" : 3,
   "params" : {
     "windowSize" : 3,
     "pixelBrightnessDiff" : 0.0
   }
 }, {
   "tabName" : "Catalano:Blur",
-  "pos" : 4,
   "params" : null
 } ]

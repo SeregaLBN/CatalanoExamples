@@ -1,25 +1,25 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
-    "useGray" : true,
     "useScale" : true,
+    "imageFile" : "passportUkr_perspctve.png"
+  }
+}, {
+  "tabName" : "Common:Resize",
+  "params" : {
     "keepToSize" : {
       "width" : 500,
       "height" : 392
     },
-    "useKeepAspectRatio" : true,
-    "boundOfRoi" : {
-      "left" : 0,
-      "top" : 0,
-      "right" : 0,
-      "bottom" : 0
-    },
-    "imageFile" : "passportUkr_perspctve.png"
+    "useKeepAspectRatio" : true
+  }
+}, {
+  "tabName" : "OpenCV:Colorized",
+  "params" : {
+    "colorsTo" : "GRAY"
   }
 }, {
   "tabName" : "OpenCV:Threshold",
-  "pos" : 1,
   "params" : {
     "thresh" : 228.94,
     "maxVal" : 281.25,
@@ -29,7 +29,6 @@
   }
 }, {
   "tabName" : "OpenCV:Canny",
-  "pos" : 2,
   "params" : {
     "threshold1" : 100.0,
     "threshold2" : 850.0,
@@ -38,7 +37,6 @@
   }
 }, {
   "tabName" : "OpenCV:MorphologyEx",
-  "pos" : 3,
   "params" : {
     "morphologicalOperation" : "MORPH_DILATE",
     "kernelSource" : "STRUCTURING_ELEMENT",
@@ -70,6 +68,5 @@
   }
 }, {
   "tabName" : "OpenCV:Custom:LeadToPerspective",
-  "pos" : 4,
   "params" : { }
 } ]

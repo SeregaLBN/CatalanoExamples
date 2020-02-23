@@ -96,6 +96,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return image;
     }
 
+    /** apply the filter of the current tab to the image of the previous tab */
     protected abstract void applyFilter();
 
 
@@ -287,7 +288,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return boxColumn;
     }
 
-    protected static Container makeEditBox(ISliderModel<?> model, String title, String borderTitle, String tip) {
+    protected Container makeEditBox(String name, ISliderModel<?> model, String title, String borderTitle, String tip) {
         java.util.List<Consumer<String>> setterTextList = new ArrayList<>(1);
         Container res = makeEditBox(
             setterTextList::add,
@@ -298,11 +299,17 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                 model.setFormatedText(newValue);
             },
             title, borderTitle, tip);
-        setterTextList.get(0).accept(model.getFormatedText());
+
+        Consumer<String> setterText = setterTextList.get(0);
+        setterText.accept(model.getFormatedText());
+        addChangeListener(name,
+                          model,
+                          v -> setterText.accept(model.getFormatedText()),
+                          null);
         return res;
     }
 
-    protected static Container makeEditBox(Consumer<Consumer<String>> setterTextExternal, Consumer<String> setterTextInternal, String labelText, String borderTitle, String tip) {
+    protected static Container makeEditBox(Consumer<Consumer<String>> getTextSetter, Consumer<String> changeTextListener, String labelText, String borderTitle, String tip) {
         JLabel labTitle = new JLabel(labelText + ": ");
         labTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         labTitle.setToolTipText(tip);
@@ -327,34 +334,32 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         box.add(txtValue);
         box.add(Box.createHorizontalGlue());
 
-        setterTextExternal.accept(txtValue::setText);
+        getTextSetter.accept(txtValue::setText);
 
-        if (setterTextInternal == null) {
+        if (changeTextListener == null) {
             txtValue.setEditable(false);
-            return box;
+        } else {
+            txtValue.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    handle();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    handle();
+                }
+
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    handle();
+                }
+
+                private void handle() {
+                    SwingUtilities.invokeLater(() -> changeTextListener.accept(txtValue.getText()));
+                }
+            });
         }
-
-        txtValue.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                handle();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                handle();
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                handle();
-            }
-
-            private void handle() {
-                SwingUtilities.invokeLater(() -> setterTextInternal.accept(txtValue.getText()));
-            }
-        });
-
         return box;
     }
 

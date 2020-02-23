@@ -60,19 +60,20 @@ jar {
 }
 
 dependencies {
-    compile 'org.slf4j:slf4j-simple:1.7.26'
-    compile 'org.openpnp:opencv:3.4.2-1'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.9.3'
-    compile 'org.apache.commons:commons-math3:3.6.1'
+    implementation 'org.slf4j:slf4j-simple:1.7.26'
+  //implementation 'org.openpnp:opencv:3.4.2-1'
+    implementation 'org.bytedeco:opencv-platform:4.1.2-1.5.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9.3'
+    implementation 'org.apache.commons:commons-math3:3.6.1'
 
   //if (project.file('./libs/Catalano.Core.jar' ).exists())
-        compile name:       'Catalano.Core'
+        implementation name:       'Catalano.Core'
   //if (project.file('./libs/Catalano.Math.jar' ).exists())
-        compile name:       'Catalano.Math'
+        implementation name:       'Catalano.Math'
   //if (project.file('./libs/Catalano.IO.jar'   ).exists())
-        compile name:       'Catalano.IO'
+        implementation name:       'Catalano.IO'
   //if (project.file('./libs/Catalano.Image.jar').exists())
-        compile name:       'Catalano.Image'
+        implementation name:       'Catalano.Image'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
     testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.5.1'
@@ -91,7 +92,7 @@ task cleanAddons(type: Delete) {
     //delete project.file('./exampleImages')
 }
 
-
+/** /
 // can run as single JAR:
 //  java -jar ./ImageFilterExamples/build/libs/ImageFilterExamples-fat-{version}.jar
 task fatJar(type: Jar) {
@@ -112,6 +113,7 @@ task fatJar(type: Jar) {
     }
     with jar
 }
+/**/
 
 def downloadByUrl(url, targetFile, recheckSize) {
     try {
@@ -203,6 +205,18 @@ task downloadCatalanoFramework(type: Copy) {
     include 'Catalano.IO.jar'
     include 'Catalano.Math.jar'
     into(project.file('./libs'))
+
+    println '...Catalano jar`s unpacked to directory: ' + project.file('./libs')
+
+    if (!project.file('./libs/Catalano.Core.jar').exists()) {
+        // WTF!
+        System.err.println('--------------------------------------------')
+        System.err.println('--')
+        System.err.println('--  Sorrryyyy!  Please call manually:')
+        System.err.println('> gradle run')
+        System.err.println('--')
+        System.err.println('--------------------------------------------')
+    }
 }
 
 // Download default example image
@@ -245,7 +259,8 @@ task downloadExampleImage() {
 
 
 
-defaultTasks 'clean', 'build'
+defaultTasks 'clean', 'build', 'run'
+
 project.tasks.clean           .dependsOn project.tasks.cleanAddons
 //project.tasks.build           .dependsOn project.tasks.fatJar
 project.tasks.compileJava     .dependsOn project.tasks.downloadCatalanoFramework

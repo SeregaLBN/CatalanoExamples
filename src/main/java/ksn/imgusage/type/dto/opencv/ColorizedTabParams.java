@@ -32,7 +32,14 @@ public class ColorizedTabParams implements ITabParams {
     /** Transform all image colors to... */
     public ECastTo colorsTo = ECastTo.GRAY;
 
+    /** Applies white balancing to the input image */
+    public boolean useWhiteBalancer;
+
+
     @Override
-    public String toString() { return "{ colorsTo=" + colorsTo + " }"; }
+    public String toString() {
+        return "{ colorsTo=" + colorsTo
+            + ", useWhiteBalancer=" + useWhiteBalancer
+            + " }"; }
 
 }
