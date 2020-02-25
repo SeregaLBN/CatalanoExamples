@@ -550,50 +550,21 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
             boxDrawContoursParams.setVisible(false);
 
         if (cntrlExteranlRectParams == null) {
-            Component cntrlMinLimit = makeSize(
-                    modelMinLimitContoursW,    // modelSizeW
-                    modelMinLimitContoursH,    // modelSizeH
-                    "MinLimitContour",         // borderTitle
-                    null,                      // tip
-                    "MinLimitContour.Width",   // tipWidth
-                    "MinLimitContour.Height"); // tipHeight
-            Component cntrlMaxLimit = makeSize(
-                    modelMaxLimitContoursW,    // modelSizeW
-                    modelMaxLimitContoursH,    // modelSizeH
-                    "MaxLimitContour",         // borderTitle
-                    null,                      // tip
-                    "MaxLimitContour.Width",   // tipWidth
-                    "MaxLimitContour.Height"); // tipHeight
+            cntrlExteranlRectParams = makeContourLimits(
+                modelMinLimitContoursW,
+                modelMinLimitContoursH,
+                modelMaxLimitContoursW,
+                modelMaxLimitContoursH,
+                "MinLimitContour", "MaxLimitContour",
+                "params.minLimitContours.width",
+                "params.minLimitContours.height",
+                "params.maxLimitContours.width",
+                "params.maxLimitContours.height");
 
-            modelMinLimitContoursW.getWrapped().addChangeListener(ev -> {
-                if (modelMinLimitContoursW.getValue() > modelMaxLimitContoursW.getValue())
-                    modelMaxLimitContoursW.setValue(modelMinLimitContoursW.getValue());
-            });
-            modelMinLimitContoursH.getWrapped().addChangeListener(ev -> {
-                if (modelMinLimitContoursH.getValue() > modelMaxLimitContoursH.getValue())
-                    modelMaxLimitContoursH.setValue(modelMinLimitContoursH.getValue());
-            });
-            modelMaxLimitContoursW.getWrapped().addChangeListener(ev -> {
-                if (modelMaxLimitContoursW.getValue() < modelMinLimitContoursW.getValue())
-                    modelMinLimitContoursW.setValue(modelMaxLimitContoursW.getValue());
-            });
-            modelMaxLimitContoursH.getWrapped().addChangeListener(ev -> {
-                if (modelMaxLimitContoursH.getValue() < modelMinLimitContoursH.getValue())
-                    modelMinLimitContoursH.setValue(modelMaxLimitContoursH.getValue());
-            });
-
-            addChangeListener("modelMinLimitContoursW", modelMinLimitContoursW , v -> params.minLimitContours.width  = v);
-            addChangeListener("modelMinLimitContoursH", modelMinLimitContoursH , v -> params.minLimitContours.height = v);
-            addChangeListener("modelMaxLimitContoursW", modelMaxLimitContoursW , v -> params.maxLimitContours.width  = v);
-            addChangeListener("modelMaxLimitContoursH", modelMaxLimitContoursH , v -> params.maxLimitContours.height = v);
-
-
-            Box box4Limits = Box.createHorizontalBox();
-            box4Limits.add(cntrlMinLimit);
-            box4Limits.add(Box.createHorizontalStrut(2));
-            box4Limits.add(cntrlMaxLimit);
-
-            cntrlExteranlRectParams = box4Limits;
+            addChangeListener("params.minLimitContours.width" , modelMinLimitContoursW, v -> params.minLimitContours.width = v);
+            addChangeListener("params.minLimitContours.height", modelMinLimitContoursH, v -> params.minLimitContours.height = v);
+            addChangeListener("params.maxLimitContours.width" , modelMaxLimitContoursW, v -> params.maxLimitContours.width = v);
+            addChangeListener("params.maxLimitContours.height", modelMaxLimitContoursH, v -> params.maxLimitContours.height = v);
         }
 
         cntrlExteranlRectParams.setVisible(true);

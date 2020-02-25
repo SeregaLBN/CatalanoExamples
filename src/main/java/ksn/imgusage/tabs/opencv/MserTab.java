@@ -5,10 +5,8 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import javax.swing.event.ChangeListener;
 
 import org.opencv.core.*;
 import org.opencv.features2d.MSER;
@@ -44,6 +42,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     private static final double MAX_MIN_MARGIN = 0.999;
     public  static final int    MIN_EDGE_BLUR_SIZE = 1;
     private static final int    MAX_EDGE_BLUR_SIZE = 300;
+    private static final int MIN_MIN_LIMIT_CONTOUR_SIZE =    0;
+    private static final int MAX_MIN_LIMIT_CONTOUR_SIZE = 1000;
+    private static final int MIN_MAX_LIMIT_CONTOUR_SIZE =    5;
+    private static final int MAX_MAX_LIMIT_CONTOUR_SIZE = 1001;
 
     private static final Scalar CONTOUR_COLOR = new Scalar(255);
     private static final Scalar GREEN         = new Scalar(0x00, 0xFF, 0x00);
@@ -86,6 +88,21 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         List<Rect> rcBoxes = bboxes.toList();
 
+        { // recheck
+            if (rcBoxes.size() != msers.size())
+                throw new RuntimeException("rcBoxes.size() != msers.size()");
+
+            for (int i=0; i< msers.size(); ++i) {
+                MatOfPoint contour = msers.get(i);
+
+                Rect rc = Imgproc.boundingRect(contour);
+                Rect rc2 = rcBoxes.get(i);
+                if (!rc.equals(rc2))
+                    throw new RuntimeException("rc != rc2");
+            }
+
+        }
+
         Mat mask = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
 
         imageMat = OpenCvHelper.to3Channel(imageMat);
@@ -119,7 +136,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
 
 
-//        imageMat = mask;
+        imageMat = mask;
     }
 
     @Override
@@ -136,6 +153,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         SliderDoubleModel modelAreaThreshold = new SliderDoubleModel(params.areaThreshold, 0, MIN_AREA_THRESHOLD, MAX_AREA_THRESHOLD);
         SliderDoubleModel modelMinMargin     = new SliderDoubleModel(params.minMargin    , 0, MIN_MIN_MARGIN    , MAX_MIN_MARGIN, 3);
         SliderIntModel    modelEdgeBlurSize  = new    SliderIntModel(params.edgeBlurSize , 0, MIN_EDGE_BLUR_SIZE, MAX_EDGE_BLUR_SIZE);
+        SliderIntModel modelMinLimitContoursW = new SliderIntModel(params.minLimitContours.width , 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
+        SliderIntModel modelMinLimitContoursH = new SliderIntModel(params.minLimitContours.height, 0, MIN_MIN_LIMIT_CONTOUR_SIZE, MAX_MIN_LIMIT_CONTOUR_SIZE);
+        SliderIntModel modelMaxLimitContoursW = new SliderIntModel(params.maxLimitContours.width , 0, MIN_MAX_LIMIT_CONTOUR_SIZE, MAX_MAX_LIMIT_CONTOUR_SIZE);
+        SliderIntModel modelMaxLimitContoursH = new SliderIntModel(params.maxLimitContours.height, 0, MIN_MAX_LIMIT_CONTOUR_SIZE, MAX_MAX_LIMIT_CONTOUR_SIZE);
 
 
         Box box4Sliders = Box.createHorizontalBox();
@@ -159,28 +180,49 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         box4Sliders2.add(Box.createHorizontalStrut(2));
         box4Sliders2.add(makeSliderVert(modelEdgeBlurSize, "Blur", "edgeBlurSize: the aperture size for edge blur"));
         box4Sliders2.add(Box.createHorizontalGlue());
-        Box box4colorImage = Box.createVerticalBox();
-        box4colorImage.setBorder(BorderFactory.createTitledBorder("For color image"));
-        box4colorImage.add(box4Sliders2);
 
+        JTabbedPane tabPaneCreate = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabPaneCreate.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
+        tabPaneCreate.addTab("Common", null, box4Sliders, null);
+        tabPaneCreate.addTab("For color image", null, box4Sliders2, null);
+
+        Box boxContourLimits = makeContourLimits(
+                modelMinLimitContoursW,
+                modelMinLimitContoursH,
+                modelMaxLimitContoursW,
+                modelMaxLimitContoursH,
+                "MinLimitContour", "MaxLimitContour",
+                "params.minLimitContours.width",
+                "params.minLimitContours.height",
+                "params.maxLimitContours.width",
+                "params.maxLimitContours.height");
+
+        JTabbedPane tabPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabPane.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
+        tabPane.addTab("Create MSER", null, tabPaneCreate, "Full consturctor for MSER detector");
+        tabPane.addTab("Filtering result of MSER", null, boxContourLimits, "Limitation of result for MSER.create");
 
         JPanel panelOptions = new JPanel();
         panelOptions.setLayout(new BorderLayout());
         panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
-        panelOptions.add(box4Sliders   , BorderLayout.CENTER);
-        panelOptions.add(box4colorImage, BorderLayout.SOUTH);
+        panelOptions.add(tabPane, BorderLayout.CENTER);
+//        panelOptions.add(box4colorImage, BorderLayout.SOUTH);
 
         box4Options.add(panelOptions);
 
-        addChangeListener("modelDelta"        , modelDelta        , v -> params.delta         = v);
-        addChangeListener("modelMinArea"      , modelMinArea      , v -> params.minArea       = v);
-        addChangeListener("modelMaxArea"      , modelMaxArea      , v -> params.maxArea       = v);
-        addChangeListener("modelMaxVariation" , modelMaxVariation , v -> params.maxVariation  = v);
-        addChangeListener("modelMinDiversity" , modelMinDiversity , v -> params.minDiversity  = v);
-        addChangeListener("modelMaxEvolution" , modelMaxEvolution , v -> params.maxEvolution  = v);
-        addChangeListener("modelAreaThreshold", modelAreaThreshold, v -> params.areaThreshold = v);
-        addChangeListener("modelMinMargin"    , modelMinMargin    , v -> params.minMargin     = v);
-      //addChangeListener("modelEdgeBlurSize" , modelEdgeBlurSize , v -> params.edgeBlurSize  = v);
+        addChangeListener("params.delta"        , modelDelta        , v -> params.delta         = v);
+        addChangeListener("params.minArea"      , modelMinArea      , v -> params.minArea       = v);
+        addChangeListener("params.maxArea"      , modelMaxArea      , v -> params.maxArea       = v);
+        addChangeListener("params.maxVariation" , modelMaxVariation , v -> params.maxVariation  = v);
+        addChangeListener("params.minDiversity" , modelMinDiversity , v -> params.minDiversity  = v);
+        addChangeListener("params.maxEvolution" , modelMaxEvolution , v -> params.maxEvolution  = v);
+        addChangeListener("params.areaThreshold", modelAreaThreshold, v -> params.areaThreshold = v);
+        addChangeListener("params.minMargin"    , modelMinMargin    , v -> params.minMargin     = v);
+        addChangeListener("params.edgeBlurSize" , modelEdgeBlurSize , v -> params.edgeBlurSize  = v);
+        addChangeListener("params.minLimitContours.width" , modelMinLimitContoursW, v -> params.minLimitContours.width = v);
+        addChangeListener("params.minLimitContours.height", modelMinLimitContoursH, v -> params.minLimitContours.height = v);
+        addChangeListener("params.maxLimitContours.width" , modelMaxLimitContoursW, v -> params.maxLimitContours.width = v);
+        addChangeListener("params.maxLimitContours.height", modelMaxLimitContoursH, v -> params.maxLimitContours.height = v);
         modelEdgeBlurSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelEdgeBlurSize: value={}", modelEdgeBlurSize.getFormatedText());
             int val = modelEdgeBlurSize.getValue();
@@ -192,7 +234,12 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 SwingUtilities.invokeLater(() -> modelEdgeBlurSize.setValue(valValid));
             }
         });
-
+        ChangeListener applyToModelMinArea = ev -> modelMinArea.setValue(modelMinLimitContoursW.getValue() * modelMinLimitContoursH.getValue());
+        ChangeListener applyToModelMaxArea = ev -> modelMaxArea.setValue(modelMaxLimitContoursW.getValue() * modelMaxLimitContoursH.getValue());
+        modelMinLimitContoursW.getWrapped().addChangeListener(applyToModelMinArea);
+        modelMinLimitContoursH.getWrapped().addChangeListener(applyToModelMinArea);
+        modelMaxLimitContoursW.getWrapped().addChangeListener(applyToModelMaxArea);
+        modelMaxLimitContoursH.getWrapped().addChangeListener(applyToModelMaxArea);
 
         return box4Options;
     }
