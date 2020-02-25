@@ -555,11 +555,9 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                 modelMinLimitContoursH,
                 modelMaxLimitContoursW,
                 modelMaxLimitContoursH,
+                null, null,
                 "MinLimitContour", "MaxLimitContour",
-                "params.minLimitContours.width",
-                "params.minLimitContours.height",
-                "params.maxLimitContours.width",
-                "params.maxLimitContours.height");
+                null, null);
 
             addChangeListener("params.minLimitContours.width" , modelMinLimitContoursW, v -> params.minLimitContours.width = v);
             addChangeListener("params.minLimitContours.height", modelMinLimitContoursH, v -> params.minLimitContours.height = v);

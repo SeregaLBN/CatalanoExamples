@@ -563,9 +563,9 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected Box makeContourLimits(
         SliderIntModel modelMinLimitContoursW, SliderIntModel modelMinLimitContoursH,
         SliderIntModel modelMaxLimitContoursW, SliderIntModel modelMaxLimitContoursH,
+        String borderTitle, String tip,
         String borderTitleMinLimitContour, String borderTitleMaxLimitContour,
-        String paramNameMinLimitContoursW, String paramNameMinLimitContoursH,
-        String paramNameMaxLimitContoursW, String paramNameMaxLimitContoursH
+        String tipMin, String tipMax
     ) {
         if (borderTitleMinLimitContour == null)
             borderTitleMinLimitContour = "MinLimitContour";
@@ -575,14 +575,14 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                 modelMinLimitContoursW,     // modelSizeW
                 modelMinLimitContoursH,     // modelSizeH
                 borderTitleMinLimitContour, // borderTitle
-                null,                       // tip
+                tipMin,                     // tip
                 borderTitleMinLimitContour + ".Width",   // tipWidth
                 borderTitleMinLimitContour + ".Height"); // tipHeight
         Component cntrlMaxLimit = makeSize(
                 modelMaxLimitContoursW,     // modelSizeW
                 modelMaxLimitContoursH,     // modelSizeH
                 borderTitleMaxLimitContour, // borderTitle
-                null,                       // tip
+                tipMax,                     // tip
                 borderTitleMaxLimitContour + ".Width",   // tipWidth
                 borderTitleMaxLimitContour + ".Height"); // tipHeight
 
@@ -607,6 +607,11 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         box4Limits.add(cntrlMinLimit);
         box4Limits.add(Box.createHorizontalStrut(2));
         box4Limits.add(cntrlMaxLimit);
+
+        if (borderTitle != null)
+            box4Limits.setBorder(BorderFactory.createTitledBorder(borderTitle));
+        if (tip != null)
+            box4Limits.setToolTipText(tip);
 
         return box4Limits;
     }

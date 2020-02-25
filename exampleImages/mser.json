@@ -1,6 +1,5 @@
 [ {
   "tabName" : "FirstTab",
-  "pos" : 0,
   "params" : {
     "useScale" : true,
     "imageFile" : "passportUkr.jpg"
@@ -17,11 +16,11 @@
 }, {
   "tabName" : "OpenCV:Colorized",
   "params" : {
-    "colorsTo" : "GRAY"
+    "colorsTo" : "GRAY",
+    "useWhiteBalancer" : false
   }
 }, {
   "tabName" : "OpenCV:AdaptiveThreshold",
-  "pos" : 1,
   "params" : {
     "maxVal" : 299.95,
     "adaptiveMethod" : "ADAPTIVE_THRESH_GAUSSIAN_C",
@@ -31,11 +30,16 @@
   }
 }, {
   "tabName" : "OpenCV:MSER",
-  "pos" : 2,
   "params" : {
     "delta" : 8,
-    "minArea" : 200,
-    "maxArea" : 500,
+    "minArea" : {
+      "width" : 3,
+      "height" : 20
+    },
+    "maxArea" : {
+      "width" : 60,
+      "height" : 20
+    },
     "maxVariation" : 0.5,
     "minDiversity" : 0.2,
     "maxEvolution" : 200,
