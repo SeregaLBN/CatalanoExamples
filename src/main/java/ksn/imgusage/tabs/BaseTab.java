@@ -546,9 +546,9 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         });
     }
 
-    protected <N extends Number> void addChangeListener(String name, ISliderModel<N> model, Consumer<N> setter, Runnable customExecutor) {
+    protected <N extends Number> void addChangeListener(String paramName, ISliderModel<N> model, Consumer<N> setter, Runnable customExecutor) {
         model.getWrapped().addChangeListener(ev -> {
-            logger.trace("{}: value={}", name, model.getFormatedText());
+            logger.trace("{}: value={}", paramName, model.getFormatedText());
             setter.accept(model.getValue());
             if (customExecutor != null)
                 customExecutor.run();
@@ -556,8 +556,59 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         });
     }
 
-    protected <N extends Number> void addChangeListener(String name, ISliderModel<N> model, Consumer<N> setter) {
-        addChangeListener(name, model, setter, null);
+    protected <N extends Number> void addChangeListener(String paramName, ISliderModel<N> model, Consumer<N> setter) {
+        addChangeListener(paramName, model, setter, null);
+    }
+
+    protected Box makeContourLimits(
+        SliderIntModel modelMinLimitContoursW, SliderIntModel modelMinLimitContoursH,
+        SliderIntModel modelMaxLimitContoursW, SliderIntModel modelMaxLimitContoursH,
+        String borderTitleMinLimitContour, String borderTitleMaxLimitContour,
+        String paramNameMinLimitContoursW, String paramNameMinLimitContoursH,
+        String paramNameMaxLimitContoursW, String paramNameMaxLimitContoursH
+    ) {
+        if (borderTitleMinLimitContour == null)
+            borderTitleMinLimitContour = "MinLimitContour";
+        if (borderTitleMaxLimitContour == null)
+            borderTitleMaxLimitContour = "MaxLimitContour";
+        Component cntrlMinLimit = makeSize(
+                modelMinLimitContoursW,     // modelSizeW
+                modelMinLimitContoursH,     // modelSizeH
+                borderTitleMinLimitContour, // borderTitle
+                null,                       // tip
+                borderTitleMinLimitContour + ".Width",   // tipWidth
+                borderTitleMinLimitContour + ".Height"); // tipHeight
+        Component cntrlMaxLimit = makeSize(
+                modelMaxLimitContoursW,     // modelSizeW
+                modelMaxLimitContoursH,     // modelSizeH
+                borderTitleMaxLimitContour, // borderTitle
+                null,                       // tip
+                borderTitleMaxLimitContour + ".Width",   // tipWidth
+                borderTitleMaxLimitContour + ".Height"); // tipHeight
+
+        modelMinLimitContoursW.getWrapped().addChangeListener(ev -> {
+            if (modelMinLimitContoursW.getValue() > modelMaxLimitContoursW.getValue())
+                modelMaxLimitContoursW.setValue(modelMinLimitContoursW.getValue());
+        });
+        modelMinLimitContoursH.getWrapped().addChangeListener(ev -> {
+            if (modelMinLimitContoursH.getValue() > modelMaxLimitContoursH.getValue())
+                modelMaxLimitContoursH.setValue(modelMinLimitContoursH.getValue());
+        });
+        modelMaxLimitContoursW.getWrapped().addChangeListener(ev -> {
+            if (modelMaxLimitContoursW.getValue() < modelMinLimitContoursW.getValue())
+                modelMinLimitContoursW.setValue(modelMaxLimitContoursW.getValue());
+        });
+        modelMaxLimitContoursH.getWrapped().addChangeListener(ev -> {
+            if (modelMaxLimitContoursH.getValue() < modelMinLimitContoursH.getValue())
+                modelMinLimitContoursH.setValue(modelMaxLimitContoursH.getValue());
+        });
+
+        Box box4Limits = Box.createHorizontalBox();
+        box4Limits.add(cntrlMinLimit);
+        box4Limits.add(Box.createHorizontalStrut(2));
+        box4Limits.add(cntrlMaxLimit);
+
+        return box4Limits;
     }
 
 }

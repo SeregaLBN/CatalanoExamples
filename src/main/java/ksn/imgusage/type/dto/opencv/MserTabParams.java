@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.MserTab;
+import ksn.imgusage.type.Size;
 
 /** Init parameters for {@link MserTab} */
 public class MserTabParams implements ITabParams {
@@ -27,10 +28,17 @@ public class MserTabParams implements ITabParams {
     /** for color image, the aperture size for edge blur */
     public int     edgeBlurSize = 5;
 
+    /** Limitation of result for {@link org.opencv.features2d.MSER#create} */
+    public Size minLimitContours = new Size(5, 5);
+
+    /** Limitation of result for {@link org.opencv.features2d.MSER#create} */
+    public Size maxLimitContours = new Size(100, 100);
+
+
     @Override
     public String toString() {
         return String.format(Locale.US,
-            "{ delta=%d, minArea=%d, maxArea=%d, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d }",
+            "{ delta=%d, minArea=%d, maxArea=%d, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d, minLimitContours=%s, maxLimitContours=%s }",
             delta,
             minArea,
             maxArea,
@@ -39,7 +47,9 @@ public class MserTabParams implements ITabParams {
             maxEvolution,
             areaThreshold,
             minMargin,
-            edgeBlurSize);
+            edgeBlurSize,
+            minLimitContours,
+            maxLimitContours);
     }
 
     public static int onlyOdd(int value, int prevValue) {
