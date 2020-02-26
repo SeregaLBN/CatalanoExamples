@@ -86,7 +86,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                 applyFilter();
                 logger.trace("getImage: ...applyFilter");
             } catch (Exception ex) {
-                logger.error("getImage: {}", ex);
+                logger.error("getImage:", ex);
                 image = ImgHelper.failedImage();
                 tabHandler.onError(ex, this, null);
             }

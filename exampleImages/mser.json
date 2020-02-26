@@ -31,22 +31,24 @@
 }, {
   "tabName" : "OpenCV:MSER",
   "params" : {
-    "delta" : 94,
+    "delta" : 1,
     "minArea" : {
       "width" : 4,
-      "height" : 3
+      "height" : 20
     },
     "maxArea" : {
-      "width" : 47,
-      "height" : 22
+      "width" : 46,
+      "height" : 40
     },
-    "maxVariation" : 59.58,
+    "maxVariation" : 0.01,
     "minDiversity" : 0.01,
     "maxEvolution" : 1,
     "areaThreshold" : 0.0,
     "minMargin" : 0.001,
     "edgeBlurSize" : 1,
-    "showMask" : true,
+    "showRegions" : true,
+    "showInner" : false,
+    "invert" : true,
     "markChars" : false,
     "markWords" : true,
     "markLines" : false

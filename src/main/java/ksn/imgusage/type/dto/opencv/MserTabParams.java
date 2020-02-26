@@ -29,10 +29,12 @@ public class MserTabParams implements ITabParams {
     public int     edgeBlurSize = 5;
 
 
-    /** Show mask */
-    public boolean showMask = true;
-    /** Hide inner contours */
-    public boolean hideInnerContours = true;
+    /** Show mask regions - MSER result */
+    public boolean showRegions = true;
+    /** Show inner contours */
+    public boolean showInner = true;
+    /** Invert regions */
+    public boolean invert;
 
     /** Show rectangle of regions (mark single char) */
     public boolean markChars;
@@ -46,7 +48,7 @@ public class MserTabParams implements ITabParams {
     public String toString() {
         return String.format(Locale.US,
             "{ delta=%d, minArea=%s, maxArea=%s, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d"
-            + ", showMask=%b, markChars=%b, markWords=%b, markLines=%b }",
+            + ", showRegions=%b, invert=%b, showInner=%b, markChars=%b, markWords=%b, markLines=%b }",
             delta,
             minArea,
             maxArea,
@@ -56,7 +58,9 @@ public class MserTabParams implements ITabParams {
             areaThreshold,
             minMargin,
             edgeBlurSize,
-            showMask,
+            showRegions,
+            invert,
+            showInner,
             markChars,
             markWords,
             markLines);

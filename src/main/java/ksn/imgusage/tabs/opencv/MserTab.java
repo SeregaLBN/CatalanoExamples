@@ -2,8 +2,8 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 
 import javax.swing.*;
 
@@ -42,9 +42,12 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     public  static final int    MIN_EDGE_BLUR_SIZE = 1;
     private static final int    MAX_EDGE_BLUR_SIZE = 300;
 
-    private static final Scalar WHITE = new Scalar(255);
-    private static final Scalar GREEN         = new Scalar(0x00, 0xFF, 0x00);
-    private static final Scalar MAGENTA       = new Scalar(0xFF, 0x00, 0xFF);
+    private static final Scalar BLACK   = new Scalar(0);
+    private static final Scalar WHITE   = new Scalar(0xFF);
+    private static final Scalar GREEN   = new Scalar(0x00, 0xFF, 0x00);
+    private static final Scalar YELLOW  = new Scalar(0x00, 0xFF, 0xFF);
+    private static final Scalar MAGENTA = new Scalar(0xFF, 0x00, 0xFF);
+    private static final Scalar AMBER   = new Scalar(0x00, 0xBF, 0xFF);
 
     private MserTabParams params;
 
@@ -77,20 +80,20 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             params.minMargin,
             params.edgeBlurSize);
 
-        List<MatOfPoint> msers = new ArrayList<>(); // resulting list of point sets
+        List<MatOfPoint> regions = new ArrayList<>(); // resulting list of point sets
         mser.detectRegions(imageMat,
-                           msers,
+                           regions,
                            new MatOfRect()); // resulting bounding boxes
 
         { // filter
             List<Integer> ignored = new ArrayList<>();
-            for (int i=0; i < msers.size(); ++i) {
-                MatOfPoint contour = msers.get(i);
+            for (int i=0; i < regions.size(); ++i) {
+                MatOfPoint contour = regions.get(i);
                 Rect rc = Imgproc.boundingRect(contour);
                 if ((rc.width  < params.minArea.width ) ||
                     (rc.height < params.minArea.height) ||
-                    (rc.width  > params.maxArea.width) ||
-                    (rc.height > params.maxArea.width))
+                    (rc.width  > params.maxArea.width ) ||
+                    (rc.height > params.maxArea.height))
                 {
                     ignored.add(i);
                 }
@@ -98,60 +101,136 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             logger.trace("Ignored contours indexes size: {}", ignored.size());
             for (int i = ignored.size() - 1; i >= 0; --i) {
                 int delIndex = ignored.get(i);
-                msers.remove(delIndex);
+                regions.remove(delIndex);
             }
         }
 
-        Mat mask = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+        List<MatOfPoint> inner = Collections.emptyList();
+        if (!params.showInner) {
+            Set<MatOfPoint> inner2 = new HashSet<>();
+            for (MatOfPoint region1 : regions) {
+                if (inner2.contains(region1))
+                    continue;
+                Rect rc1 = Imgproc.boundingRect(region1);
+                for (MatOfPoint region2 : regions) {
+                    if (region1 == region2) // by ref
+                        continue;
+                    if (inner2.contains(region2))
+                        continue;
+                    Rect rc2 = Imgproc.boundingRect(region2);
+                    if ((rc1.x > rc2.x) &&
+                        (rc1.y > rc2.y) &&
+                        (rc1.x+rc1.width  < rc2.x+rc2.width) &&
+                        (rc1.y+rc1.height < rc2.y+rc2.height))
+                    {
+                        inner2.add(region1);
+                        break;
+                    }
+                }
+            }
+            logger.trace("Inner regions count is {}", inner2.size());
+            if (!inner2.isEmpty()) {
+                inner = new ArrayList<>(inner2);
+                regions.removeAll(inner2);
+            }
+        }
+
         logger.trace("Draw mask");
-        for (MatOfPoint contour : msers) {
+        Mat maskChars = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+        for (MatOfPoint contour : regions) {
             Rect rc = Imgproc.boundingRect(contour);
-            Mat roi = new Mat(mask, rc);
+            Mat roi = new Mat(maskChars, rc);
             roi.setTo(WHITE);
         }
 
-        if (params.showMask) {
-            logger.trace("Show mask: contours.size={}", msers.size());
-            imageMat = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+        if (params.showRegions) {
+            logger.trace("Show mask: contours.size={}", regions.size());
+            imageMat = params.invert
+                    ? new Mat  (imageMat.size(), CvType.CV_8UC1, WHITE)
+                    : Mat.zeros(imageMat.size(), CvType.CV_8UC1);
             Imgproc.drawContours(
                     imageMat,        // Mat image
-                    msers,           // List<MatOfPoint> contours
+                    regions,         // List<MatOfPoint> contours
                     -1,              // int contourIdx
-                    WHITE,           // Scalar color
+                    params.invert    // Scalar color
+                        ? BLACK : WHITE,
                     Imgproc.FILLED); // int thickness
+            if (!inner.isEmpty())
+                Imgproc.drawContours(
+                        imageMat,        // Mat image
+                        inner,           // List<MatOfPoint> contours
+                        -1,              // int contourIdx
+                        params.invert    // Scalar color
+                            ? WHITE : BLACK,
+                        Imgproc.FILLED); // int thickness
         }
 
-
-        imageMat = OpenCvHelper.to3Channel(imageMat);
+        if (params.markChars || params.markWords || params.markLines)
+            imageMat = OpenCvHelper.to3Channel(imageMat);
 
         if (params.markChars) {
             logger.trace("Mark chars");
-            for (MatOfPoint contour : msers) {
+            for (MatOfPoint contour : regions) {
                 Rect rc = Imgproc.boundingRect(contour);
                 Imgproc.rectangle(imageMat, rc.br(), rc.tl(), GREEN);
             }
-        }
-
-        if (params.markWords) {
-            logger.trace("Mark words");
-            Mat morbyte = new Mat();
-            Mat kernel = new Mat(1, 50, CvType.CV_8UC1, Scalar.all(255));
-            Imgproc.morphologyEx(mask, morbyte, Imgproc.MORPH_DILATE, kernel);
-            List<MatOfPoint> contour2 = new ArrayList<>();
-            Mat hierarchy = new Mat();
-            int imgsize = imageMat.height() * imageMat.width();
-            Imgproc.findContours(morbyte, contour2, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
-    //        Scalar zeos = new Scalar(0, 0, 0);
-            for (MatOfPoint element : contour2) {
-                Rect rectan3 = Imgproc.boundingRect(element);
-                if ((rectan3.area() > 0.5 * imgsize) || (rectan3.area() < 100) || (rectan3.width / rectan3.height < 2)) {
-    //                Mat roi = new Mat(morbyte, rectan3);
-    //                roi.setTo(zeos);
-                } else {
-                    Imgproc.rectangle(imageMat, rectan3.br(), rectan3.tl(), MAGENTA);
-                }
+            for (MatOfPoint contour : inner) {
+                Rect rc = Imgproc.boundingRect(contour);
+                Imgproc.rectangle(imageMat, rc.br(), rc.tl(), YELLOW);
             }
         }
+
+        Mat maskWords = params.markLines
+                ? Mat.zeros(imageMat.size(), CvType.CV_8UC1)
+                : null;
+
+        if (params.markWords || params.markLines) {
+            logger.trace("Mark words");
+            mark(maskChars, params.maxArea.width/3, 1, rc -> {
+                if (params.markWords)
+                    Imgproc.rectangle(imageMat, rc.br(), rc.tl(), MAGENTA);
+                if (maskWords != null) {
+                    Mat roi = new Mat(maskWords, rc);
+                    roi.setTo(WHITE);
+                }
+            });
+
+//            // tmp
+//            if (params.markWords)
+//                imageMat = maskChars;
+        }
+
+        if (params.markLines) {
+            logger.trace("Mark lines");
+            mark(maskWords, params.maxArea.width/2, 2, rc -> Imgproc.rectangle(imageMat, rc.br(), rc.tl(), AMBER));
+        }
+    }
+
+    private Mat mark(Mat mask, int dilateX, int dilateY, Consumer<Rect> marker) {
+        Mat morphology = new Mat();
+        Mat kernel = new Mat(dilateY, dilateX, CvType.CV_8UC1, WHITE);
+        Imgproc.morphologyEx(mask, morphology, Imgproc.MORPH_DILATE, kernel);
+
+        List<MatOfPoint> contours = new ArrayList<>();
+//        int imgsize = imageMat.height() * imageMat.width();
+        Imgproc.findContours(
+                morphology,
+                contours,
+                new Mat(), // hierarchy,
+                Imgproc.RETR_EXTERNAL,
+                Imgproc.CHAIN_APPROX_NONE);
+//        Scalar zeos = new Scalar(0, 0, 0);
+        for (MatOfPoint element : contours) {
+            Rect rc = Imgproc.boundingRect(element);
+//            if ((rc.area() > 0.5 * imgsize) || (rc.area() < 100) || (rc.width / rc.height < 2)) {
+////                Mat roi = new Mat(morphology, rectan3);
+////                roi.setTo(zeos);
+//            } else {
+                marker.accept(rc);
+//            }
+        }
+
+        return morphology;
     }
 
     @Override
@@ -202,40 +281,82 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         tabPane.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
         tabPane.addTab("Common", null, box4Sliders, null);
         tabPane.addTab("For color image", null, box4Sliders2, null);
-        Box boxDown = Box.createVerticalBox();
-        boxDown.setBorder(BorderFactory.createTitledBorder(""));
-        boxDown.add(Box.createVerticalGlue());
-        boxDown.add(makeCheckBox(
-                () -> params.showMask,      // getter
-                v  -> params.showMask = v,  // setter
-                "Show mask",                // title
-                "params.showMask",          // paramName
+
+        Box boxRegions = Box.createHorizontalBox();
+        boxRegions.add(Box.createHorizontalStrut(7));
+        JCheckBox boxInner = makeCheckBox(
+                () -> params.showInner,     // getter
+                v  -> params.showInner = v, // setter
+                "Inner?",                   // title
+                "params.showInner",         // paramName
+                "Show inner contours",      // tip
+                null);                      // customListener
+        JCheckBox boxInvert = makeCheckBox(
+                () -> params.invert,        // getter
+                v  -> params.invert = v,    // setter
+                "Invert",                   // title
+                "params.invert",            // paramName
                 null,                       // tip
-                null));                     // customListener
-        boxDown.add(Box.createVerticalStrut(2));
-        boxDown.add(makeCheckBox(
+                null);                      // customListener
+        boxRegions.add(makeCheckBox(
+                () -> params.showRegions,       // getter
+                v  -> params.showRegions = v,   // setter
+                "Show regions",                 // title
+                "params.showRegions",           // paramName
+                null,                           // tip
+                () -> {                         // customListener
+                    boxInner .setEnabled(params.showRegions);
+                    boxInvert.setEnabled(params.showRegions);
+                }));
+        boxRegions.add(Box.createHorizontalStrut(7));
+        boxRegions.add(boxInner);
+        boxRegions.add(Box.createHorizontalStrut(7));
+        boxRegions.add(boxInvert);
+        boxRegions.add(Box.createHorizontalGlue());
+
+        Box boxChars = Box.createHorizontalBox();
+        boxChars.add(Box.createHorizontalStrut(7));
+        boxChars.add(makeCheckBox(
                 () -> params.markChars,      // getter
                 v  -> params.markChars = v,  // setter
                 "Mark chars",                // title
                 "params.markChars",          // paramName
                 null,                        // tip
                 null));                      // customListener
+        boxChars.add(Box.createHorizontalGlue());
+
+        Box boxWords = Box.createHorizontalBox();
+        boxWords.add(Box.createHorizontalStrut(7));
+        boxWords.add(makeCheckBox(
+                () -> params.markWords,      // getter
+                v  -> params.markWords = v,  // setter
+                "Mark words",                // title
+                "params.markWords",          // paramName
+                null,                        // tip
+                null));                      // customListener
+        boxWords.add(Box.createHorizontalGlue());
+
+        Box boxLines = Box.createHorizontalBox();
+        boxLines.add(Box.createHorizontalStrut(7));
+        boxLines.add(makeCheckBox(
+                () -> params.markLines,      // getter
+                v  -> params.markLines = v,  // setter
+                "Mark lines",                // title
+                "params.markLines",          // paramName
+                null,                        // tip
+                null));                      // customListener
+        boxLines.add(Box.createHorizontalGlue());
+
+        Box boxDown = Box.createVerticalBox();
+        boxDown.setBorder(BorderFactory.createTitledBorder(""));
+        boxDown.add(Box.createVerticalGlue());
+        boxDown.add(boxRegions);
         boxDown.add(Box.createVerticalStrut(2));
-        boxDown.add(makeCheckBox(
-                () -> params.markWords,     // getter
-                v  -> params.markWords = v, // setter
-                "Mark words",               // title
-                "params.markWords",         // paramName
-                null,                       // tip
-                null));                     // customListener
+        boxDown.add(boxChars);
         boxDown.add(Box.createVerticalStrut(2));
-        boxDown.add(makeCheckBox(
-                () -> params.markLines,     // getter
-                v  -> params.markLines = v, // setter
-                "Mark lines",               // title
-                "params.markLines",         // paramName
-                null,                       // tip
-                null));                     // customListener
+        boxDown.add(boxWords);
+        boxDown.add(Box.createVerticalStrut(2));
+        boxDown.add(boxLines);
         boxDown.add(Box.createVerticalGlue());
 
 
