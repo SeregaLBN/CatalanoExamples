@@ -48,6 +48,8 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
     private static final Scalar GOLD        = new Scalar(0x00, 0xD7, 0xFF);
     private static final Scalar MAGENTA     = new Scalar(0xFF, 0x00, 0xFF);
 
+    private static final Point offset = new Point();
+
     private FindContoursTabParams params;
     private Box boxDrawContoursParams;
     private Component cntrlExteranlRectParams;
@@ -109,8 +111,6 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
 
         switch (params.drawMethod) {
         case DRAW_CONTOURS:
-            final Point offset = new Point();
-
             List<Integer> ids;
             if (params.maxContourArea > 0) {
                 ids = new ArrayList<>();

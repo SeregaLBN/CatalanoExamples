@@ -103,40 +103,55 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         }
 
         Mat mask = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
-
-        imageMat = OpenCvHelper.to3Channel(imageMat);
-
+        logger.trace("Draw mask");
         for (MatOfPoint contour : msers) {
             Rect rc = Imgproc.boundingRect(contour);
             Mat roi = new Mat(mask, rc);
             roi.setTo(WHITE);
-
-            // mark single char
-            Imgproc.rectangle(imageMat, rc.br(), rc.tl(), GREEN);
         }
 
-        // mark word
-        Mat morbyte = new Mat();
-        Mat kernel = new Mat(1, 50, CvType.CV_8UC1, Scalar.all(255));
-        Imgproc.morphologyEx(mask, morbyte, Imgproc.MORPH_DILATE, kernel);
-        List<MatOfPoint> contour2 = new ArrayList<>();
-        Mat hierarchy = new Mat();
-        int imgsize = imageMat.height() * imageMat.width();
-        Imgproc.findContours(morbyte, contour2, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
-//        Scalar zeos = new Scalar(0, 0, 0);
-        for (MatOfPoint element : contour2) {
-            Rect rectan3 = Imgproc.boundingRect(element);
-            if ((rectan3.area() > 0.5 * imgsize) || (rectan3.area() < 100) || (rectan3.width / rectan3.height < 2)) {
-//                Mat roi = new Mat(morbyte, rectan3);
-//                roi.setTo(zeos);
-            } else {
-                Imgproc.rectangle(imageMat, rectan3.br(), rectan3.tl(), MAGENTA);
+        if (params.showMask) {
+            logger.trace("Show mask: contours.size={}", msers.size());
+            imageMat = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+            Imgproc.drawContours(
+                    imageMat,        // Mat image
+                    msers,           // List<MatOfPoint> contours
+                    -1,              // int contourIdx
+                    WHITE,           // Scalar color
+                    Imgproc.FILLED); // int thickness
+        }
+
+
+        imageMat = OpenCvHelper.to3Channel(imageMat);
+
+        if (params.markChars) {
+            logger.trace("Mark chars");
+            for (MatOfPoint contour : msers) {
+                Rect rc = Imgproc.boundingRect(contour);
+                Imgproc.rectangle(imageMat, rc.br(), rc.tl(), GREEN);
             }
         }
 
-
-
-        imageMat = mask;
+        if (params.markWords) {
+            logger.trace("Mark words");
+            Mat morbyte = new Mat();
+            Mat kernel = new Mat(1, 50, CvType.CV_8UC1, Scalar.all(255));
+            Imgproc.morphologyEx(mask, morbyte, Imgproc.MORPH_DILATE, kernel);
+            List<MatOfPoint> contour2 = new ArrayList<>();
+            Mat hierarchy = new Mat();
+            int imgsize = imageMat.height() * imageMat.width();
+            Imgproc.findContours(morbyte, contour2, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+    //        Scalar zeos = new Scalar(0, 0, 0);
+            for (MatOfPoint element : contour2) {
+                Rect rectan3 = Imgproc.boundingRect(element);
+                if ((rectan3.area() > 0.5 * imgsize) || (rectan3.area() < 100) || (rectan3.width / rectan3.height < 2)) {
+    //                Mat roi = new Mat(morbyte, rectan3);
+    //                roi.setTo(zeos);
+                } else {
+                    Imgproc.rectangle(imageMat, rectan3.br(), rectan3.tl(), MAGENTA);
+                }
+            }
+        }
     }
 
     @Override
@@ -187,12 +202,48 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         tabPane.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
         tabPane.addTab("Common", null, box4Sliders, null);
         tabPane.addTab("For color image", null, box4Sliders2, null);
+        Box boxDown = Box.createVerticalBox();
+        boxDown.setBorder(BorderFactory.createTitledBorder(""));
+        boxDown.add(Box.createVerticalGlue());
+        boxDown.add(makeCheckBox(
+                () -> params.showMask,      // getter
+                v  -> params.showMask = v,  // setter
+                "Show mask",                // title
+                "params.showMask",          // paramName
+                null,                       // tip
+                null));                     // customListener
+        boxDown.add(Box.createVerticalStrut(2));
+        boxDown.add(makeCheckBox(
+                () -> params.markChars,      // getter
+                v  -> params.markChars = v,  // setter
+                "Mark chars",                // title
+                "params.markChars",          // paramName
+                null,                        // tip
+                null));                      // customListener
+        boxDown.add(Box.createVerticalStrut(2));
+        boxDown.add(makeCheckBox(
+                () -> params.markWords,     // getter
+                v  -> params.markWords = v, // setter
+                "Mark words",               // title
+                "params.markWords",         // paramName
+                null,                       // tip
+                null));                     // customListener
+        boxDown.add(Box.createVerticalStrut(2));
+        boxDown.add(makeCheckBox(
+                () -> params.markLines,     // getter
+                v  -> params.markLines = v, // setter
+                "Mark lines",               // title
+                "params.markLines",         // paramName
+                null,                       // tip
+                null));                     // customListener
+        boxDown.add(Box.createVerticalGlue());
+
 
         JPanel panelOptions = new JPanel();
         panelOptions.setLayout(new BorderLayout());
         panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
         panelOptions.add(tabPane, BorderLayout.CENTER);
-//        panelOptions.add(box4colorImage, BorderLayout.SOUTH);
+        panelOptions.add(boxDown, BorderLayout.SOUTH);
 
         box4Options.add(panelOptions);
 

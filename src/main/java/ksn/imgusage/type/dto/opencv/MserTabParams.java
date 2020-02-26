@@ -29,10 +29,24 @@ public class MserTabParams implements ITabParams {
     public int     edgeBlurSize = 5;
 
 
+    /** Show mask */
+    public boolean showMask = true;
+    /** Hide inner contours */
+    public boolean hideInnerContours = true;
+
+    /** Show rectangle of regions (mark single char) */
+    public boolean markChars;
+    /** Show groups of regions as a word (mark word) */
+    public boolean markWords;
+    /** Show word groups as a line */
+    public boolean markLines;
+
+
     @Override
     public String toString() {
         return String.format(Locale.US,
-            "{ delta=%d, minArea=%s, maxArea=%s, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d }",
+            "{ delta=%d, minArea=%s, maxArea=%s, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d"
+            + ", showMask=%b, markChars=%b, markWords=%b, markLines=%b }",
             delta,
             minArea,
             maxArea,
@@ -41,7 +55,11 @@ public class MserTabParams implements ITabParams {
             maxEvolution,
             areaThreshold,
             minMargin,
-            edgeBlurSize);
+            edgeBlurSize,
+            showMask,
+            markChars,
+            markWords,
+            markLines);
     }
 
     public static int onlyOdd(int value, int prevValue) {
