@@ -1,0 +1,13 @@
+.metadata/
+.gradle/
+.settings/
+.idea/
+.project
+.classpath
+**/bin
+**/build
+**/libs
+local.properties
+*.iml
+gradlew*
+gradle-wrapper*
