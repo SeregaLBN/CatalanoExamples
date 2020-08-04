@@ -1,0 +1,19 @@
+[ {
+  "tabName" : "FirstTab",
+  "params" : {
+    "useScale" : true,
+    "imageFile" : "Lena.png"
+  }
+}, {
+  "tabName" : "OpenCV:Colorized",
+  "params" : {
+    "colorsTo" : "RGB",
+    "useWhiteBalancer" : true
+  }
+}, {
+  "tabName" : "OpenCV:CascadeClassifier",
+  "params" : {
+    "first" : "frontalface_alt",
+    "second" : "eye_tree_eyeglasses"
+  }
+} ]
