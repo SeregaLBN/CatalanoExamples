@@ -81,6 +81,8 @@ public final class MapperFilter {
                                                      BoxTab.TAB_DESCRIPTION),
             new FilterTabs(                        CannyTab.TAB_TITLE,
                                                    CannyTab.TAB_DESCRIPTION),
+            new FilterTabs(            CascadeClassifierTab.TAB_TITLE,
+                                       CascadeClassifierTab.TAB_DESCRIPTION),
             new FilterTabs(                    ColorizedTab.TAB_TITLE,
                                                ColorizedTab.TAB_DESCRIPTION),
             new FilterTabs(        ContrastAndBrightnessTab.TAB_TITLE,
@@ -145,6 +147,8 @@ public final class MapperFilter {
             return                           BoxTab.class;
         case                               CannyTab.TAB_NAME:
             return                         CannyTab.class;
+        case                   CascadeClassifierTab.TAB_NAME:
+            return             CascadeClassifierTab.class;
         case                           ColorizedTab.TAB_NAME:
             return                     ColorizedTab.class;
         case               ContrastAndBrightnessTab.TAB_NAME:
@@ -230,6 +234,8 @@ public final class MapperFilter {
             return                               BoxTabParams.class;
         case                                   CannyTab.TAB_NAME:
             return                             CannyTabParams.class;
+        case                       CascadeClassifierTab.TAB_NAME:
+            return                 CascadeClassifierTabParams.class;
         case                               ColorizedTab.TAB_NAME:
             return                         ColorizedTabParams.class;
         case                   ContrastAndBrightnessTab.TAB_NAME:
