@@ -103,7 +103,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
     private final JButton makeButtonLoadPipeline() {
         JButton btnLoad = new JButton("Load pipeline...");
-        btnLoad.setToolTipText("Load image pipeline tabs");
+        btnLoad.setToolTipText(UiHelper.KEY_COMBO_LOAD_PIPELINE.toolTip);
         btnLoad.addActionListener(ev -> tabHandler.onLoadPipeline());
         return btnLoad;
     }
@@ -117,12 +117,14 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
     private final JButton makeButtonCancel() {
         JButton btnCancel = new JButton("Cancel");
+        btnCancel.setToolTipText(UiHelper.KEY_COMBO_EXIT_APP.toolTip);
         btnCancel.addActionListener(ev -> tabHandler.onCancel());
         return btnCancel;
     }
 
     private final JButton makeButtonLoadImage() {
         JButton btnLoadImage = new JButton("Load image...");
+        btnLoadImage.setToolTipText(UiHelper.KEY_COMBO_OPEN_IMAGE.toolTip);
         btnLoadImage.addActionListener(ev -> onSelectImage());
         if (sourceImage == null)
             SwingUtilities.invokeLater(btnLoadImage::doClick);

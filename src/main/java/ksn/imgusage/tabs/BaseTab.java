@@ -140,11 +140,20 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected final JButton makeButtonAddFilter() {
         JButton btnAddFilter = new JButton("Add filter...");
         btnAddFilter.addActionListener(ev -> tabHandler.onAddNewFilter());
+        btnAddFilter.setToolTipText("<html><b>" + UiHelper.KEY_COMBO_ADD_NEW_FILTER1.toolTip + "</b>"
+                                  + "<br>"      + UiHelper.KEY_COMBO_ADD_NEW_FILTER2.toolTip
+                                  + "<br>"      + UiHelper.KEY_COMBO_ADD_NEW_FILTER3.toolTip);
         return btnAddFilter;
     }
     protected final JButton makeButtonRemoveFilter() {
         JButton btnRemoveFilter = new JButton("Remove filter");
         btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(this));
+        btnRemoveFilter.setToolTipText("<html><b>" + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.toolTip + "</b>"
+                                     + "<br>"      + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.toolTip
+                                     + "<br>"      + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.toolTip
+                                     + "<br>"      + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.toolTip
+                                     + "<br><hr>"
+                                     + "<i>PS: "   + UiHelper.KEY_COMBO_DEL_ALL_FITERS.toolTip);
         return btnRemoveFilter;
     }
     protected final JButton makeButtonSaveImage() {

@@ -3,6 +3,8 @@ package ksn.imgusage.utils;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +19,19 @@ import org.slf4j.Logger;
 
 public final class UiHelper {
     private UiHelper() {}
+
+    public static final KeyStrokeInfo KEY_COMBO_EXIT_APP            = new KeyStrokeInfo("Exit app (Esc)"                    , KeyEvent.VK_ESCAPE  , 0);
+    public static final KeyStrokeInfo KEY_COMBO_ADD_NEW_FILTER1     = new KeyStrokeInfo("Add new filter (key '+')"          , KeyEvent.VK_PLUS    , 0);
+    public static final KeyStrokeInfo KEY_COMBO_ADD_NEW_FILTER2     = new KeyStrokeInfo("Add new filter (key '=')"          , KeyEvent.VK_EQUALS  , 0);
+    public static final KeyStrokeInfo KEY_COMBO_ADD_NEW_FILTER3     = new KeyStrokeInfo("Add new filter (numpad '+')"       , KeyEvent.VK_ADD     , 0);
+    public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER1 = new KeyStrokeInfo("Delete current filter (key '-')"   , KeyEvent.VK_MINUS   , 0);
+    public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER2 = new KeyStrokeInfo("Delete current filter (numpad '-')", KeyEvent.VK_SUBTRACT, 0);
+    public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER3 = new KeyStrokeInfo("Delete current filter (Del)"       , KeyEvent.VK_DELETE  , 0);
+    public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER4 = new KeyStrokeInfo("Delete current filter (Ctrl+W)"    , KeyEvent.VK_W       , InputEvent.CTRL_DOWN_MASK);
+    public static final KeyStrokeInfo KEY_COMBO_DEL_ALL_FITERS      = new KeyStrokeInfo("Delete all filter (Ctrl+Shift+W)"  , KeyEvent.VK_W       , InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK);
+    public static final KeyStrokeInfo KEY_COMBO_LOAD_PIPELINE       = new KeyStrokeInfo("Load image pipeline tabs (key 'O')", KeyEvent.VK_L       , 0);
+    public static final KeyStrokeInfo KEY_COMBO_OPEN_IMAGE          = new KeyStrokeInfo("Open image file (Ctrl+O)"          , KeyEvent.VK_O       , InputEvent.CTRL_DOWN_MASK);
+
 
     private static File chooseFileToLoad(Component parent, File currentDir, FileFilter filter) {
         JFileChooser fileChooser = new JFileChooser();

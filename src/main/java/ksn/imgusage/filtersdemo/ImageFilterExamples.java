@@ -1,8 +1,6 @@
 package ksn.imgusage.filtersdemo;
 
 import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Path2D;
@@ -72,16 +70,17 @@ public class ImageFilterExamples {
     }
 
     private void initialize() {
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0                        , false), this::onClose); // exit by Esc
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_PLUS  , 0                        , false), this::onAddNewFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, 0                        , false), this::onAddNewFilter);
-      //UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_MINUS , 0                        , false), this::onRemoveCurrentFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0                        , false), this::onRemoveCurrentFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_W     , InputEvent.CTRL_DOWN_MASK, false), this::onRemoveCurrentFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_W     , InputEvent.SHIFT_DOWN_MASK
-                                                                                       + InputEvent.CTRL_DOWN_MASK, false), this::onRemoveAllFilters);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_L     , 0                        , false), this::onLoadPipeline);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(KeyEvent.VK_O     , InputEvent.CTRL_DOWN_MASK, false), this::onSelectImage);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_EXIT_APP           .keyCode, UiHelper.KEY_COMBO_EXIT_APP           .modifiers, false), this::onClose); // exit by Esc
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER1    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER1    .modifiers, false), this::onAddNewFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER2    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER2    .modifiers, false), this::onAddNewFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER3    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER3    .modifiers, false), this::onAddNewFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.modifiers, false), this::onRemoveCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.modifiers, false), this::onRemoveCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.modifiers, false), this::onRemoveCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.modifiers, false), this::onRemoveCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_ALL_FITERS     .keyCode, UiHelper.KEY_COMBO_DEL_ALL_FITERS     .modifiers, false), this::onRemoveAllFilters);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_LOAD_PIPELINE      .keyCode, UiHelper.KEY_COMBO_LOAD_PIPELINE      .modifiers, false), this::onLoadPipeline);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_OPEN_IMAGE         .keyCode, UiHelper.KEY_COMBO_OPEN_IMAGE         .modifiers, false), this::onSelectImage);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
