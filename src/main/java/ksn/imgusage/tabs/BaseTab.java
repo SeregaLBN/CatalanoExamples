@@ -1,6 +1,7 @@
 package ksn.imgusage.tabs;
 
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -40,7 +41,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected ITab<?> source;
     protected BufferedImage image;
     protected Runnable imagePanelRepaint;
-    private Timer timer;
+    private Timer debounceTimer;
 
     @Override
     public void setHandler(ITabHandler tabHandler) {
@@ -110,8 +111,8 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected final void invalidateAsync() {
         resetImage();
         UiHelper.debounceExecutor(
-            () -> timer,
-            t -> timer = t,
+            () -> debounceTimer,
+            t -> debounceTimer = t,
             DEBOUNCE_TIMEOUT_MS,
             () -> {
                 repaint();
@@ -148,9 +149,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected final JButton makeButtonRemoveFilter() {
         JButton btnRemoveFilter = new JButton("Remove filter");
         btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(this));
-        btnRemoveFilter.setToolTipText("<html><b>" + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.toolTip + "</b>"
-                                     + "<br>"      + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.toolTip
-                                     + "<br>"      + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.toolTip
+        btnRemoveFilter.setToolTipText("<html><b>" + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.toolTip + "</b>"
                                      + "<br>"      + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.toolTip
                                      + "<br><hr>"
                                      + "<i>PS: "   + UiHelper.KEY_COMBO_DEL_ALL_FITERS.toolTip);
@@ -623,6 +622,16 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             box4Limits.setToolTipText(tip);
 
         return box4Limits;
+    }
+
+    @Override
+    public void close() {
+        if (debounceTimer != null) {
+            debounceTimer.stop();
+            for (ActionListener al : debounceTimer.getActionListeners())
+                debounceTimer.removeActionListener(al);
+            debounceTimer = null;
+        }
     }
 
 }

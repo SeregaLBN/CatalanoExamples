@@ -1,5 +1,6 @@
 package ksn.imgusage.tabs.opencv;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.File;
 import java.nio.file.Files;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.JPanel;
 
 import org.bytedeco.javacpp.Loader;
 import org.opencv.core.*;
@@ -28,6 +30,7 @@ public class CascadeClassifierTab extends OpencvFilterTab<CascadeClassifierTabPa
 
     private static final Scalar FUCHSIA = new Scalar(0xFF, 0x00, 0xFF);
     private static final Scalar BLUE    = new Scalar(0xFF, 0x00, 0x00);
+    private static final Scalar LIME    = new Scalar(0x00, 0xFF, 0x00);
 
     /**
      *  Hardcoded resources from
@@ -121,8 +124,9 @@ public class CascadeClassifierTab extends OpencvFilterTab<CascadeClassifierTabPa
         first.detectMultiScale(imageGray, faces);
         List<Rect> listOfFaces = faces.toList();
         for (Rect face : listOfFaces) {
-            Point center = new Point(face.x + face.width / 2, face.y + face.height / 2);
-            Imgproc.ellipse(imageMat, center, new Size(face.width / 2, face.height / 2), 0, 0, 360, FUCHSIA);
+            //Point center = new Point(face.x + face.width / 2, face.y + face.height / 2);
+            //Imgproc.ellipse(imageMat, center, new Size(face.width / 2, face.height / 2), 0, 0, 360, FUCHSIA);
+            Imgproc.rectangle(imageMat, face, LIME, 3);
 
             Mat faceROI = imageGray.submat(face);
             if (second != null) {
@@ -141,150 +145,64 @@ public class CascadeClassifierTab extends OpencvFilterTab<CascadeClassifierTabPa
 
     @Override
     protected Component makeOptions() {
+        Box box1 = Box.createHorizontalBox();
+        box1.add(Box.createHorizontalStrut(5));
+        box1.add(makeComboBox(
+                              EHaarcascade.values(),
+                              () -> params.first,
+                              v  -> {
+                                  params.first = v;
+                                  first = null;
+                              },
+                              "params.first",
+                              "Haar-cascade first model",
+                              "Haar-cascade detection pretrained models"));
+        box1.add(Box.createHorizontalStrut(5));
+
+
+        EHaarcascade[] def = EHaarcascade.values();
+        EHaarcascade[] vals = new EHaarcascade[1 + def.length];
+        int i = 0;
+        vals[i++] = null;
+        for (EHaarcascade e : def) {
+            vals[i++] = e;
+        }
+
+        Box box2 = Box.createHorizontalBox();
+        box2.add(Box.createHorizontalStrut(5));
+        box2.add(makeComboBox(
+                              vals,
+                              () -> params.second,
+                              v  -> {
+                                  params.second = v;
+                                  second = null;
+                              },
+                              "params.second",
+                              "Haar-cascade second model",
+                              "Haar-cascade detection pretrained models"));
+        box2.add(Box.createHorizontalStrut(5));
+
+
         Box box = Box.createVerticalBox();
         box.setBorder(BorderFactory.createTitledBorder(TAB_TITLE + " options"));
+        box.add(Box.createVerticalStrut(5));
+        box.add(box1);
+        box.add(Box.createVerticalStrut(5));
+        box.add(box2);
+        box.add(Box.createVerticalStrut(5));
 
-        box.add(Box.createVerticalGlue());
 
-        {
-            Component cntrlMorphOper = makeComboBox(
-                         EHaarcascade.values(),
-                         () -> params.first,
-                         v  -> {
-                             params.first = v;
-                             first = null;
-                         },
-                         "params.first",
-                         "Haar-cascade first model",
-                         "Haar-cascade detection pretrained models");
-            box.add(cntrlMorphOper);
-        }
+        JPanel panelOptions = new JPanel();
+        panelOptions.setLayout(new BorderLayout());
+//        panelOptions.setBorder(BorderFactory.createTitledBorder(getTitle() + " options"));
+        panelOptions.add(box    , BorderLayout.NORTH);
 
-        box.add(Box.createVerticalGlue());
-
-        {
-            EHaarcascade[] def = EHaarcascade.values();
-            EHaarcascade[] vals = new EHaarcascade[1 + def.length];
-            int i = 0;
-            vals[i++] = null;
-            for (EHaarcascade e : def) {
-                vals[i++] = e;
-            }
-
-            Component cntrlMorphOper = makeComboBox(
-                         vals,
-                         () -> params.second,
-                         v  -> {
-                             params.second = v;
-                             second = null;
-                         },
-                         "params.second",
-                         "Haar-cascade second model",
-                         "Haar-cascade detection pretrained models");
-            box.add(cntrlMorphOper);
-        }
-
-        box.add(Box.createVerticalGlue());
-        return box;
+        return panelOptions;
     }
 
     @Override
     public CascadeClassifierTabParams getParams() {
         return params;
     }
-
-    /** /
-    public static void main(String[] args) throws IOException {
-        CodeSource src = org.bytedeco.javacpp.BooleanPointer.class.getProtectionDomain().getCodeSource();
-//        CodeSource src = CascadeClassifier.class.getProtectionDomain().getCodeSource();
-        List<String> list = new ArrayList<>();
-
-        if (src != null) {
-            URL jar = src.getLocation();
-            try (ZipInputStream zip = new ZipInputStream(jar.openStream())) {
-                ZipEntry ze = null;
-                while ((ze = zip.getNextEntry()) != null) {
-                    String entryName = ze.getName();
-//  if( entryName.startsWith("images") && entryName.endsWith(".png") ) {
-                    if (entryName.endsWith("/") || entryName.endsWith(".class"))
-                        continue;
-                    list.add(entryName);
-// }
-                }
-            }
-        }
-        System.err.println("xx");
-        list.forEach(x -> System.out.println(x));
-    }
-    /** /
-    public static void main(String[] args) throws IOException {
-//        ClassLoader classLoader = ClassLoader.getSystemClassLoader().getParent();
-//        ClassLoader classLoader = org.bytedeco.javacpp.BooleanPointer.class.getProtectionDomain().getClassLoader();
-//        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-//        ClassLoader classLoader = ClassLoader.getSystemClassLoader().getParent();
-        ClassLoader classLoader = CascadeClassifier.class.getClassLoader();
-//        ClassLoader classLoader = CascadeClassifier.class.getProtectionDomain().getClassLoader();
-        Enumeration<URL> roots = classLoader.getResources("");
-//        Enumeration<URL> roots = ClassLoader.getSystemResources("");
-        List<URL> allRoots = new ArrayList<>();
-        while (roots.hasMoreElements()) {
-            URL url = roots.nextElement();
-            allRoots.add(url);
-        }
-        URLClassLoader urlClassLoader = new URLClassLoader(allRoots.toArray(new URL[allRoots.size()]));
-        ClasspathFileListPrinter pr = new ClasspathFileListPrinter(urlClassLoader);
-        pr.print();
-    }
-    /** /
-    private static Iterator list(ClassLoader CL) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
-        Class CL_class = CL.getClass();
-        while (CL_class != java.lang.ClassLoader.class) {
-            CL_class = CL_class.getSuperclass();
-        }
-        java.lang.reflect.Field ClassLoader_classes_field = CL_class.getDeclaredField("classes");
-        ClassLoader_classes_field.setAccessible(true);
-        Vector classes = (Vector) ClassLoader_classes_field.get(CL);
-        return classes.iterator();
-    }
-
-    public static void main(String args[]) throws Exception {
-        ClassLoader myCL = Thread.currentThread().getContextClassLoader();
-        while (myCL != null) {
-            System.out.println("ClassLoader: " + myCL);
-            for (Iterator iter = list(myCL); iter.hasNext();) {
-                System.out.println("\t" + iter.next());
-            }
-            myCL = myCL.getParent();
-        }
-    }
-    /** /
-    public static class InstrumentHook {
-
-        public static void premain(String agentArgs, Instrumentation inst) {
-            if (agentArgs != null) {
-                System.getProperties().put(AGENT_ARGS_KEY, agentArgs);
-            }
-            System.getProperties().put(INSTRUMENTATION_KEY, inst);
-        }
-
-        public static Instrumentation getInstrumentation() {
-            return (Instrumentation) System.getProperties().get(INSTRUMENTATION_KEY);
-        }
-
-        // Needn't be a UUID - can be a String or any other object that implements equals().
-        private static final Object AGENT_ARGS_KEY = UUID.fromString("887b43f3-c742-4b87-978d-70d2db74e40e");
-
-        private static final Object INSTRUMENTATION_KEY = UUID.fromString("214ac54a-60a5-417e-b3b8-772e80a16667");
-
-    }
-
-    public static void main(String[] args) {
-        Instrumentation inst = InstrumentHook.getInstrumentation();
-        for (Class<?> clazz: inst.getAllLoadedClasses()) {
-            System.err.println(clazz.getName());
-        }
-    }
-
-    /**/
 
 }

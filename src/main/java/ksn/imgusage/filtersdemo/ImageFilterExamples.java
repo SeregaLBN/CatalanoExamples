@@ -74,13 +74,13 @@ public class ImageFilterExamples {
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER1    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER1    .modifiers, false), this::onAddNewFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER2    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER2    .modifiers, false), this::onAddNewFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER3    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER3    .modifiers, false), this::onAddNewFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.modifiers, false), this::onRemoveCurrentFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.modifiers, false), this::onRemoveCurrentFilter);
+      //UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.modifiers, false), this::onRemoveCurrentFilter);
+      //UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.modifiers, false), this::onRemoveCurrentFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.modifiers, false), this::onRemoveCurrentFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.modifiers, false), this::onRemoveCurrentFilter);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_ALL_FITERS     .keyCode, UiHelper.KEY_COMBO_DEL_ALL_FITERS     .modifiers, false), this::onRemoveAllFilters);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_LOAD_PIPELINE      .keyCode, UiHelper.KEY_COMBO_LOAD_PIPELINE      .modifiers, false), this::onLoadPipeline);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_OPEN_IMAGE         .keyCode, UiHelper.KEY_COMBO_OPEN_IMAGE         .modifiers, false), this::onSelectImage);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_OPEN_IMAGE_OR_VIDEO.keyCode, UiHelper.KEY_COMBO_OPEN_IMAGE_OR_VIDEO.modifiers, false), this::onSelectImageOrVideo);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -151,6 +151,7 @@ public class ImageFilterExamples {
     }
 
     private void onClose() {
+        tabs.forEach(ITab::close);
         frame.dispose();
         logger.info("Good bay!\n\n");
         tabs.forEach(tab -> logger.info("{}.params={}", tab.getClass().getName(), tab.getParams()));
@@ -212,6 +213,8 @@ public class ImageFilterExamples {
     }
 
     private void onRemoveTab(ITab<?> tab) {
+        tab.close();
+
         int pos = tabs.lastIndexOf(tab);
         assert pos >= 0;
 
@@ -342,6 +345,7 @@ public class ImageFilterExamples {
         File jsonFile = UiHelper.chooseFileToSavePipeline(frame, latestPipelineDir);
         if (jsonFile == null)
             return; // aborted
+
         jsonFile = SelectFilterDialog.checkExtension(jsonFile, "json");
 
         List<PipelineItem> pipeline = new ArrayList<>(tabs.size());
@@ -383,11 +387,12 @@ public class ImageFilterExamples {
         File jsonFile = UiHelper.chooseFileToLoadPipeline(frame, latestPipelineDir);
         if (jsonFile == null)
             return; // aborted
+
         loadPipeline(jsonFile);
     }
 
-    private void onSelectImage() {
-        getFirstTab().onSelectImage();
+    private void onSelectImageOrVideo() {
+        getFirstTab().onSelectImageOrVideo();
     }
 
     private void loadPipeline(File jsonFile) {

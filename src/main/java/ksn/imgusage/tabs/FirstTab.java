@@ -2,6 +2,7 @@ package ksn.imgusage.tabs;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -11,9 +12,16 @@ import java.util.function.Consumer;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
+import org.opencv.core.Mat;
+import org.opencv.videoio.VideoCapture;
+
 import ksn.imgusage.filtersdemo.ImageFilterExamples;
 import ksn.imgusage.type.dto.FirstTabParams;
+import ksn.imgusage.type.dto.FirstTabParams.EFileType;
+import ksn.imgusage.utils.ImgHelper;
 import ksn.imgusage.utils.UiHelper;
+import ksn.imgusage.utils.UiHelper.ChooseFileResult;
+import ksn.imgusage.utils.UiHelper.EFilterType;
 
 /** The first tab to select an image to work with. */
 public class FirstTab extends BaseTab<FirstTabParams> {
@@ -29,18 +37,24 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
 
     private BufferedImage sourceImage;
-    private File latestImageDir = DEFAULT_IMAGE.getParentFile();
+    private File latestImageDir = DEFAULT_IMAGE.getParentFile(); // Paths.get(System.getProperty("user.home"), "Downloads").toFile();
     private FirstTabParams params;
     private Consumer<String> showImageSize;
+    private VideoCapture videoCapture;
+    private Timer videoTimer;
 
     @Override
     public Component makeTab(FirstTabParams params) {
         if (params == null)
-            params = new FirstTabParams(DEFAULT_IMAGE, true);
+            params = new FirstTabParams(DEFAULT_IMAGE, EFileType.IMAGE, true);
 
         this.params = params;
 
-        readImageFile(params.imageFile);
+        if (params.fileType == EFileType.IMAGE)
+            readImageFile(params.imageFile);
+        else
+            readVideoFile(params.imageFile);
+
         return makeTab();
     }
 
@@ -72,11 +86,18 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         showImageSize.accept(image.getWidth() + "x" + image.getHeight());
     }
 
-    public void onSelectImage() {
-        logger.trace("onSelectImage");
+    public void onSelectImageOrVideo() {
+        logger.trace("onSelectImageOrVideo");
 
-        File file = UiHelper.chooseFileToLoadImage(JOptionPane.getRootFrame(), latestImageDir);
-        readImageFile(file);
+        ChooseFileResult fileRes = UiHelper.chooseFileToLoadImageOrVideo(JOptionPane.getRootFrame(), latestImageDir);
+        if (fileRes == null)
+            return;
+
+        if (fileRes.filterType == EFilterType.IMAGE)
+            readImageFile(fileRes.file);
+        else
+        if (fileRes.filterType == EFilterType.VIDEO)
+            readVideoFile(fileRes.file);
     }
 
     private void readImageFile(File imageFile) {
@@ -89,15 +110,81 @@ public class FirstTab extends BaseTab<FirstTabParams> {
                 tabHandler.onError(new Exception("File not found: " + imageFile), this, null);
                 return;
             }
+
             sourceImage = ImageIO.read(imageFile);
 
             params.imageFile = imageFile;
+            params.fileType  = EFileType.IMAGE;
             tabHandler.getFrame().setTitle(ImageFilterExamples.DEFAULT_TITLE + ": " + imageFile.getName());
             latestImageDir = imageFile.getParentFile();
 
-            invalidateAsync();
+//            invalidateAsync();
+            SwingUtilities.invokeLater(() -> {
+                invalidate();
+                tabHandler.onImageChanged(this);
+            });
+
+            if (videoCapture != null)
+                videoCapture.release();
+            if (videoTimer != null)
+                videoTimer.stop();
+
         } catch (IOException ex) {
             logger.error("Can`t read image", ex);
+            tabHandler.onError(ex, this, null);
+        }
+    }
+
+    private void readVideoFile(File videoFile) {
+        if (videoFile == null)
+            return;
+
+        if (videoCapture == null)
+            videoCapture = new VideoCapture();
+
+        if (!videoCapture.open(videoFile.getAbsolutePath()))  {
+            logger.error("Can`t read video");
+            tabHandler.onError(new Exception("Can`t read video"), this, null);
+            return;
+        }
+
+
+        Mat videoFrame = new Mat();
+        if (!videoCapture.read(videoFrame))
+            return;
+
+        sourceImage = ImgHelper.toBufferedImage(videoFrame);
+
+        params.imageFile = videoFile;
+        params.fileType  = EFileType.VIDEO;
+        tabHandler.getFrame().setTitle(ImageFilterExamples.DEFAULT_TITLE + ": " + videoFile.getName());
+        latestImageDir = videoFile.getParentFile();
+
+        SwingUtilities.invokeLater(() -> {
+            invalidate();
+            tabHandler.onImageChanged(this);
+
+            if (videoTimer == null) {
+                videoTimer = new javax.swing.Timer(10, evt -> onReadNextVideoFrame());
+                videoTimer.setRepeats(true);
+                videoTimer.start();
+            } else {
+                videoTimer.restart();
+            }
+        });
+    }
+
+    private void onReadNextVideoFrame() {
+        if (videoCapture == null)
+            return;
+
+        Mat videoFrame = new Mat();
+        if (videoCapture.read(videoFrame)) {
+            sourceImage = ImgHelper.toBufferedImage(videoFrame);
+            invalidate();
+            tabHandler.onImageChanged(this);
+        } else {
+            // TODO restart anew video?
         }
     }
 
@@ -122,10 +209,10 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         return btnCancel;
     }
 
-    private final JButton makeButtonLoadImage() {
-        JButton btnLoadImage = new JButton("Load image...");
-        btnLoadImage.setToolTipText(UiHelper.KEY_COMBO_OPEN_IMAGE.toolTip);
-        btnLoadImage.addActionListener(ev -> onSelectImage());
+    private final JButton makeButtonLoadImageOrVideo() {
+        JButton btnLoadImage = new JButton("Load image/video...");
+        btnLoadImage.setToolTipText(UiHelper.KEY_COMBO_OPEN_IMAGE_OR_VIDEO.toolTip);
+        btnLoadImage.addActionListener(ev -> onSelectImageOrVideo());
         if (sourceImage == null)
             SwingUtilities.invokeLater(btnLoadImage::doClick);
 
@@ -145,7 +232,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         Box box4Buttons = Box.createVerticalBox();
         box4Buttons.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
 
-        box4Buttons.add(makeButtonLoadImage());
+        box4Buttons.add(makeButtonLoadImageOrVideo());
         box4Buttons.add(Box.createVerticalStrut(2));
         box4Buttons.add(makeButtonUseScale());
 
@@ -190,6 +277,23 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     @Override
     public FirstTabParams getParams() {
         return params;
+    }
+
+    @Override
+    public void close() {
+        super.close();
+
+        if (videoCapture != null) {
+            videoCapture.release();
+            videoCapture = null;
+        }
+
+        if (videoTimer != null) {
+            videoTimer.stop();
+            for (ActionListener al : videoTimer.getActionListeners())
+                videoTimer.removeActionListener(al);
+            videoTimer = null;
+        }
     }
 
 }

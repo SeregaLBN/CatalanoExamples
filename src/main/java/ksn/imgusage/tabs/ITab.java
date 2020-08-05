@@ -3,7 +3,7 @@ package ksn.imgusage.tabs;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 
-public interface ITab<TTabParams extends ITabParams> {
+public interface ITab<TTabParams extends ITabParams> extends AutoCloseable {
 
     void setHandler(ITabHandler tabHandler) ;
     void setSource(ITab<?> source) ;
@@ -23,5 +23,8 @@ public interface ITab<TTabParams extends ITabParams> {
     String getGroup();
     String getName();
     String getDescription();
+
+    @Override
+    void close();
 
 }

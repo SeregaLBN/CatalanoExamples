@@ -24,65 +24,86 @@ public final class UiHelper {
     public static final KeyStrokeInfo KEY_COMBO_ADD_NEW_FILTER1     = new KeyStrokeInfo("Add new filter (key '+')"          , KeyEvent.VK_PLUS    , 0);
     public static final KeyStrokeInfo KEY_COMBO_ADD_NEW_FILTER2     = new KeyStrokeInfo("Add new filter (key '=')"          , KeyEvent.VK_EQUALS  , 0);
     public static final KeyStrokeInfo KEY_COMBO_ADD_NEW_FILTER3     = new KeyStrokeInfo("Add new filter (numpad '+')"       , KeyEvent.VK_ADD     , 0);
-    public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER1 = new KeyStrokeInfo("Delete current filter (key '-')"   , KeyEvent.VK_MINUS   , 0);
-    public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER2 = new KeyStrokeInfo("Delete current filter (numpad '-')", KeyEvent.VK_SUBTRACT, 0);
+  //public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER1 = new KeyStrokeInfo("Delete current filter (key '-')"   , KeyEvent.VK_MINUS   , 0);
+  //public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER2 = new KeyStrokeInfo("Delete current filter (numpad '-')", KeyEvent.VK_SUBTRACT, 0);
     public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER3 = new KeyStrokeInfo("Delete current filter (Del)"       , KeyEvent.VK_DELETE  , 0);
     public static final KeyStrokeInfo KEY_COMBO_DEL_CURRENT_FILTER4 = new KeyStrokeInfo("Delete current filter (Ctrl+W)"    , KeyEvent.VK_W       , InputEvent.CTRL_DOWN_MASK);
     public static final KeyStrokeInfo KEY_COMBO_DEL_ALL_FITERS      = new KeyStrokeInfo("Delete all filter (Ctrl+Shift+W)"  , KeyEvent.VK_W       , InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK);
     public static final KeyStrokeInfo KEY_COMBO_LOAD_PIPELINE       = new KeyStrokeInfo("Load image pipeline tabs (key 'O')", KeyEvent.VK_L       , 0);
-    public static final KeyStrokeInfo KEY_COMBO_OPEN_IMAGE          = new KeyStrokeInfo("Open image file (Ctrl+O)"          , KeyEvent.VK_O       , InputEvent.CTRL_DOWN_MASK);
+    public static final KeyStrokeInfo KEY_COMBO_OPEN_IMAGE_OR_VIDEO = new KeyStrokeInfo("Open image/video file (Ctrl+O)"    , KeyEvent.VK_O       , InputEvent.CTRL_DOWN_MASK);
 
 
-    private static File chooseFileToLoad(Component parent, File currentDir, FileFilter filter) {
+    private static ChooseFileResult chooseFileToLoad(Component parent, File currentDir, InternalFilter ...filters) {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.addChoosableFileFilter(filter);
+        for (FileFilter filter : filters)
+            fileChooser.addChoosableFileFilter(filter);
         fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if (currentDir != null)
             fileChooser.setCurrentDirectory(currentDir);
 
         int option = fileChooser.showOpenDialog(parent);
         if (option == JFileChooser.APPROVE_OPTION)
-            return fileChooser.getSelectedFile();
-
+            return new ChooseFileResult(fileChooser.getSelectedFile(),
+                       ((InternalFilter)fileChooser.getFileFilter()).type);
         return null;
     }
 
-    private static File chooseFileToSave(Component parent, File currentDir, FileFilter filter) {
+    private static ChooseFileResult chooseFileToSave(Component parent, File currentDir, InternalFilter filter) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.addChoosableFileFilter(filter);
         fileChooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if (currentDir != null)
             fileChooser.setCurrentDirectory(currentDir);
 
         int option = fileChooser.showSaveDialog(parent);
         if (option == JFileChooser.APPROVE_OPTION)
-            return fileChooser.getSelectedFile();
-
+            return new ChooseFileResult(fileChooser.getSelectedFile(),
+                       ((InternalFilter)fileChooser.getFileFilter()).type);
         return null;
     }
 
-    public static File chooseFileToLoadImage(Component parent, File currentDir) {
-        return chooseFileToLoad(parent, currentDir, new ImageFilter());
+    public static class ChooseFileResult {
+        public final File file;
+        public final EFilterType filterType;
+
+        public ChooseFileResult(File file, EFilterType filterType) {
+            this.file = file;
+            this.filterType = filterType;
+        }
+    }
+    public static ChooseFileResult chooseFileToLoadImageOrVideo(Component parent, File currentDir) {
+        return chooseFileToLoad(parent, currentDir, new ImageFilter(), new VideoFilter());
     }
 
     public static File chooseFileToSavePngImage(Component parent, File currentDir) {
-        return chooseFileToSave(parent, currentDir, new ImageOnlyPngFilter());
+        ChooseFileResult res = chooseFileToSave(parent, currentDir, new ImageOnlyPngFilter());
+        return res == null ? null : res.file;
     }
 
     public static File chooseFileToLoadPipeline(Component parent, File currentDir) {
-        return chooseFileToLoad(parent, currentDir, new PipelineFilter());
+        ChooseFileResult res = chooseFileToLoad(parent, currentDir, new PipelineFilter());
+        return res == null ? null : res.file;
     }
 
     public static File chooseFileToSavePipeline(Component parent, File currentDir) {
-        return chooseFileToSave(parent, currentDir, new PipelineFilter());
+        ChooseFileResult res = chooseFileToSave(parent, currentDir, new PipelineFilter());
+        return res == null ? null : res.file;
+    }
+
+    public enum EFilterType {
+        IMAGE, VIDEO, PIPELINE, ONLY_PNG
     }
 
     private static class InternalFilter extends FileFilter {
 
+        public final EFilterType type;
         private final List<String> extensions;
         private final String description;
 
-        protected InternalFilter(List<String> extensions, String description) {
+        protected InternalFilter(EFilterType type, List<String> extensions, String description) {
+            this.type = type;
             this.extensions = extensions;
             this.description = description;
         }
@@ -107,17 +128,22 @@ public final class UiHelper {
 
     private static class ImageFilter extends InternalFilter {
         public ImageFilter() {
-            super(Arrays.asList("jpeg", "jpg", "gif", "tiff", "tif", "png"), "Image Only");
+            super(EFilterType.IMAGE, Arrays.asList("jpeg", "jpg", "gif", "tiff", "tif", "png"), "Images (*.jpg, *.png, *.gif)");
+        }
+    }
+    private static class VideoFilter extends InternalFilter {
+        public VideoFilter() {
+            super(EFilterType.VIDEO, Arrays.asList("mp4"), "Video files (*.mp4)");
         }
     }
     private static class PipelineFilter extends InternalFilter {
         public PipelineFilter() {
-            super(Arrays.asList("json"),  "Pipeline filters (*.json)");
+            super(EFilterType.PIPELINE, Arrays.asList("json"),  "Pipeline filters (*.json)");
         }
     }
     private static class ImageOnlyPngFilter extends InternalFilter {
         public ImageOnlyPngFilter() {
-            super(Arrays.asList("png"), "PNG Only");
+            super(EFilterType.ONLY_PNG, Arrays.asList("png"), "PNG Only");
         }
     }
 

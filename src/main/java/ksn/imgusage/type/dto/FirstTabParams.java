@@ -12,9 +12,13 @@ import ksn.imgusage.tabs.ITabParams;
 /** Init parameters for {@link FirstTab} */
 public class FirstTabParams implements ITabParams {
 
+    public enum EFileType { IMAGE, VIDEO }
+
     /** source image */
     @JsonIgnore
     public File    imageFile;
+
+    public EFileType fileType = EFileType.IMAGE;
 
     public boolean useScale;
 
@@ -22,9 +26,11 @@ public class FirstTabParams implements ITabParams {
 
     public FirstTabParams(
         File    imageFile,
+        EFileType fileType,
         boolean useScale)
     {
         this.imageFile = imageFile;
+        this.fileType  = fileType;
         this.useScale  = useScale;
     }
 
@@ -45,8 +51,9 @@ public class FirstTabParams implements ITabParams {
     @Override
     public String toString() {
         return String.format(
-                "{imageFile='%s', useScale=%b}",
+                "{imageFile='%s', fileType=%s, useScale=%b}",
                 imageFile,
+                fileType,
                 useScale);
     }
 

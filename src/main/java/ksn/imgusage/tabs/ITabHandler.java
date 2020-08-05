@@ -16,7 +16,7 @@ public interface ITabHandler {
 
     ITab<?> getFirstTab();
 
-    /** User changed image */
+    /** User changed image - redraw all next tabs */
     void onImageChanged(ITab<?> tab);
     void onCancel();
     void onAddNewFilter();
