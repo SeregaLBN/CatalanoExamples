@@ -117,6 +117,90 @@ task fatJar(type: Jar) {
 }
 /**/
 
+def ansiColorized(
+    text,          // string: you text
+    colorText,     // string: any of [null, 'black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white']
+    colorBk,       // string: any of [null, 'black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white']
+    isBrightText,  // boolean: is high intensity? (set bright foreground color)
+    isBrightBk,    // boolean: is high intensity? (set bright background color)
+    style          // string: any of [ null         //  none
+                   //               , 'bold'        //  Bold or increased intensity     As with faint, the color change is a PC (SCO / CGA) invention
+                   //               , 'dim'         //  Faint or decreased intensity    aka Dim (with a saturated color). May be implemented as a light font weight like bold.
+                   //               , 'italic'      //  Italic                          Not widely supported. Sometimes treated as inverse or blink. 
+                   //               , 'underline'   //  Underline                       Style extensions exist for Kitty, VTE, mintty and iTerm2
+                   //               , 'slowBlink'   //  Slow Blink                      less than 150 per minute
+                   //               , 'rapidBLink'  //  Rapid Blink                     MS-DOS ANSI.SYS, 150+ per minute; not widely supported  
+                   //               , 'inverse'     //  Reverse                         Swap foreground and background colors, aka invert; inconsistent emulation
+                   //               , 'hidden'      //  Conceal                         aka Hide, not widely supported
+                   //               , 'crossout' ]  //  Crossed-out                     aka Strikethrough, characters legible but marked as if for deletion. 
+) {
+    // https://en.wikipedia.org/wiki/ANSI_escape_code
+    // https://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
+
+    def codeText
+    switch (colorText) {
+    case 'black' : codeText = isBrightText ? '90' : '30'; break
+    case 'red'   : codeText = isBrightText ? '91' : '31'; break
+    case 'green' : codeText = isBrightText ? '92' : '32'; break
+    case 'yellow': codeText = isBrightText ? '93' : '33'; break
+    case 'blue'  : codeText = isBrightText ? '94' : '34'; break
+    case 'purple': codeText = isBrightText ? '95' : '35'; break
+    case 'cyan'  : codeText = isBrightText ? '96' : '36'; break
+    case 'white' : codeText = isBrightText ? '97' : '37'; break
+    case  null   : codeText = ''; break
+    default:
+        return text // unknown color
+    }
+
+    def codeBk
+    switch (colorBk) {
+    case 'black' : codeBk = isBrightBk ? '100' : '40'; break
+    case 'red'   : codeBk = isBrightBk ? '101' : '41'; break
+    case 'green' : codeBk = isBrightBk ? '102' : '42'; break
+    case 'yellow': codeBk = isBrightBk ? '103' : '43'; break
+    case 'blue'  : codeBk = isBrightBk ? '104' : '44'; break
+    case 'purple': codeBk = isBrightBk ? '105' : '45'; break
+    case 'cyan'  : codeBk = isBrightBk ? '106' : '46'; break
+    case 'white' : codeBk = isBrightBk ? '107' : '47'; break
+    case  null   :
+    default      : codeBk = '' // unknown color
+    }
+    
+    if ((codeText != '') && (codeBk != ''))
+        codeBk = ';' + codeBk;
+
+    def addon = ''
+    switch (style) {
+    case 'bold'      : addon = ';1'; break
+    case 'dim'       : addon = ';2'; break
+    case 'italic'    : addon = ';3'; break
+    case 'underline' : addon = ';4'; break
+    case 'slowBlink' : addon = ';5'; break
+    case 'rapidBLink': addon = ';6'; break
+    case 'inverse'   : addon = ';7'; break
+    case 'hidden'    : addon = ';8'; break
+    case 'crossout'  : addon = ';9'; break
+    case  null       : addon = ''
+    }
+
+    def reset = '\u001B[0m'
+    return      '\u001B[' + codeText + codeBk + addon + 'm' + text + reset
+}
+
+//// test
+//for (def clrTxt : [null, 'black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white']) {
+//for (def clrBk  : [null, 'black', 'red', 'green', 'yellow', 'blue', 'purple', 'cyan', 'white']) {
+//    for (def isBrightText : [false, true]) {
+//    for (def isBrightBk   : [false, true]) {
+//        for (def style : [ null, 'bold', 'dim', 'italic', 'underline', 'slowBlink', 'rapidBLink', 'inverse', 'hidden', 'crossout' ]) {
+//            def thisText = 'ansiColorized(thisText, colorText=' + clrTxt + ', colorBk=' + clrBk + ', isBrightText=' + isBrightText + ', isBrightBk=' + isBrightBk + ', style=' + style + ')'
+//            println thisText + '\t\t' + ansiColorized(thisText, clrTxt, clrBk, isBrightText, isBrightBk, style)
+//        }
+//    }}
+//}}
+
+def colorizedText(colorName, text) { return ansiColorized(colorName, text, false, false, false, null) } 
+
 def downloadByUrl(url, targetFile, recheckSize) {
     try {
         if (targetFile.exists()) {
@@ -140,7 +224,8 @@ def downloadByUrl(url, targetFile, recheckSize) {
                     return true // all ok
                 }
 
-                System.err.println('...illegal file size: delete it: locatFileSize=' + targetFile.length() + '; remouteFileSize=' + size)
+                println colorizedText('red', '...illegal file size: delete it: locatFileSize=' + targetFile.length() + '; remouteFileSize=' + size)
+
                 targetFile.delete()
             } finally {
                 if (conn != null)
@@ -150,7 +235,7 @@ def downloadByUrl(url, targetFile, recheckSize) {
 
         targetFile.parentFile.mkdirs()
 
-        println 'Trying to download a file ' + url
+        println colorizedText('yellow', 'Trying to download a file ' + url)
         new java.io.BufferedInputStream(url.openStream()).withCloseable { bin ->
         new java.io.FileOutputStream(targetFile).withCloseable { fos ->
             def buffer = new byte[10240]
@@ -170,7 +255,7 @@ def downloadByUrl(url, targetFile, recheckSize) {
         }}
         return true
     } catch (Exception ex) {
-        System.err.println('Can`t download file: ' + ex)
+        println colorizedText('red', 'Can`t download file: ' + ex)
         return false
     }
 }
@@ -250,11 +335,29 @@ task downloadExampleImage() {
 
         // https://en.wikipedia.org/wiki/Ukrainian_identity_card
         // https://commons.wikimedia.org/wiki/File:Passport_of_the_Citizen_of_Ukraine_(Since_2016).jpg
-        def urkPassFile = project.file('./exampleImages/passportUkr.jpg');
         downloadByUrl(
             new java.net.URL('https://upload.wikimedia.org/wikipedia/commons/0/0f/Passport_of_the_Citizen_of_Ukraine_%28Since_2016%29.jpg'),
-            urkPassFile,
+            project.file('./exampleImages/passportUkr.jpg'),
             false)
+
+        // free stock photos
+        // https://www.pexels.com/search/family/
+        System.setProperty("http.agent", "Mozilla..."); // lifehack. Otherwise: java.io.IOException: Server returned HTTP response code: 503
+
+        // Саша Лазарев: Children Taking Groupie
+        // https://www.pexels.com/photo/children-taking-groupie-3556662/
+        downloadByUrl(
+            new java.net.URL('https://images.pexels.com/photos/3556662/pexels-photo-3556662.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260'),
+            project.file('./exampleImages/family_childrenTakingGroupie_750x1260_AlexLazarev.jpg'),
+            false)
+
+        // Julia M Cameron: Photo of Woman and Boy Smiling While Watching Through Imac
+        // https://www.pexels.com/photo/photo-of-woman-and-boy-leaning-on-wooden-table-4145353/
+        downloadByUrl(
+            new java.net.URL('https://images.pexels.com/photos/4145353/pexels-photo-4145353.jpeg?auto=compress&cs=tinysrgb&h=750&w=1260'),
+            project.file('./exampleImages/family_womanAndBoySmiling_750x1260_JuliaCameron.jpg'),
+            false)
+
     }
 }
 
