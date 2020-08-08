@@ -15,6 +15,7 @@ import javax.swing.*;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 
+import ksn.imgusage.filtersdemo.AppInfo;
 import ksn.imgusage.filtersdemo.ImageFilterExamples;
 import ksn.imgusage.type.dto.FirstTabParams;
 import ksn.imgusage.type.dto.FirstTabParams.EFileType;
@@ -26,10 +27,7 @@ import ksn.imgusage.utils.UiHelper.EFilterType;
 /** The first tab to select an image to work with. */
 public class FirstTab extends BaseTab<FirstTabParams> {
 
-    public static final File DEFAULT_IMAGE = Paths.get("exampleImages"
-                                                     //, "VolodHill.jpg"
-                                                       , "Lena.png"
-                                                      ).toAbsolutePath().toFile();
+    public static final File DEFAULT_IMAGE = Paths.get("exampleImages" , "Lena.png").toAbsolutePath().toFile();
 
     public static final String TAB_TITLE = "Original";
     public static final String TAB_NAME  = "FirstTab";
@@ -37,11 +35,25 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
 
     private BufferedImage sourceImage;
-    private File latestImageDir = DEFAULT_IMAGE.getParentFile(); // Paths.get(System.getProperty("user.home"), "Downloads").toFile();
     private FirstTabParams params;
     private Consumer<String> showImageSize;
     private VideoCapture videoCapture;
     private Timer videoTimer;
+    private Runnable savePipelineHandler;
+    private Runnable loadPipelineHandler;
+
+    static {
+        AppInfo.setLatestImageDir(DEFAULT_IMAGE.toPath().getParent());
+        AppInfo.setLatestVideoDir(Paths.get(System.getProperty("user.home"), "Downloads"));
+    }
+
+    public void setSavePipelineHandler(Runnable savePipelineHandler) {
+        this.savePipelineHandler = savePipelineHandler;
+    }
+
+    public void setLoadPipelineHandler(Runnable loadPipelineHandler) {
+        this.loadPipelineHandler = loadPipelineHandler;
+    }
 
     @Override
     public Component makeTab(FirstTabParams params) {
@@ -72,10 +84,6 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         return sourceImage;
     }
 
-    public File getLatestImageDir() {
-        return latestImageDir;
-    }
-
     public boolean isScale() {
         return params.useScale;
     }
@@ -89,7 +97,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     public void onSelectImageOrVideo() {
         logger.trace("onSelectImageOrVideo");
 
-        ChooseFileResult fileRes = UiHelper.chooseFileToLoadImageOrVideo(JOptionPane.getRootFrame(), latestImageDir);
+        ChooseFileResult fileRes = UiHelper.chooseFileToLoadImageOrVideo(JOptionPane.getRootFrame(), AppInfo.getLatestImageDir());
         if (fileRes == null)
             return;
 
@@ -115,8 +123,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
             params.imageFile = imageFile;
             params.fileType  = EFileType.IMAGE;
-            tabHandler.getFrame().setTitle(ImageFilterExamples.DEFAULT_TITLE + ": " + imageFile.getName());
-            latestImageDir = imageFile.getParentFile();
+            AppInfo.getRootFrame().setTitle(ImageFilterExamples.DEFAULT_TITLE + ": " + imageFile.getName());
+            AppInfo.setLatestImageDir(imageFile.toPath().getParent());
 
 //            invalidateAsync();
             SwingUtilities.invokeLater(() -> {
@@ -157,8 +165,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
         params.imageFile = videoFile;
         params.fileType  = EFileType.VIDEO;
-        tabHandler.getFrame().setTitle(ImageFilterExamples.DEFAULT_TITLE + ": " + videoFile.getName());
-        latestImageDir = videoFile.getParentFile();
+        AppInfo.getRootFrame().setTitle(ImageFilterExamples.DEFAULT_TITLE + ": " + videoFile.getName());
+        AppInfo.setLatestVideoDir(videoFile.toPath().getParent());
 
         SwingUtilities.invokeLater(() -> {
             invalidate();
@@ -191,14 +199,14 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private final JButton makeButtonLoadPipeline() {
         JButton btnLoad = new JButton("Load pipeline...");
         btnLoad.setToolTipText(UiHelper.KEY_COMBO_LOAD_PIPELINE.toolTip);
-        btnLoad.addActionListener(ev -> tabHandler.onLoadPipeline());
+        btnLoad.addActionListener(ev -> loadPipelineHandler.run());
         return btnLoad;
     }
 
     private final JButton makeButtonSavePipeline() {
         JButton btnSave = new JButton("Save pipeline...");
         btnSave.setToolTipText("Save current pipeline tabs for selected image");
-        btnSave.addActionListener(ev -> tabHandler.onSavePipeline());
+        btnSave.addActionListener(ev -> savePipelineHandler.run());
         return btnSave;
     }
 

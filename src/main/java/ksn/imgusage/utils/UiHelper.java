@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -33,14 +34,14 @@ public final class UiHelper {
     public static final KeyStrokeInfo KEY_COMBO_OPEN_IMAGE_OR_VIDEO = new KeyStrokeInfo("Open image/video file (Ctrl+O)"    , KeyEvent.VK_O       , InputEvent.CTRL_DOWN_MASK);
 
 
-    private static ChooseFileResult chooseFileToLoad(Component parent, File currentDir, InternalFilter ...filters) {
+    private static ChooseFileResult chooseFileToLoad(Component parent, Path currentDir, InternalFilter ...filters) {
         JFileChooser fileChooser = new JFileChooser();
         for (FileFilter filter : filters)
             fileChooser.addChoosableFileFilter(filter);
         fileChooser.setAcceptAllFileFilterUsed(false);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if (currentDir != null)
-            fileChooser.setCurrentDirectory(currentDir);
+            fileChooser.setCurrentDirectory(currentDir.toFile());
 
         int option = fileChooser.showOpenDialog(parent);
         if (option == JFileChooser.APPROVE_OPTION)
@@ -49,13 +50,13 @@ public final class UiHelper {
         return null;
     }
 
-    private static ChooseFileResult chooseFileToSave(Component parent, File currentDir, InternalFilter filter) {
+    private static ChooseFileResult chooseFileToSave(Component parent, Path currentDir, InternalFilter filter) {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.addChoosableFileFilter(filter);
         fileChooser.setAcceptAllFileFilterUsed(false);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         if (currentDir != null)
-            fileChooser.setCurrentDirectory(currentDir);
+            fileChooser.setCurrentDirectory(currentDir.toFile());
 
         int option = fileChooser.showSaveDialog(parent);
         if (option == JFileChooser.APPROVE_OPTION)
@@ -73,21 +74,21 @@ public final class UiHelper {
             this.filterType = filterType;
         }
     }
-    public static ChooseFileResult chooseFileToLoadImageOrVideo(Component parent, File currentDir) {
+    public static ChooseFileResult chooseFileToLoadImageOrVideo(Component parent, Path currentDir) {
         return chooseFileToLoad(parent, currentDir, new ImageFilter(), new VideoFilter());
     }
 
-    public static File chooseFileToSavePngImage(Component parent, File currentDir) {
+    public static File chooseFileToSavePngImage(Component parent, Path currentDir) {
         ChooseFileResult res = chooseFileToSave(parent, currentDir, new ImageOnlyPngFilter());
         return res == null ? null : res.file;
     }
 
-    public static File chooseFileToLoadPipeline(Component parent, File currentDir) {
+    public static File chooseFileToLoadPipeline(Component parent, Path currentDir) {
         ChooseFileResult res = chooseFileToLoad(parent, currentDir, new PipelineFilter());
         return res == null ? null : res.file;
     }
 
-    public static File chooseFileToSavePipeline(Component parent, File currentDir) {
+    public static File chooseFileToSavePipeline(Component parent, Path currentDir) {
         ChooseFileResult res = chooseFileToSave(parent, currentDir, new PipelineFilter());
         return res == null ? null : res.file;
     }

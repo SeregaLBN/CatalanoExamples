@@ -30,6 +30,7 @@ import ksn.imgusage.tabs.ITabHandler;
 import ksn.imgusage.tabs.ITabParams;
 import ksn.imgusage.tabs.opencv.AddWeightedTab;
 import ksn.imgusage.tabs.opencv.InitLib;
+import ksn.imgusage.tabs.opencv.PerspectiveTransformTab;
 import ksn.imgusage.type.PipelineItem;
 import ksn.imgusage.type.dto.FirstTabParams;
 import ksn.imgusage.utils.JsonHelper;
@@ -58,10 +59,10 @@ public class ImageFilterExamples {
     private List<ITab<?>> tabs = new ArrayList<>();
     private JWindow errorWindow;
     private Timer timer;
-    private File latestPipelineDir = DEFAULT_PIPELINE.getParentFile();
 
     public ImageFilterExamples() {
         frame = new JFrame(DEFAULT_TITLE);
+        AppInfo.setRootFrame(frame);
         makeLogo();
         initialize();
 
@@ -99,6 +100,8 @@ public class ImageFilterExamples {
         tabPane.addChangeListener(this::onTabChanged);
 
         FirstTab tab = new FirstTab();
+        tab.setSavePipelineHandler(this::onSavePipeline);
+        tab.setLoadPipelineHandler(this::onLoadPipeline);
         isScale = tab::isScale;
         addTab(tab, null);
 
@@ -166,17 +169,12 @@ public class ImageFilterExamples {
 
     private ITabHandler getTabHandler() {
         return new ITabHandler() {
-            @Override public JFrame getFrame()                                            { return ImageFilterExamples.this.frame; }
-            @Override public File   getCurrentDir()                                       { return ImageFilterExamples.this.getFirstTab().getLatestImageDir(); }
-            @Override public ITab<?> getFirstTab()                                        { return ImageFilterExamples.this.getFirstTab(); }
             @Override public void onImageChanged(ITab<?> tab)                             {        ImageFilterExamples.this.onImageChanged(tab); }
             @Override public void onAddNewFilter()                                        {        ImageFilterExamples.this.onAddNewFilter(); }
             @Override public void onRemoveFilter(ITab<?> tab)                             {        ImageFilterExamples.this.onRemoveTab(tab); }
             @Override public void onCancel()                                              {        ImageFilterExamples.this.onCancel(); }
             @Override public void onImgPanelDraw(JPanel imgPanel, Graphics2D g, Logger l) {        ImageFilterExamples.this.onImgPanelDraw(imgPanel, g, l); }
             @Override public void onError(Exception ex, ITab<?> tab, Component from)      {        ImageFilterExamples.this.onError(ex, tab, from); }
-            @Override public void onSavePipeline()                                        {        ImageFilterExamples.this.onSavePipeline(); }
-            @Override public void onLoadPipeline()                                        {        ImageFilterExamples.this.onLoadPipeline(); }
         };
     }
 
@@ -195,7 +193,10 @@ public class ImageFilterExamples {
             try {
                 @SuppressWarnings("unchecked")
                 Constructor<? extends ITab<TTabParams>> ctor = (Constructor<? extends ITab<TTabParams>>)tabClass.getConstructor();
-                addTab(ctor.newInstance(), params);
+                ITab<TTabParams> newTab = ctor.newInstance();
+                if (newTab instanceof PerspectiveTransformTab)
+                    ((PerspectiveTransformTab)newTab).setFirstTabSupplier(this::getFirstTab);
+                addTab(newTab, params);
             } catch (Exception ex) {
                 logger.error(ex.toString());
             }
@@ -342,7 +343,7 @@ public class ImageFilterExamples {
     }
 
     private void onSavePipeline() {
-        File jsonFile = UiHelper.chooseFileToSavePipeline(frame, latestPipelineDir);
+        File jsonFile = UiHelper.chooseFileToSavePipeline(frame, AppInfo.getLatestPipelineDir());
         if (jsonFile == null)
             return; // aborted
 
@@ -374,7 +375,7 @@ public class ImageFilterExamples {
         try (FileOutputStream fos = new FileOutputStream(jsonFile)) {
             fos.write(json.getBytes(StandardCharsets.UTF_8));
             logger.info("Pipeline saved to file {}", jsonFile);
-            latestPipelineDir = jsonFile.getParentFile();
+            AppInfo.setLatestPipelineDir(jsonFile.getParentFile().toPath());
         } catch (Exception ex) {
             logger.error("Can`t save file '{}': {}", jsonFile, ex);
             onError(new Exception("Can`t save file '" + jsonFile + "'", ex), null, frame);
@@ -384,7 +385,7 @@ public class ImageFilterExamples {
     }
 
     private void onLoadPipeline() {
-        File jsonFile = UiHelper.chooseFileToLoadPipeline(frame, latestPipelineDir);
+        File jsonFile = UiHelper.chooseFileToLoadPipeline(frame, AppInfo.getLatestPipelineDir());
         if (jsonFile == null)
             return; // aborted
 
@@ -430,7 +431,7 @@ public class ImageFilterExamples {
 
         frame.setTitle(frame.getTitle() +": pipline " + jsonFile.getName());
 
-        latestPipelineDir = jsonFile.getParentFile();
+        AppInfo.setLatestPipelineDir(jsonFile.getParentFile().toPath());
     }
 
     private FirstTab getFirstTab() {

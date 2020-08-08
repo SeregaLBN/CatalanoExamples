@@ -11,7 +11,7 @@ public interface ITab<TTabParams extends ITabParams> extends AutoCloseable {
     Component makeTab(TTabParams params);
     TTabParams getParams();
 
-    /** get filtered image (used as source for net tab) */
+    /** get filtered image (used as source for next tab) */
     BufferedImage getImage();
     /** get a filtered image, possibly with an additional rendering layer (used to draw in the current tab) */
     BufferedImage getDrawImage();

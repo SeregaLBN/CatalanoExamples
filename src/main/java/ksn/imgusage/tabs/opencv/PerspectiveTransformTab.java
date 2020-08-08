@@ -3,6 +3,7 @@ package ksn.imgusage.tabs.opencv;
 import java.awt.Component;
 import java.awt.image.BufferedImage;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -12,6 +13,7 @@ import org.opencv.imgproc.Imgproc;
 
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.model.SliderIntModel;
+import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.type.dto.opencv.PerspectiveTransformTabParams;
 import ksn.imgusage.type.opencv.CvInterpolationFlags;
 import ksn.imgusage.utils.OpenCvHelper;
@@ -29,6 +31,11 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
 
     private PerspectiveTransformTabParams params;
     private Runnable checkModelsDiapason;
+    private Supplier<ITab<?>> firstTabSupplier;
+
+    public void setFirstTabSupplier(Supplier<ITab<?>> firstTabSupplier) {
+        this.firstTabSupplier = firstTabSupplier;
+    }
 
     @Override
     public Component makeTab(PerspectiveTransformTabParams params) {
@@ -51,7 +58,7 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
         checkModelsDiapason.run();
 
         imageMat = params.applyToFirstTab
-                ? getSourceMat(tabHandler.getFirstTab())
+                ? getSourceMat(firstTabSupplier.get())
                 : imageMat;
         if (params.showRegion) {
 

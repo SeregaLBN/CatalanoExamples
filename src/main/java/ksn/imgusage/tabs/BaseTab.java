@@ -20,6 +20,7 @@ import javax.swing.event.DocumentListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ksn.imgusage.filtersdemo.AppInfo;
 import ksn.imgusage.model.ISliderModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.utils.ImgHelper;
@@ -78,7 +79,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         if (src == null)
             return null;
 
-        JFrame frame = tabHandler.getFrame();
+        JFrame frame = AppInfo.getRootFrame();
         try {
             frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -158,7 +159,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     protected final JButton makeButtonSaveImage() {
         JButton btn = new JButton("Save to png...");
         btn.addActionListener(ev -> {
-            File file = UiHelper.chooseFileToSavePngImage(btn, tabHandler.getCurrentDir());
+            File file = UiHelper.chooseFileToSavePngImage(btn, AppInfo.getLatestImageDir());
             if (file == null)
                 return; // canceled
             file = SelectFilterDialog.checkExtension(file, "png");
