@@ -31,6 +31,7 @@ public abstract class OpencvFilterTab<TTabParams extends ITabParams> extends Bas
     protected Mat imageMat;
 
     protected Mat getSourceMat() {
+        ITab<?> source = tabManager.getPrevTab(this);
         return getSourceMat(source);
     }
 

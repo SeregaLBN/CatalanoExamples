@@ -26,9 +26,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
-import ksn.imgusage.tabs.ITabHandler;
+import ksn.imgusage.tabs.ITabManager;
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.opencv.AddWeightedTab;
 import ksn.imgusage.tabs.opencv.InitLib;
 import ksn.imgusage.tabs.opencv.PerspectiveTransformTab;
 import ksn.imgusage.type.PipelineItem;
@@ -72,13 +71,13 @@ public class ImageFilterExamples {
 
     private void initialize() {
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_EXIT_APP           .keyCode, UiHelper.KEY_COMBO_EXIT_APP           .modifiers, false), this::onClose); // exit by Esc
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER1    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER1    .modifiers, false), this::onAddNewFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER2    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER2    .modifiers, false), this::onAddNewFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER3    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER3    .modifiers, false), this::onAddNewFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER1    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER1    .modifiers, false), this::onAddNewTab);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER2    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER2    .modifiers, false), this::onAddNewTab);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_ADD_NEW_FILTER3    .keyCode, UiHelper.KEY_COMBO_ADD_NEW_FILTER3    .modifiers, false), this::onAddNewTab);
       //UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER1.modifiers, false), this::onRemoveCurrentFilter);
       //UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER2.modifiers, false), this::onRemoveCurrentFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.modifiers, false), this::onRemoveCurrentFilter);
-        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.modifiers, false), this::onRemoveCurrentFilter);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.modifiers, false), this::onRemoveCurrentTab);
+        UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.keyCode, UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.modifiers, false), this::onRemoveCurrentTab);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_DEL_ALL_FITERS     .keyCode, UiHelper.KEY_COMBO_DEL_ALL_FITERS     .modifiers, false), this::onRemoveAllFilters);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_LOAD_PIPELINE      .keyCode, UiHelper.KEY_COMBO_LOAD_PIPELINE      .modifiers, false), this::onLoadPipeline);
         UiHelper.bindKey(frame.getRootPane(), KeyStroke.getKeyStroke(UiHelper.KEY_COMBO_OPEN_IMAGE_OR_VIDEO.keyCode, UiHelper.KEY_COMBO_OPEN_IMAGE_OR_VIDEO.modifiers, false), this::onSelectImageOrVideo);
@@ -109,23 +108,9 @@ public class ImageFilterExamples {
     }
 
     private <TTabParams extends ITabParams> void addTab(ITab<TTabParams> newTab, TTabParams tabParams) {
-        ITab<?> prev = null;
-        final int i = tabPane.getSelectedIndex();
-        if (i >= 0)
-            prev = tabs.get(i);
-        final int newPos = i + 1;
-        newTab.setHandler(getTabHandler());
+        final int newPos = tabPane.getSelectedIndex() + 1;
+        newTab.setManager(getTabManager());
 
-        // TODO hardcode (
-        if (newTab instanceof AddWeightedTab) {
-            if (i < 1) {
-                onError(new Exception("Can`t use AddWeighted operation: TWO previous tabs are be used!"), null, null);
-                return;
-            }
-            ((AddWeightedTab)newTab).setSource2(tabs.get(i - 1));
-        }
-
-        newTab.setSource(prev);
         tabPane.insertTab(
                 newTab.getTitle(),
                 null,
@@ -136,13 +121,6 @@ public class ImageFilterExamples {
                     + newTab.getDescription(),
                 newPos);
         tabs.add(newPos, newTab);
-
-        prev = newTab;
-        for (int j = newPos + 1; j < tabs.size(); ++j) {
-            ITab<?> curr = tabs.get(j);
-            curr.setSource(prev);
-            prev = curr;
-        }
 
         tabPane.setSelectedIndex(newPos);
         SwingUtilities.invokeLater(tabPane::requestFocus);
@@ -160,25 +138,36 @@ public class ImageFilterExamples {
         tabs.forEach(tab -> logger.info("{}.params={}", tab.getClass().getName(), tab.getParams()));
     }
 
-    private void onImageChanged(ITab<?> tab) {
-        int pos = tabs.lastIndexOf(tab);
-        assert pos > 0;
 
-        tabs.stream().skip(pos + 1).forEach(ITab::invalidate);
-    }
-
-    private ITabHandler getTabHandler() {
-        return new ITabHandler() {
-            @Override public void onImageChanged(ITab<?> tab)                             {        ImageFilterExamples.this.onImageChanged(tab); }
-            @Override public void onAddNewFilter()                                        {        ImageFilterExamples.this.onAddNewFilter(); }
-            @Override public void onRemoveFilter(ITab<?> tab)                             {        ImageFilterExamples.this.onRemoveTab(tab); }
-            @Override public void onCancel()                                              {        ImageFilterExamples.this.onCancel(); }
-            @Override public void onImgPanelDraw(JPanel imgPanel, Graphics2D g, Logger l) {        ImageFilterExamples.this.onImgPanelDraw(imgPanel, g, l); }
-            @Override public void onError(Exception ex, ITab<?> tab, Component from)      {        ImageFilterExamples.this.onError(ex, tab, from); }
+    private ITabManager getTabManager() {
+        return new ITabManager() {
+            @Override public ITab<?> getPrevTab(ITab<?> self)                                { return ImageFilterExamples.this.getPrevTab(self); }
+            @Override public ITab<?> getNextTab(ITab<?> self)                                { return ImageFilterExamples.this.getNextTab(self); }
+            @Override public void    onAddNewFilter()                                        {        ImageFilterExamples.this.onAddNewTab(); }
+            @Override public void    onRemoveFilter(ITab<?> tab)                             {        ImageFilterExamples.this.onRemoveTab(tab); }
+            @Override public void    onCancel()                                              {        ImageFilterExamples.this.onCancel(); }
+            @Override public void    onImgPanelDraw(JPanel imgPanel, Graphics2D g, Logger l) {        ImageFilterExamples.this.onImgPanelDraw(imgPanel, g, l); }
+            @Override public void    onError(Exception ex, ITab<?> tab, Component from)      {        ImageFilterExamples.this.onError(ex, tab, from); }
         };
     }
 
-    private void onAddNewFilter() {
+    private ITab<?> getPrevTab(ITab<?> self) {
+        int pos = tabs.indexOf(self);
+        if (pos < 1)
+            return null;
+        return tabs.get(pos - 1);
+    }
+
+    private ITab<?> getNextTab(ITab<?> self) {
+        int pos = tabs.indexOf(self);
+        if (pos < 0)
+            return null;
+        if (pos >= tabs.size() -1)
+            return null;
+        return tabs.get(pos + 1);
+    }
+
+    private void onAddNewTab() {
         logger.trace("onAddNewFilter");
         String filterTabFullName = new SelectFilterDialog(frame).getFilterTabFullName();
         if (filterTabFullName != null)
@@ -202,7 +191,7 @@ public class ImageFilterExamples {
             }
     }
 
-    private void onRemoveCurrentFilter() {
+    private void onRemoveCurrentTab() {
         int i = tabPane.getSelectedIndex();
         if (i > 0)
             onRemoveTab(tabs.get(i));
@@ -214,25 +203,18 @@ public class ImageFilterExamples {
     }
 
     private void onRemoveTab(ITab<?> tab) {
+        ITab<?> nextTab = getNextTab(tab);
+
         tab.close();
 
-        int pos = tabs.lastIndexOf(tab);
+        int pos = tabs.indexOf(tab);
         assert pos >= 0;
 
         tabPane.removeTabAt(pos);
         tabs.remove(tab);
-        if (pos == 0)
-            return;
 
-        for (int i = pos; i < tabs.size(); ++i) {
-            ITab<?> curr = tabs.get(i);
-            if (i == pos) {
-                ITab<?> prev = tabs.get(i-1);
-                curr.setSource(prev);
-            } else {
-                curr.invalidate();
-            }
-        }
+        if (nextTab != null)
+            nextTab.invalidate();
     }
 
     private void onImgPanelDraw(JPanel imagePanel, Graphics2D g, Logger l) {

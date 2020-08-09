@@ -116,7 +116,7 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
         imageMat = started.mat;
 
         if (started.rcOut == null)
-            tabHandler.onError(new Exception("Not found started contour"), this, null);
+            tabManager.onError(new Exception("Not found started contour"), this, null);
         else
             SwingUtilities.invokeLater(this::nextIteration);
     }
@@ -129,15 +129,14 @@ public class LeadToPerspectiveTab extends CustomTab<LeadToPerspectiveTabParams> 
             nextIterationRightTopX(+1);
         } catch (Exception ex) {
             logger.error("nextIteration: {}", ex);
-            tabHandler.onError(ex, this, null);
+            tabManager.onError(ex, this, null);
         }
     }
 
     private void applyImage(Mat mat) {
         imageMat = mat;
         image = ImgHelper.toBufferedImage(imageMat);
-        imagePanelRepaint.run();
-        tabHandler.onImageChanged(this);
+        invalidate(false);
     }
 
     private void nextIterationRightTopX(int offsetX) {

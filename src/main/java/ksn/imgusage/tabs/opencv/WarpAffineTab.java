@@ -216,7 +216,7 @@ public class WarpAffineTab extends OpencvFilterTab<WarpAffineTabParams> {
         box4Sliders.add(Box.createHorizontalGlue());
 
         Runnable reset = () -> {
-            BufferedImage img = source.getImage();
+            BufferedImage img = getSourceImage();
             modelCenterX.setValue((img==null) ? DEFAULT_WIDTH  : img.getWidth()  / 2);
             modelCenterY.setValue((img==null) ? DEFAULT_HEIGHT : img.getHeight() / 2);
             modelAngle.setValue(0.0);

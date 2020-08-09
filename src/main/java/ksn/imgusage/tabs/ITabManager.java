@@ -7,10 +7,11 @@ import javax.swing.JPanel;
 
 import org.slf4j.Logger;
 
-public interface ITabHandler {
+public interface ITabManager {
 
-    /** User changed image - redraw all next tabs */
-    void onImageChanged(ITab<?> tab);
+    ITab<?> getPrevTab(ITab<?> self);
+    ITab<?> getNextTab(ITab<?> self);
+
     void onCancel();
     void onAddNewFilter();
     void onRemoveFilter(ITab<?> tab);

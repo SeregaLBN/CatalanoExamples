@@ -31,12 +31,7 @@ public class AddWeightedTab extends OpencvFilterTab<AddWeightedTabParams> {
     public  static final int    MIN_DEPTH =   -1;
     private static final int    MAX_DEPTH =   99;
 
-    private ITab<?> src2;
     private AddWeightedTabParams params;
-
-    public void setSource2(ITab<?> src2) {
-        this.src2 = src2;
-    }
 
     @Override
     public Component makeTab(AddWeightedTabParams params) {
@@ -56,6 +51,8 @@ public class AddWeightedTab extends OpencvFilterTab<AddWeightedTabParams> {
 
     @Override
     protected void applyOpencvFilter() {
+        ITab<?> source = tabManager.getPrevTab(this);
+        ITab<?> src2 = tabManager.getPrevTab(source);
         if (src2 == null)
             throw new IllegalArgumentException("Don`t defined secondary source!");
 

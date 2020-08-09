@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 
 import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.tabs.BaseTab;
+import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
 
 public abstract class CatalanoFilterTab<TTabParams extends ITabParams> extends BaseTab<TTabParams>  {
@@ -26,6 +27,7 @@ public abstract class CatalanoFilterTab<TTabParams extends ITabParams> extends B
     }
 
     protected FastBitmap getSourceFastBitmap() {
+        ITab<?> source = tabManager.getPrevTab(this);
         if (source instanceof CatalanoFilterTab)
             return ((CatalanoFilterTab<?>)source).imageFBmp;
 

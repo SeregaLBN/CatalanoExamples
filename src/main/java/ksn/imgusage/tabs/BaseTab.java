@@ -38,31 +38,23 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
     private static final int DEBOUNCE_TIMEOUT_MS = 150;
 
-    protected ITabHandler tabHandler;
-    protected ITab<?> source;
+    protected ITabManager tabManager;
     protected BufferedImage image;
     protected Runnable imagePanelRepaint;
     private Timer debounceTimer;
 
     @Override
-    public void setHandler(ITabHandler tabHandler) {
-        this.tabHandler = tabHandler;
+    public void setManager(ITabManager tabManager) {
+        this.tabManager = tabManager;
     }
 
-    @Override
-    public final void setSource(ITab<?> newSource) {
-        if (this.source == newSource) // ref eq
-            return;
-
-        this.source = newSource;
-        invalidate();
-    }
-
+    /** get previous tab image */
     protected BufferedImage getSourceImage() {
-        if (source == null)
+        ITab<?> prevTab = tabManager.getPrevTab(this);
+        if (prevTab == null)
             return null;
 
-        return source.getImage();
+        return prevTab.getImage();
     }
 
     @Override
@@ -90,7 +82,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
             } catch (Exception ex) {
                 logger.error("getImage:", ex);
                 image = ImgHelper.failedImage();
-                tabHandler.onError(ex, this, null);
+                tabManager.onError(ex, this, null);
             }
         } finally {
             frame.setCursor(Cursor.getDefaultCursor());
@@ -104,22 +96,32 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
     @Override
     public final void invalidate() {
-        resetImage();
-        repaint();
+        invalidate(true);
     }
 
-    /** user changed parameters */
+    protected final void invalidate(boolean resetMyImage) {
+        if (resetMyImage)
+            resetImage();
+        repaint();
+
+        ITab<?> nextTab = tabManager.getNextTab(this);
+        if (nextTab != null)
+            nextTab.invalidate();
+    }
+
+    /** user changed parameters in this tab */
     protected final void invalidateAsync() {
         resetImage();
         UiHelper.debounceExecutor(
             () -> debounceTimer,
-            t -> debounceTimer = t,
+            t  -> debounceTimer = t,
             DEBOUNCE_TIMEOUT_MS,
             () -> {
-                repaint();
+                if (image != null)
+                    // already redrawed
+                    return;
 
-                //SwingUtilities.invokeLater(() -> tabHandler.onImageChanged(source, this));
-                tabHandler.onImageChanged(this);
+                invalidate();
             },
             logger);
     }
@@ -141,7 +143,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
     protected final JButton makeButtonAddFilter() {
         JButton btnAddFilter = new JButton("Add filter...");
-        btnAddFilter.addActionListener(ev -> tabHandler.onAddNewFilter());
+        btnAddFilter.addActionListener(ev -> tabManager.onAddNewFilter());
         btnAddFilter.setToolTipText("<html><b>" + UiHelper.KEY_COMBO_ADD_NEW_FILTER1.toolTip + "</b>"
                                   + "<br>"      + UiHelper.KEY_COMBO_ADD_NEW_FILTER2.toolTip
                                   + "<br>"      + UiHelper.KEY_COMBO_ADD_NEW_FILTER3.toolTip);
@@ -149,7 +151,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     }
     protected final JButton makeButtonRemoveFilter() {
         JButton btnRemoveFilter = new JButton("Remove filter");
-        btnRemoveFilter.addActionListener(ev -> tabHandler.onRemoveFilter(this));
+        btnRemoveFilter.addActionListener(ev -> tabManager.onRemoveFilter(this));
         btnRemoveFilter.setToolTipText("<html><b>" + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER3.toolTip + "</b>"
                                      + "<br>"      + UiHelper.KEY_COMBO_DEL_CURRENT_FILTER4.toolTip
                                      + "<br><hr>"
@@ -171,7 +173,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                     logger.warn("Can`t save image to PNG file {}", file);
             } catch (Exception ex) {
                 logger.error("Can`t save image to PNG file: {}", ex);
-                tabHandler.onError(new Exception("Can`t save image to PNG file", ex), this, btn);
+                tabManager.onError(new Exception("Can`t save image to PNG file", ex), this, btn);
             }
         });
         return btn;
@@ -195,7 +197,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
     }
 
     protected final Component makeTab() {
-        JPanel imagePanel = buildImagePanel(tabHandler);
+        JPanel imagePanel = buildImagePanel(tabManager);
         JPanel leftPanel = new JPanel();
         { // fill leftPanel
             leftPanel.setLayout(new BorderLayout());
@@ -220,7 +222,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         return panel;
     }
 
-    private JPanel buildImagePanel(ITabHandler tabHandler) {
+    private JPanel buildImagePanel(ITabManager tabHandler) {
         JPanel[] tmp = { null };
         JPanel imagePanel = new JPanel() {
             private static final long serialVersionUID = 1L;

@@ -5,8 +5,7 @@ import java.awt.image.BufferedImage;
 
 public interface ITab<TTabParams extends ITabParams> extends AutoCloseable {
 
-    void setHandler(ITabHandler tabHandler) ;
-    void setSource(ITab<?> source) ;
+    void setManager(ITabManager tabHandler) ;
 
     Component makeTab(TTabParams params);
     TTabParams getParams();
@@ -16,7 +15,7 @@ public interface ITab<TTabParams extends ITabParams> extends AutoCloseable {
     /** get a filtered image, possibly with an additional rendering layer (used to draw in the current tab) */
     BufferedImage getDrawImage();
 
-    /** Mark the current image to be redrawn (the previous {@link ITab#getImage()} has changed} */
+    /** Mark the current image to be redrawn */
     void invalidate();
 
     String getTitle();

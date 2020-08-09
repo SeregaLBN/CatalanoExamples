@@ -116,8 +116,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
     private void applyImage(Mat mat) {
         imageMat = mat;
         image = ImgHelper.toBufferedImage(imageMat);
-        imagePanelRepaint.run();
-        tabHandler.onImageChanged(this);
+        invalidate(false);
     }
 
     private void nextIteration(Mat matStarted, double angle) {
@@ -127,7 +126,7 @@ public class LeadToAxisTab extends CustomTab<LeadToAxisTabParams> {
             nextIteration1(matStarted, angle);
         } catch (Exception ex) {
             logger.error("nextIteration: {}", ex);
-            tabHandler.onError(ex, this, null);
+            tabManager.onError(ex, this, null);
         }
     }
     private void nextIteration1(Mat matStarted, double angle) {

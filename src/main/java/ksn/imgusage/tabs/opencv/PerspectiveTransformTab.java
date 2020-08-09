@@ -121,7 +121,7 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
         SliderIntModel modelSizeH;
 
         {
-            BufferedImage img = source.getImage();
+            BufferedImage img = getSourceImage();
             int w = (img==null) ? DEFAULT_WIDTH  : img.getWidth();
             int h = (img==null) ? DEFAULT_HEIGHT : img.getHeight();
 
@@ -147,7 +147,7 @@ public class PerspectiveTransformTab extends OpencvFilterTab<PerspectiveTransfor
         }
 
         checkModelsDiapason = () -> {
-            BufferedImage img = source.getImage();
+            BufferedImage img = getSourceImage();
             int w = (img==null) ? DEFAULT_WIDTH  : img.getWidth();
             int h = (img==null) ? DEFAULT_HEIGHT : img.getHeight();
             int dx = w / 10;

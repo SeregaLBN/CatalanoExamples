@@ -115,7 +115,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         try {
             if (!imageFile.exists()) {
                 logger.warn("File not found: {}", imageFile);
-                tabHandler.onError(new Exception("File not found: " + imageFile), this, null);
+                tabManager.onError(new Exception("File not found: " + imageFile), this, null);
                 return;
             }
 
@@ -127,10 +127,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             AppInfo.setLatestImageDir(imageFile.toPath().getParent());
 
 //            invalidateAsync();
-            SwingUtilities.invokeLater(() -> {
-                invalidate();
-                tabHandler.onImageChanged(this);
-            });
+            SwingUtilities.invokeLater(this::invalidate);
 
             if (videoCapture != null)
                 videoCapture.release();
@@ -139,7 +136,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
         } catch (IOException ex) {
             logger.error("Can`t read image", ex);
-            tabHandler.onError(ex, this, null);
+            tabManager.onError(ex, this, null);
         }
     }
 
@@ -152,7 +149,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
         if (!videoCapture.open(videoFile.getAbsolutePath()))  {
             logger.error("Can`t read video");
-            tabHandler.onError(new Exception("Can`t read video"), this, null);
+            tabManager.onError(new Exception("Can`t read video"), this, null);
             return;
         }
 
@@ -170,7 +167,6 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
         SwingUtilities.invokeLater(() -> {
             invalidate();
-            tabHandler.onImageChanged(this);
 
             if (videoTimer == null) {
                 videoTimer = new javax.swing.Timer(10, evt -> onReadNextVideoFrame());
@@ -190,7 +186,6 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         if (videoCapture.read(videoFrame)) {
             sourceImage = ImgHelper.toBufferedImage(videoFrame);
             invalidate();
-            tabHandler.onImageChanged(this);
         } else {
             // TODO restart anew video?
         }
@@ -213,7 +208,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     private final JButton makeButtonCancel() {
         JButton btnCancel = new JButton("Cancel");
         btnCancel.setToolTipText(UiHelper.KEY_COMBO_EXIT_APP.toolTip);
-        btnCancel.addActionListener(ev -> tabHandler.onCancel());
+        btnCancel.addActionListener(ev -> tabManager.onCancel());
         return btnCancel;
     }
 
