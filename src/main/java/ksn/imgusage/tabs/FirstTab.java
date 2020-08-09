@@ -179,6 +179,8 @@ public class FirstTab extends BaseTab<FirstTabParams> {
     }
 
     private void onReadNextVideoFrame() {
+        if (!videoTimer.isRunning())
+            return;
         if (videoCapture == null)
             return;
 
@@ -187,7 +189,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
             sourceImage = ImgHelper.toBufferedImage(videoFrame);
             invalidate();
         } else {
-            // TODO restart anew video?
+            readVideoFile(params.imageFile); // anew restart video
         }
     }
 
