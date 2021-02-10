@@ -98,13 +98,17 @@ public class ImageFilterExamples {
         tabPane.setBorder(BorderFactory.createEmptyBorder(8,8,2,8));
         tabPane.addChangeListener(this::onTabChanged);
 
-        FirstTab tab = new FirstTab();
+        addTab(new FirstTab(), null);
+        initFirstTab();
+
+        frame.getContentPane().add(tabPane, BorderLayout.CENTER);
+    }
+
+    private void initFirstTab() {
+        FirstTab tab = getFirstTab();
         tab.setSavePipelineHandler(this::onSavePipeline);
         tab.setLoadPipelineHandler(this::onLoadPipeline);
         isScale = tab::isScale;
-        addTab(tab, null);
-
-        frame.getContentPane().add(tabPane, BorderLayout.CENTER);
     }
 
     private <TTabParams extends ITabParams> void addTab(ITab<TTabParams> newTab, TTabParams tabParams) {
@@ -409,7 +413,7 @@ public class ImageFilterExamples {
         for (PipelineItem item : pipeline)
             addTabByFilterFullName(item.tabName, item.params);
 
-        isScale = getFirstTab()::isScale;
+        initFirstTab();
 
         frame.setTitle(frame.getTitle() +": pipline " + jsonFile.getName());
 
