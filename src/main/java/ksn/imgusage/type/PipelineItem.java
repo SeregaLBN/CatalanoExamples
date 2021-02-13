@@ -1,20 +1,19 @@
 package ksn.imgusage.type;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTypeDeserializer;
 import ksn.imgusage.tabs.ITabParams;
 
-@JsonDeserialize(using = PipelineItemDeserializer.class)
+@JsonbTypeDeserializer(PipelineItemDeserializer.class)
 public class PipelineItem {
 
     public static final String KEY_TAB_NAME = "tabName";
     public static final String KEY_PARAMS   = "params";
 
-    @JsonProperty(KEY_TAB_NAME)
+    @JsonbProperty(KEY_TAB_NAME)
     public String tabName;
 
-    @JsonProperty(KEY_PARAMS)
+    @JsonbProperty(KEY_PARAMS)
     public ITabParams params;
 
 }

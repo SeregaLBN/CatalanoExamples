@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 
 import javax.imageio.ImageIO;
@@ -27,7 +27,7 @@ import ksn.imgusage.utils.UiHelper.EFilterType;
 /** The first tab to select an image to work with. */
 public class FirstTab extends BaseTab<FirstTabParams> {
 
-    public static final File DEFAULT_IMAGE = Paths.get("exampleImages" , "Lena.png").toAbsolutePath().toFile();
+    public static final File DEFAULT_IMAGE = Path.of("exampleImages" , "Lena.png").toAbsolutePath().toFile();
 
     public static final String TAB_TITLE = "Original";
     public static final String TAB_NAME  = "FirstTab";
@@ -44,7 +44,7 @@ public class FirstTab extends BaseTab<FirstTabParams> {
 
     static {
         AppInfo.setLatestImageDir(DEFAULT_IMAGE.toPath().getParent());
-        AppInfo.setLatestVideoDir(Paths.get(System.getProperty("user.home"), "Downloads"));
+        AppInfo.setLatestVideoDir(Path.of(System.getProperty("user.home"), "Downloads"));
     }
 
     public void setSavePipelineHandler(Runnable savePipelineHandler) {

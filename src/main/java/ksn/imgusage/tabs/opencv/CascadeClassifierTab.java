@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -28,7 +27,7 @@ public class CascadeClassifierTab extends OpencvFilterTab<CascadeClassifierTabPa
     public static final String TAB_NAME  = TAB_PREFIX + TAB_TITLE;
     public static final String TAB_DESCRIPTION = "Object Detection using Haar feature-based cascade classifiers";
 
-    private static final Scalar FUCHSIA = new Scalar(0xFF, 0x00, 0xFF);
+  //private static final Scalar FUCHSIA = new Scalar(0xFF, 0x00, 0xFF);
     private static final Scalar BLUE    = new Scalar(0xFF, 0x00, 0x00);
     private static final Scalar LIME    = new Scalar(0x00, 0xFF, 0x00);
 
@@ -64,7 +63,7 @@ public class CascadeClassifierTab extends OpencvFilterTab<CascadeClassifierTabPa
     static {
         Path tmpDir;
         try {
-            tmpDir = Paths.get(System.getProperty("java.io.tmpdir"), "ImageFilterExamples", "CascadeClassifier");
+            tmpDir = Path.of(System.getProperty("java.io.tmpdir"), "ImageFilterExamples", "CascadeClassifier");
             Files.createDirectories(tmpDir);
         } catch (Exception ex) {
             throw new RuntimeException("Can not create temporaly directory", ex);

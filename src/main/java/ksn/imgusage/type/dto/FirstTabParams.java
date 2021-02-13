@@ -1,11 +1,10 @@
 package ksn.imgusage.type.dto;
 
 import java.io.File;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.json.bind.annotation.JsonbTransient;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITabParams;
 
@@ -15,8 +14,8 @@ public class FirstTabParams implements ITabParams {
     public enum EFileType { IMAGE, VIDEO }
 
     /** source image */
-    @JsonIgnore
-    public File    imageFile;
+    @JsonbTransient
+    public File imageFile;
 
     public EFileType fileType = EFileType.IMAGE;
 
@@ -34,18 +33,18 @@ public class FirstTabParams implements ITabParams {
         this.useScale  = useScale;
     }
 
-    @JsonProperty("imageFile")
+    @JsonbProperty("imageFile")
     public String getImagePath() {
         if (imageFile == null)
             return null;
         return imageFile.getPath();
     }
-    @JsonProperty("imageFile")
+    @JsonbProperty("imageFile")
     public void setImagePath(String imagePath) {
         if (imagePath == null)
             this.imageFile = null;
         else
-            this.imageFile = Paths.get(imagePath).toFile();
+            this.imageFile = Path.of(imagePath).toFile();
     }
 
     @Override

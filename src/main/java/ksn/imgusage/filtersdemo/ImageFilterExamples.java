@@ -11,18 +11,17 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.ws.rs.core.GenericType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
@@ -50,7 +49,7 @@ public class ImageFilterExamples {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageFilterExamples.class);
     public static final String DEFAULT_TITLE = "Demonstration of image filters";
-    private static final File DEFAULT_PIPELINE = Paths.get("exampleImages", "Lena.OpenCV.Neon.json").toAbsolutePath().toFile();
+    private static final File DEFAULT_PIPELINE = Path.of("exampleImages", "Lena.OpenCV.Neon.json").toAbsolutePath().toFile();
 
     private final JFrame frame;
     private JTabbedPane tabPane;
@@ -390,7 +389,8 @@ public class ImageFilterExamples {
 
         List<PipelineItem> pipeline;
         try (FileInputStream fis = new FileInputStream(jsonFile)) {
-            pipeline = JsonHelper.fromJson(fis, new TypeReference<List<PipelineItem>>() {});
+            String json = new String(fis.readAllBytes(), StandardCharsets.UTF_8);
+            pipeline = JsonHelper.fromJson(json, new GenericType<List<PipelineItem>>() {});
             logger.info("Pipeline loaded from file {}", jsonFile);
         } catch (Exception ex) {
             logger.error("Can`t convert to JSON from file {}: {}", jsonFile, ex);

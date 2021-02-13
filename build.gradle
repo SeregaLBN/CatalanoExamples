@@ -15,8 +15,8 @@ repositories {
     }
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 compileJava.options.encoding = 'UTF-8'
 
@@ -60,12 +60,13 @@ jar {
 }
 
 dependencies {
+    implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
     implementation 'org.slf4j:slf4j-simple:1.7.26'
     if (false)
         implementation 'org.openpnp:opencv:4.3.0-2'
     else
         implementation 'org.bytedeco:opencv-platform:4.3.0-1.5.3'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.9.3'
+    implementation 'org.eclipse:yasson:2.0.1'
     implementation 'org.apache.commons:commons-math3:3.6.1'
 
   //if (project.file('./libs/Catalano.Core.jar' ).exists())

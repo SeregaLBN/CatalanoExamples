@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -168,16 +168,16 @@ public class PassportUkrTest {
     @Test
     public void randomRotateTest() throws IOException {
         randomRotate(
-                Paths.get("exampleImages", "passportUkr.jpg"    ).toFile(),
-                Paths.get("exampleImages", "passportUkr_rotated.png").toFile());
+                Path.of("exampleImages", "passportUkr.jpg"    ).toFile(),
+                Path.of("exampleImages", "passportUkr_rotated.png").toFile());
     }
 
     /** Make demo image for pipeline ./exampleImages/idCard.LeadToPerspective.json */
     @Test
     public void randomPerspectiveTest() throws IOException {
         randomPerspective(
-                Paths.get("exampleImages", "passportUkr.jpg"          ).toFile(),
-                Paths.get("exampleImages", "passportUkr_perspctve.png").toFile());
+                Path.of("exampleImages", "passportUkr.jpg"          ).toFile(),
+                Path.of("exampleImages", "passportUkr_perspctve.png").toFile());
     }
 
     public static void main(String[] args) {

@@ -1,34 +1,40 @@
 package ksn.imgusage.utils;
 
-import java.io.IOException;
-import java.io.InputStream;
+import javax.ws.rs.core.GenericType;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
+import jakarta.json.bind.JsonbException;
 
 public final class JsonHelper {
     private JsonHelper() {}
 
-    public static <T> T fromJson(InputStream inputStream, TypeReference<T> clazz) throws IOException {
-        return new ObjectMapper().readerFor(clazz).readValue(inputStream);
+    public static String toJson(Object obj, boolean formatted) {
+        JsonbConfig cfg = new JsonbConfig();
+        cfg.withFormatting(formatted);
+
+        try (Jsonb jsonb = JsonbBuilder.create(cfg)) {
+            return jsonb.toJson(obj);
+        } catch (Exception ex) {
+            throw new JsonbException("JSON write failed", ex);
+        }
     }
 
-    public static <T> T fromJson(JsonNode node, Class<T> clazz) throws IOException {
-        return new ObjectMapper().readerFor(clazz).readValue(node);
+    public static <T> T fromJson(String json, Class<T> clazz) {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            return jsonb.fromJson(json, clazz);
+        } catch (Exception ex) {
+            throw new JsonbException("JSON read failed", ex);
+        }
     }
 
-    private static ObjectWriter getObjectWriter(boolean formatted) {
-        ObjectWriter ow = new ObjectMapper().writer();
-        return formatted
-                ? ow.withDefaultPrettyPrinter()
-                : ow.with(new MinimalPrettyPrinter(""));
-    }
-
-    public static String toJson(Object obj, boolean formatted) throws IOException {
-        return getObjectWriter(formatted).writeValueAsString(obj);
+    public static <T> T fromJson(String json, GenericType<T> clazz) {
+        try (Jsonb jsonb = JsonbBuilder.create()) {
+            return jsonb.fromJson(json, clazz.getType());
+        } catch (Exception ex) {
+            throw new JsonbException("JSON read failed", ex);
+        }
     }
 
 }
