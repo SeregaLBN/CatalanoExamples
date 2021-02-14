@@ -1,5 +1,7 @@
 package ksn.imgusage.model;
 
+import java.text.ParseException;
+
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 
@@ -19,6 +21,7 @@ public class SliderIntModel implements ISliderModel<Integer> {
     public Integer getValue() {
         return model.getValue();
     }
+
     @Override
     public void setValue(Integer value) {
         model.setValue(value);
@@ -38,21 +41,41 @@ public class SliderIntModel implements ISliderModel<Integer> {
     public Integer getMaximum() {
         return model.getMaximum();
     }
+
     @Override
     public void setMaximum(Integer max) {
         model.setMaximum(max);
     }
 
+    private String formatValue(int value) {
+        return Integer.toString(value);
+    }
+
+    private int parseValue(String value) throws ParseException {
+        return Integer.parseInt(value);
+    }
+
     @Override
     public String getFormatedText() {
-        return Integer.toString(getValue());
+        return formatValue(getValue());
     }
+
     @Override
     public void setFormatedText(String value) {
         try {
-            setValue(Integer.parseInt(value));
+            setValue(parseValue(value));
         } catch (Exception ex) {
             logger.error("{}::setFormatedText: {}", getClass().getSimpleName(), ex.getMessage());
+        }
+    }
+
+    @Override
+    public String reformat(String value) {
+        try {
+            return formatValue(parseValue(value));
+        } catch (Exception ex) {
+            logger.error("{}::formatText: {}", getClass().getSimpleName(), ex.getMessage());
+            return null;
         }
     }
 

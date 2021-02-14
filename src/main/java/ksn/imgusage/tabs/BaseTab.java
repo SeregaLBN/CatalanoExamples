@@ -266,7 +266,14 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
         boxColumn.add(slider);
         boxColumn.add(txtValue);
 
-        Runnable executor = () -> txtValue.setText(model.getFormatedText());
+
+        Runnable executor = () -> {
+            String existed = model.getFormatedText();
+            String implied = model.reformat(txtValue.getText());
+            System.out.println("existed=" + existed + "; implied=" + implied);
+            if (!existed.equals(implied))
+                txtValue.setText(existed);
+        };
         executor.run();
         model.getWrapped().addChangeListener(ev -> executor.run());
         txtValue.getDocument().addDocumentListener(new DocumentListener() {
@@ -287,11 +294,11 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
 
             private void handle() {
                 SwingUtilities.invokeLater(() -> {
-                    String newVaue = txtValue.getText();
-                    if (newVaue.equals(model.getFormatedText()))
+                    String newValue = txtValue.getText();
+                    if (newValue.equals(model.getFormatedText()))
                         return;
 
-                    model.setFormatedText(newVaue);
+                    model.setFormatedText(newValue);
                 });
             }
         });
@@ -470,7 +477,7 @@ public abstract class BaseTab<TTabParams extends ITabParams> implements ITab<TTa
                     setter.accept(e);
                     logger.trace("{} changed to {}", paramName, e);
                     if (customListener != null)
-                        customListener.accept(e);;
+                        customListener.accept(e);
                     invalidateAsync();
                 }
             });

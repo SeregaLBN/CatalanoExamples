@@ -1,6 +1,7 @@
 package ksn.imgusage.model;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
 
 import javax.swing.BoundedRangeModel;
@@ -33,6 +34,7 @@ public class SliderDoubleModel implements ISliderModel<Double> {
     public Double getValue() {
         return model.getValue() * coefficient;
     }
+
     @Override
     public void setValue(Double value) {
         model.setValue((int)(value / coefficient));
@@ -52,27 +54,47 @@ public class SliderDoubleModel implements ISliderModel<Double> {
     public Double getMaximum() {
         return model.getMaximum() * coefficient;
     }
+
     @Override
     public void setMaximum(Double max) {
         model.setMaximum((int)(max / coefficient));
     }
 
+    private String formatValue(double value) {
+        String format = "%." + decimalPrecision + "f";
+        return String.format(Locale.US, format, value);
+    }
+
+    private double parseValue(String value) throws ParseException {
+        NumberFormat format = NumberFormat.getInstance(Locale.US);
+        Number number = format.parse(value);
+        return number.doubleValue();
+    }
+
     @Override
     public String getFormatedText() {
-        String format = "%." + decimalPrecision + "f";
-        return String.format(Locale.US, format, getValue());
+        return formatValue(getValue());
     }
 
     @Override
     public void setFormatedText(String value) {
         try {
-            NumberFormat format = NumberFormat.getInstance(Locale.US);
-            Number number = format.parse(value);
-            setValue(number.doubleValue());
+            setValue(parseValue(value));
         } catch (Exception ex) {
             logger.error("{}::setFormatedText: {}", getClass().getSimpleName(), ex.getMessage());
         }
     }
+
+    @Override
+    public String reformat(String value) {
+        try {
+            return formatValue(parseValue(value));
+        } catch (Exception ex) {
+            logger.error("{}::formatText: {}", getClass().getSimpleName(), ex.getMessage());
+            return null;
+        }
+    }
+
 
     @Override
     public BoundedRangeModel getWrapped() {
