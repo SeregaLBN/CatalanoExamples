@@ -222,10 +222,14 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 //        Scalar zeos = new Scalar(0, 0, 0);
         for (MatOfPoint element : contours) {
             Rect rc = Imgproc.boundingRect(element);
-            rc.x += dilateX/2;
-            rc.y += dilateY/2;
-            rc.width  -= dilateX;
-            rc.height -= dilateY;
+            if (rc.width > dilateX) {
+                rc.x += (dilateX + 0.5) / 2;
+                rc.width -= dilateX - 1;
+            }
+            if (rc.height > dilateY) {
+                rc.y += (dilateY + 0.5) / 2;
+                rc.height -= dilateY - 1;
+            }
 //            if ((rc.area() > 0.5 * imgsize) || (rc.area() < 100) || (rc.width / rc.height < 2)) {
 ////                Mat roi = new Mat(morphology, rectan3);
 ////                roi.setTo(zeos);
