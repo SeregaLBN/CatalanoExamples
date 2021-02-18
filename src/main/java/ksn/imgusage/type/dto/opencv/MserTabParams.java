@@ -12,9 +12,9 @@ public class MserTabParams implements ITabParams {
     /** it compares (size_i − size_iDelta)/size_iDelta */
     public int     delta = 5;
     /** prune the area which smaller than minArea */
-    public Size    minArea = new Size(6, 8);
+    public int     minArea = 48;
     /** prune the area which bigger than maxArea */
-    public Size    maxArea = new Size(100, 140);
+    public int     maxArea = 14000;
     /** prune the area have similar size to its children */
     public double  maxVariation = 0.25;
     /** for color image, trace back to cut off mser with diversity less than min_diversity */
@@ -28,6 +28,10 @@ public class MserTabParams implements ITabParams {
     /** for color image, the aperture size for edge blur */
     public int     edgeBlurSize = 5;
 
+    /** Additional restrictions on the minimum symbol size */
+    public Size    minSymbol = new Size(1, 1);
+    /** Additional restrictions on the maximum symbol size */
+    public Size    maxSymbol = new Size(500, 700);
 
     /** Show mask regions - MSER result */
     public boolean showRegions = true;
@@ -48,6 +52,7 @@ public class MserTabParams implements ITabParams {
     public String toString() {
         return String.format(Locale.US,
             "{ delta=%d, minArea=%s, maxArea=%s, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d"
+            + ", minSymbol=%s, maxSymbol=%s, "
             + ", showRegions=%b, invert=%b, showInner=%b, markChars=%b, markWords=%b, markLines=%b }",
             delta,
             minArea,
@@ -58,6 +63,8 @@ public class MserTabParams implements ITabParams {
             areaThreshold,
             minMargin,
             edgeBlurSize,
+            minSymbol,
+            maxSymbol,
             showRegions,
             invert,
             showInner,

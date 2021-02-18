@@ -41,6 +41,14 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     private static final double MAX_MIN_MARGIN = 0.999;
     public  static final int    MIN_EDGE_BLUR_SIZE = 1;
     private static final int    MAX_EDGE_BLUR_SIZE = 300;
+    private static final int    MIN_MIN_SYMBOL_W =   1;
+    private static final int    MIN_MIN_SYMBOL_H =   1;
+    private static final int    MAX_MIN_SYMBOL_W = 499;
+    private static final int    MAX_MIN_SYMBOL_H = 699;
+    private static final int    MIN_MAX_SYMBOL_W = MIN_MIN_SYMBOL_W + 1;
+    private static final int    MIN_MAX_SYMBOL_H = MIN_MIN_SYMBOL_H + 1;
+    private static final int    MAX_MAX_SYMBOL_W = MAX_MIN_SYMBOL_W + 1;
+    private static final int    MAX_MAX_SYMBOL_H = MAX_MIN_SYMBOL_H + 1;
 
     private static final Scalar BLACK   = new Scalar(0);
     private static final Scalar WHITE   = new Scalar(0xFF);
@@ -71,8 +79,8 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     protected void applyOpencvFilter() {
         MSER mser = MSER.create(
             params.delta,
-            params.minArea.width * params.minArea.height,
-            params.maxArea.width * params.maxArea.height,
+            params.minArea,
+            params.maxArea,
             params.maxVariation,
             params.minDiversity,
             params.maxEvolution,
@@ -90,10 +98,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             for (int i=0; i < regions.size(); ++i) {
                 MatOfPoint contour = regions.get(i);
                 Rect rc = Imgproc.boundingRect(contour);
-                if ((rc.width  < params.minArea.width ) ||
-                    (rc.height < params.minArea.height) ||
-                    (rc.width  > params.maxArea.width ) ||
-                    (rc.height > params.maxArea.height))
+                if ((rc.width  < params.minSymbol.width ) ||
+                    (rc.height < params.minSymbol.height) ||
+                    (rc.width  > params.maxSymbol.width ) ||
+                    (rc.height > params.maxSymbol.height))
                 {
                     ignored.add(i);
                 }
@@ -186,7 +194,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         if (params.markWords || params.markLines) {
             logger.trace("Mark words");
-            mark(maskChars, params.maxArea.width/3, 1, rc -> {
+            mark(maskChars, params.maxSymbol.width/3, 1, rc -> {
                 if (params.markWords)
                     Imgproc.rectangle(imageMat, rc.br(), rc.tl(), MAGENTA);
                 if (maskWords != null) {
@@ -202,7 +210,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         if (params.markLines) {
             logger.trace("Mark lines");
-            mark(maskWords, params.maxArea.width/2, 2, rc -> Imgproc.rectangle(imageMat, rc.br(), rc.tl(), AMBER));
+            mark(maskWords, params.maxSymbol.width/2, 2, rc -> Imgproc.rectangle(imageMat, rc.br(), rc.tl(), AMBER));
         }
     }
 
@@ -246,28 +254,30 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         Box box4Options = Box.createVerticalBox();
 //        box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
-        SliderIntModel    modelDelta         = new    SliderIntModel(params.delta         , 0, MIN_DELTA         , MAX_DELTA);
-        SliderIntModel    modelMinAreaW      = new    SliderIntModel(params.minArea.width , 0, MIN_MIN_AREA      , MAX_MIN_AREA);
-        SliderIntModel    modelMinAreaH      = new    SliderIntModel(params.minArea.height, 0, MIN_MIN_AREA      , MAX_MIN_AREA);
-        SliderIntModel    modelMaxAreaW      = new    SliderIntModel(params.maxArea.width , 0, MIN_MAX_AREA      , MAX_MAX_AREA);
-        SliderIntModel    modelMaxAreaH      = new    SliderIntModel(params.maxArea.height, 0, MIN_MAX_AREA      , MAX_MAX_AREA);
-        SliderDoubleModel modelMaxVariation  = new SliderDoubleModel(params.maxVariation  , 0, MIN_MAX_VARIATION , MAX_MAX_VARIATION);
-        SliderDoubleModel modelMinDiversity  = new SliderDoubleModel(params.minDiversity  , 0, MIN_MIN_DIVERSITY , MAX_MIN_DIVERSITY);
-        SliderIntModel    modelMaxEvolution  = new    SliderIntModel(params.maxEvolution  , 0, MIN_MAX_EVOLUTION , MAX_MAX_EVOLUTION);
-        SliderDoubleModel modelAreaThreshold = new SliderDoubleModel(params.areaThreshold , 0, MIN_AREA_THRESHOLD, MAX_AREA_THRESHOLD);
-        SliderDoubleModel modelMinMargin     = new SliderDoubleModel(params.minMargin     , 0, MIN_MIN_MARGIN    , MAX_MIN_MARGIN, 3);
-        SliderIntModel    modelEdgeBlurSize  = new    SliderIntModel(params.edgeBlurSize  , 0, MIN_EDGE_BLUR_SIZE, MAX_EDGE_BLUR_SIZE);
+        SliderIntModel    modelDelta         = new    SliderIntModel(params.delta           , 0, MIN_DELTA         , MAX_DELTA);
+        SliderIntModel    modelMinArea       = new    SliderIntModel(params.minArea         , 0, MIN_MIN_AREA      , MAX_MIN_AREA);
+        SliderIntModel    modelMaxArea       = new    SliderIntModel(params.maxArea         , 0, MIN_MAX_AREA      , MAX_MAX_AREA);
+        SliderDoubleModel modelMaxVariation  = new SliderDoubleModel(params.maxVariation    , 0, MIN_MAX_VARIATION , MAX_MAX_VARIATION);
+        SliderDoubleModel modelMinDiversity  = new SliderDoubleModel(params.minDiversity    , 0, MIN_MIN_DIVERSITY , MAX_MIN_DIVERSITY);
+        SliderIntModel    modelMaxEvolution  = new    SliderIntModel(params.maxEvolution    , 0, MIN_MAX_EVOLUTION , MAX_MAX_EVOLUTION);
+        SliderDoubleModel modelAreaThreshold = new SliderDoubleModel(params.areaThreshold   , 0, MIN_AREA_THRESHOLD, MAX_AREA_THRESHOLD);
+        SliderDoubleModel modelMinMargin     = new SliderDoubleModel(params.minMargin       , 0, MIN_MIN_MARGIN    , MAX_MIN_MARGIN, 3);
+        SliderIntModel    modelEdgeBlurSize  = new    SliderIntModel(params.edgeBlurSize    , 0, MIN_EDGE_BLUR_SIZE, MAX_EDGE_BLUR_SIZE);
+        SliderIntModel    modelMinSymbolW    = new    SliderIntModel(params.minSymbol.width , 0, MIN_MIN_SYMBOL_W  , MAX_MIN_SYMBOL_W);
+        SliderIntModel    modelMinSymbolH    = new    SliderIntModel(params.minSymbol.height, 0, MIN_MIN_SYMBOL_H  , MAX_MIN_SYMBOL_H);
+        SliderIntModel    modelMaxSymbolW    = new    SliderIntModel(params.maxSymbol.width , 0, MIN_MAX_SYMBOL_W  , MAX_MAX_SYMBOL_W);
+        SliderIntModel    modelMaxSymbolH    = new    SliderIntModel(params.maxSymbol.height, 0, MIN_MAX_SYMBOL_H  , MAX_MAX_SYMBOL_H);
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
         box4Sliders.add(makeSliderVert(modelDelta, "Delta", "it compares (size<i>−size<i−delta>)/size<i−delta>"));
         box4Sliders.add(Box.createHorizontalStrut(2));
-        box4Sliders.add(makeContourLimits(
-                          modelMinAreaW, modelMinAreaH,
-                          modelMaxAreaW, modelMaxAreaH,
-                          "Area", "Prune the area",
-                          "MinArea", "MaxArea",
-                          "Prune the area which smaller than minArea", "Prune the area which bigger than maxArea"));
+        box4Sliders.add(makeMinMax(modelMinArea,                                 // modelMin
+                                   modelMaxArea,                                 // modelMax
+                                   "Area",                                       // borderTitle
+                                   "Prune the area",                             // tip
+                                   "Prune the area which smaller than minArea",  // tipMin
+                                   "Prune the area which bigger than maxArea")); // tipMax
         box4Sliders.add(Box.createHorizontalStrut(2));
         box4Sliders.add(makeSliderVert(modelMaxVariation, "Variation", "MAX Variation: Prune the area have similar size to its children"));
         box4Sliders.add(Box.createHorizontalGlue());
@@ -285,10 +295,22 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         box4Sliders2.add(makeSliderVert(modelEdgeBlurSize, "Blur", "edgeBlurSize: the aperture size for edge blur"));
         box4Sliders2.add(Box.createHorizontalGlue());
 
+        Box box4Sliders3 = Box.createHorizontalBox();
+        box4Sliders3.add(Box.createHorizontalGlue());
+        box4Sliders3.add(makeContourLimits(
+                          modelMinSymbolW, modelMinSymbolH,
+                          modelMaxSymbolW, modelMaxSymbolH,
+                          "Symbol", "Symbol limits",
+                          "MinSymbol", "MaxSymbol",
+                          "Additional restrictions on the minimum symbol size",
+                          "Additional restrictions on the maximum symbol size"));
+        box4Sliders3.add(Box.createHorizontalGlue());
+
         JTabbedPane tabPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabPane.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
         tabPane.addTab("Common", null, box4Sliders, null);
         tabPane.addTab("For color image", null, box4Sliders2, null);
+        tabPane.addTab("Symbol limits", null, box4Sliders3, "Additional restrictions on symbol size");
 
         Box boxRegions = Box.createHorizontalBox();
         boxRegions.add(Box.createHorizontalStrut(7));
@@ -376,17 +398,19 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         box4Options.add(panelOptions);
 
-        addChangeListener("params.delta"         , modelDelta        , v -> params.delta          = v);
-        addChangeListener("params.minArea.width" , modelMinAreaW     , v -> params.minArea.width  = v);
-        addChangeListener("params.minArea.height", modelMinAreaH     , v -> params.minArea.height = v);
-        addChangeListener("params.maxArea.width" , modelMaxAreaW     , v -> params.maxArea.width  = v);
-        addChangeListener("params.maxArea.height", modelMaxAreaH     , v -> params.maxArea.height = v);
-        addChangeListener("params.maxVariation"  , modelMaxVariation , v -> params.maxVariation   = v);
-        addChangeListener("params.minDiversity"  , modelMinDiversity , v -> params.minDiversity   = v);
-        addChangeListener("params.maxEvolution"  , modelMaxEvolution , v -> params.maxEvolution   = v);
-        addChangeListener("params.areaThreshold" , modelAreaThreshold, v -> params.areaThreshold  = v);
-        addChangeListener("params.minMargin"     , modelMinMargin    , v -> params.minMargin      = v);
-      //addChangeListener("params.edgeBlurSize"  , modelEdgeBlurSize , v -> params.edgeBlurSize   = v);
+        addChangeListener("params.delta"           , modelDelta        , v -> params.delta            = v);
+        addChangeListener("params.minArea"         , modelMinArea      , v -> params.minArea          = v);
+        addChangeListener("params.maxArea"         , modelMaxArea      , v -> params.maxArea          = v);
+        addChangeListener("params.maxVariation"    , modelMaxVariation , v -> params.maxVariation     = v);
+        addChangeListener("params.minDiversity"    , modelMinDiversity , v -> params.minDiversity     = v);
+        addChangeListener("params.maxEvolution"    , modelMaxEvolution , v -> params.maxEvolution     = v);
+        addChangeListener("params.areaThreshold"   , modelAreaThreshold, v -> params.areaThreshold    = v);
+        addChangeListener("params.minMargin"       , modelMinMargin    , v -> params.minMargin        = v);
+      //addChangeListener("params.edgeBlurSize"    , modelEdgeBlurSize , v -> params.edgeBlurSize     = v);
+        addChangeListener("params.minSymbol.width" , modelMinSymbolW   , v -> params.minSymbol.width  = v);
+        addChangeListener("params.minSymbol.height", modelMinSymbolH   , v -> params.minSymbol.height = v);
+        addChangeListener("params.maxSymbol.width" , modelMaxSymbolW   , v -> params.maxSymbol.width  = v);
+        addChangeListener("params.maxSymbol.height", modelMaxSymbolH   , v -> params.maxSymbol.height = v);
         modelEdgeBlurSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelEdgeBlurSize: value={}", modelEdgeBlurSize.getFormatedText());
             int val = modelEdgeBlurSize.getValue();

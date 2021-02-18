@@ -1,56 +1,65 @@
-[ {
-  "tabName" : "FirstTab",
-  "params" : {
-    "useScale" : true,
-    "imageFile" : "passportUkr.jpg"
-  }
-}, {
-  "tabName" : "Common:Resize",
-  "params" : {
-    "keepToSize" : {
-      "width" : 1200,
-      "height" : 766
+[
+    {
+        "params": {
+            "fileType": "IMAGE",
+            "imageFile": "passportUkr.jpg",
+            "useScale": true
+        },
+        "tabName": "FirstTab"
     },
-    "useKeepAspectRatio" : true
-  }
-}, {
-  "tabName" : "OpenCV:Colorized",
-  "params" : {
-    "colorsTo" : "GRAY",
-    "useWhiteBalancer" : true
-  }
-}, {
-  "tabName" : "OpenCV:AdaptiveThreshold",
-  "params" : {
-    "maxVal" : 299.95,
-    "adaptiveMethod" : "ADAPTIVE_THRESH_GAUSSIAN_C",
-    "threshType" : "THRESH_BINARY",
-    "blockSize" : 43,
-    "c" : 16.75
-  }
-}, {
-  "tabName" : "OpenCV:MSER",
-  "params" : {
-    "delta" : 1,
-    "minArea" : {
-      "width" : 4,
-      "height" : 20
+    {
+        "params": {
+            "keepToSize": {
+                "height": 766,
+                "width": 1200
+            },
+            "useKeepAspectRatio": true
+        },
+        "tabName": "Common:Resize"
     },
-    "maxArea" : {
-      "width" : 46,
-      "height" : 40
+    {
+        "params": {
+            "colorsTo": "GRAY",
+            "useWhiteBalancer": true
+        },
+        "tabName": "OpenCV:Colorized"
     },
-    "maxVariation" : 0.01,
-    "minDiversity" : 0.01,
-    "maxEvolution" : 1,
-    "areaThreshold" : 0.0,
-    "minMargin" : 0.001,
-    "edgeBlurSize" : 1,
-    "showRegions" : true,
-    "showInner" : false,
-    "invert" : true,
-    "markChars" : false,
-    "markWords" : true,
-    "markLines" : false
-  }
-} ]
+    {
+        "params": {
+            "adaptiveMethod": "ADAPTIVE_THRESH_GAUSSIAN_C",
+            "blockSize": 43,
+            "c": 16.75,
+            "maxVal": 299.95,
+            "threshType": "THRESH_BINARY"
+        },
+        "tabName": "OpenCV:AdaptiveThreshold"
+    },
+    {
+        "params": {
+            "areaThreshold": 0.0,
+            "delta": 1,
+            "edgeBlurSize": 1,
+            "invert": true,
+            "markChars": true,
+            "markLines": true,
+            "markWords": true,
+            "maxArea": 470,
+            "maxEvolution": 1,
+            "maxSymbol": {
+                "height": 35,
+                "width": 50
+            },
+            "maxVariation": 0.01,
+            "minArea": 40,
+            "minDiversity": 0.01,
+            "minMargin": 0.001,
+            "minSymbol": {
+                "height": 20,
+                "width": 4
+            },
+            "showInner": false,
+            "showRegions": true
+        },
+        "tabName": "OpenCV:MSER"
+    }
+]
