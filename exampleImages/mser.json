@@ -41,13 +41,13 @@
             "edgeBlurSize": 1,
             "invert": true,
             "markChars": true,
-            "markLines": true,
+            "markLines": false,
             "markWords": true,
             "maxArea": 470,
             "maxEvolution": 1,
             "maxSymbol": {
-                "height": 35,
-                "width": 50
+                "height": 40,
+                "width": 35
             },
             "maxVariation": 0.01,
             "minArea": 40,
@@ -58,7 +58,8 @@
                 "width": 4
             },
             "showInner": false,
-            "showRegions": true
+            "showRegions": true,
+            "stuckSymbols": 2
         },
         "tabName": "OpenCV:MSER"
     }

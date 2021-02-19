@@ -2,6 +2,7 @@ package ksn.imgusage.tabs.opencv;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -49,6 +50,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     private static final int    MIN_MAX_SYMBOL_H = MIN_MIN_SYMBOL_H + 1;
     private static final int    MAX_MAX_SYMBOL_W = MAX_MIN_SYMBOL_W + 1;
     private static final int    MAX_MAX_SYMBOL_H = MAX_MIN_SYMBOL_H + 1;
+    private static final int    MAX_SYMBOLS_STUCK = 10;
 
     private static final Scalar BLACK   = new Scalar(0);
     private static final Scalar WHITE   = new Scalar(0xFF);
@@ -100,7 +102,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 Rect rc = Imgproc.boundingRect(contour);
                 if ((rc.width  < params.minSymbol.width ) ||
                     (rc.height < params.minSymbol.height) ||
-                    (rc.width  > params.maxSymbol.width ) ||
+                    (rc.width  >(params.maxSymbol.width * params.stuckSymbols)) ||
                     (rc.height > params.maxSymbol.height))
                 {
                     ignored.add(i);
@@ -194,7 +196,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         if (params.markWords || params.markLines) {
             logger.trace("Mark words");
-            mark(maskChars, params.maxSymbol.width/3, 1, rc -> {
+            mark(maskChars, (int)(params.maxSymbol.width * 0.45), 1, rc -> {
                 if (params.markWords)
                     Imgproc.rectangle(imageMat, rc.br(), rc.tl(), MAGENTA);
                 if (maskWords != null) {
@@ -210,7 +212,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         if (params.markLines) {
             logger.trace("Mark lines");
-            mark(maskWords, params.maxSymbol.width/2, 2, rc -> Imgproc.rectangle(imageMat, rc.br(), rc.tl(), AMBER));
+            mark(maskWords, (int)(params.maxSymbol.width * 0.9), 2, rc -> Imgproc.rectangle(imageMat, rc.br(), rc.tl(), AMBER));
         }
     }
 
@@ -267,6 +269,8 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         SliderIntModel    modelMinSymbolH    = new    SliderIntModel(params.minSymbol.height, 0, MIN_MIN_SYMBOL_H  , MAX_MIN_SYMBOL_H);
         SliderIntModel    modelMaxSymbolW    = new    SliderIntModel(params.maxSymbol.width , 0, MIN_MAX_SYMBOL_W  , MAX_MAX_SYMBOL_W);
         SliderIntModel    modelMaxSymbolH    = new    SliderIntModel(params.maxSymbol.height, 0, MIN_MAX_SYMBOL_H  , MAX_MAX_SYMBOL_H);
+        SliderIntModel    modelSymbolsStuck  = new    SliderIntModel(params.stuckSymbols    , 0, 1                 , MAX_SYMBOLS_STUCK);
+
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
@@ -305,12 +309,19 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                           "Additional restrictions on the minimum symbol size",
                           "Additional restrictions on the maximum symbol size"));
         box4Sliders3.add(Box.createHorizontalGlue());
+        ////////////
+        JPanel panel3 = new JPanel();
+        panel3.setLayout(new BorderLayout());
+        Container cntrlStuckW = makeEditBox("params.stuckSymbols", modelSymbolsStuck, "Stuck symbols", null, "the number of characters stuck together");
+        panel3.add(box4Sliders3, BorderLayout.CENTER);
+        panel3.add(cntrlStuckW, BorderLayout.SOUTH);
+        ///////////////
 
         JTabbedPane tabPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabPane.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
         tabPane.addTab("Common", null, box4Sliders, null);
         tabPane.addTab("For color image", null, box4Sliders2, null);
-        tabPane.addTab("Symbol limits", null, box4Sliders3, "Additional restrictions on symbol size");
+        tabPane.addTab("Symbol limits", null, panel3, "Additional restrictions on symbol size");
 
         Box boxRegions = Box.createHorizontalBox();
         boxRegions.add(Box.createHorizontalStrut(7));
@@ -411,6 +422,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         addChangeListener("params.minSymbol.height", modelMinSymbolH   , v -> params.minSymbol.height = v);
         addChangeListener("params.maxSymbol.width" , modelMaxSymbolW   , v -> params.maxSymbol.width  = v);
         addChangeListener("params.maxSymbol.height", modelMaxSymbolH   , v -> params.maxSymbol.height = v);
+        addChangeListener("params.stuckSymbols"    , modelSymbolsStuck , v -> params.stuckSymbols     = v);
         modelEdgeBlurSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelEdgeBlurSize: value={}", modelEdgeBlurSize.getFormatedText());
             int val = modelEdgeBlurSize.getValue();

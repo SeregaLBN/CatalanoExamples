@@ -33,6 +33,9 @@ public class MserTabParams implements ITabParams {
     /** Additional restrictions on the maximum symbol size */
     public Size    maxSymbol = new Size(500, 700);
 
+    /** the number of characters stuck together */
+    public int stuckSymbols = 1;
+
     /** Show mask regions - MSER result */
     public boolean showRegions = true;
     /** Show inner contours */
@@ -52,7 +55,7 @@ public class MserTabParams implements ITabParams {
     public String toString() {
         return String.format(Locale.US,
             "{ delta=%d, minArea=%s, maxArea=%s, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d"
-            + ", minSymbol=%s, maxSymbol=%s, "
+            + ", minSymbol=%s, maxSymbol=%s, stuckSymbols=%d"
             + ", showRegions=%b, invert=%b, showInner=%b, markChars=%b, markWords=%b, markLines=%b }",
             delta,
             minArea,
@@ -65,6 +68,7 @@ public class MserTabParams implements ITabParams {
             edgeBlurSize,
             minSymbol,
             maxSymbol,
+            stuckSymbols,
             showRegions,
             invert,
             showInner,
