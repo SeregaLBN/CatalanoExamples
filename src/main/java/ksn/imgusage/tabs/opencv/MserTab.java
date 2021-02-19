@@ -182,7 +182,16 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             logger.trace("Mark chars");
             for (MatOfPoint contour : regions) {
                 Rect rc = Imgproc.boundingRect(contour);
-                Imgproc.rectangle(imageMat, rc.br(), rc.tl(), GREEN);
+                if ((params.stuckSymbols == 1) || (rc.width < params.maxSymbol.width)) {
+                    Imgproc.rectangle(imageMat, rc.br(), rc.tl(), GREEN);
+                } else {
+                    int cnt = (int)Math.round((rc.width / (params.maxSymbol.width * 0.7)) + 0.5);
+                    int w = rc.width / cnt;
+                    for (int i = 0; i < cnt; ++i) {
+                        Rect rc2 = new Rect(rc.x + i * w, rc.y, w, rc.height);
+                        Imgproc.rectangle(imageMat, rc2.br(), rc2.tl(), GREEN);
+                    }
+                }
             }
             for (MatOfPoint contour : inner) {
                 Rect rc = Imgproc.boundingRect(contour);
@@ -196,7 +205,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         if (params.markWords || params.markLines) {
             logger.trace("Mark words");
-            mark(maskChars, (int)(params.maxSymbol.width * 0.45), 1, rc -> {
+            mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1, rc -> {
                 if (params.markWords)
                     Imgproc.rectangle(imageMat, rc.br(), rc.tl(), MAGENTA);
                 if (maskWords != null) {
