@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.swing.*;
@@ -199,17 +198,19 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         logger.trace("Collect words");
         List<Rect> allWords = new ArrayList<>();
-        mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1, rc -> {
-            allWords.add(rc);
+        mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1)
+            .forEach(rc -> {
+                allWords.add(rc);
 
-            Mat roi = new Mat(maskWords, rc);
-            roi.setTo(WHITE);
-        });
+                Mat roi = new Mat(maskWords, rc);
+                roi.setTo(WHITE);
+            });
 
 
         logger.trace("Collect lines");
         List<Rect> allLines = new ArrayList<>();
-        mark(maskWords, (int)(params.maxSymbol.width * 0.9), 2, allLines::add);
+        mark(maskWords, (int)(params.maxSymbol.width * 0.9), 2)
+            .forEach(allLines::add);
 
 
         class SymbolTmp {
@@ -291,7 +292,8 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                         roi.setTo(WHITE);
                     }
                     List<Rect> rebuildSymbols = new ArrayList<>();
-                    mark(maskChars, 1, params.minSymbol.height, rebuildSymbols::add);
+                    mark(maskChars, 1, params.minSymbol.height)
+                        .forEach(rebuildSymbols::add);
                     wordItem.symbols = rebuildSymbols.stream()
                             .map(SymbolTmp::new)
                             .collect(Collectors.toList());
@@ -360,20 +362,20 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         }
     }
 
-    private Mat mark(Mat mask, int dilateX, int dilateY, Consumer<Rect> marker) {
+    private List<Rect> mark(Mat mask, int dilateX, int dilateY) {
         Mat morphology = new Mat();
         Mat kernel = new Mat(dilateY, dilateX, CvType.CV_8UC1, WHITE);
         Imgproc.morphologyEx(mask, morphology, Imgproc.MORPH_DILATE, kernel);
 
         List<MatOfPoint> contours = new ArrayList<>();
-//        int imgsize = imageMat.height() * imageMat.width();
         Imgproc.findContours(
                 morphology,
                 contours,
                 new Mat(), // hierarchy,
                 Imgproc.RETR_EXTERNAL,
                 Imgproc.CHAIN_APPROX_NONE);
-//        Scalar zeos = new Scalar(0, 0, 0);
+
+        List<Rect> res = new ArrayList<>(contours.size());
         for (MatOfPoint element : contours) {
             Rect rc = Imgproc.boundingRect(element);
             if (rc.width > dilateX) {
@@ -384,15 +386,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 rc.y += (dilateY / 2.0) - 0.5;
                 rc.height -= dilateY - 1;
             }
-//            if ((rc.area() > 0.5 * imgsize) || (rc.area() < 100) || (rc.width / rc.height < 2)) {
-////                Mat roi = new Mat(morphology, rectan3);
-////                roi.setTo(zeos);
-//            } else {
-                marker.accept(rc);
-//            }
+            res.add(rc);
         }
 
-        return morphology;
+        return res;
     }
 
     @Override
