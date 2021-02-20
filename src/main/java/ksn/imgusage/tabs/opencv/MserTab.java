@@ -339,7 +339,17 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 for (WordTmp wordItem : lineItem.words) {
                     for (SymbolTmp symbolItem : wordItem.symbols) {
                         Rect rc = symbolItem.position;
-                        Imgproc.rectangle(imageMat, rc.br(), rc.tl(), SYMBOL_COLOR, 1);
+                        //Imgproc.rectangle(imageMat, rc.br(), rc.tl(), SYMBOL_COLOR, 1);
+                        if ((params.stuckSymbols == 1) || (rc.width < params.maxSymbol.width)) {
+                            Imgproc.rectangle(imageMat, rc.br(), rc.tl(), SYMBOL_COLOR);
+                        } else {
+                            int cnt = (int)Math.round((rc.width / (params.maxSymbol.width * 0.7)) + 0.5);
+                            int w = rc.width / cnt;
+                            for (int i = 0; i < cnt; ++i) {
+                                Rect rc2 = new Rect(rc.x + i * w, rc.y, w, rc.height);
+                                Imgproc.rectangle(imageMat, rc2.br(), rc2.tl(), SYMBOL_COLOR);
+                            }
+                        }
                     }
                 }
             }
