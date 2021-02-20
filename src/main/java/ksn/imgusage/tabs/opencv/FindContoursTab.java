@@ -25,6 +25,7 @@ import ksn.imgusage.type.dto.opencv.FindContoursTabParams;
 import ksn.imgusage.type.opencv.CvContourApproximationModes;
 import ksn.imgusage.type.opencv.CvLineType;
 import ksn.imgusage.type.opencv.CvRetrievalModes;
+import ksn.imgusage.utils.GeomHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d3/dc0/group__imgproc__shape.html#ga17ed9f5d79ae97bd4c7cf18403e1689a'>Finds contours in a binary image</a> */
@@ -353,7 +354,7 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
                     continue;
 
                 Rect rc2 = cc2.rc;
-                Rect rc = intersect(rcOwn, rc2);
+                Rect rc = GeomHelper.intersectInclude(rcOwn, rc2);
                 if (!checkBounds(rc) ||
                     rc.equals(rcOwn) ||
                     rc.equals(rc2))
@@ -384,17 +385,6 @@ public class FindContoursTab extends OpencvFilterTab<FindContoursTabParams> {
         }
 
         return res;
-    }
-
-    private static Rect intersect(Rect rc1, Rect rc2) {
-        Point br1 = rc1.br();
-        Point br2 = rc2.br();
-        return new Rect(
-            new Point(Math.min(rc1.x, rc2.x),
-                      Math.min(rc1.y, rc2.y)),
-            new Point(Math.max(br1.x, br2.x),
-                      Math.max(br1.y, br2.y))
-        );
     }
 
     @Override

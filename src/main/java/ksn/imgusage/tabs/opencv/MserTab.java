@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 
@@ -15,6 +16,7 @@ import org.opencv.imgproc.Imgproc;
 import ksn.imgusage.model.SliderDoubleModel;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.dto.opencv.MserTabParams;
+import ksn.imgusage.utils.GeomHelper;
 import ksn.imgusage.utils.OpenCvHelper;
 
 /** <a href='https://docs.opencv.org/3.4.2/d3/d28/classcv_1_1MSER.html'>Maximally stable extremal region extractor</a> */
@@ -58,6 +60,11 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     private static final Scalar YELLOW  = new Scalar(0x00, 0xFF, 0xFF);
     private static final Scalar MAGENTA = new Scalar(0xFF, 0x00, 0xFF);
     private static final Scalar AMBER   = new Scalar(0x00, 0xBF, 0xFF);
+
+    private static final Scalar  INNER_COLOR = YELLOW;
+    private static final Scalar SYMBOL_COLOR = GREEN;
+    private static final Scalar   WORD_COLOR = MAGENTA;
+    private static final Scalar   LINE_COLOR = AMBER;
 
     private MserTabParams params;
 
@@ -145,14 +152,6 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             }
         }
 
-        logger.trace("Draw mask");
-        Mat maskChars = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
-        for (MatOfPoint contour : regions) {
-            Rect rc = Imgproc.boundingRect(contour);
-            Mat roi = new Mat(maskChars, rc);
-            roi.setTo(WHITE);
-        }
-
         if (params.showRegions) {
             logger.trace("Show mask: contours.size={}", regions.size());
             imageMat = params.invert
@@ -178,50 +177,176 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         if (params.markChars || params.markWords || params.markLines)
             imageMat = OpenCvHelper.to3Channel(imageMat);
 
+
+        logger.trace("Draw mask");
+        Mat maskChars = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+        Mat maskWords = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+
+        logger.trace("Collect symbols");
+        List<Rect> allSymbols = new ArrayList<>(regions.size());
+        List<Rect> innerSymbols = new ArrayList<>(inner.size());
+        for (MatOfPoint contour : regions) {
+            Rect rc = Imgproc.boundingRect(contour);
+            allSymbols.add(rc);
+
+            Mat roi = new Mat(maskChars, rc);
+            roi.setTo(WHITE);
+        }
+        for (MatOfPoint contour : inner) {
+            Rect rc = Imgproc.boundingRect(contour);
+            innerSymbols.add(rc);
+        }
+
+        logger.trace("Collect words");
+        List<Rect> allWords = new ArrayList<>();
+        mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1, rc -> {
+            allWords.add(rc);
+
+            Mat roi = new Mat(maskWords, rc);
+            roi.setTo(WHITE);
+        });
+
+
+        logger.trace("Collect lines");
+        List<Rect> allLines = new ArrayList<>();
+        mark(maskWords, (int)(params.maxSymbol.width * 0.9), 2, allLines::add);
+
+
+        class SymbolTmp {
+            final Rect position;
+            boolean handled = false;
+            SymbolTmp(Rect position) { this.position = position; }
+        }
+        class WordTmp {
+            final Rect position;
+            List<SymbolTmp> symbols = new ArrayList<>();
+            boolean handled = false;
+            WordTmp(Rect position) { this.position = position; }
+        }
+        class LineTmp {
+            final Rect position;
+            List<WordTmp> words = new ArrayList<>();
+            LineTmp(Rect position) { this.position = position; }
+        }
+
+        List<SymbolTmp> allTmpSymbols = allSymbols.stream()
+                .map(SymbolTmp::new)
+                .collect(Collectors.toList());
+        List<WordTmp> allTmpWords = allWords.stream()
+                .sorted((a, b) -> Integer.compare(a.width * a.height,
+                                                  b.width * b.height))
+                .map(WordTmp::new)
+                .collect(Collectors.toList());
+        List<LineTmp> allTmpLines = allLines.stream()
+                .sorted((a, b) -> Integer.compare(a.width * a.height,
+                                                  b.width * b.height))
+                .map(LineTmp::new)
+                .collect(Collectors.toList());
+
+        for (WordTmp wordItem : allTmpWords) {
+            Rect rcWord = wordItem.position;
+            for (SymbolTmp symbolItem : allTmpSymbols) {
+                if (symbolItem.handled)
+                    continue;
+
+                Rect rcSymbol = symbolItem.position;
+                if (GeomHelper.isIntersected(rcWord, rcSymbol)) {
+                    wordItem.symbols.add(symbolItem);
+                    symbolItem.handled = true;
+                }
+            }
+        }
+        for (LineTmp lineItem : allTmpLines) {
+            boolean any = false;
+            Rect rcLine = lineItem.position;
+            for (WordTmp wordItem : allTmpWords) {
+                if (wordItem.handled)
+                    continue;
+
+                Rect rcWord = wordItem.position;
+                if (GeomHelper.isIntersected(rcLine, rcWord)) {
+                    lineItem.words.add(wordItem);
+                    wordItem.handled = true;
+                    any = true;
+                }
+            }
+            if (!any)
+                logger.error("Bad algorithm - line is failed");
+        }
+        for (WordTmp wordTmp : allTmpWords)
+            if (!wordTmp.handled)
+                logger.error("Bad algorithm - word is failed");
+        for (SymbolTmp symbolTmp : allTmpSymbols)
+            if (!symbolTmp.handled)
+                logger.error("Bad algorithm - symbol is failed");
+
+
+        if (params.mergeSymboVertical) {
+            logger.trace("Merge symbol area vertically");
+            for (LineTmp lineItem : allTmpLines) {
+                for (WordTmp wordItem : lineItem.words) {
+                    maskChars.setTo(BLACK);
+                    for (SymbolTmp symbolItem : wordItem.symbols) {
+                        Mat roi = new Mat(maskChars, symbolItem.position);
+                        roi.setTo(WHITE);
+                    }
+                    List<Rect> rebuildSymbols = new ArrayList<>();
+                    mark(maskChars, 1, params.minSymbol.height, rebuildSymbols::add);
+                    wordItem.symbols = rebuildSymbols.stream()
+                            .map(SymbolTmp::new)
+                            .collect(Collectors.toList());
+                }
+            }
+        }
+
+        if (params.fitSymbolHeight) {
+            logger.trace("Fit symbol height to word height");
+            for (LineTmp lineItem : allTmpLines) {
+                for (WordTmp wordItem : lineItem.words) {
+                    wordItem.symbols = wordItem.symbols
+                            .stream()
+                            .map(symbol ->
+                                new Rect(symbol.position.x,
+                                         wordItem.position.y,
+                                         symbol.position.width,
+                                         wordItem.position.height))
+                            .map(SymbolTmp::new)
+                            .collect(Collectors.toList());
+                }
+            }
+        }
+
+
+        if (params.markLines) {
+            logger.trace("Mark lines");
+            for (LineTmp lineItem : allTmpLines) {
+                Rect rc = lineItem.position;
+                Imgproc.rectangle(imageMat, rc.br(), rc.tl(), LINE_COLOR, 3);
+            }
+        }
+        if (params.markWords) {
+            logger.trace("Mark words");
+            for (LineTmp lineItem : allTmpLines) {
+                for (WordTmp wordItem : lineItem.words) {
+                    Rect rc = wordItem.position;
+                    Imgproc.rectangle(imageMat, rc.br(), rc.tl(), WORD_COLOR, 2);
+                }
+            }
+        }
         if (params.markChars) {
             logger.trace("Mark chars");
-            for (MatOfPoint contour : regions) {
-                Rect rc = Imgproc.boundingRect(contour);
-                if ((params.stuckSymbols == 1) || (rc.width < params.maxSymbol.width)) {
-                    Imgproc.rectangle(imageMat, rc.br(), rc.tl(), GREEN);
-                } else {
-                    int cnt = (int)Math.round((rc.width / (params.maxSymbol.width * 0.7)) + 0.5);
-                    int w = rc.width / cnt;
-                    for (int i = 0; i < cnt; ++i) {
-                        Rect rc2 = new Rect(rc.x + i * w, rc.y, w, rc.height);
-                        Imgproc.rectangle(imageMat, rc2.br(), rc2.tl(), GREEN);
+            for (LineTmp lineItem : allTmpLines) {
+                for (WordTmp wordItem : lineItem.words) {
+                    for (SymbolTmp symbolItem : wordItem.symbols) {
+                        Rect rc = symbolItem.position;
+                        Imgproc.rectangle(imageMat, rc.br(), rc.tl(), SYMBOL_COLOR, 1);
                     }
                 }
             }
             for (MatOfPoint contour : inner) {
                 Rect rc = Imgproc.boundingRect(contour);
-                Imgproc.rectangle(imageMat, rc.br(), rc.tl(), YELLOW);
+                Imgproc.rectangle(imageMat, rc.br(), rc.tl(), INNER_COLOR, 1);
             }
-        }
-
-        Mat maskWords = params.markLines
-                ? Mat.zeros(imageMat.size(), CvType.CV_8UC1)
-                : null;
-
-        if (params.markWords || params.markLines) {
-            logger.trace("Mark words");
-            mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1, rc -> {
-                if (params.markWords)
-                    Imgproc.rectangle(imageMat, rc.br(), rc.tl(), MAGENTA);
-                if (maskWords != null) {
-                    Mat roi = new Mat(maskWords, rc);
-                    roi.setTo(WHITE);
-                }
-            });
-
-//            // tmp
-//            if (params.markWords)
-//                imageMat = maskChars;
-        }
-
-        if (params.markLines) {
-            logger.trace("Mark lines");
-            mark(maskWords, (int)(params.maxSymbol.width * 0.9), 2, rc -> Imgproc.rectangle(imageMat, rc.br(), rc.tl(), AMBER));
         }
     }
 
@@ -242,11 +367,11 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         for (MatOfPoint element : contours) {
             Rect rc = Imgproc.boundingRect(element);
             if (rc.width > dilateX) {
-                rc.x += (dilateX + 0.5) / 2;
+                rc.x += (dilateX / 2.0) - 0.5;
                 rc.width -= dilateX - 1;
             }
             if (rc.height > dilateY) {
-                rc.y += (dilateY + 0.5) / 2;
+                rc.y += (dilateY / 2.0) - 0.5;
                 rc.height -= dilateY - 1;
             }
 //            if ((rc.area() > 0.5 * imgsize) || (rc.area() < 100) || (rc.width / rc.height < 2)) {
@@ -366,13 +491,34 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         Box boxChars = Box.createHorizontalBox();
         boxChars.add(Box.createHorizontalStrut(7));
+        JCheckBox boxMergeVertical = makeCheckBox(
+                  () -> params.mergeSymboVertical,     // getter
+                  v  -> params.mergeSymboVertical = v, // setter
+                  "Merge vertical",                    // title
+                  "params.mergeSymboVertical",         // paramName
+                  "Merge symbol area vertically",      // tip
+                  null);                               // customListener
+        JCheckBox boxFitHeight = makeCheckBox(
+                  () -> params.fitSymbolHeight,        // getter
+                  v  -> params.fitSymbolHeight = v,    // setter
+                  "Fit height",                        // title
+                  "params.fitSymbolHeight",            // paramName
+                  "Fit symbol height to word height",  // tip
+                  null);                               // customListener
         boxChars.add(makeCheckBox(
                 () -> params.markChars,      // getter
                 v  -> params.markChars = v,  // setter
                 "Mark chars",                // title
                 "params.markChars",          // paramName
                 null,                        // tip
-                null));                      // customListener
+                () -> {                      // customListener
+                    boxMergeVertical.setEnabled(params.markChars);
+                    boxFitHeight    .setEnabled(params.markChars);
+                }));                      // customListener
+        boxChars.add(Box.createHorizontalStrut(7));
+        boxChars.add(boxMergeVertical);
+        boxChars.add(Box.createHorizontalStrut(7));
+        boxChars.add(boxFitHeight);
         boxChars.add(Box.createHorizontalGlue());
 
         Box boxWords = Box.createHorizontalBox();
