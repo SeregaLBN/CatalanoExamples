@@ -11,11 +11,6 @@ public class MserTabParams implements ITabParams {
 
     /** it compares (size_i − size_iDelta)/size_iDelta */
     public int     delta = 5;
-    /** prune the area which smaller than minArea */
-    public int     minArea = 48;
-    /** prune the area which bigger than maxArea */
-    public int     maxArea = 14000;
-    /** prune the area have similar size to its children */
     public double  maxVariation = 0.25;
     /** for color image, trace back to cut off mser with diversity less than min_diversity */
     public double  minDiversity = .2;
@@ -32,6 +27,11 @@ public class MserTabParams implements ITabParams {
     public Size    minSymbol = new Size(1, 1);
     /** Additional restrictions on the maximum symbol size */
     public Size    maxSymbol = new Size(500, 700);
+
+    /** Minimum line heigth */
+    public int    minLineHeight = 50;
+   //** Maximum line heigth */
+  //public int    maxLineHeight => maxSymbol.height;
 
     /** the number of characters stuck together */
     public int stuckSymbols = 1;
@@ -59,13 +59,11 @@ public class MserTabParams implements ITabParams {
     @Override
     public String toString() {
         return String.format(Locale.US,
-            "{ delta=%d, minArea=%s, maxArea=%s, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d"
-            + ", minSymbol=%s, maxSymbol=%s, stuckSymbols=%d"
+            "{ delta=%d, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d"
+            + ", minSymbol=%s, maxSymbol=%s, minLineHeight=%s, stuckSymbols=%d"
             + ", mergeSymboVertical=%b, fitSymbolHeight=%b"
             + ", showRegions=%b, invert=%b, showInner=%b, markChars=%b, markWords=%b, markLines=%b }",
             delta,
-            minArea,
-            maxArea,
             maxVariation,
             minDiversity,
             maxEvolution,
@@ -74,6 +72,7 @@ public class MserTabParams implements ITabParams {
             edgeBlurSize,
             minSymbol,
             maxSymbol,
+            minLineHeight,
             stuckSymbols,
             showRegions,
             invert,

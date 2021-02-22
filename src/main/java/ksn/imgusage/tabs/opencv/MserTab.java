@@ -3,8 +3,10 @@ package ksn.imgusage.tabs.opencv;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.*;
 
@@ -27,10 +29,6 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
     public  static final int    MIN_DELTA = 1;
     private static final int    MAX_DELTA = 150;
-    private static final int    MIN_MIN_AREA =   1;
-    private static final int    MAX_MIN_AREA = 4200;
-    private static final int    MIN_MAX_AREA =   2;
-    private static final int    MAX_MAX_AREA = 4201;
     private static final double MIN_MAX_VARIATION = 0.01;
     private static final double MAX_MAX_VARIATION = 100;
     private static final double MIN_MIN_DIVERSITY = 0.01;
@@ -51,7 +49,11 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     private static final int    MIN_MAX_SYMBOL_H = MIN_MIN_SYMBOL_H + 1;
     private static final int    MAX_MAX_SYMBOL_W = MAX_MIN_SYMBOL_W + 1;
     private static final int    MAX_MAX_SYMBOL_H = MAX_MIN_SYMBOL_H + 1;
+    private static final int    MIN_MIN_LINE_HEIGHT  = MIN_MIN_SYMBOL_H;
+    private static final int    MAX_MIN_LINE_HEIGHT  = MAX_MAX_SYMBOL_H;
     private static final int    MAX_SYMBOLS_STUCK = 10;
+
+    private static final int NUMBER_OF_BROKEN_VERTICAL_PARTS = 4;
 
     private static final Scalar BLACK   = new Scalar(0);
     private static final Scalar WHITE   = new Scalar(0xFF);
@@ -85,10 +87,16 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
     @Override
     protected void applyOpencvFilter() {
+        final int minLineHeight = params.minLineHeight;
+        final int maxLineHeight = params.maxSymbol.height;//(int)(params.maxSymbol.height * 1.5);
+
         MSER mser = MSER.create(
             params.delta,
-            params.minArea,
-            params.maxArea,
+
+            // filter #1 by area
+            params.minSymbol.width * params.minSymbol.height / (params.mergeSymboVertical ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1),
+            params.maxSymbol.width * params.maxSymbol.height * params.stuckSymbols,
+
             params.maxVariation,
             params.minDiversity,
             params.maxEvolution,
@@ -101,14 +109,14 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                            regions,
                            new MatOfRect()); // resulting bounding boxes
 
-        { // filter
+        { // filter #2 by size (width and height)
             List<Integer> ignored = new ArrayList<>();
             for (int i=0; i < regions.size(); ++i) {
                 MatOfPoint contour = regions.get(i);
                 Rect rc = Imgproc.boundingRect(contour);
                 if ((rc.width  < params.minSymbol.width ) ||
-                    (rc.height < params.minSymbol.height) ||
-                    (rc.width  >(params.maxSymbol.width * params.stuckSymbols)) ||
+                    (rc.height <(params.minSymbol.height / (params.mergeSymboVertical ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1))) ||
+                    (rc.width  >(params.maxSymbol.width  *  params.stuckSymbols)) ||
                     (rc.height > params.maxSymbol.height))
                 {
                     ignored.add(i);
@@ -121,102 +129,19 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             }
         }
 
-        List<MatOfPoint> inner = Collections.emptyList();
-        if (!params.showInner) {
-            Set<MatOfPoint> inner2 = new HashSet<>();
-            for (MatOfPoint region1 : regions) {
-                if (inner2.contains(region1))
-                    continue;
-                Rect rc1 = Imgproc.boundingRect(region1);
-                for (MatOfPoint region2 : regions) {
-                    if (region1 == region2) // by ref
-                        continue;
-                    if (inner2.contains(region2))
-                        continue;
-                    Rect rc2 = Imgproc.boundingRect(region2);
-                    if ((rc1.x > rc2.x) &&
-                        (rc1.y > rc2.y) &&
-                        (rc1.x+rc1.width  < rc2.x+rc2.width) &&
-                        (rc1.y+rc1.height < rc2.y+rc2.height))
-                    {
-                        inner2.add(region1);
-                        break;
-                    }
-                }
-            }
-            logger.trace("Inner regions count is {}", inner2.size());
-            if (!inner2.isEmpty()) {
-                inner = new ArrayList<>(inner2);
-                regions.removeAll(inner2);
-            }
+        class InnerTmp {
+            final Rect position;
+            final MatOfPoint contour;
+            InnerTmp(MatOfPoint contour, Rect pos) { this.contour = contour; this.position = pos; }
         }
-
-        if (params.showRegions) {
-            logger.trace("Show mask: contours.size={}", regions.size());
-            imageMat = params.invert
-                    ? new Mat  (imageMat.size(), CvType.CV_8UC1, WHITE)
-                    : Mat.zeros(imageMat.size(), CvType.CV_8UC1);
-            Imgproc.drawContours(
-                    imageMat,        // Mat image
-                    regions,         // List<MatOfPoint> contours
-                    -1,              // int contourIdx
-                    params.invert    // Scalar color
-                        ? BLACK : WHITE,
-                    Imgproc.FILLED); // int thickness
-            if (!inner.isEmpty())
-                Imgproc.drawContours(
-                        imageMat,        // Mat image
-                        inner,           // List<MatOfPoint> contours
-                        -1,              // int contourIdx
-                        params.invert    // Scalar color
-                            ? WHITE : BLACK,
-                        Imgproc.FILLED); // int thickness
-        }
-
-        if (params.markChars || params.markWords || params.markLines)
-            imageMat = OpenCvHelper.to3Channel(imageMat);
-
-
-        logger.trace("Draw mask");
-        Mat maskChars = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
-        Mat maskWords = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
-
-        logger.trace("Collect symbols");
-        List<Rect> allSymbols = new ArrayList<>(regions.size());
-        List<Rect> innerSymbols = new ArrayList<>(inner.size());
-        for (MatOfPoint contour : regions) {
-            Rect rc = Imgproc.boundingRect(contour);
-            allSymbols.add(rc);
-
-            Mat roi = new Mat(maskChars, rc);
-            roi.setTo(WHITE);
-        }
-        for (MatOfPoint contour : inner) {
-            Rect rc = Imgproc.boundingRect(contour);
-            innerSymbols.add(rc);
-        }
-
-        logger.trace("Collect words");
-        List<Rect> allWords = new ArrayList<>();
-        mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1)
-            .forEach(rc -> {
-                allWords.add(rc);
-
-                Mat roi = new Mat(maskWords, rc);
-                roi.setTo(WHITE);
-            });
-
-
-        logger.trace("Collect lines");
-        List<Rect> allLines = new ArrayList<>();
-        mark(maskWords, (int)(params.maxSymbol.width * 0.9), 2)
-            .forEach(allLines::add);
-
-
         class SymbolTmp {
             final Rect position;
+            final List<MatOfPoint> contours;
+            List<InnerTmp> inners = new ArrayList<>();
             boolean handled = false;
-            SymbolTmp(Rect position) { this.position = position; }
+            SymbolTmp(MatOfPoint contour) { this.contours = new ArrayList<>();
+                                            this.contours.add(contour);
+                                            this.position = Imgproc.boundingRect(contour); }
         }
         class WordTmp {
             final Rect position;
@@ -230,23 +155,75 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             LineTmp(Rect position) { this.position = position; }
         }
 
-        List<SymbolTmp> allTmpSymbols = allSymbols.stream()
-                .map(SymbolTmp::new)
+        logger.trace("Collect symbols");
+        List<SymbolTmp> allSymbols = regions
+                    .stream()
+                    .map(SymbolTmp::new)
+                    .collect(Collectors.toList());
+        regions = null; // do not use again
+
+        logger.trace("Find inner regions");
+        for (SymbolTmp symbol : allSymbols) {
+            if (symbol.handled)
+                continue;
+            for (SymbolTmp symbol2 : allSymbols) {
+                if (symbol == symbol2) // by ref
+                    continue;
+                if (symbol2.handled)
+                    continue;
+                Rect rc1 = symbol.position;
+                Rect rc2 = symbol2.position;
+                if ((rc1.x < rc2.x) &&
+                    (rc1.y < rc2.y) &&
+                    (rc1.x+rc1.width  > rc2.x+rc2.width) &&
+                    (rc1.y+rc1.height > rc2.y+rc2.height))
+                {
+                    symbol2.handled = true; // mark is inner
+                    symbol.inners.add(new InnerTmp(symbol2.contours.get(0), symbol2.position));
+                    symbol.inners.addAll(symbol2.inners);
+                }
+            }
+        }
+        allSymbols = allSymbols.stream()
+                .filter(s -> !s.handled) // only own regions
                 .collect(Collectors.toList());
-        List<WordTmp> allTmpWords = allWords.stream()
+        allSymbols.forEach(s -> s.handled = false);
+
+
+        logger.trace("Draw symbols masks");
+        Mat maskChars = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+        for (SymbolTmp symbol : allSymbols) {
+            Mat roi = new Mat(maskChars, symbol.position);
+            roi.setTo(WHITE);
+        }
+
+        logger.trace("Collect word regions");
+        List<WordTmp> allWords = mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1)
+                .stream()
                 .sorted((a, b) -> Integer.compare(a.width * a.height,
                                                   b.width * b.height))
                 .map(WordTmp::new)
                 .collect(Collectors.toList());
-        List<LineTmp> allTmpLines = allLines.stream()
-                .sorted((a, b) -> Integer.compare(a.width * a.height,
-                                                  b.width * b.height))
+
+        logger.trace("Draw words masks");
+        Mat maskWords = Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+        allWords.forEach(w -> {
+            Mat roi = new Mat(maskWords, w.position);
+            roi.setTo(WHITE);
+        });
+
+        logger.trace("Collect line regions");
+        List<LineTmp> allLines = mark(maskWords, (int)(params.maxSymbol.width * 0.9), 2)
+                .stream()
+                .sorted((rc1, rc2) -> Integer.compare(rc1.width * rc1.height,
+                                                      rc2.width * rc2.height))
                 .map(LineTmp::new)
                 .collect(Collectors.toList());
 
-        for (WordTmp wordItem : allTmpWords) {
+        logger.trace("Build words");
+        for (WordTmp wordItem : allWords) {
             Rect rcWord = wordItem.position;
-            for (SymbolTmp symbolItem : allTmpSymbols) {
+            for (SymbolTmp symbolItem : allSymbols) {
                 if (symbolItem.handled)
                     continue;
 
@@ -257,10 +234,12 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 }
             }
         }
-        for (LineTmp lineItem : allTmpLines) {
+
+        logger.trace("Build lines");
+        for (LineTmp lineItem : allLines) {
             boolean any = false;
             Rect rcLine = lineItem.position;
-            for (WordTmp wordItem : allTmpWords) {
+            for (WordTmp wordItem : allWords) {
                 if (wordItem.handled)
                     continue;
 
@@ -274,61 +253,138 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             if (!any)
                 logger.error("Bad algorithm - line is failed");
         }
-        for (WordTmp wordTmp : allTmpWords)
+        for (WordTmp wordTmp : allWords)
             if (!wordTmp.handled)
                 logger.error("Bad algorithm - word is failed");
-        for (SymbolTmp symbolTmp : allTmpSymbols)
+        for (SymbolTmp symbolTmp : allSymbols)
             if (!symbolTmp.handled)
                 logger.error("Bad algorithm - symbol is failed");
+
+        allSymbols = null; // do not use again
+        allWords = null; // do not use again
+        allLines = allLines
+                .stream()
+
+                // filter #3 by height line
+                .filter(l -> l.position.height >= minLineHeight)
+                .filter(l -> l.position.height <= maxLineHeight)
+
+                .collect(Collectors.toList());
 
 
         if (params.mergeSymboVertical) {
             logger.trace("Merge symbol area vertically");
-            for (LineTmp lineItem : allTmpLines) {
+            for (LineTmp lineItem : allLines) {
                 for (WordTmp wordItem : lineItem.words) {
                     maskChars.setTo(BLACK);
                     for (SymbolTmp symbolItem : wordItem.symbols) {
                         Mat roi = new Mat(maskChars, symbolItem.position);
                         roi.setTo(WHITE);
                     }
-                    List<Rect> rebuildSymbols = new ArrayList<>();
-                    mark(maskChars, 1, params.minSymbol.height)
-                        .forEach(rebuildSymbols::add);
-                    wordItem.symbols = rebuildSymbols.stream()
-                            .map(SymbolTmp::new)
-                            .collect(Collectors.toList());
+
+                    List<Rect> rebuildSymbols = mark(maskChars, 1, params.minSymbol.height);
+                    wordItem.symbols = rebuildSymbols
+                        .stream()
+                        .map(rcNewSymbol -> {
+                            SymbolTmp newSymbol = wordItem.symbols
+                                    .stream()
+                                    .filter(s -> {
+                                        boolean x = (rcNewSymbol.x                       <= s.position.x                    );
+                                        boolean w = (rcNewSymbol.x +  rcNewSymbol.width  >= s.position.x + s.position.width );
+                                        boolean y = (rcNewSymbol.y                       <= s.position.y                    );
+                                        boolean h = (rcNewSymbol.y +  rcNewSymbol.height >= s.position.y + s.position.height);
+                                        return x && y && w && h;
+                                    })
+                                    .reduce((s1, s2) -> {
+                                        s1.contours.addAll(s2.contours);
+                                        s1.inners.addAll(s2.inners);
+                                        Rect rc = GeomHelper.intersectInclude(s1.position, s2.position);
+                                        s1.position.x      = rc.x;
+                                        s1.position.y      = rc.y;
+                                        s1.position.width  = rc.width;
+                                        s1.position.height = rc.height;
+                                        return s1;
+                                    })
+                                    .get();
+                            if (!rcNewSymbol.equals(newSymbol.position))
+                                logger.warn("Bad algorithm 'mergeSymboVertical'...");
+                            return newSymbol;
+                        })
+                        .collect(Collectors.toList());
                 }
             }
         }
 
         if (params.fitSymbolHeight) {
             logger.trace("Fit symbol height to word height");
-            for (LineTmp lineItem : allTmpLines) {
-                for (WordTmp wordItem : lineItem.words) {
-                    wordItem.symbols = wordItem.symbols
-                            .stream()
-                            .map(symbol ->
-                                new Rect(symbol.position.x,
-                                         wordItem.position.y,
-                                         symbol.position.width,
-                                         wordItem.position.height))
-                            .map(SymbolTmp::new)
-                            .collect(Collectors.toList());
-                }
-            }
+            for (LineTmp lineItem : allLines)
+                for (WordTmp wordItem : lineItem.words)
+                    for (SymbolTmp symbolItem : wordItem.symbols) {
+                        Rect rc = symbolItem.position;
+                        rc.y = wordItem.position.y;
+                        rc.height = wordItem.position.height;
+                    }
         }
 
 
+        // show results
+        if (params.showRegions) {
+            List<MatOfPoint> all = allLines.stream()
+                    .flatMap(l -> l.words
+                                   .stream()
+                                   .flatMap(w -> w.symbols
+                                                  .stream()
+                                                  .flatMap(s -> s.contours.stream())))
+                    .collect(Collectors.toList());
+
+            logger.trace("Show mask: contours.size={}", all.size());
+            imageMat = params.invert
+                    ? new Mat  (imageMat.size(), CvType.CV_8UC1, WHITE)
+                    : Mat.zeros(imageMat.size(), CvType.CV_8UC1);
+            Imgproc.drawContours(
+                    imageMat,        // Mat image
+                    all,             // List<MatOfPoint> contours
+                    -1,              // int contourIdx
+                    params.invert    // Scalar color
+                        ? BLACK : WHITE,
+                    Imgproc.FILLED); // int thickness
+
+            if (params.showInner) {
+                List<MatOfPoint> inner = allLines.stream()
+                        .flatMap(l -> l.words
+                                       .stream()
+                                       .flatMap(w -> w.symbols
+                                                      .stream()
+                                                      .flatMap(s -> s.inners
+                                                                     .stream()
+                                                                     .flatMap(i -> Stream.of(i.contour)))))
+                        .collect(Collectors.toList());
+                if (!inner.isEmpty())
+                    Imgproc.drawContours(
+                            imageMat,        // Mat image
+                            inner,           // List<MatOfPoint> contours
+                            -1,              // int contourIdx
+//                            params.invert    // Scalar color
+//                                ? WHITE : BLACK,
+                            params.invert    // Scalar color
+                                ? BLACK : WHITE,
+                            Imgproc.FILLED); // int thickness
+            }
+        }
+
+        if (params.markChars || params.markWords || params.markLines)
+            imageMat = OpenCvHelper.to3Channel(imageMat);
+
         if (params.markLines) {
             logger.trace("Mark lines");
-            for (LineTmp lineItem : allTmpLines) {
+            for (LineTmp lineItem : allLines) {
                 Rect rc = lineItem.position;
                 Imgproc.rectangle(imageMat, rc.br(), rc.tl(), LINE_COLOR, 3);
             }
         }
         if (params.markWords) {
             logger.trace("Mark words");
-            for (LineTmp lineItem : allTmpLines) {
+            for (LineTmp lineItem : allLines) {
                 for (WordTmp wordItem : lineItem.words) {
                     Rect rc = wordItem.position;
                     Imgproc.rectangle(imageMat, rc.br(), rc.tl(), WORD_COLOR, 2);
@@ -337,7 +393,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         }
         if (params.markChars) {
             logger.trace("Mark chars");
-            for (LineTmp lineItem : allTmpLines) {
+            for (LineTmp lineItem : allLines) {
                 for (WordTmp wordItem : lineItem.words) {
                     for (SymbolTmp symbolItem : wordItem.symbols) {
                         Rect rc = symbolItem.position;
@@ -352,12 +408,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                                 Imgproc.rectangle(imageMat, rc2.br(), rc2.tl(), SYMBOL_COLOR);
                             }
                         }
+                        for (InnerTmp inner : symbolItem.inners)
+                            Imgproc.rectangle(imageMat, inner.position.br(), inner.position.tl(), INNER_COLOR, 1);
                     }
                 }
-            }
-            for (MatOfPoint contour : inner) {
-                Rect rc = Imgproc.boundingRect(contour);
-                Imgproc.rectangle(imageMat, rc.br(), rc.tl(), INNER_COLOR, 1);
             }
         }
     }
@@ -397,35 +451,62 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         Box box4Options = Box.createVerticalBox();
 //        box4Options.setBorder(BorderFactory.createTitledBorder(""));
 
-        SliderIntModel    modelDelta         = new    SliderIntModel(params.delta           , 0, MIN_DELTA         , MAX_DELTA);
-        SliderIntModel    modelMinArea       = new    SliderIntModel(params.minArea         , 0, MIN_MIN_AREA      , MAX_MIN_AREA);
-        SliderIntModel    modelMaxArea       = new    SliderIntModel(params.maxArea         , 0, MIN_MAX_AREA      , MAX_MAX_AREA);
-        SliderDoubleModel modelMaxVariation  = new SliderDoubleModel(params.maxVariation    , 0, MIN_MAX_VARIATION , MAX_MAX_VARIATION);
-        SliderDoubleModel modelMinDiversity  = new SliderDoubleModel(params.minDiversity    , 0, MIN_MIN_DIVERSITY , MAX_MIN_DIVERSITY);
-        SliderIntModel    modelMaxEvolution  = new    SliderIntModel(params.maxEvolution    , 0, MIN_MAX_EVOLUTION , MAX_MAX_EVOLUTION);
-        SliderDoubleModel modelAreaThreshold = new SliderDoubleModel(params.areaThreshold   , 0, MIN_AREA_THRESHOLD, MAX_AREA_THRESHOLD);
-        SliderDoubleModel modelMinMargin     = new SliderDoubleModel(params.minMargin       , 0, MIN_MIN_MARGIN    , MAX_MIN_MARGIN, 3);
-        SliderIntModel    modelEdgeBlurSize  = new    SliderIntModel(params.edgeBlurSize    , 0, MIN_EDGE_BLUR_SIZE, MAX_EDGE_BLUR_SIZE);
-        SliderIntModel    modelMinSymbolW    = new    SliderIntModel(params.minSymbol.width , 0, MIN_MIN_SYMBOL_W  , MAX_MIN_SYMBOL_W);
-        SliderIntModel    modelMinSymbolH    = new    SliderIntModel(params.minSymbol.height, 0, MIN_MIN_SYMBOL_H  , MAX_MIN_SYMBOL_H);
-        SliderIntModel    modelMaxSymbolW    = new    SliderIntModel(params.maxSymbol.width , 0, MIN_MAX_SYMBOL_W  , MAX_MAX_SYMBOL_W);
-        SliderIntModel    modelMaxSymbolH    = new    SliderIntModel(params.maxSymbol.height, 0, MIN_MAX_SYMBOL_H  , MAX_MAX_SYMBOL_H);
-        SliderIntModel    modelSymbolsStuck  = new    SliderIntModel(params.stuckSymbols    , 0, 1                 , MAX_SYMBOLS_STUCK);
+        SliderIntModel    modelDelta         = new    SliderIntModel(params.delta           , 0, MIN_DELTA          , MAX_DELTA);
+        SliderDoubleModel modelMaxVariation  = new SliderDoubleModel(params.maxVariation    , 0, MIN_MAX_VARIATION  , MAX_MAX_VARIATION);
+        SliderDoubleModel modelMinDiversity  = new SliderDoubleModel(params.minDiversity    , 0, MIN_MIN_DIVERSITY  , MAX_MIN_DIVERSITY);
+        SliderIntModel    modelMaxEvolution  = new    SliderIntModel(params.maxEvolution    , 0, MIN_MAX_EVOLUTION  , MAX_MAX_EVOLUTION);
+        SliderDoubleModel modelAreaThreshold = new SliderDoubleModel(params.areaThreshold   , 0, MIN_AREA_THRESHOLD , MAX_AREA_THRESHOLD);
+        SliderDoubleModel modelMinMargin     = new SliderDoubleModel(params.minMargin       , 0, MIN_MIN_MARGIN     , MAX_MIN_MARGIN, 3);
+        SliderIntModel    modelEdgeBlurSize  = new    SliderIntModel(params.edgeBlurSize    , 0, MIN_EDGE_BLUR_SIZE , MAX_EDGE_BLUR_SIZE);
+        SliderIntModel    modelMinSymbolW    = new    SliderIntModel(params.minSymbol.width , 0, MIN_MIN_SYMBOL_W   , MAX_MIN_SYMBOL_W);
+        SliderIntModel    modelMinSymbolH    = new    SliderIntModel(params.minSymbol.height, 0, MIN_MIN_SYMBOL_H   , MAX_MIN_SYMBOL_H);
+        SliderIntModel    modelMaxSymbolW    = new    SliderIntModel(params.maxSymbol.width , 0, MIN_MAX_SYMBOL_W   , MAX_MAX_SYMBOL_W);
+        SliderIntModel    modelMaxSymbolH    = new    SliderIntModel(params.maxSymbol.height, 0, MIN_MAX_SYMBOL_H   , MAX_MAX_SYMBOL_H);
+        SliderIntModel    modelMinLineHeight = new    SliderIntModel(params.minLineHeight   , 0, MIN_MIN_LINE_HEIGHT, MAX_MIN_LINE_HEIGHT);
+        SliderIntModel    modelSymbolsStuck  = new    SliderIntModel(params.stuckSymbols    , 0, 1                  , MAX_SYMBOLS_STUCK);
 
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
-        box4Sliders.add(makeSliderVert(modelDelta, "Delta", "it compares (size<i>−size<i−delta>)/size<i−delta>"));
+        Box box4Area = makeContourLimits(
+                          modelMinSymbolW, modelMinSymbolH,
+                          modelMaxSymbolW, modelMaxSymbolH,
+                          "Symbol", "Symbol limits",
+                          "MinSymbol", "MaxSymbol",
+                          "Additional restrictions on the minimum symbol size",
+                          "Additional restrictions on the maximum symbol size");
+        box4Sliders.add(box4Area);
         box4Sliders.add(Box.createHorizontalStrut(2));
-        box4Sliders.add(makeMinMax(modelMinArea,                                 // modelMin
-                                   modelMaxArea,                                 // modelMax
-                                   "Area",                                       // borderTitle
-                                   "Prune the area",                             // tip
-                                   "Prune the area which smaller than minArea",  // tipMin
-                                   "Prune the area which bigger than maxArea")); // tipMax
-        box4Sliders.add(Box.createHorizontalStrut(2));
-        box4Sliders.add(makeSliderVert(modelMaxVariation, "Variation", "MAX Variation: Prune the area have similar size to its children"));
+
+        Box boxLineH = Box.createHorizontalBox();
+        boxLineH.setBorder(BorderFactory.createTitledBorder("Line"));
+        boxLineH.setToolTipText("Line restrictions");
+        boxLineH.add(Box.createHorizontalGlue());
+        boxLineH.add(makeSliderVert(modelMinLineHeight, "MinHeight", "Minimum line height\n Maximum defined as MaxSymbol.Height"));
+        boxLineH.add(Box.createHorizontalGlue());
+
+        modelMinLineHeight.getWrapped().addChangeListener(ev -> {
+            if (modelMinLineHeight.getValue() < modelMinSymbolH.getValue())
+                modelMinSymbolH.setValue(modelMinLineHeight.getValue());
+            if (modelMinLineHeight.getValue() > modelMaxSymbolH.getValue())
+                modelMaxSymbolH.setValue(modelMinLineHeight.getValue());
+        });
+        modelMinSymbolH.getWrapped().addChangeListener(ev -> {
+            if (modelMinSymbolH.getValue() > modelMinLineHeight.getValue())
+                modelMinLineHeight.setValue(modelMinSymbolH.getValue());
+        });
+        modelMaxSymbolH.getWrapped().addChangeListener(ev -> {
+            if (modelMaxSymbolH.getValue() < modelMinLineHeight.getValue())
+                modelMinLineHeight.setValue(modelMaxSymbolH.getValue());
+        });
+
+        box4Sliders.add(boxLineH);
         box4Sliders.add(Box.createHorizontalGlue());
+        JPanel panel3 = new JPanel();
+        panel3.setLayout(new BorderLayout());
+        Container cntrlStuckW = makeEditBox("params.stuckSymbols", modelSymbolsStuck, "Stuck symbols", null, "the number of characters stuck together");
+        panel3.add(box4Sliders, BorderLayout.CENTER);
+        panel3.add(cntrlStuckW, BorderLayout.SOUTH);
 
         Box box4Sliders2 = Box.createHorizontalBox();
         box4Sliders2.add(Box.createHorizontalGlue());
@@ -440,29 +521,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         box4Sliders2.add(makeSliderVert(modelEdgeBlurSize, "Blur", "edgeBlurSize: the aperture size for edge blur"));
         box4Sliders2.add(Box.createHorizontalGlue());
 
-        Box box4Sliders3 = Box.createHorizontalBox();
-        box4Sliders3.add(Box.createHorizontalGlue());
-        box4Sliders3.add(makeContourLimits(
-                          modelMinSymbolW, modelMinSymbolH,
-                          modelMaxSymbolW, modelMaxSymbolH,
-                          "Symbol", "Symbol limits",
-                          "MinSymbol", "MaxSymbol",
-                          "Additional restrictions on the minimum symbol size",
-                          "Additional restrictions on the maximum symbol size"));
-        box4Sliders3.add(Box.createHorizontalGlue());
-        ////////////
-        JPanel panel3 = new JPanel();
-        panel3.setLayout(new BorderLayout());
-        Container cntrlStuckW = makeEditBox("params.stuckSymbols", modelSymbolsStuck, "Stuck symbols", null, "the number of characters stuck together");
-        panel3.add(box4Sliders3, BorderLayout.CENTER);
-        panel3.add(cntrlStuckW, BorderLayout.SOUTH);
-        ///////////////
-
         JTabbedPane tabPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabPane.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
-        tabPane.addTab("Common", null, box4Sliders, null);
+        tabPane.addTab("Area limits", null, panel3, "Additional restrictions on area size");
         tabPane.addTab("For color image", null, box4Sliders2, null);
-        tabPane.addTab("Symbol limits", null, panel3, "Additional restrictions on symbol size");
 
         Box boxRegions = Box.createHorizontalBox();
         boxRegions.add(Box.createHorizontalStrut(7));
@@ -572,8 +634,6 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         box4Options.add(panelOptions);
 
         addChangeListener("params.delta"           , modelDelta        , v -> params.delta            = v);
-        addChangeListener("params.minArea"         , modelMinArea      , v -> params.minArea          = v);
-        addChangeListener("params.maxArea"         , modelMaxArea      , v -> params.maxArea          = v);
         addChangeListener("params.maxVariation"    , modelMaxVariation , v -> params.maxVariation     = v);
         addChangeListener("params.minDiversity"    , modelMinDiversity , v -> params.minDiversity     = v);
         addChangeListener("params.maxEvolution"    , modelMaxEvolution , v -> params.maxEvolution     = v);
@@ -584,6 +644,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         addChangeListener("params.minSymbol.height", modelMinSymbolH   , v -> params.minSymbol.height = v);
         addChangeListener("params.maxSymbol.width" , modelMaxSymbolW   , v -> params.maxSymbol.width  = v);
         addChangeListener("params.maxSymbol.height", modelMaxSymbolH   , v -> params.maxSymbol.height = v);
+        addChangeListener("params.minLineHeight"   , modelMinLineHeight, v -> params.minLineHeight    = v);
         addChangeListener("params.stuckSymbols"    , modelSymbolsStuck , v -> params.stuckSymbols     = v);
         modelEdgeBlurSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelEdgeBlurSize: value={}", modelEdgeBlurSize.getFormatedText());
