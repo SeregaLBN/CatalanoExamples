@@ -1,0 +1,67 @@
+[
+    {
+        "params": {
+            "fileType": "IMAGE",
+            "imageFile": "passportUkraine_since2016_back.jpg",
+            "useScale": true
+        },
+        "tabName": "FirstTab"
+    },
+    {
+        "params": {
+            "keepToSize": {
+                "height": 764,
+                "width": 1198
+            },
+            "useKeepAspectRatio": true
+        },
+        "tabName": "Common:Resize"
+    },
+    {
+        "params": {
+            "colorsTo": "GRAY",
+            "useWhiteBalancer": true
+        },
+        "tabName": "OpenCV:Colorized"
+    },
+    {
+        "params": {
+            "adaptiveMethod": "ADAPTIVE_THRESH_GAUSSIAN_C",
+            "blockSize": 43,
+            "c": 16.75,
+            "maxVal": 299.95,
+            "threshType": "THRESH_BINARY"
+        },
+        "tabName": "OpenCV:AdaptiveThreshold"
+    },
+    {
+        "params": {
+            "areaThreshold": 0.0,
+            "delta": 1,
+            "edgeBlurSize": 1,
+            "fitSymbolHeight": false,
+            "invert": true,
+            "markChars": true,
+            "markLines": true,
+            "markWords": false,
+            "maxEvolution": 1,
+            "maxSymbol": {
+                "height": 45,
+                "width": 35
+            },
+            "maxVariation": 0.01,
+            "mergeSymboVertical": false,
+            "minDiversity": 0.01,
+            "minLineHeight": 25,
+            "minMargin": 0.001,
+            "minSymbol": {
+                "height": 14,
+                "width": 7
+            },
+            "showInner": false,
+            "showRegions": true,
+            "stuckSymbols": 1
+        },
+        "tabName": "OpenCV:MSER"
+    }
+]

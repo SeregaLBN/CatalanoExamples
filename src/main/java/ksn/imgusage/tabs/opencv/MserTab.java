@@ -200,8 +200,8 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         logger.trace("Collect word regions");
         List<WordTmp> allWords = mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1)
                 .stream()
-                .sorted((a, b) -> Integer.compare(a.width * a.height,
-                                                  b.width * b.height))
+                .sorted((rc1, rc2) -> Integer.compare(rc1.width * rc1.height,
+                                                      rc2.width * rc2.height))
                 .map(WordTmp::new)
                 .collect(Collectors.toList());
 
@@ -276,6 +276,9 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             logger.trace("Merge symbol area vertically");
             for (LineTmp lineItem : allLines) {
                 for (WordTmp wordItem : lineItem.words) {
+                    if (wordItem.symbols.size() == 1)
+                        continue;
+
                     maskChars.setTo(BLACK);
                     for (SymbolTmp symbolItem : wordItem.symbols) {
                         Mat roi = new Mat(maskChars, symbolItem.position);
@@ -288,13 +291,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                         .map(rcNewSymbol -> {
                             SymbolTmp newSymbol = wordItem.symbols
                                     .stream()
-                                    .filter(s -> {
-                                        boolean x = (rcNewSymbol.x                       <= s.position.x                    );
-                                        boolean w = (rcNewSymbol.x +  rcNewSymbol.width  >= s.position.x + s.position.width );
-                                        boolean y = (rcNewSymbol.y                       <= s.position.y                    );
-                                        boolean h = (rcNewSymbol.y +  rcNewSymbol.height >= s.position.y + s.position.height);
-                                        return x && y && w && h;
-                                    })
+                                    .filter(s -> (rcNewSymbol.x                       <= s.position.x                    )
+                                              && (rcNewSymbol.x +  rcNewSymbol.width  >= s.position.x + s.position.width )
+                                              && (rcNewSymbol.y                       <= s.position.y                    )
+                                              && (rcNewSymbol.y +  rcNewSymbol.height >= s.position.y + s.position.height))
                                     .reduce((s1, s2) -> {
                                         s1.contours.addAll(s2.contours);
                                         s1.inners.addAll(s2.inners);
@@ -364,8 +364,6 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                             imageMat,        // Mat image
                             inner,           // List<MatOfPoint> contours
                             -1,              // int contourIdx
-//                            params.invert    // Scalar color
-//                                ? WHITE : BLACK,
                             params.invert    // Scalar color
                                 ? BLACK : WHITE,
                             Imgproc.FILLED); // int thickness
