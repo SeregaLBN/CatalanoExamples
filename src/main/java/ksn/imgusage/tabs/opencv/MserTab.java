@@ -279,12 +279,31 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                     if (wordItem.symbols.size() == 1)
                         continue;
 
+                    class GroupTmp {
+                        Rect rc; // top/bottom - word region; left/right - symbol region
+                        SymbolTmp s;
+                    }
+                    Rect rcWord = wordItem.position;
+                    wordItem.symbols.stream()
+                        .map(s -> {
+                            GroupTmp res = new GroupTmp();
+                            res.s = s;
+                            res.rc = new Rect(s.position.x,
+                                              rcWord.y,
+                                              s.position.width,
+                                              rcWord.height);
+                            return res;
+                        })
+                        ;
+//                        .collect(Collectors.groupingBy(classifier))
+
                     maskChars.setTo(BLACK);
                     for (SymbolTmp symbolItem : wordItem.symbols) {
                         Mat roi = new Mat(maskChars, symbolItem.position);
                         roi.setTo(WHITE);
                     }
 
+                    try {
                     List<Rect> rebuildSymbols = mark(maskChars, 1, params.minSymbol.height);
                     wordItem.symbols = rebuildSymbols
                         .stream()
@@ -311,6 +330,9 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                             return newSymbol;
                         })
                         .collect(Collectors.toList());
+                    } catch (Exception ex) {
+                        logger.error("Merge symbol area vertically", ex);
+                    }
                 }
             }
         }

@@ -1,0 +1,78 @@
+[
+    {
+        "params": {
+            "fileType": "IMAGE",
+            "imageFile": "../../../Downloads/meduza_IPI-2680/realData/inn/11238708135.jpeg",
+            "useScale": true
+        },
+        "tabName": "FirstTab"
+    },
+    {
+        "params": {
+            "keepToSize": {
+                "height": 770,
+                "width": 1200
+            },
+            "useKeepAspectRatio": true
+        },
+        "tabName": "Common:Resize"
+    },
+    {
+        "params": {
+            "colorsTo": "GRAY",
+            "useWhiteBalancer": true
+        },
+        "tabName": "OpenCV:Colorized"
+    },
+    {
+        "params": {
+            "alpha": 2.6,
+            "autoClipHist": true,
+            "autoWhiteAjust": false,
+            "beta": -333.06,
+            "clipHistPercent": 1,
+            "whitePercent": 65
+        },
+        "tabName": "OpenCV:Contrast/Brightness"
+    },
+    {
+        "params": {
+            "adaptiveMethod": "ADAPTIVE_THRESH_GAUSSIAN_C",
+            "blockSize": 43,
+            "c": 16.75,
+            "maxVal": 299.95,
+            "threshType": "THRESH_BINARY"
+        },
+        "tabName": "OpenCV:AdaptiveThreshold"
+    },
+    {
+        "params": {
+            "areaThreshold": 0.0,
+            "delta": 1,
+            "edgeBlurSize": 1,
+            "fitSymbolHeight": false,
+            "invert": true,
+            "markChars": true,
+            "markLines": false,
+            "markWords": true,
+            "maxEvolution": 1,
+            "maxSymbol": {
+                "height": 50,
+                "width": 37
+            },
+            "maxVariation": 0.01,
+            "mergeSymboVertical": false,
+            "minDiversity": 0.01,
+            "minLineHeight": 10,
+            "minMargin": 0.001,
+            "minSymbol": {
+                "height": 2,
+                "width": 2
+            },
+            "showInner": false,
+            "showRegions": false,
+            "stuckSymbols": 1
+        },
+        "tabName": "OpenCV:MSER"
+    }
+]
