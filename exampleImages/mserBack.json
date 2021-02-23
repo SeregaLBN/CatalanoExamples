@@ -2,7 +2,7 @@
     {
         "params": {
             "fileType": "IMAGE",
-            "imageFile": "passportUkraine_since2016_back.jpg",
+            "imageFile": "UkrPassport/passportUkraine_since2016_back.jpg",
             "useScale": true
         },
         "tabName": "FirstTab"
@@ -23,6 +23,17 @@
             "useWhiteBalancer": true
         },
         "tabName": "OpenCV:Colorized"
+    },
+    {
+        "params": {
+            "alpha": 1.03,
+            "autoClipHist": true,
+            "autoWhiteAjust": false,
+            "beta": -5.16,
+            "clipHistPercent": 1,
+            "whitePercent": 65
+        },
+        "tabName": "OpenCV:Contrast/Brightness"
     },
     {
         "params": {

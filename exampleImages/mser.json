@@ -26,6 +26,17 @@
     },
     {
         "params": {
+            "alpha": 1.01,
+            "autoClipHist": true,
+            "autoWhiteAjust": false,
+            "beta": -1.01,
+            "clipHistPercent": 1,
+            "whitePercent": 65
+        },
+        "tabName": "OpenCV:Contrast/Brightness"
+    },
+    {
+        "params": {
             "adaptiveMethod": "ADAPTIVE_THRESH_GAUSSIAN_C",
             "blockSize": 43,
             "c": 16.75,
