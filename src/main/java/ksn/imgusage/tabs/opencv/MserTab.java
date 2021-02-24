@@ -279,32 +279,42 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                     if (wordItem.symbols.size() == 1)
                         continue;
 
-                    class HorizTmp {
-                        int x;
-                        int width;
-                        HorizTmp(SymbolTmp s) { this.x = s.position.x; this.width = s.position.width; }
-                        @Override
-                        public boolean equals(Object obj) {
-                            // magic
-                            HorizTmp tmp = (HorizTmp)obj;
-                            int left = Math.max(this.x, tmp.x);
-                            int right = Math.min(x + width, tmp.x + tmp.width);
-                            boolean res = (left < right); // if the line segments intersect
-                            if (res) {
-                                // yes, equals method update itself
-                                left  = Math.min(this.x, tmp.x);
-                                right = Math.max(x + width, tmp.x + tmp.width);
-                                this.x = tmp.x = left;
-                                this.width = tmp.width = right - left;
-                            }
-                            return res;
+                    class GroupTmp {
+                        int groupId = -1;
+                        final SymbolTmp s;
+                        GroupTmp(SymbolTmp s) { this.s = s; }
+                    }
+
+                    List<GroupTmp> grouped = wordItem.symbols
+                            .stream()
+                            .map(GroupTmp::new)
+                            .collect(Collectors.toList());
+
+                    int groupId = 0;
+                    for (GroupTmp gr1 : grouped) {
+                        if (gr1.groupId < 0)
+                            gr1.groupId = groupId++;
+
+                        for (GroupTmp gr2 : grouped) {
+                            if (gr1 == gr2)
+                                continue;
+                            if (gr2.groupId >= 0)
+                                continue;
+
+                            int left = Math.max(gr1.s.position.x, gr2.s.position.x);
+                            int right = Math.min(gr1.s.position.x + gr1.s.position.width,
+                                                 gr2.s.position.x + gr2.s.position.width);
+                            if (left < right) // if the line segments intersect
+                                gr2.groupId = gr1.groupId;
                         }
                     }
-                    wordItem.symbols = wordItem.symbols.stream()
-                        .collect(Collectors.groupingBy(HorizTmp::new))
+
+                    wordItem.symbols = grouped.stream()
+                        .collect(Collectors.groupingBy(gr -> gr.groupId))
                         .values()
                         .stream()
-                        .map(sl -> sl.stream()
+                        .map(inGroups -> inGroups.stream()
+                                     .map(gr -> gr.s)
                                      .reduce((s1, s2) -> {
                                          s1.contours.addAll(s2.contours);
                                          s1.inners.addAll(s2.inners);
