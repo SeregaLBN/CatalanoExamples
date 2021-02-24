@@ -11,9 +11,9 @@ public final class GeomHelper {
         Point br2 = rc2.br();
         int x = Math.max(rc1.x, rc2.x);
         int y = Math.max(rc1.y, rc2.y);
-        double l = Math.min(br1.x, br2.x);
+        double r = Math.min(br1.x, br2.x);
         double b = Math.min(br1.y, br2.y);
-        return (x < l)
+        return (x < r)
             && (y < b);
     }
 

@@ -279,60 +279,44 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                     if (wordItem.symbols.size() == 1)
                         continue;
 
-                    class GroupTmp {
-                        Rect rc; // top/bottom - word region; left/right - symbol region
-                        SymbolTmp s;
-                    }
-                    Rect rcWord = wordItem.position;
-                    wordItem.symbols.stream()
-                        .map(s -> {
-                            GroupTmp res = new GroupTmp();
-                            res.s = s;
-                            res.rc = new Rect(s.position.x,
-                                              rcWord.y,
-                                              s.position.width,
-                                              rcWord.height);
+                    class HorizTmp {
+                        int x;
+                        int width;
+                        HorizTmp(SymbolTmp s) { this.x = s.position.x; this.width = s.position.width; }
+                        @Override
+                        public boolean equals(Object obj) {
+                            // magic
+                            HorizTmp tmp = (HorizTmp)obj;
+                            int left = Math.max(this.x, tmp.x);
+                            int right = Math.min(x + width, tmp.x + tmp.width);
+                            boolean res = (left < right);
+                            if (res) {
+                                // yes, equals method update itself
+                                left  = Math.min(this.x, tmp.x);
+                                right = Math.max(x + width, tmp.x + tmp.width);
+                                this.x = tmp.x = left;
+                                this.width = tmp.width = right - left;
+                            }
                             return res;
-                        })
-                        ;
-//                        .collect(Collectors.groupingBy(classifier))
-
-                    maskChars.setTo(BLACK);
-                    for (SymbolTmp symbolItem : wordItem.symbols) {
-                        Mat roi = new Mat(maskChars, symbolItem.position);
-                        roi.setTo(WHITE);
+                        }
                     }
-
-                    try {
-                    List<Rect> rebuildSymbols = mark(maskChars, 1, params.minSymbol.height);
-                    wordItem.symbols = rebuildSymbols
+                    wordItem.symbols = wordItem.symbols.stream()
+                        .collect(Collectors.groupingBy(HorizTmp::new))
+                        .values()
                         .stream()
-                        .map(rcNewSymbol -> {
-                            SymbolTmp newSymbol = wordItem.symbols
-                                    .stream()
-                                    .filter(s -> (rcNewSymbol.x                       <= s.position.x                    )
-                                              && (rcNewSymbol.x +  rcNewSymbol.width  >= s.position.x + s.position.width )
-                                              && (rcNewSymbol.y                       <= s.position.y                    )
-                                              && (rcNewSymbol.y +  rcNewSymbol.height >= s.position.y + s.position.height))
-                                    .reduce((s1, s2) -> {
-                                        s1.contours.addAll(s2.contours);
-                                        s1.inners.addAll(s2.inners);
-                                        Rect rc = GeomHelper.intersectInclude(s1.position, s2.position);
-                                        s1.position.x      = rc.x;
-                                        s1.position.y      = rc.y;
-                                        s1.position.width  = rc.width;
-                                        s1.position.height = rc.height;
-                                        return s1;
-                                    })
-                                    .get();
-                            if (!rcNewSymbol.equals(newSymbol.position))
-                                logger.warn("Bad algorithm 'mergeSymboVertical'...");
-                            return newSymbol;
-                        })
+                        .map(sl -> sl.stream()
+                                     .reduce((s1, s2) -> {
+                                         s1.contours.addAll(s2.contours);
+                                         s1.inners.addAll(s2.inners);
+                                         Rect rc = GeomHelper.intersectInclude(s1.position, s2.position);
+                                         s1.position.x      = rc.x;
+                                         s1.position.y      = rc.y;
+                                         s1.position.width  = rc.width;
+                                         s1.position.height = rc.height;
+                                         return s1;
+                                     })
+                                    .get())
                         .collect(Collectors.toList());
-                    } catch (Exception ex) {
-                        logger.error("Merge symbol area vertically", ex);
-                    }
                 }
             }
         }
