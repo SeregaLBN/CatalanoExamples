@@ -88,7 +88,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     @Override
     protected void applyOpencvFilter() {
         final int minLineHeight = params.minLineHeight;
-        final int maxLineHeight = params.maxSymbol.height;//(int)(params.maxSymbol.height * 1.5);
+        final int maxLineHeight = params.maxSymbol.height * 3 / 2;
 
         MSER mser = MSER.create(
             params.delta,
@@ -287,6 +287,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
                     List<GroupTmp> grouped = wordItem.symbols
                             .stream()
+                            .sorted((s1,s2) -> Integer.compare(s2.position.width, s1.position.width))
                             .map(GroupTmp::new)
                             .collect(Collectors.toList());
 
