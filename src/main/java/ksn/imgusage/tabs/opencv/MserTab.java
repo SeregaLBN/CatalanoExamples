@@ -289,7 +289,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                             HorizTmp tmp = (HorizTmp)obj;
                             int left = Math.max(this.x, tmp.x);
                             int right = Math.min(x + width, tmp.x + tmp.width);
-                            boolean res = (left < right);
+                            boolean res = (left < right); // if the line segments intersect
                             if (res) {
                                 // yes, equals method update itself
                                 left  = Math.min(this.x, tmp.x);
@@ -514,21 +514,29 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         Box box4Sliders2 = Box.createHorizontalBox();
         box4Sliders2.add(Box.createHorizontalGlue());
-        box4Sliders2.add(makeSliderVert(modelMinDiversity, "Diver", "minDiversity: trace back to cut off mser with diversity less than min_diversity"));
+        box4Sliders2.add(makeSliderVert(modelDelta, "Delta", "it compares (size<i>−size<i−delta>)/size<i−delta>"));
         box4Sliders2.add(Box.createHorizontalStrut(2));
-        box4Sliders2.add(makeSliderVert(modelMaxEvolution, "Evol", "maxEvolution: the evolution steps"));
-        box4Sliders2.add(Box.createHorizontalStrut(2));
-        box4Sliders2.add(makeSliderVert(modelAreaThreshold, "Thresh", "areaThreshold: the area threshold to cause re-initialize"));
-        box4Sliders2.add(Box.createHorizontalStrut(2));
-        box4Sliders2.add(makeSliderVert(modelMinMargin, "Margin", "minMargin: ignore too small margin"));
-        box4Sliders2.add(Box.createHorizontalStrut(2));
-        box4Sliders2.add(makeSliderVert(modelEdgeBlurSize, "Blur", "edgeBlurSize: the aperture size for edge blur"));
+        box4Sliders2.add(makeSliderVert(modelMaxVariation, "Variation", "MAX Variation: Prune the area have similar size to its children"));
         box4Sliders2.add(Box.createHorizontalGlue());
+
+        Box box4Sliders3 = Box.createHorizontalBox();
+        box4Sliders3.add(Box.createHorizontalGlue());
+        box4Sliders3.add(makeSliderVert(modelMinDiversity, "Diver", "minDiversity: trace back to cut off mser with diversity less than min_diversity"));
+        box4Sliders3.add(Box.createHorizontalStrut(2));
+        box4Sliders3.add(makeSliderVert(modelMaxEvolution, "Evol", "maxEvolution: the evolution steps"));
+        box4Sliders3.add(Box.createHorizontalStrut(2));
+        box4Sliders3.add(makeSliderVert(modelAreaThreshold, "Thresh", "areaThreshold: the area threshold to cause re-initialize"));
+        box4Sliders3.add(Box.createHorizontalStrut(2));
+        box4Sliders3.add(makeSliderVert(modelMinMargin, "Margin", "minMargin: ignore too small margin"));
+        box4Sliders3.add(Box.createHorizontalStrut(2));
+        box4Sliders3.add(makeSliderVert(modelEdgeBlurSize, "Blur", "edgeBlurSize: the aperture size for edge blur"));
+        box4Sliders3.add(Box.createHorizontalGlue());
 
         JTabbedPane tabPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabPane.setBorder(BorderFactory.createEmptyBorder(2,2,2,2));
         tabPane.addTab("Area limits", null, panel3, "Additional restrictions on area size");
-        tabPane.addTab("For color image", null, box4Sliders2, null);
+        tabPane.addTab("Other", null, box4Sliders2, null);
+        tabPane.addTab("For color image", null, box4Sliders3, null);
 
         Box boxRegions = Box.createHorizontalBox();
         boxRegions.add(Box.createHorizontalStrut(7));
