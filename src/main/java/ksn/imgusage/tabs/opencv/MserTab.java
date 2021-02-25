@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,7 +95,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             params.delta,
 
             // filter #1 by area
-            params.minSymbol.width * params.minSymbol.height / (params.mergeSymboVertical ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1),
+            params.minSymbol.width * params.minSymbol.height / (params.mergeSymbol ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1),
             params.maxSymbol.width * params.maxSymbol.height * params.stuckSymbols,
 
             params.maxVariation,
@@ -115,7 +116,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 MatOfPoint contour = regions.get(i);
                 Rect rc = Imgproc.boundingRect(contour);
                 if ((rc.width  < params.minSymbol.width ) ||
-                    (rc.height <(params.minSymbol.height / (params.mergeSymboVertical ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1))) ||
+                    (rc.height <(params.minSymbol.height / (params.mergeSymbol ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1))) ||
                     (rc.width  >(params.maxSymbol.width  *  params.stuckSymbols)) ||
                     (rc.height > params.maxSymbol.height))
                 {
@@ -272,7 +273,19 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 .collect(Collectors.toList());
 
 
-        if (params.mergeSymboVertical) {
+        if (params.mergeSymbol) {
+
+            BinaryOperator<SymbolTmp> union = (s1, s2) -> {
+                s1.contours.addAll(s2.contours);
+                s1.inners.addAll(s2.inners);
+                Rect rc = GeomHelper.intersectInclude(s1.position, s2.position);
+                s1.position.x      = rc.x;
+                s1.position.y      = rc.y;
+                s1.position.width  = rc.width;
+                s1.position.height = rc.height;
+                return s1;
+            };
+
             logger.trace("Merge symbol area vertically");
             for (LineTmp lineItem : allLines) {
                 for (WordTmp wordItem : lineItem.words) {
@@ -287,7 +300,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
                     List<GroupTmp> grouped = wordItem.symbols
                             .stream()
-                            .sorted((s1,s2) -> Integer.compare(s2.position.width, s1.position.width))
+                            .sorted((s1, s2) -> Integer.compare(s2.position.width, s1.position.width))
                             .map(GroupTmp::new)
                             .collect(Collectors.toList());
 
@@ -315,19 +328,53 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                         .values()
                         .stream()
                         .map(inGroups -> inGroups.stream()
-                                     .map(gr -> gr.s)
-                                     .reduce((s1, s2) -> {
-                                         s1.contours.addAll(s2.contours);
-                                         s1.inners.addAll(s2.inners);
-                                         Rect rc = GeomHelper.intersectInclude(s1.position, s2.position);
-                                         s1.position.x      = rc.x;
-                                         s1.position.y      = rc.y;
-                                         s1.position.width  = rc.width;
-                                         s1.position.height = rc.height;
-                                         return s1;
-                                     })
-                                    .get())
+                                                 .map(gr -> gr.s)
+                                                 .reduce(union)
+                                                 .get())
                         .collect(Collectors.toList());
+                }
+            }
+
+            logger.trace("Merge symbol area horizontally");
+            for (LineTmp lineItem : allLines) {
+                for (WordTmp wordItem : lineItem.words) {
+                    if (wordItem.symbols.size() == 1)
+                        continue;
+
+                    List<SymbolTmp> newWordSymbols = new ArrayList<>();
+                    List<SymbolTmp> sorted = wordItem.symbols
+                            .stream()
+                            .sorted((s1, s2) -> Integer.compare(s1.position.x, s2.position.x))
+                            .collect(Collectors.toList());
+                    sorted.forEach(s -> s.handled = false);
+
+                    for (int i = 0; i < (sorted.size()); ++i) {
+                        SymbolTmp curr = sorted.get(i);
+                        newWordSymbols.add(curr);
+
+                        if (i == sorted.size() - 1)
+                            continue;
+
+                        if (curr.position.width >= params.maxSymbol.width)
+                            continue;
+
+                        for (int j = i + 1; j < sorted.size(); ++j) {
+                            SymbolTmp next = sorted.get(j);
+                            Rect rc1 = curr.position; // recalc!
+                            Rect rc2 = next.position;
+                            int newWidth = (rc2.x + rc2.width) - rc1.x;
+                            if (newWidth > params.maxSymbol.width)
+                                break;
+
+                            int dX = rc2.x - (rc1.x + rc1.width);
+                            if (dX > params.minSymbol.width)
+                                break;
+                            union.apply(curr, next);
+                            ++i;
+                        }
+                    }
+
+                    wordItem.symbols = newWordSymbols;
                 }
             }
         }
@@ -583,13 +630,13 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
 
         Box boxChars = Box.createHorizontalBox();
         boxChars.add(Box.createHorizontalStrut(7));
-        JCheckBox boxMergeVertical = makeCheckBox(
-                  () -> params.mergeSymboVertical,     // getter
-                  v  -> params.mergeSymboVertical = v, // setter
-                  "Merge vertical",                    // title
-                  "params.mergeSymboVertical",         // paramName
-                  "Merge symbol area vertically",      // tip
-                  null);                               // customListener
+        JCheckBox boxMergeSymbol = makeCheckBox(
+                  () -> params.mergeSymbol,              // getter
+                  v  -> params.mergeSymbol = v,          // setter
+                  "Merge regions",                       // title
+                  "params.mergeSymbol",                  // paramName
+                  "Merge small regions into one symbol", // tip
+                  null);                                 // customListener
         JCheckBox boxFitHeight = makeCheckBox(
                   () -> params.fitSymbolHeight,        // getter
                   v  -> params.fitSymbolHeight = v,    // setter
@@ -604,11 +651,11 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 "params.markChars",          // paramName
                 null,                        // tip
                 () -> {                      // customListener
-                    boxMergeVertical.setEnabled(params.markChars);
+                    boxMergeSymbol.setEnabled(params.markChars);
                     boxFitHeight    .setEnabled(params.markChars);
                 }));                      // customListener
         boxChars.add(Box.createHorizontalStrut(7));
-        boxChars.add(boxMergeVertical);
+        boxChars.add(boxMergeSymbol);
         boxChars.add(Box.createHorizontalStrut(7));
         boxChars.add(boxFitHeight);
         boxChars.add(Box.createHorizontalGlue());

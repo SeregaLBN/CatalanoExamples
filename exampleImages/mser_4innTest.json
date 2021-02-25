@@ -2,7 +2,7 @@
     {
         "params": {
             "fileType": "IMAGE",
-            "imageFile": "passportUkr.jpg",
+            "imageFile": "..\\inn\\fakeDemoInn1.jpg",
             "useScale": true
         },
         "tabName": "FirstTab"
@@ -10,8 +10,8 @@
     {
         "params": {
             "keepToSize": {
-                "height": 766,
-                "width": 1200
+                "height": 763,
+                "width": 1198
             },
             "useKeepAspectRatio": true
         },
@@ -26,10 +26,10 @@
     },
     {
         "params": {
-            "alpha": 1.01,
+            "alpha": 1.42,
             "autoClipHist": true,
             "autoWhiteAjust": false,
-            "beta": -1.01,
+            "beta": -103.99000000000001,
             "clipHistPercent": 1,
             "whitePercent": 65
         },
@@ -52,27 +52,52 @@
             "edgeBlurSize": 1,
             "fitSymbolHeight": true,
             "invert": true,
-            "markChars": false,
+            "markChars": true,
             "markLines": false,
-            "markWords": true,
+            "markWords": false,
             "maxEvolution": 1,
             "maxSymbol": {
-                "height": 37,
-                "width": 37
+                "height": 25,
+                "width": 13
             },
             "maxVariation": 0.01,
             "mergeSymbol": true,
             "minDiversity": 0.01,
-            "minLineHeight": 25,
+            "minLineHeight": 10,
             "minMargin": 0.001,
             "minSymbol": {
-                "height": 19,
-                "width": 3
+                "height": 1,
+                "width": 1
             },
             "showInner": false,
-            "showRegions": true,
-            "stuckSymbols": 2
+            "showRegions": false,
+            "stuckSymbols": 1
         },
         "tabName": "OpenCV:MSER"
+    },
+    {
+        "params": {
+            "ratio": {
+                "height": 300,
+                "width": 500
+            },
+            "roi": {
+                "height": 20,
+                "width": 99,
+                "x": 221,
+                "y": 136
+            }
+        },
+        "tabName": "Common:ROI"
+    },
+    {
+        "params": {
+            "keepToSize": {
+                "height": 563,
+                "width": 2668
+            },
+            "useKeepAspectRatio": true
+        },
+        "tabName": "Common:Resize"
     }
 ]

@@ -43,8 +43,8 @@ public class MserTabParams implements ITabParams {
     /** Invert regions */
     public boolean invert;
 
-    /** Merge symbol area vertically */
-    public boolean mergeSymboVertical;
+    /** Merge small regions into one symbol */
+    public boolean mergeSymbol;
     /** Fit symbol height to word height */
     public boolean fitSymbolHeight;
 
@@ -61,7 +61,7 @@ public class MserTabParams implements ITabParams {
         return String.format(Locale.US,
             "{ delta=%d, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d"
             + ", minSymbol=%s, maxSymbol=%s, minLineHeight=%s, stuckSymbols=%d"
-            + ", mergeSymboVertical=%b, fitSymbolHeight=%b"
+            + ", mergeSymbol=%b, fitSymbolHeight=%b"
             + ", showRegions=%b, invert=%b, showInner=%b, markChars=%b, markWords=%b, markLines=%b }",
             delta,
             maxVariation,
@@ -76,7 +76,7 @@ public class MserTabParams implements ITabParams {
             stuckSymbols,
             showRegions,
             invert,
-            mergeSymboVertical, fitSymbolHeight,
+            mergeSymbol, fitSymbolHeight,
             showInner,
             markChars,
             markWords,
