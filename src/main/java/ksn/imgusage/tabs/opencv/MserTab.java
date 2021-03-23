@@ -395,6 +395,39 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                     }
         }
 
+        if (params.stuckSymbols > 1) {
+            logger.trace("Rebuild chars");
+            for (LineTmp lineItem : allLines) {
+                for (WordTmp wordItem : lineItem.words) {
+                    List<SymbolTmp> newSymbols = new ArrayList<>();
+                    for (SymbolTmp symbolItem : wordItem.symbols) {
+                        Rect rc = symbolItem.position;
+                        if (rc.width < params.maxSymbol.width) {
+                            newSymbols.add(symbolItem);
+                        } else {
+                            List<MatOfPoint> contours = symbolItem.contours;
+                            int cnt = (int)Math.round((rc.width / (params.maxSymbol.width * 0.7)) + 0.5);
+                            int newWidth = rc.width / cnt;
+                            for (int i = 0; i < cnt; ++i) {
+                                SymbolTmp newSymbol = new SymbolTmp(contours.get(0));
+                                newSymbol.contours.clear();
+                                if (i == 0)
+                                    newSymbol.contours.addAll(contours);
+
+                                newSymbol.position.x      = rc.x + i * newWidth;
+                                newSymbol.position.y      = rc.y;
+                                newSymbol.position.width  = newWidth;
+                                newSymbol.position.height = rc.height;
+
+                                newSymbols.add(newSymbol);
+                            }
+                        }
+                    }
+                    wordItem.symbols = newSymbols;
+                }
+            }
+        }
+
 
         // show results
         if (params.showRegions) {
@@ -464,17 +497,8 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 for (WordTmp wordItem : lineItem.words) {
                     for (SymbolTmp symbolItem : wordItem.symbols) {
                         Rect rc = symbolItem.position;
-                        //Imgproc.rectangle(imageMat, rc.br(), rc.tl(), SYMBOL_COLOR, 1);
-                        if ((params.stuckSymbols == 1) || (rc.width < params.maxSymbol.width)) {
-                            Imgproc.rectangle(imageMat, rc.br(), rc.tl(), SYMBOL_COLOR);
-                        } else {
-                            int cnt = (int)Math.round((rc.width / (params.maxSymbol.width * 0.7)) + 0.5);
-                            int w = rc.width / cnt;
-                            for (int i = 0; i < cnt; ++i) {
-                                Rect rc2 = new Rect(rc.x + i * w, rc.y, w, rc.height);
-                                Imgproc.rectangle(imageMat, rc2.br(), rc2.tl(), SYMBOL_COLOR);
-                            }
-                        }
+                        Imgproc.rectangle(imageMat, rc.br(), rc.tl(), SYMBOL_COLOR, 1);
+
                         for (InnerTmp inner : symbolItem.inners)
                             Imgproc.rectangle(imageMat, inner.position.br(), inner.position.tl(), INNER_COLOR, 1);
                     }
