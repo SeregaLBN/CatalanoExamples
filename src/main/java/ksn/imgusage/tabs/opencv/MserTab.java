@@ -100,8 +100,8 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             params.delta,
 
             // filter #1 by area
-            params.minSymbol.width * Math.max(1, params.minSymbol.height / (params.mergeSymbol ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1)),
-            params.maxSymbol.width * params.maxSymbol.height * params.stuckSymbols,
+            params.minSymbol.width * Math.max(1, params.minSymbol.height / (params.mergeRegionsVertivally ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1)),
+            params.maxSymbol.width *             params.maxSymbol.height * params.stuckSymbols,
 
             params.maxVariation,
             params.minDiversity,
@@ -111,6 +111,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             params.edgeBlurSize);
 
         List<MatOfPoint> regions = new ArrayList<>(); // resulting list of point sets
+
         mser.detectRegions(imageMat,
                            regions,
                            new MatOfRect()); // resulting bounding boxes
@@ -120,10 +121,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             for (int i=0; i < regions.size(); ++i) {
                 MatOfPoint contour = regions.get(i);
                 Rect rc = Imgproc.boundingRect(contour);
-                if ((rc.width  <              params.minSymbol.width ) ||
-                    (rc.height < Math.max(1, (params.minSymbol.height / (params.mergeSymbol ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1)))) ||
-                    (rc.width  >             (params.maxSymbol.width  *  params.stuckSymbols)) ||
-                    (rc.height >              params.maxSymbol.height))
+                if ((rc.width  <             params.minSymbol.width ) ||
+                    (rc.height < Math.max(1, params.minSymbol.height / (params.mergeRegionsVertivally ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1))) ||
+                    (rc.width  >            (params.maxSymbol.width  *  params.stuckSymbols)) ||
+                    (rc.height >             params.maxSymbol.height))
                 {
                     ignored.add(i);
                 }
@@ -278,7 +279,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 .collect(Collectors.toList());
 
 
-        if (params.mergeSymbol) {
+        if (params.mergeRegionsVertivally || params.mergeRegionsHorizontally) {
 
             BinaryOperator<SymbolTmp> union = (s1, s2) -> {
                 s1.contours.addAll(s2.contours);
@@ -291,95 +292,99 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 return s1;
             };
 
-            logger.trace("Merge symbol area vertically");
-            for (LineTmp lineItem : allLines) {
-                for (WordTmp wordItem : lineItem.words) {
-                    if (wordItem.symbols.size() == 1)
-                        continue;
+            if (params.mergeRegionsVertivally) {
+                logger.trace("Merge symbol area vertically");
+                for (LineTmp lineItem : allLines) {
+                    for (WordTmp wordItem : lineItem.words) {
+                        if (wordItem.symbols.size() == 1)
+                            continue;
 
-                    class GroupTmp {
-                        int groupId = -1;
-                        final SymbolTmp s;
-                        GroupTmp(SymbolTmp s) { this.s = s; }
-                    }
-
-                    List<GroupTmp> grouped = wordItem.symbols
-                            .stream()
-                            .sorted((s1, s2) -> Integer.compare(s2.position.width, s1.position.width))
-                            .map(GroupTmp::new)
-                            .collect(Collectors.toList());
-
-                    int groupId = 0;
-                    for (GroupTmp gr1 : grouped) {
-                        if (gr1.groupId < 0)
-                            gr1.groupId = groupId++;
-
-                        for (GroupTmp gr2 : grouped) {
-                            if (gr1 == gr2)
-                                continue;
-                            if (gr2.groupId >= 0)
-                                continue;
-
-                            int left = Math.max(gr1.s.position.x, gr2.s.position.x);
-                            int right = Math.min(gr1.s.position.x + gr1.s.position.width,
-                                                 gr2.s.position.x + gr2.s.position.width);
-                            if (left < right) // if the line segments intersect
-                                gr2.groupId = gr1.groupId;
+                        class GroupTmp {
+                            int groupId = -1;
+                            final SymbolTmp s;
+                            GroupTmp(SymbolTmp s) { this.s = s; }
                         }
-                    }
 
-                    wordItem.symbols = grouped.stream()
-                        .collect(Collectors.groupingBy(gr -> gr.groupId))
-                        .values()
-                        .stream()
-                        .map(inGroups -> inGroups.stream()
-                                                 .map(gr -> gr.s)
-                                                 .reduce(union)
-                                                 .get())
-                        .collect(Collectors.toList());
+                        List<GroupTmp> grouped = wordItem.symbols
+                                .stream()
+                                .sorted((s1, s2) -> Integer.compare(s2.position.width, s1.position.width))
+                                .map(GroupTmp::new)
+                                .collect(Collectors.toList());
+
+                        int groupId = 0;
+                        for (GroupTmp gr1 : grouped) {
+                            if (gr1.groupId < 0)
+                                gr1.groupId = groupId++;
+
+                            for (GroupTmp gr2 : grouped) {
+                                if (gr1 == gr2)
+                                    continue;
+                                if (gr2.groupId >= 0)
+                                    continue;
+
+                                int left = Math.max(gr1.s.position.x, gr2.s.position.x);
+                                int right = Math.min(gr1.s.position.x + gr1.s.position.width,
+                                                     gr2.s.position.x + gr2.s.position.width);
+                                if (left < right) // if the line segments intersect
+                                    gr2.groupId = gr1.groupId;
+                            }
+                        }
+
+                        wordItem.symbols = grouped.stream()
+                            .collect(Collectors.groupingBy(gr -> gr.groupId))
+                            .values()
+                            .stream()
+                            .map(inGroups -> inGroups.stream()
+                                                     .map(gr -> gr.s)
+                                                     .reduce(union)
+                                                     .get())
+                            .collect(Collectors.toList());
+                    }
                 }
             }
 
-            logger.trace("Merge symbol area horizontally");
-            for (LineTmp lineItem : allLines) {
-                for (WordTmp wordItem : lineItem.words) {
-                    if (wordItem.symbols.size() == 1)
-                        continue;
-
-                    List<SymbolTmp> newWordSymbols = new ArrayList<>();
-                    List<SymbolTmp> sorted = wordItem.symbols
-                            .stream()
-                            .sorted((s1, s2) -> Integer.compare(s1.position.x, s2.position.x))
-                            .collect(Collectors.toList());
-                    sorted.forEach(s -> s.handled = false);
-
-                    for (int i = 0; i < (sorted.size()); ++i) {
-                        SymbolTmp curr = sorted.get(i);
-                        newWordSymbols.add(curr);
-
-                        if (i == sorted.size() - 1)
+            if (params.mergeRegionsHorizontally) {
+                logger.trace("Merge symbol area horizontally");
+                for (LineTmp lineItem : allLines) {
+                    for (WordTmp wordItem : lineItem.words) {
+                        if (wordItem.symbols.size() == 1)
                             continue;
 
-                        if (curr.position.width >= params.maxSymbol.width)
-                            continue;
+                        List<SymbolTmp> newWordSymbols = new ArrayList<>();
+                        List<SymbolTmp> sorted = wordItem.symbols
+                                .stream()
+                                .sorted((s1, s2) -> Integer.compare(s1.position.x, s2.position.x))
+                                .collect(Collectors.toList());
+                        sorted.forEach(s -> s.handled = false);
 
-                        for (int j = i + 1; j < sorted.size(); ++j) {
-                            SymbolTmp next = sorted.get(j);
-                            Rect rc1 = curr.position; // recalc!
-                            Rect rc2 = next.position;
-                            int newWidth = (rc2.x + rc2.width) - rc1.x;
-                            if (newWidth > params.maxSymbol.width)
-                                break;
+                        for (int i = 0; i < (sorted.size()); ++i) {
+                            SymbolTmp curr = sorted.get(i);
+                            newWordSymbols.add(curr);
 
-                            int dX = rc2.x - (rc1.x + rc1.width);
-                            if (dX > params.minSymbol.width)
-                                break;
-                            union.apply(curr, next);
-                            ++i;
+                            if (i == sorted.size() - 1)
+                                continue;
+
+                            if (curr.position.width >= params.maxSymbol.width)
+                                continue;
+
+                            for (int j = i + 1; j < sorted.size(); ++j) {
+                                SymbolTmp next = sorted.get(j);
+                                Rect rc1 = curr.position; // recalc!
+                                Rect rc2 = next.position;
+                                int newWidth = (rc2.x + rc2.width) - rc1.x;
+                                if (newWidth > params.maxSymbol.width)
+                                    break;
+
+                                int dX = rc2.x - (rc1.x + rc1.width);
+                                if (dX > params.minSymbol.width)
+                                    break;
+                                union.apply(curr, next);
+                                ++i;
+                            }
                         }
-                    }
 
-                    wordItem.symbols = newWordSymbols;
+                        wordItem.symbols = newWordSymbols;
+                    }
                 }
             }
         }
@@ -662,76 +667,76 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                     boxInner .setEnabled(params.showRegions);
                     boxInvert.setEnabled(params.showRegions);
                 }));
-        boxRegions.add(Box.createHorizontalStrut(7));
-        boxRegions.add(boxInner);
-        boxRegions.add(Box.createHorizontalStrut(7));
-        boxRegions.add(boxInvert);
         boxRegions.add(Box.createHorizontalGlue());
+        boxRegions.add(boxInner);
+        boxRegions.add(Box.createHorizontalGlue());
+        boxRegions.add(boxInvert);
+        boxRegions.add(Box.createHorizontalStrut(7));
 
-        Box boxChars = Box.createHorizontalBox();
-        boxChars.add(Box.createHorizontalStrut(7));
-        JCheckBox boxMergeSymbol = makeCheckBox(
-                  () -> params.mergeSymbol,              // getter
-                  v  -> params.mergeSymbol = v,          // setter
-                  "Merge regions",                       // title
-                  "params.mergeSymbol",                  // paramName
-                  "Merge small regions into one symbol", // tip
-                  null);                                 // customListener
-        JCheckBox boxFitHeight = makeCheckBox(
-                  () -> params.fitSymbolHeight,        // getter
-                  v  -> params.fitSymbolHeight = v,    // setter
-                  "Fit height",                        // title
-                  "params.fitSymbolHeight",            // paramName
-                  "Fit symbol height to word height",  // tip
-                  null);                               // customListener
-        boxChars.add(makeCheckBox(
-                () -> params.markChars,      // getter
-                v  -> params.markChars = v,  // setter
-                "Mark chars",                // title
-                "params.markChars",          // paramName
-                null,                        // tip
-                () -> {                      // customListener
-                    boxMergeSymbol.setEnabled(params.markChars);
-                    boxFitHeight    .setEnabled(params.markChars);
-                }));                      // customListener
-        boxChars.add(Box.createHorizontalStrut(7));
-        boxChars.add(boxMergeSymbol);
-        boxChars.add(Box.createHorizontalStrut(7));
-        boxChars.add(boxFitHeight);
-        boxChars.add(Box.createHorizontalGlue());
+        JCheckBox boxMergeRegionsVertivally = makeCheckBox(() -> params.mergeRegionsVertivally,                       // getter
+                                                           v  -> params.mergeRegionsVertivally = v,                   // setter
+                                                           "Merge V",                                                 // title
+                                                           "params.mergeRegionsVertivally",                           // paramName
+                                                           "Merge small regions (by vertically) into one symbol",     // tip
+                                                           null);                                                     // customListener
+        JCheckBox boxMergeRegionsHorizontally = makeCheckBox(() -> params.mergeRegionsHorizontally,                   // getter
+                                                             v  -> params.mergeRegionsHorizontally = v,               // setter
+                                                             "Merge H",                                               // title
+                                                             "params.mergeRegionsHorizontally",                       // paramName
+                                                             "Merge small regions (by horizontally) into one symbol", // tip
+                                                             null);                                                   // customListener
+        JCheckBox boxFitHeight = makeCheckBox(() -> params.fitSymbolHeight,        // getter
+                                              v  -> params.fitSymbolHeight = v,    // setter
+                                              "Fit height",                        // title
+                                              "params.fitSymbolHeight",            // paramName
+                                              "Fit symbol height to word height",  // tip
+                                              null);                              // customListener
+        Box box4MergeAndFit = Box.createHorizontalBox();
+        box4MergeAndFit.add(Box.createHorizontalStrut(7));
+        box4MergeAndFit.add(boxMergeRegionsVertivally);
+        box4MergeAndFit.add(Box.createHorizontalGlue());
+        box4MergeAndFit.add(boxMergeRegionsHorizontally);
+        box4MergeAndFit.add(Box.createHorizontalGlue());
+        box4MergeAndFit.add(boxFitHeight);
+        box4MergeAndFit.add(Box.createHorizontalStrut(7));
 
-        Box boxWords = Box.createHorizontalBox();
-        boxWords.add(Box.createHorizontalStrut(7));
-        boxWords.add(makeCheckBox(
-                () -> params.markWords,      // getter
-                v  -> params.markWords = v,  // setter
-                "Mark words",                // title
-                "params.markWords",          // paramName
-                null,                        // tip
-                null));                      // customListener
-        boxWords.add(Box.createHorizontalGlue());
+        Box box4Mark = Box.createHorizontalBox();
+        box4Mark.add(Box.createHorizontalStrut(7));
+        box4Mark.add(makeCheckBox(() -> params.markChars,      // getter
+                                  v  -> params.markChars = v,  // setter
+                                  "Mark chars",                // title
+                                  "params.markChars",          // paramName
+                                  null,                        // tip
+                                  () -> {                      // customListener
+                                      boxMergeRegionsVertivally  .setEnabled(params.markChars);
+                                      boxMergeRegionsHorizontally.setEnabled(params.markChars);
+                                      boxFitHeight               .setEnabled(params.markChars);
+                                  }));
+        box4Mark.add(Box.createHorizontalGlue());
+        box4Mark.add(makeCheckBox(() -> params.markWords,      // getter
+                                  v  -> params.markWords = v,  // setter
+                                  "Mark words",                // title
+                                  "params.markWords",          // paramName
+                                  null,                        // tip
+                                  null));                      // customListener);
+        box4Mark.add(Box.createHorizontalGlue());
+        box4Mark.add(makeCheckBox(() -> params.markLines,      // getter
+                                  v  -> params.markLines = v,  // setter
+                                  "Mark lines",                // title
+                                  "params.markLines",          // paramName
+                                  null,                        // tip
+                                  null));                      // customListener);
+        box4Mark.add(Box.createHorizontalStrut(7));
 
-        Box boxLines = Box.createHorizontalBox();
-        boxLines.add(Box.createHorizontalStrut(7));
-        boxLines.add(makeCheckBox(
-                () -> params.markLines,      // getter
-                v  -> params.markLines = v,  // setter
-                "Mark lines",                // title
-                "params.markLines",          // paramName
-                null,                        // tip
-                null));                      // customListener
-        boxLines.add(Box.createHorizontalGlue());
 
         Box boxDown = Box.createVerticalBox();
         boxDown.setBorder(BorderFactory.createTitledBorder(""));
         boxDown.add(Box.createVerticalGlue());
         boxDown.add(boxRegions);
         boxDown.add(Box.createVerticalStrut(2));
-        boxDown.add(boxChars);
+        boxDown.add(box4MergeAndFit);
         boxDown.add(Box.createVerticalStrut(2));
-        boxDown.add(boxWords);
-        boxDown.add(Box.createVerticalStrut(2));
-        boxDown.add(boxLines);
+        boxDown.add(box4Mark);
         boxDown.add(Box.createVerticalGlue());
 
 
@@ -755,9 +760,9 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         addChangeListener("params.maxSymbol.width" , modelMaxSymbolW   , v -> params.maxSymbol.width  = v);
         addChangeListener("params.maxSymbol.height", modelMaxSymbolH   , v -> params.maxSymbol.height = v);
         addChangeListener("params.minLineHeight"   , modelMinLineHeight, v -> params.minLineHeight    = v);
-      //addChangeListener("params.stuckSymbols"    , modelSymbolsStuck , v -> params.stuckSymbols     = v);
-      //addChangeListener("params.wordWidthCoef"   , modelWordWidthCoef, v -> params.wordWidthCoef    = v);
-      //addChangeListener("params.lineWidthCoef"   , modelLineWidthCoef, v -> params.lineWidthCoef    = v);
+        addChangeListener("params.stuckSymbols"    , modelSymbolsStuck , v -> params.stuckSymbols     = v);
+        addChangeListener("params.wordWidthCoef"   , modelWordWidthCoef, v -> params.wordWidthCoef    = v);
+        addChangeListener("params.lineWidthCoef"   , modelLineWidthCoef, v -> params.lineWidthCoef    = v);
         modelEdgeBlurSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelEdgeBlurSize: value={}", modelEdgeBlurSize.getFormatedText());
             int val = modelEdgeBlurSize.getValue();

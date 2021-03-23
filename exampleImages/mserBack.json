@@ -61,7 +61,8 @@
                 "width": 35
             },
             "maxVariation": 0.01,
-            "mergeSymbol": false,
+            "mergeRegionsVertivally": false,
+            "mergeRegionsHorizontally": false,
             "minDiversity": 0.01,
             "minLineHeight": 25,
             "minMargin": 0.001,

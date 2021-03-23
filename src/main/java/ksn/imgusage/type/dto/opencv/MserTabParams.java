@@ -43,8 +43,10 @@ public class MserTabParams implements ITabParams {
     /** Invert regions */
     public boolean invert;
 
-    /** Merge small regions into one symbol */
-    public boolean mergeSymbol;
+    /** Merge small regions (by vertically) into one symbol */
+    public boolean mergeRegionsVertivally;
+    /** Merge small regions (by horizontally) into one symbol */
+    public boolean mergeRegionsHorizontally;
     /** Fit symbol height to word height */
     public boolean fitSymbolHeight;
 
@@ -67,7 +69,7 @@ public class MserTabParams implements ITabParams {
             "{ delta=%d, maxVariation=%.2f, minDiversity=%.2f, maxEvolution=%d, areaThreshold=%.2f, minMargin=%.2f, edgeBlurSize=%d"
             + ", minSymbol=%s, maxSymbol=%s, minLineHeight=%s, stuckSymbols=%d"
             + ", wordWidthCoef=%.2f, lineWidthCoef=%.2f"
-            + ", mergeSymbol=%b, fitSymbolHeight=%b"
+            + ", mergeRegionsVertivally=%b, mergeRegionsHorizontally=%b, fitSymbolHeight=%b"
             + ", showRegions=%b, invert=%b, showInner=%b, markChars=%b, markWords=%b, markLines=%b }",
             delta,
             maxVariation,
@@ -81,7 +83,8 @@ public class MserTabParams implements ITabParams {
             minLineHeight,
             stuckSymbols,
             wordWidthCoef, lineWidthCoef,
-            mergeSymbol, fitSymbolHeight,
+            mergeRegionsVertivally, mergeRegionsHorizontally,
+            fitSymbolHeight,
             showRegions,
             invert,
             showInner,
