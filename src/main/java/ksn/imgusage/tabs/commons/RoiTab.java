@@ -5,7 +5,6 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.*;
 
-import Catalano.Imaging.FastBitmap;
 import ksn.imgusage.model.SliderIntModel;
 import ksn.imgusage.type.Rect;
 import ksn.imgusage.type.Size;
@@ -122,10 +121,12 @@ public class RoiTab extends CommonTab<RoiTabParams> {
         drawImage = ImgHelper.copy(sourceImage);
 
         if (sourceImage.getType() == BufferedImage.TYPE_BYTE_GRAY) {
-            FastBitmap bmp = new FastBitmap(drawImage);
-            assert bmp.isGrayscale();
-            bmp.toRGB(); // ! restore colors for preview !
-            drawImage = bmp.toBufferedImage();
+            // ! restore colors for preview !
+            BufferedImage image = new BufferedImage(srcW, srcH, BufferedImage.TYPE_4BYTE_ABGR);
+            Graphics g = image.getGraphics();
+            g.drawImage(drawImage, 0, 0, null);
+            g.dispose();
+            drawImage = image;
         }
 
         Graphics2D g = drawImage.createGraphics();

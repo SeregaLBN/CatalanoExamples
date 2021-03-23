@@ -10,7 +10,6 @@ import javax.swing.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ksn.imgusage.tabs.catalano.CatalanoFilterTab;
 import ksn.imgusage.tabs.commons.CommonTab;
 import ksn.imgusage.tabs.opencv.OpencvFilterTab;
 import ksn.imgusage.tabs.opencv.custom.CustomTab;
@@ -38,15 +37,6 @@ public class SelectFilterDialog {
             JRadioButton radioFilter = new JRadioButton(tab.filterTitle + ": " + tab.description);
             radioFilter.setActionCommand(CommonTab.TAB_PREFIX + tab.filterTitle);
             boxCommonFilters.add(radioFilter);
-            radioGroup.add(radioFilter);
-        });
-
-        Box boxCatalanoFilters = Box.createVerticalBox();
-        boxCatalanoFilters.setBorder(BorderFactory.createTitledBorder("Catalano filters"));
-        MapperFilter.getAllCatalanoTabsDescr().forEach(tab -> {
-            JRadioButton radioFilter = new JRadioButton(tab.filterTitle + ": " + tab.description);
-            radioFilter.setActionCommand(CatalanoFilterTab.TAB_PREFIX + tab.filterTitle);
-            boxCatalanoFilters.add(radioFilter);
             radioGroup.add(radioFilter);
         });
 
@@ -83,7 +73,6 @@ public class SelectFilterDialog {
         Box boxCenter = Box.createVerticalBox();
         boxCenter.add(boxCommonFilters);
         boxCenter.add(boxOpenCvFilters);
-        boxCenter.add(boxCatalanoFilters);
 
         dlg.add(boxCenter, BorderLayout.CENTER);
         dlg.add(btnOk, BorderLayout.SOUTH);

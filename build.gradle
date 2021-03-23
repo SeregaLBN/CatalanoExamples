@@ -4,15 +4,15 @@ apply plugin: 'application'
 repositories {
     mavenCentral()
 
-    flatDir {
-        dirs './libs'
-        // https://github.com/DiegoCatalano/Catalano-Framework/releases
-        // Download and unpack from libs.zip:
-        //  ./libs/Catalano.Core.jar
-        //  ./libs/Catalano.Math.jar
-        //  ./libs/Catalano.IO.jar
-        //  ./libs/Catalano.Image.jar
-    }
+    //flatDir {
+    //    dirs './libs'
+    //    // https://github.com/DiegoCatalano/Catalano-Framework/releases
+    //    // Download and unpack from libs.zip:
+    //    //  ./libs/Catalano.Core.jar
+    //    //  ./libs/Catalano.Math.jar
+    //    //  ./libs/Catalano.IO.jar
+    //    //  ./libs/Catalano.Image.jar
+    //}
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -70,13 +70,13 @@ dependencies {
     implementation 'org.apache.commons:commons-math3:3.6.1'
 
   //if (project.file('./libs/Catalano.Core.jar' ).exists())
-        implementation name:       'Catalano.Core'
+  //      implementation name:       'Catalano.Core'
   //if (project.file('./libs/Catalano.Math.jar' ).exists())
-        implementation name:       'Catalano.Math'
+  //      implementation name:       'Catalano.Math'
   //if (project.file('./libs/Catalano.IO.jar'   ).exists())
-        implementation name:       'Catalano.IO'
+  //      implementation name:       'Catalano.IO'
   //if (project.file('./libs/Catalano.Image.jar').exists())
-        implementation name:       'Catalano.Image'
+  //      implementation name:       'Catalano.Image'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
     testRuntimeOnly    'org.junit.jupiter:junit-jupiter-engine:5.7.1'
@@ -283,49 +283,49 @@ def downloadByUrl(url, targetFile, recheckSize) {
 
 // Im not found the Catalano-Framework in the Maven repository ;(
 // Trying to auto-download ZIP and unpack JARs
-task downloadCatalanoFramework(type: Copy) {
-    def lib1 = project.file('./libs/Catalano.Core.jar')
-    def lib2 = project.file('./libs/Catalano.Image.jar')
-    def lib3 = project.file('./libs/Catalano.IO.jar')
-    def lib4 = project.file('./libs/Catalano.Math.jar')
-    if (lib1.exists() &&
-        lib2.exists() &&
-        lib3.exists() &&
-        lib4.exists())
-    {
-        println 'Catalano-Framework exist'
-        return;
-    }
-
-    def targetZipFile = project.file('./libs/libs.zip')
-    def succ = downloadByUrl(
-        'https://github.com/DiegoCatalano/Catalano-Framework/releases/download/v1.6.1.1-libs/libs.zip',
-        targetZipFile,
-        true)
-    if (!succ)
-        return
-
-    def libZipTree = zipTree(targetZipFile)
-
-    from libZipTree
-    include 'Catalano.Core.jar'
-    include 'Catalano.Image.jar'
-    include 'Catalano.IO.jar'
-    include 'Catalano.Math.jar'
-    into(project.file('./libs'))
-
-    println '...Catalano jar`s unpacked to directory: ' + project.file('./libs')
-
-    if (!project.file('./libs/Catalano.Core.jar').exists()) {
-        // WTF!
-        System.err.println('--------------------------------------------')
-        System.err.println('--')
-        System.err.println('--  Sorrryyyy!  Please call manually:')
-        System.err.println('> gradle run')
-        System.err.println('--')
-        System.err.println('--------------------------------------------')
-    }
-}
+//task downloadCatalanoFramework(type: Copy) {
+//    def lib1 = project.file('./libs/Catalano.Core.jar')
+//    def lib2 = project.file('./libs/Catalano.Image.jar')
+//    def lib3 = project.file('./libs/Catalano.IO.jar')
+//    def lib4 = project.file('./libs/Catalano.Math.jar')
+//    if (lib1.exists() &&
+//        lib2.exists() &&
+//        lib3.exists() &&
+//        lib4.exists())
+//    {
+//        println 'Catalano-Framework exist'
+//        return;
+//    }
+//
+//    def targetZipFile = project.file('./libs/libs.zip')
+//    def succ = downloadByUrl(
+//        'https://github.com/DiegoCatalano/Catalano-Framework/releases/download/v1.6.1.1-libs/libs.zip',
+//        targetZipFile,
+//        true)
+//    if (!succ)
+//        return
+//
+//    def libZipTree = zipTree(targetZipFile)
+//
+//    from libZipTree
+//    include 'Catalano.Core.jar'
+//    include 'Catalano.Image.jar'
+//    include 'Catalano.IO.jar'
+//    include 'Catalano.Math.jar'
+//    into(project.file('./libs'))
+//
+//    println '...Catalano jar`s unpacked to directory: ' + project.file('./libs')
+//
+//    if (!project.file('./libs/Catalano.Core.jar').exists()) {
+//        // WTF!
+//        System.err.println('--------------------------------------------')
+//        System.err.println('--')
+//        System.err.println('--  Sorrryyyy!  Please call manually:')
+//        System.err.println('> gradle run')
+//        System.err.println('--')
+//        System.err.println('--------------------------------------------')
+//    }
+//}
 
 // Download default example image
 task downloadExampleImage() {
@@ -389,7 +389,7 @@ defaultTasks 'clean', 'build', 'run'
 
 project.tasks.clean           .dependsOn project.tasks.cleanAddons
 //project.tasks.build           .dependsOn project.tasks.fatJar
-project.tasks.compileJava     .dependsOn project.tasks.downloadCatalanoFramework
+//project.tasks.compileJava     .dependsOn project.tasks.downloadCatalanoFramework
 project.tasks.processResources.dependsOn project.tasks.downloadExampleImage
 
 /** /

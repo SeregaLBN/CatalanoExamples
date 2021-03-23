@@ -9,8 +9,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import Catalano.Imaging.FastBitmap;
-
 public final class ImgHelper {
     private ImgHelper() {}
 
@@ -18,9 +16,7 @@ public final class ImgHelper {
     public static Mat copy(Mat from) {
         return from.clone();
     }
-    public static FastBitmap copy(FastBitmap from) {
-        return new FastBitmap(from);
-    }
+
     public static BufferedImage copy(BufferedImage from) {
         ColorModel cm = from.getColorModel();
         boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
@@ -28,36 +24,23 @@ public final class ImgHelper {
         return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
     }
 
-    public static BufferedImage toBufferedImage(FastBitmap from) {
-        return from.toBufferedImage();
-    }
+
     public static BufferedImage toBufferedImage(Mat from) {
         return OpenCvHelper.toImage(from);
     }
 
-    public static FastBitmap toFastBitmap(BufferedImage from) {
-        return new FastBitmap(from);
-    }
-    public static FastBitmap toFastBitmap(Mat from) {
-        return new FastBitmap(OpenCvHelper.toImage(from));
-    }
 
     public static Mat toMat(BufferedImage from) {
         return OpenCvHelper.fromImage(from);
     }
-    public static Mat toMat(FastBitmap from) {
-        return OpenCvHelper.fromImage(from.toBufferedImage());
-    }
+
 
     public static Mat resize(Mat from, int newWidth, int newHeight) {
         Mat resizeimage = new Mat();
         Imgproc.resize(from, resizeimage, new Size(newWidth, newHeight));
         return resizeimage;
     }
-    public static FastBitmap resize(FastBitmap from, int newWidth, int newHeight) {
-        // return new Catalano.Imaging.Filters.Resize(newWidth, newHeight).apply(from); // ;(
-        return new FastBitmap(resize(from.toBufferedImage(), newWidth, newHeight));
-    }
+
     public static BufferedImage resize(BufferedImage from, int newWidth, int newHeight) {
         if (true) {
             Mat src = OpenCvHelper.fromImage(from);

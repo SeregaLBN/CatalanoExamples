@@ -6,8 +6,6 @@ import java.util.List;
 import ksn.imgusage.tabs.FirstTab;
 import ksn.imgusage.tabs.ITab;
 import ksn.imgusage.tabs.ITabParams;
-import ksn.imgusage.tabs.catalano.*;
-import ksn.imgusage.tabs.catalano.BlurTab;
 import ksn.imgusage.tabs.commons.ResizeTab;
 import ksn.imgusage.tabs.commons.RoiTab;
 import ksn.imgusage.tabs.opencv.*;
@@ -15,8 +13,6 @@ import ksn.imgusage.tabs.opencv.custom.BindToNeighborTab;
 import ksn.imgusage.tabs.opencv.custom.LeadToAxisTab;
 import ksn.imgusage.tabs.opencv.custom.LeadToPerspectiveTab;
 import ksn.imgusage.type.dto.FirstTabParams;
-import ksn.imgusage.type.dto.catalano.*;
-import ksn.imgusage.type.dto.catalano.BlurTabParams;
 import ksn.imgusage.type.dto.common.ResizeTabParams;
 import ksn.imgusage.type.dto.common.RoiTabParams;
 import ksn.imgusage.type.dto.opencv.*;
@@ -43,27 +39,6 @@ public final class MapperFilter {
                            ResizeTab.TAB_DESCRIPTION),
             new FilterTabs(   RoiTab.TAB_TITLE,
                               RoiTab.TAB_DESCRIPTION)
-        );
-    }
-
-    public static List<FilterTabs> getAllCatalanoTabsDescr() {
-        return Arrays.asList( // alphabetical sort
-            new FilterTabs(     AdaptiveContrastTab.TAB_TITLE,
-                                AdaptiveContrastTab.TAB_DESCRIPTION),
-            new FilterTabs(     ArtifactsRemovalTab.TAB_TITLE,
-                                ArtifactsRemovalTab.TAB_DESCRIPTION),
-            new FilterTabs(     BernsenThresholdTab.TAB_TITLE,
-                                BernsenThresholdTab.TAB_DESCRIPTION),
-            new FilterTabs(                 BlurTab.TAB_TITLE,
-                                            BlurTab.TAB_DESCRIPTION),
-            new FilterTabs(BradleyLocalThresholdTab.TAB_TITLE,
-                           BradleyLocalThresholdTab.TAB_DESCRIPTION),
-            new FilterTabs( BrightnessCorrectionTab.TAB_TITLE,
-                            BrightnessCorrectionTab.TAB_DESCRIPTION),
-            new FilterTabs(      FrequencyFilterTab.TAB_TITLE,
-                                 FrequencyFilterTab.TAB_DESCRIPTION),
-            new FilterTabs(               RotateTab.TAB_TITLE,
-                                          RotateTab.TAB_DESCRIPTION)
         );
     }
 
@@ -182,26 +157,6 @@ public final class MapperFilter {
             return                BindToNeighborTab.class;
 
         default:
-
-            // Catalano-Framework
-            // alphabetical sort
-            if (filterTabFullName.equals(     AdaptiveContrastTab.TAB_NAME))
-                return                        AdaptiveContrastTab.class;
-            if (filterTabFullName.equals(     ArtifactsRemovalTab.TAB_NAME))
-                return                        ArtifactsRemovalTab.class;
-            if (filterTabFullName.equals(     BernsenThresholdTab.TAB_NAME))
-                return                        BernsenThresholdTab.class;
-            if (filterTabFullName.equals(                 BlurTab.TAB_NAME))
-                return                                    BlurTab.class;
-            if (filterTabFullName.equals(BradleyLocalThresholdTab.TAB_NAME))
-                return                   BradleyLocalThresholdTab.class;
-            if (filterTabFullName.equals( BrightnessCorrectionTab.TAB_NAME))
-                return                    BrightnessCorrectionTab.class;
-            if (filterTabFullName.equals(      FrequencyFilterTab.TAB_NAME))
-                return                         FrequencyFilterTab.class;
-            if (filterTabFullName.equals(               RotateTab.TAB_NAME))
-                return                                  RotateTab.class;
-
             return null;
         }
     }
@@ -269,26 +224,6 @@ public final class MapperFilter {
             return                    BindToNeighborTabParams.class;
 
         default:
-
-            // Catalano-Framework
-            // alphabetical sort
-            if (filterTabFullName.equals(     AdaptiveContrastTab.TAB_NAME))
-                return                        AdaptiveContrastTabParams.class;
-            if (filterTabFullName.equals(     ArtifactsRemovalTab.TAB_NAME))
-                return                        ArtifactsRemovalTabParams.class;
-            if (filterTabFullName.equals(     BernsenThresholdTab.TAB_NAME))
-                return                        BernsenThresholdTabParams.class;
-            if (filterTabFullName.equals(                 BlurTab.TAB_NAME))
-                return                                    BlurTabParams.class;
-            if (filterTabFullName.equals(BradleyLocalThresholdTab.TAB_NAME))
-                return                   BradleyLocalThresholdTabParams.class;
-            if (filterTabFullName.equals( BrightnessCorrectionTab.TAB_NAME))
-                return                    BrightnessCorrectionTabParams.class;
-            if (filterTabFullName.equals(      FrequencyFilterTab.TAB_NAME))
-                return                         FrequencyFilterTabParams.class;
-            if (filterTabFullName.equals(               RotateTab.TAB_NAME))
-                return                                  RotateTabParams.class;
-
             return null;
         }
     }

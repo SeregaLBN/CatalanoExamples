@@ -47,6 +47,12 @@ public class FirstTab extends BaseTab<FirstTabParams> {
         AppInfo.setLatestVideoDir(Path.of(System.getProperty("user.home"), "Downloads"));
     }
 
+    public FirstTab() {
+        //
+        int i = 0;
+        ++i;
+    }
+
     public void setSavePipelineHandler(Runnable savePipelineHandler) {
         this.savePipelineHandler = savePipelineHandler;
     }
