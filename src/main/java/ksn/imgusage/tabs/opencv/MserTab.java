@@ -54,6 +54,11 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
     private static final int    MAX_MIN_LINE_HEIGHT  = MAX_MAX_SYMBOL_H;
     private static final int    MAX_SYMBOLS_STUCK = 10;
 
+    private static final double MIN_WORD_WIDTH_COEF = 0.2;
+    private static final double MAX_WORD_WIDTH_COEF = 0.9;
+    private static final double MIN_LINE_WIDTH_COEF = 0.8;
+    private static final double MAX_LINE_WIDTH_COEF = 2.5;
+
     private static final int NUMBER_OF_BROKEN_VERTICAL_PARTS = 4;
 
     private static final Scalar BLACK   = new Scalar(0);
@@ -95,7 +100,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             params.delta,
 
             // filter #1 by area
-            params.minSymbol.width * params.minSymbol.height / (params.mergeSymbol ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1),
+            params.minSymbol.width * Math.max(1, params.minSymbol.height / (params.mergeSymbol ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1)),
             params.maxSymbol.width * params.maxSymbol.height * params.stuckSymbols,
 
             params.maxVariation,
@@ -115,10 +120,10 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
             for (int i=0; i < regions.size(); ++i) {
                 MatOfPoint contour = regions.get(i);
                 Rect rc = Imgproc.boundingRect(contour);
-                if ((rc.width  < params.minSymbol.width ) ||
-                    (rc.height <(params.minSymbol.height / (params.mergeSymbol ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1))) ||
-                    (rc.width  >(params.maxSymbol.width  *  params.stuckSymbols)) ||
-                    (rc.height > params.maxSymbol.height))
+                if ((rc.width  <              params.minSymbol.width ) ||
+                    (rc.height < Math.max(1, (params.minSymbol.height / (params.mergeSymbol ? NUMBER_OF_BROKEN_VERTICAL_PARTS : 1)))) ||
+                    (rc.width  >             (params.maxSymbol.width  *  params.stuckSymbols)) ||
+                    (rc.height >              params.maxSymbol.height))
                 {
                     ignored.add(i);
                 }
@@ -199,7 +204,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         }
 
         logger.trace("Collect word regions");
-        List<WordTmp> allWords = mark(maskChars, (int)(params.maxSymbol.width * 0.35), 1)
+        List<WordTmp> allWords = mark(maskChars, (int)(params.maxSymbol.width * params.wordWidthCoef), 1)
                 .stream()
                 .sorted((rc1, rc2) -> Integer.compare(rc1.width * rc1.height,
                                                       rc2.width * rc2.height))
@@ -214,7 +219,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         });
 
         logger.trace("Collect line regions");
-        List<LineTmp> allLines = mark(maskWords, (int)(params.maxSymbol.width * 0.9), 2)
+        List<LineTmp> allLines = mark(maskWords, (int)(params.maxSymbol.width * params.lineWidthCoef), 2)
                 .stream()
                 .sorted((rc1, rc2) -> Integer.compare(rc1.width * rc1.height,
                                                       rc2.width * rc2.height))
@@ -526,7 +531,8 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         SliderIntModel    modelMaxSymbolH    = new    SliderIntModel(params.maxSymbol.height, 0, MIN_MAX_SYMBOL_H   , MAX_MAX_SYMBOL_H);
         SliderIntModel    modelMinLineHeight = new    SliderIntModel(params.minLineHeight   , 0, MIN_MIN_LINE_HEIGHT, MAX_MIN_LINE_HEIGHT);
         SliderIntModel    modelSymbolsStuck  = new    SliderIntModel(params.stuckSymbols    , 0, 1                  , MAX_SYMBOLS_STUCK);
-
+        SliderDoubleModel modelWordWidthCoef = new SliderDoubleModel(params.wordWidthCoef   , 0, MIN_WORD_WIDTH_COEF, MAX_WORD_WIDTH_COEF);
+        SliderDoubleModel modelLineWidthCoef = new SliderDoubleModel(params.lineWidthCoef   , 0, MIN_LINE_WIDTH_COEF, MAX_LINE_WIDTH_COEF);
 
         Box box4Sliders = Box.createHorizontalBox();
         box4Sliders.add(Box.createHorizontalGlue());
@@ -566,9 +572,19 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         box4Sliders.add(Box.createHorizontalGlue());
         JPanel panel3 = new JPanel();
         panel3.setLayout(new BorderLayout());
-        Container cntrlStuckW = makeEditBox("params.stuckSymbols", modelSymbolsStuck, "Stuck symbols", null, "the number of characters stuck together");
+        Container cntrlStuckW   = makeEditBox("params.stuckSymbols" , modelSymbolsStuck, "Stuck symbols", null, "the number of characters stuck together");
+        Container cntrlWordWiCo = makeEditBox("params.wordWidthCoef", modelWordWidthCoef, "Word WCo", null, "Width coefficient between symbols. Determines the distance at which characters are combined into words");
+        Container cntrlLineWiCo = makeEditBox("params.lineWidthCoef", modelLineWidthCoef, "Line WCo", null, "Width coefficient between words. Determines the distance at which words are combined into a line");
+        Box box4EditBoxesH = Box.createHorizontalBox();
+        box4EditBoxesH.add(cntrlWordWiCo);
+        box4EditBoxesH.add(Box.createHorizontalGlue());
+        box4EditBoxesH.add(cntrlLineWiCo);
+        Box box4EditBoxesV = Box.createVerticalBox();
+        box4EditBoxesV.add(cntrlStuckW);
+        box4EditBoxesV.add(Box.createVerticalStrut(2));
+        box4EditBoxesV.add(box4EditBoxesH);
         panel3.add(box4Sliders, BorderLayout.CENTER);
-        panel3.add(cntrlStuckW, BorderLayout.SOUTH);
+        panel3.add(box4EditBoxesV, BorderLayout.SOUTH);
 
         Box box4Sliders2 = Box.createHorizontalBox();
         box4Sliders2.add(Box.createHorizontalGlue());
@@ -715,7 +731,9 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         addChangeListener("params.maxSymbol.width" , modelMaxSymbolW   , v -> params.maxSymbol.width  = v);
         addChangeListener("params.maxSymbol.height", modelMaxSymbolH   , v -> params.maxSymbol.height = v);
         addChangeListener("params.minLineHeight"   , modelMinLineHeight, v -> params.minLineHeight    = v);
-        addChangeListener("params.stuckSymbols"    , modelSymbolsStuck , v -> params.stuckSymbols     = v);
+      //addChangeListener("params.stuckSymbols"    , modelSymbolsStuck , v -> params.stuckSymbols     = v);
+      //addChangeListener("params.wordWidthCoef"   , modelWordWidthCoef, v -> params.wordWidthCoef    = v);
+      //addChangeListener("params.lineWidthCoef"   , modelLineWidthCoef, v -> params.lineWidthCoef    = v);
         modelEdgeBlurSize.getWrapped().addChangeListener(ev -> {
             logger.trace("modelEdgeBlurSize: value={}", modelEdgeBlurSize.getFormatedText());
             int val = modelEdgeBlurSize.getValue();
