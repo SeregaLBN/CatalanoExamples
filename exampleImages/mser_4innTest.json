@@ -11,7 +11,7 @@
         "params": {
             "keepToSize": {
                 "height": 763,
-                "width": 1198
+                "width": 1200
             },
             "useKeepAspectRatio": true
         },
@@ -40,7 +40,7 @@
             "adaptiveMethod": "ADAPTIVE_THRESH_GAUSSIAN_C",
             "blockSize": 43,
             "c": 16.75,
-            "maxVal": 299.95,
+            "maxVal": 300.0,
             "threshType": "THRESH_BINARY"
         },
         "tabName": "OpenCV:AdaptiveThreshold"
@@ -52,16 +52,18 @@
             "edgeBlurSize": 1,
             "fitSymbolHeight": true,
             "invert": true,
+            "lineWidthCoef": 0.9,
             "markChars": true,
             "markLines": false,
-            "markWords": false,
+            "markWords": true,
             "maxEvolution": 1,
             "maxSymbol": {
                 "height": 25,
                 "width": 13
             },
             "maxVariation": 0.01,
-            "mergeSymbol": true,
+            "mergeRegionsHorizontally": true,
+            "mergeRegionsVertically": true,
             "minDiversity": 0.01,
             "minLineHeight": 10,
             "minMargin": 0.001,
@@ -70,8 +72,9 @@
                 "width": 1
             },
             "showInner": false,
-            "showRegions": false,
-            "stuckSymbols": 1
+            "showOnSource": true,
+            "stuckSymbols": 1,
+            "wordWidthCoef": 0.35
         },
         "tabName": "OpenCV:MSER"
     },
@@ -93,8 +96,8 @@
     {
         "params": {
             "keepToSize": {
-                "height": 563,
-                "width": 2668
+                "height": 569,
+                "width": 2700
             },
             "useKeepAspectRatio": true
         },

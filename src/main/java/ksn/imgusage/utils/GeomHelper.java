@@ -17,6 +17,17 @@ public final class GeomHelper {
             && (y < b);
     }
 
+    public static boolean isInside(Rect own, Rect inside) {
+//        return own.contains(inside.tl())
+//            && own.contains(inside.br());
+        Point br1 = own.br();
+        Point br2 = inside.br();
+        return (own.x <= inside.x)
+            && (own.y <= inside.y)
+            && (br1.x >= br2.x)
+            && (br1.y >= br2.y);
+    }
+
     /** @see equals {@link java.awt.geom.Area#intersect} */
     public static Rect intersect(Rect rc1, Rect rc2) {
         Point br1 = rc1.br();
