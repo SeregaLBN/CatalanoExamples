@@ -39,8 +39,8 @@
         "params": {
             "adaptiveMethod": "ADAPTIVE_THRESH_GAUSSIAN_C",
             "blockSize": 43,
-            "c": 16.75,
-            "maxVal": 299.95,
+            "c": 25.0,
+            "maxVal": 300.0,
             "threshType": "THRESH_BINARY"
         },
         "tabName": "OpenCV:AdaptiveThreshold"
@@ -52,28 +52,55 @@
             "edgeBlurSize": 1,
             "fitSymbolHeight": true,
             "invert": true,
-            "markChars": false,
+            "lineWidthCoef": 0.9,
+            "markChars": true,
             "markLines": false,
             "markWords": true,
             "maxEvolution": 1,
             "maxSymbol": {
-                "height": 37,
-                "width": 37
+                "height": 35,
+                "width": 24
             },
             "maxVariation": 0.01,
-            "mergeRegionsVertivally": true,
             "mergeRegionsHorizontally": true,
+            "mergeRegionsVertically": true,
             "minDiversity": 0.01,
-            "minLineHeight": 25,
+            "minLineHeight": 20,
             "minMargin": 0.001,
             "minSymbol": {
-                "height": 19,
-                "width": 3
+                "height": 20,
+                "width": 4
             },
             "showInner": false,
-            "showRegions": true,
-            "stuckSymbols": 2
+            "showOnSource": false,
+            "stuckSymbols": 1,
+            "wordWidthCoef": 0.45
         },
         "tabName": "OpenCV:MSER"
+    },
+    {
+        "params": {
+            "ratio": {
+                "height": 300,
+                "width": 500
+            },
+            "roi": {
+                "height": 27,
+                "width": 146,
+                "x": 328,
+                "y": 175
+            }
+        },
+        "tabName": "Common:ROI"
+    },
+    {
+        "params": {
+            "keepToSize": {
+                "height": 234,
+                "width": 1204
+            },
+            "useKeepAspectRatio": true
+        },
+        "tabName": "Common:Resize"
     }
 ]

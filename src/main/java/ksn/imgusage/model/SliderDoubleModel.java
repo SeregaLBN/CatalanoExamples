@@ -21,6 +21,8 @@ public class SliderDoubleModel implements ISliderModel<Double> {
         this(value, extent, min, max, 2);
     }
     public SliderDoubleModel(double value, double extent, double min, double max, int decimalPrecision) {
+        value = Math.max(min, value);
+        value = Math.min(max, value);
         this.decimalPrecision = decimalPrecision;
         coefficient = 1/Math.pow(10, decimalPrecision); // 1: 0.1;  2: 0.01;  3: 0.001;  4: 0.0001
         model = new DefaultBoundedRangeModel(

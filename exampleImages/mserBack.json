@@ -71,7 +71,7 @@
                 "width": 7
             },
             "showInner": false,
-            "showRegions": true,
+            "showOnSource": false,
             "stuckSymbols": 1
         },
         "tabName": "OpenCV:MSER"

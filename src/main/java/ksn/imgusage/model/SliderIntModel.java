@@ -14,6 +14,8 @@ public class SliderIntModel implements ISliderModel<Integer> {
     private final DefaultBoundedRangeModel model;
 
     public SliderIntModel(int value, int extent, int min, int max) {
+        value = Math.max(min, value);
+        value = Math.min(max, value);
         model = new DefaultBoundedRangeModel(value, extent, min, max);
     }
 

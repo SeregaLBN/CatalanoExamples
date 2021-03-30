@@ -24,31 +24,31 @@ public class MserTabParams implements ITabParams {
     public int     edgeBlurSize = 5;
 
     /** Additional restrictions on the minimum symbol size */
-    public Size    minSymbol = new Size(1, 1);
+    public Size    minSymbol = new Size(3, 5);
     /** Additional restrictions on the maximum symbol size */
-    public Size    maxSymbol = new Size(500, 700);
+    public Size    maxSymbol = new Size(30, 45);
 
     /** Minimum line heigth */
-    public int    minLineHeight = 50;
+    public int    minLineHeight = 10;
    //** Maximum line heigth */
-  //public int    maxLineHeight => maxSymbol.height;
+  //public int    maxLineHeight => maxSymbol.height * 2.3;
 
     /** the number of characters stuck together */
     public int stuckSymbols = 1;
 
-    /** Show mask regions - MSER result */
-    public boolean showRegions = true;
+    /** Show on source */
+    public boolean showOnSource = true;
     /** Show inner contours */
     public boolean showInner = true;
     /** Invert regions */
     public boolean invert;
 
     /** Merge small regions (by vertically) into one symbol */
-    public boolean mergeRegionsVertivally;
+    public boolean mergeRegionsVertically = true;
     /** Merge small regions (by horizontally) into one symbol */
-    public boolean mergeRegionsHorizontally;
+    public boolean mergeRegionsHorizontally = true;
     /** Fit symbol height to word height */
-    public boolean fitSymbolHeight;
+    public boolean fitSymbolHeight = true;
 
     /** Show rectangle of regions (mark single char) */
     public boolean markChars;
@@ -70,7 +70,7 @@ public class MserTabParams implements ITabParams {
             + ", minSymbol=%s, maxSymbol=%s, minLineHeight=%s, stuckSymbols=%d"
             + ", wordWidthCoef=%.2f, lineWidthCoef=%.2f"
             + ", mergeRegionsVertivally=%b, mergeRegionsHorizontally=%b, fitSymbolHeight=%b"
-            + ", showRegions=%b, invert=%b, showInner=%b, markChars=%b, markWords=%b, markLines=%b }",
+            + ", showOnSource=%b, invert=%b, showInner=%b, markChars=%b, markWords=%b, markLines=%b }",
             delta,
             maxVariation,
             minDiversity,
@@ -83,9 +83,9 @@ public class MserTabParams implements ITabParams {
             minLineHeight,
             stuckSymbols,
             wordWidthCoef, lineWidthCoef,
-            mergeRegionsVertivally, mergeRegionsHorizontally,
+            mergeRegionsVertically, mergeRegionsHorizontally,
             fitSymbolHeight,
-            showRegions,
+            showOnSource,
             invert,
             showInner,
             markChars,
