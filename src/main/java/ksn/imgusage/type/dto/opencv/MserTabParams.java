@@ -11,6 +11,7 @@ public class MserTabParams implements ITabParams {
 
     /** it compares (size_i − size_iDelta)/size_iDelta */
     public int     delta = 5;
+    /** MAX Variation: Prune the area have similar size to its children */
     public double  maxVariation = 0.25;
     /** for color image, trace back to cut off mser with diversity less than min_diversity */
     public double  minDiversity = .2;
