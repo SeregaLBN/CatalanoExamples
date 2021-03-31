@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -105,7 +104,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         InnerTmp(MatOfPoint contour, Rect pos) { this.contour = contour; this.position = pos; }
     }
 
-    static class SymbolTmp {
+    private static class SymbolTmp {
         final Rect position;
         final List<MatOfPoint> contours;
         List<InnerTmp> inners = new ArrayList<>();
@@ -115,14 +114,14 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                                         this.position = Imgproc.boundingRect(contour); }
     }
 
-    static class WordTmp {
+    private static class WordTmp {
         final Rect position;
         List<SymbolTmp> symbols = new ArrayList<>();
         boolean handled = false;
         WordTmp(Rect position) { this.position = position; }
     }
 
-    static class LineTmp {
+    private static class LineTmp {
         final Rect position;
         List<WordTmp> words = new ArrayList<>();
         LineTmp(Rect position) { this.position = position; }
@@ -374,7 +373,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                     .stream()
                     .map(inGroups -> inGroups.stream()
                                              .map(gr -> gr.s)
-                                             .reduce(mergeSymbols)
+                                             .reduce(MserTab::mergeSymbols)
                                              .get())
                     .collect(Collectors.toList());
             }
@@ -391,42 +390,62 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
                 if (wordItem.symbols.size() == 1)
                     continue;
 
-                List<SymbolTmp> newWordSymbols = new ArrayList<>();
-                List<SymbolTmp> sorted = wordItem.symbols
-                        .stream()
-                        .sorted((s1, s2) -> Integer.compare(s1.position.x, s2.position.x))
-                        .collect(Collectors.toList());
-                sorted.forEach(s -> s.handled = false);
-
-                for (int i = 0; i < sorted.size(); ++i) {
-                    SymbolTmp curr = sorted.get(i);
-                    newWordSymbols.add(curr);
-
-                    if (i == sorted.size() - 1)
-                        continue;
-
-                    if (curr.position.width >= params.maxSymbol.width)
-                        continue;
-
-                    for (int j = i + 1; j < sorted.size(); ++j) {
-                        SymbolTmp next = sorted.get(j);
-                        Rect rc1 = curr.position; // recalc!
-                        Rect rc2 = next.position;
-                        int newWidth = (rc2.x + rc2.width) - rc1.x;
-                        if (newWidth > params.maxSymbol.width)
-                            break;
-
-                        int dX = rc2.x - (rc1.x + rc1.width);
-                        if (dX > params.minSymbol.width)
-                            break;
-                        mergeSymbols.apply(curr, next);
-                        ++i;
-                    }
-                }
-
-                wordItem.symbols = newWordSymbols;
+                mergeWordHorizontally(wordItem);
             }
         }
+    }
+
+    private void mergeWordHorizontally(WordTmp wordItem) {
+        do {
+            if (wordItem.symbols.size() == 1)
+                break;
+
+            wordItem.symbols.forEach(s -> s.handled = false);
+            List<SymbolTmp> sortedByX = wordItem.symbols
+                    .stream()
+                    .sorted((s1, s2) -> Integer.compare(s1.position.x, s2.position.x))
+                    .collect(Collectors.toList());
+
+            class NeighborX {
+                final SymbolTmp left;
+                final SymbolTmp right;
+                final int distance; // between left & right
+                NeighborX(SymbolTmp left,
+                          SymbolTmp right) {
+                    this.left = left;
+                    this.right = right;
+                    this.distance = right.position.x - (left.position.x + left.position.width);
+                }
+            }
+            List<NeighborX> neighbors = new ArrayList<>(sortedByX.size() - 1);
+            for (int i = 1; i < sortedByX.size(); ++i)
+                neighbors.add(new NeighborX(sortedByX.get(i-1), sortedByX.get(i)));
+
+            List<NeighborX> sortedByDist = neighbors.stream()
+                    .sorted((n1, n2) -> Integer.compare(n1.distance, n2.distance))
+                    .collect(Collectors.toList());
+
+            boolean anyMerge = false;
+            for (NeighborX n : sortedByDist) {
+                if ((n.left.position.width + n.distance + n.right.position.width) <= params.maxSymbol.width) {
+                    if (n.left.handled)
+                        break;
+
+                    // union right to left
+                    mergeSymbols(n.left, n.right);
+                    n.right.handled = true;
+                    anyMerge = true;
+                }
+            }
+
+            if (!anyMerge)
+                break;
+
+            wordItem.symbols = wordItem.symbols.stream()
+                    .filter(s -> !s.handled)
+                    .collect(Collectors.toList());
+
+        } while(true);
     }
 
     private void fitSymbolHeight(List<LineTmp> allLines) {
@@ -557,7 +576,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         }
     }
 
-    private static BinaryOperator<SymbolTmp> mergeSymbols = (s1, s2) -> {
+    private static SymbolTmp mergeSymbols(SymbolTmp s1, SymbolTmp s2) {
         s1.contours.addAll(s2.contours);
         s1.inners.addAll(s2.inners);
         Rect rc = GeomHelper.intersectInclude(s1.position, s2.position);
@@ -566,7 +585,7 @@ public class MserTab extends OpencvFilterTab<MserTabParams> {
         s1.position.width  = rc.width;
         s1.position.height = rc.height;
         return s1;
-    };
+    }
 
     private static List<Rect> collectMaskedRegions(Mat mask, int dilateX, int dilateY) {
         Mat morphology = new Mat();
